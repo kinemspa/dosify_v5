@@ -54,16 +54,6 @@ import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 // DoseHistoryWidget replaced by MedicationReportsWidget
 
-/// Modern, revolutionized medication detail screen with:
-/// - Hero header with gradient and key stats
-/// - Interactive quick action cards
-/// - Visual stock progress indicators
-/// - Clean sectioned information display
-/// - Responsive layout for all screen sizes
-const double _kDetailHeaderExpandedHeight =
-    224; // Keep header size consistent (reduced empty space)
-const double _kDetailHeaderCollapsedHeight = 56;
-
 SyringeSizeMl _inferSyringeSizeFromDoseVolumeMl(double volumeMl) {
   if (volumeMl <= 0.3) return SyringeSizeMl.ml0_3;
   if (volumeMl <= 0.5) return SyringeSizeMl.ml0_5;
@@ -145,7 +135,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   static const String _kCardActivity = 'activity';
   static const String _kCardCalendar = 'calendar';
 
-  double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
+  double _measuredExpandedHeaderHeight = kMedicationDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
 
   @override
@@ -218,9 +208,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       final topInset = MediaQuery.of(context).padding.top;
       // Leave a small safety margin so content doesn't hug the gradient edge
       // (helps on compact screens and near-limit text scaling).
-      final baseChildMax = _kDetailHeaderExpandedHeight - topInset - kSpacingS;
+      final baseChildMax = kMedicationDetailHeaderExpandedHeight - topInset - kSpacingS;
       final desired = measuredHeight <= baseChildMax
-          ? _kDetailHeaderExpandedHeight
+          ? kMedicationDetailHeaderExpandedHeight
           : (measuredHeight + topInset + kSpacingM);
 
       if ((desired - _measuredExpandedHeaderHeight).abs() > 1.0) {
@@ -252,10 +242,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             children: [
               Icon(
                 Icons.medication_outlined,
-                size: 64,
+                size: kIconSizeXLarge,
                 color: Theme.of(context).colorScheme.outline,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
               Text(
                 'Medication not found',
                 style: Theme.of(context).textTheme.titleMedium,
@@ -296,9 +286,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 slivers: [
                   // Combined AppBar and Stats Banner in one SliverAppBar
                   SliverAppBar(
-                    toolbarHeight: _kDetailHeaderCollapsedHeight,
+                    toolbarHeight: kMedicationDetailHeaderCollapsedHeight,
                     expandedHeight: headerHeight,
-                    collapsedHeight: _kDetailHeaderCollapsedHeight,
+                    collapsedHeight: kMedicationDetailHeaderCollapsedHeight,
                     floating: false,
                     pinned: true,
                     backgroundColor: kColorTransparent,
@@ -310,7 +300,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       builder: (context, constraints) {
                         final top = MediaQuery.of(context).padding.top;
                         final collapsedHeight =
-                            _kDetailHeaderCollapsedHeight + top;
+                            kMedicationDetailHeaderCollapsedHeight + top;
                         final expandedHeight = headerHeight;
                         final currentHeight = constraints.maxHeight;
                         final scrollOffset = expandedHeight - currentHeight;
@@ -361,7 +351,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                       child: Padding(
                                         padding: const EdgeInsets.fromLTRB(
                                           kPageHorizontalPadding,
-                                          4, // Reduced from 12
+                                          kSpacingXS, // Reduced from 12
                                           kPageHorizontalPadding,
                                           0,
                                         ),
@@ -398,7 +388,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             Positioned(
                               top: lerpDouble(
                                 top + 48,
-                                top + (_kDetailHeaderCollapsedHeight - 26) / 2,
+                                top + (kMedicationDetailHeaderCollapsedHeight - 26) / 2,
                                 t,
                               ),
                               left: kPageHorizontalPadding,
@@ -483,7 +473,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                           ),
                                           child: Padding(
                                             padding: const EdgeInsets.only(
-                                              top: 1,
+                                              top: kBorderWidthMedium,
                                             ),
                                             child: Text(
                                               updatedMed.manufacturer!,
@@ -511,7 +501,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                               top: top,
                               left: 0,
                               right: 0,
-                              height: _kDetailHeaderCollapsedHeight,
+                              height: kMedicationDetailHeaderCollapsedHeight,
                               child: IgnorePointer(
                                 child: Opacity(
                                   opacity: (1.0 - t * 3).clamp(0.0, 1.0),
@@ -629,7 +619,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       key: _headerMeasureKey,
                       padding: const EdgeInsets.fromLTRB(
                         kPageHorizontalPadding,
-                        4,
+                        kSpacingXS,
                         kPageHorizontalPadding,
                         0,
                       ),
@@ -944,12 +934,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 // Description & Notes
                 if (med.description != null && med.description!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: kSpacingXS),
                     child: Text(
                       med.description!,
                       style: helperTextStyle(
                         context,
-                        color: onPrimary.withValues(alpha: 0.9),
+                        color: onPrimary.withValues(alpha: kOpacityEmphasis),
                       )?.copyWith(fontStyle: FontStyle.italic),
                       maxLines: 2, // Reduced from 3
                       overflow: TextOverflow.ellipsis,
@@ -958,11 +948,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
                 if (med.notes != null && med.notes!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: kSpacingS),
                     child: Text(
                       med.notes!,
                       style: hintTextStyle(context)?.copyWith(
-                        color: onPrimary.withValues(alpha: 0.6),
+                        color: onPrimary.withValues(alpha: kOpacityMedium),
                         fontStyle: FontStyle.italic,
                       ),
                       maxLines: 1, // Reduced from 2
@@ -970,7 +960,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     ),
                   ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: kSpacingS),
 
                 // Strength with Icon (Standardized)
                 _HeaderInfoTile(
@@ -980,7 +970,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       '${_formatNumber(med.strengthValue)} ${_unitLabel(med.strengthUnit)}',
                   textColor: onPrimary,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: kSpacingS),
 
                 // Storage + expiry (match Large Cards compact storage rows)
                 if (isMdv) ...[
@@ -989,7 +979,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     med,
                     onPrimary: onPrimary,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: kSpacingS),
                 ] else if (storageLabel != null && storageLabel.isNotEmpty) ...[
                   CompactStorageLine(
                     icons: [
@@ -1009,7 +999,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     textColor: onPrimary,
                     onPrimaryBackground: true,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: kSpacingS),
                 ],
 
                 const Spacer(),
@@ -1018,7 +1008,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: kSpacingL),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -1056,7 +1046,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         strokeWidth: kMedicationDetailDonutStrokeWidth,
                       ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: kSpacingXS),
               if (!isMdv) ...[
                 RichText(
                   textAlign: TextAlign.right,
@@ -1102,25 +1092,25 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   textAlign: TextAlign.right,
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: kSpacingS),
 
               // Stock Forecast (Moved Here)
               _buildStockForecastCard(context, onPrimary, med),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: kSpacingS),
 
               // Custom Refill Button
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    height: 28,
+                    height: kStepperButtonSize,
                     decoration: BoxDecoration(
-                      color: onPrimary.withValues(alpha: 0.15),
+                      color: onPrimary.withValues(alpha: kOpacitySubtle),
                       borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                       border: Border.all(
-                        color: onPrimary.withValues(alpha: 0.3),
-                        width: 1,
+                        color: onPrimary.withValues(alpha: kOpacityVeryLow),
+                        width: kBorderWidthMedium,
                       ),
                     ),
                     child: Material(
@@ -1138,7 +1128,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             children: [
                               Icon(
                                 Icons.add_circle_outline,
-                                size: 14,
+                                size: kIconSizeXSmall,
                                 color: onPrimary,
                               ),
                               const SizedBox(width: kSpacingXS + kSpacingXXS),
@@ -1158,13 +1148,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   if (med.form == MedicationForm.multiDoseVial) ...[
                     const SizedBox(width: kSpacingS),
                     Container(
-                      height: 28,
+                      height: kStepperButtonSize,
                       decoration: BoxDecoration(
-                        color: onPrimary.withValues(alpha: 0.15),
+                        color: onPrimary.withValues(alpha: kOpacitySubtle),
                         borderRadius: BorderRadius.circular(kBorderRadiusSmall),
                         border: Border.all(
-                          color: onPrimary.withValues(alpha: 0.3),
-                          width: 1,
+                          color: onPrimary.withValues(alpha: kOpacityVeryLow),
+                          width: kBorderWidthMedium,
                         ),
                       ),
                       child: Material(
@@ -1183,7 +1173,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                               children: [
                                 Icon(
                                   Icons.inventory_2_outlined,
-                                  size: 14,
+                                  size: kIconSizeXSmall,
                                   color: onPrimary,
                                 ),
                                 const SizedBox(width: kSpacingXS + kSpacingXXS),
@@ -1602,7 +1592,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     if (icon != null) {
       return Row(
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+          Icon(icon, size: kIconSizeMedium, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: kSpacingS),
           Text(title, style: sectionTitleStyle(context)),
         ],
@@ -1792,10 +1782,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         // NOTES (optional)
         if (med.description != null && med.description!.isNotEmpty) ...[
           Divider(
-            height: 1,
+            height: kBorderWidthMedium,
             indent: 16,
             endIndent: 16,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+            color: colorScheme.outlineVariant.withValues(alpha: kOpacityMinimal),
           ),
           _buildDetailTile(
             context,
@@ -2037,7 +2027,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
       child: Row(
         children: [
           Icon(
@@ -2155,7 +2145,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          color: colorScheme.outlineVariant.withValues(alpha: kOpacityVeryLow),
         ),
       ),
       child: Column(
@@ -2163,9 +2153,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         children: [
           // Info banner
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: kSpacingL, vertical: kSpacingS + kSpacingXXS),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+              color: colorScheme.primaryContainer.withValues(alpha: kOpacityVeryLow),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(kBorderRadiusLarge),
               ),
@@ -2174,10 +2164,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               children: [
                 Icon(
                   Icons.science_outlined,
-                  size: 16,
+                  size: kIconSizeSmall,
                   color: colorScheme.primary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: kSpacingS),
                 Expanded(
                   child: Text(
                     'Vial currently in use for injections',
@@ -2193,7 +2183,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           // Volume remaining (prominent display)
           if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: kSpacingL, vertical: kSpacingM),
               child: Row(
                 children: [
                   Text(
@@ -2215,10 +2205,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             ),
 
           Divider(
-            height: 1,
+            height: kBorderWidthMedium,
             indent: 16,
             endIndent: 16,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+            color: colorScheme.outlineVariant.withValues(alpha: kOpacityMinimal),
           ),
 
           // Details
@@ -2249,10 +2239,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           ),
 
           Divider(
-            height: 1,
+            height: kBorderWidthMedium,
             indent: 16,
             endIndent: 16,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+            color: colorScheme.outlineVariant.withValues(alpha: kOpacityMinimal),
           ),
 
           // Storage conditions as tappable chips
@@ -2289,11 +2279,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return InkWell(
       onTap: () => _showActiveVialConditionsDialog(context, med),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: kSpacingL, vertical: kSpacingS),
         child: Row(
           children: [
             SizedBox(
-              width: 90,
+              width: kMedicationDetailInlineLabelWidth,
               child: Text(
                 'Conditions',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -2305,8 +2295,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
             ),
           ],
         ),
@@ -2410,11 +2400,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return InkWell(
       onTap: () => _showBackupStockConditionsDialog(context, med),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: kSpacingL, vertical: kSpacingS),
         child: Row(
           children: [
             SizedBox(
-              width: 90,
+              width: kMedicationDetailInlineLabelWidth,
               child: Text(
                 'Conditions',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -2426,8 +2416,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
             ),
           ],
         ),
@@ -2513,15 +2503,15 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       children: [
         // Section title with count
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: kSpacingL, vertical: kSpacingS),
           child: Row(
             children: [
               Icon(
                 Icons.inventory_2_outlined,
-                size: 18,
+                size: kIconSizeMedium,
                 color: colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: kSpacingS),
               Text(
                 'Sealed Vials',
                 style: sectionTitleStyle(
@@ -2540,14 +2530,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: kSpacingL),
           child: Text(
             'Used for reconstitution.',
             style: helperTextStyle(context),
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: kSpacingS),
 
         // Details
         _buildDetailTile(
@@ -2578,10 +2568,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         ),
 
         Divider(
-          height: 1,
+          height: kBorderWidthMedium,
           indent: 16,
           endIndent: 16,
-          color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+          color: colorScheme.outlineVariant.withValues(alpha: kOpacityMinimal),
         ),
 
         // Storage conditions
@@ -2722,7 +2712,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       isScrollControlled: true,
       backgroundColor: Theme.of(
         context,
-      ).colorScheme.surface.withValues(alpha: 0.0),
+      ).colorScheme.surface.withValues(alpha: kOpacityTransparent),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.9,
         minChildSize: 0.5,
@@ -2810,7 +2800,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: children[i]),
-            const SizedBox(width: 12),
+            const SizedBox(width: kSpacingM),
             if (i + 1 < children.length)
               Expanded(child: children[i + 1])
             else
@@ -2819,7 +2809,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         ),
       );
       if (i + 2 < children.length) {
-        rows.add(const SizedBox(height: 12));
+        rows.add(const SizedBox(height: kSpacingM));
       }
     }
     return Column(children: rows);
@@ -2843,7 +2833,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       children: [
         // Label with fixed width for alignment
         SizedBox(
-          width: 110,
+          width: kMedicationDetailStockEditorLabelWidth,
           child: Text(
             label,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -2875,7 +2865,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         if (isEditable)
           Icon(
             Icons.chevron_right,
-            size: 18,
+            size: kIconSizeMedium,
             color: theme.colorScheme.onSurface.withValues(alpha: kOpacityVeryLow),
           ),
       ],
@@ -2927,7 +2917,7 @@ class _AdherenceBarPainter extends CustomPainter {
 
       if (value < 0) {
         // Future / No Data - Draw a dot or small line
-        paint.color = color.withValues(alpha: 0.2);
+        paint.color = color.withValues(alpha: kOpacityMinimal);
         canvas.drawRRect(
           RRect.fromRectAndRadius(
             Rect.fromLTWH(x, size.height - 2, barWidth, 2),
@@ -2945,9 +2935,9 @@ class _AdherenceBarPainter extends CustomPainter {
         // Color: Full opacity for taken, lower for partial, maybe warning color for missed?
         // Since we only have one color passed in (onPrimary usually white), we use opacity.
         if (value == 0) {
-          paint.color = color.withValues(alpha: 0.3); // Missed
+          paint.color = color.withValues(alpha: kOpacityVeryLow); // Missed
         } else if (value < 1.0) {
-          paint.color = color.withValues(alpha: 0.6); // Partial
+          paint.color = color.withValues(alpha: kOpacityMedium); // Partial
         } else {
           paint.color = color; // Taken
         }
@@ -3000,16 +2990,16 @@ class _HeaderInfoTile extends StatelessWidget {
           label,
           style: medicationDetailHeaderTileLabelTextStyle(
             context,
-            color: color.withValues(alpha: 0.7),
+            color: color.withValues(alpha: kOpacityMediumHigh),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: kSpacingXS),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, color: color, size: 14),
-              const SizedBox(width: 4),
+              Icon(icon, color: color, size: kIconSizeXSmall),
+              const SizedBox(width: kSpacingXS),
             ],
             Text(
               value,
@@ -3019,8 +3009,8 @@ class _HeaderInfoTile extends StatelessWidget {
               ),
             ),
             if (trailingIcon != null) ...[
-              const SizedBox(width: 4),
-              Icon(trailingIcon, color: color, size: 14),
+              const SizedBox(width: kSpacingXS),
+              Icon(trailingIcon, color: color, size: kIconSizeXSmall),
             ],
           ],
         ),
@@ -3251,7 +3241,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: kSpacingXS),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -3324,7 +3314,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: kSpacingXS),
                 Center(child: Text(unit, style: helperTextStyle(stateContext))),
               ],
               const SizedBox(height: kSpacingL),
@@ -3491,7 +3481,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       isScrollControlled: true,
       backgroundColor: Theme.of(
         dialogContext,
-      ).colorScheme.surface.withValues(alpha: 0.0),
+      ).colorScheme.surface.withValues(alpha: kOpacityTransparent),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.9,
         minChildSize: 0.5,
@@ -3537,7 +3527,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       isScrollControlled: true,
       backgroundColor: Theme.of(
         dialogContext,
-      ).colorScheme.surface.withValues(alpha: 0.0),
+      ).colorScheme.surface.withValues(alpha: kOpacityTransparent),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.9,
         minChildSize: 0.5,
@@ -4161,7 +4151,7 @@ Future<void> _showRestockSealedVialsDialog(
                 'Add new sealed vials to your sealed vial stock.',
                 style: helperTextStyle(context),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
 
               // Current stock
               Container(
@@ -4213,7 +4203,7 @@ Future<void> _showRestockSealedVialsDialog(
                   decoration: buildCompactFieldDecoration(context: context),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
 
               // Preview
               Container(
@@ -4439,7 +4429,7 @@ Future<void> _showStepperEditDialog(
               },
             ),
             if (unit != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: kSpacingS),
               Text(unit, style: helperTextStyle(dialogContext)),
             ],
           ],
@@ -4702,7 +4692,7 @@ void _editForm(BuildContext context, Medication med) async {
         return SimpleDialogOption(
           onPressed: () => Navigator.pop(context, form),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: kSpacingS),
             child: Text(_formLabel(form)),
           ),
         );
@@ -5056,9 +5046,9 @@ Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
         '7 Day Adherence',
         style: helperTextStyle(
           context,
-        )?.copyWith(color: color.withValues(alpha: 0.7)),
+        )?.copyWith(color: color.withValues(alpha: kOpacityMediumHigh)),
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: kSpacingS),
       SizedBox(
         height: 40,
         width: double.infinity,
@@ -5136,16 +5126,16 @@ Widget _buildStockForecastCard(
         'Stock Forecast',
         style: medicationDetailStockForecastLabelTextStyle(
           context,
-          color: color.withValues(alpha: 0.7),
+          color: color.withValues(alpha: kOpacityMediumHigh),
         ),
         textAlign: TextAlign.right,
       ),
-      const SizedBox(height: 2),
+      const SizedBox(height: kSpacingXXS),
       Text(
         'Based on current schedule',
         style: medicationDetailStockForecastSubLabelTextStyle(
           context,
-          color: color.withValues(alpha: 0.5),
+          color: color.withValues(alpha: kOpacityMediumLow),
         )?.copyWith(fontStyle: FontStyle.italic),
         textAlign: TextAlign.right,
       ),
@@ -5153,7 +5143,7 @@ Widget _buildStockForecastCard(
         'Expected to last until',
         style: medicationDetailStockForecastLabelTextStyle(
           context,
-          color: color.withValues(alpha: 0.5),
+          color: color.withValues(alpha: kOpacityMediumLow),
         )?.copyWith(fontStyle: FontStyle.italic),
         textAlign: TextAlign.right,
       ),
@@ -5169,30 +5159,30 @@ Widget _buildStockForecastCard(
         '${daysRemaining.floor()} days',
         style: medicationDetailStockForecastDaysTextStyle(
           context,
-          color: color.withValues(alpha: 0.9),
+          color: color.withValues(alpha: kOpacityEmphasis),
         ),
         textAlign: TextAlign.right,
       ),
       if (expiry != null) ...[
-        const SizedBox(height: 4),
+        const SizedBox(height: kSpacingXS),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Icon(
               Icons.event,
-              size: 12,
+              size: kIconSizeXXSmall,
               color: expiresBeforeStockout
                   ? Theme.of(context).colorScheme.errorContainer
-                  : color.withValues(alpha: 0.7),
+                  : color.withValues(alpha: kOpacityMediumHigh),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: kSpacingXS),
             Text(
               'Expires: ${DateFormat('d MMM y').format(expiry)}',
               style: medicationDetailStockForecastExpiryTextStyle(
                 context,
                 color: expiresBeforeStockout
                     ? Theme.of(context).colorScheme.errorContainer
-                    : color.withValues(alpha: 0.7),
+                    : color.withValues(alpha: kOpacityMediumHigh),
                 emphasized: expiresBeforeStockout,
               ),
             ),

@@ -103,6 +103,7 @@ const double kIconSizeXSmall = 14;
 const double kIconSizeSmall = 16;
 const double kIconSizeMedium = 20;
 const double kIconSizeLarge = 24;
+const double kIconSizeXLarge = 64; // Avatar, hero icons
 
 /// Empty state icon size
 const double kEmptyStateIconSize = 48;
@@ -237,6 +238,9 @@ const double kMedicationDetailDonutInnerStrokeWidth = 7.0;
 /// Kept intentionally compact so values have room on small screens.
 const double kMedicationDetailInlineLabelWidth = 90;
 
+/// Fixed label width for medication detail stock editor.
+const double kMedicationDetailStockEditorLabelWidth = 110;
+
 /// Medication header text limits
 const int kMedicationHeaderDescriptionMaxChars = 90;
 
@@ -246,6 +250,10 @@ const int kMedicationHeaderDescriptionMaxChars = 90;
 /// SliverAppBar's animated name/form/manufacturer overlay never overlaps
 /// the header content on smaller screens.
 const double kMedicationDetailHeaderOverlayReservedHeight = 80;
+
+/// Medication detail header (SliverAppBar) expanded and collapsed heights.
+const double kMedicationDetailHeaderExpandedHeight = 224;
+const double kMedicationDetailHeaderCollapsedHeight = 56;
 
 /// Medication header description/notes spacing (inside [MedicationHeaderWidget]).
 const EdgeInsets kMedicationHeaderDescriptionPadding = EdgeInsets.only(
