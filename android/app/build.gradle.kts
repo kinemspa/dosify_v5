@@ -5,6 +5,9 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.io.FileInputStream
+import java.util.Properties
+
 android {
     namespace = "com.dosifi.dosifi_v5"
     compileSdk = 36
@@ -30,11 +33,40 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            val keystorePropertiesFile = rootProject.file("key.properties")
+
+            if (!keystorePropertiesFile.exists()) {
+                throw GradleException(
+                    "Missing android/key.properties for release signing. " +
+                        "Create it from android/key.properties.example and provide an upload keystore for Play App Signing.",
+                )
+            }
+
+            val keystoreProperties = Properties()
+            FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+
+            storeFile = rootProject.file(
+                requireNotNull(keystoreProperties.getProperty("storeFile")) {
+                    "key.properties missing storeFile"
+                },
+            )
+            storePassword = requireNotNull(keystoreProperties.getProperty("storePassword")) {
+                "key.properties missing storePassword"
+            }
+            keyAlias = requireNotNull(keystoreProperties.getProperty("keyAlias")) {
+                "key.properties missing keyAlias"
+            }
+            keyPassword = requireNotNull(keystoreProperties.getProperty("keyPassword")) {
+                "key.properties missing keyPassword"
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

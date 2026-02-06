@@ -1,0 +1,10 @@
+# Copy this file to `android/key.properties` and fill in values.
+# Do NOT commit `android/key.properties` or your keystore.
+#
+# Recommended: store your keystore in `android/upload-keystore.jks`
+# and set storeFile to that filename.
+
+storeFile=upload-keystore.jks
+storePassword=REPLACE_ME
+keyAlias=upload
+keyPassword=REPLACE_ME
