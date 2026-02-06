@@ -14,10 +14,14 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 /// This service computes all scheduled dose times for a given date range
 /// and matches them with existing dose logs to determine status.
 class DoseCalculationService {
+  static const int _millisPerMinute = 60 * 1000;
+
   static int _lastDayOfMonth(DateTime date) {
     final last = DateTime(date.year, date.month + 1, 0);
     return last.day;
   }
+
+  static int _minuteKey(DateTime dt) => dt.millisecondsSinceEpoch ~/ _millisPerMinute;
 
   static bool _isMonthlyDoseDay(Schedule schedule, DateTime date) {
     final days = schedule.daysOfMonth;
@@ -48,7 +52,14 @@ class DoseCalculationService {
     bool includeInactive = false,
   }) async {
     final schedules = await _getSchedules(scheduleId, medicationId);
-    final doseLogs = await _getDoseLogs(startDate, endDate);
+    final scheduleIds = schedules.map((s) => s.id).toSet();
+    final doseLogs = await _getDoseLogs(
+      startDate,
+      endDate,
+      scheduleIds: scheduleIds,
+    );
+
+    final logIndex = _indexLogsByScheduleMinute(doseLogs);
 
     final doses = <CalculatedDose>[];
 
@@ -63,7 +74,7 @@ class DoseCalculationService {
 
       // Match with existing logs
       for (final dose in scheduleDoses) {
-        final log = _findMatchingLog(dose, doseLogs);
+        final log = _findMatchingLogIndexed(dose, logIndex);
         doses.add(dose.copyWith(existingLog: log));
       }
     }
@@ -103,12 +114,14 @@ class DoseCalculationService {
   static Future<List<DoseLog>> _getDoseLogs(
     DateTime startDate,
     DateTime endDate,
+    {Set<String>? scheduleIds}
   ) async {
     final box = Hive.box<DoseLog>('dose_logs');
 
     return box.values
         .where(
           (log) =>
+              (scheduleIds == null || scheduleIds.contains(log.scheduleId)) &&
               log.scheduledTime.isAfter(
                 startDate.subtract(const Duration(hours: 1)),
               ) &&
@@ -301,18 +314,33 @@ class DoseCalculationService {
     return true;
   }
 
-  /// Finds a dose log that matches the calculated dose
-  ///
-  /// Matches based on scheduleId and scheduled time (within 1-minute window)
-  static DoseLog? _findMatchingLog(CalculatedDose dose, List<DoseLog> logs) {
-    return logs.cast<DoseLog?>().firstWhere((log) {
-      if (log == null) return false;
-      if (log.scheduleId != dose.scheduleId) return false;
+  static Map<String, Map<int, DoseLog>> _indexLogsByScheduleMinute(
+    List<DoseLog> logs,
+  ) {
+    final index = <String, Map<int, DoseLog>>{};
+    for (final log in logs) {
+      final byMinute = index.putIfAbsent(log.scheduleId, () => <int, DoseLog>{});
+      byMinute[_minuteKey(log.scheduledTime)] = log;
+    }
+    return index;
+  }
 
-      // Match if within 1 minute of scheduled time
+  static DoseLog? _findMatchingLogIndexed(
+    CalculatedDose dose,
+    Map<String, Map<int, DoseLog>> logIndex,
+  ) {
+    final byMinute = logIndex[dose.scheduleId];
+    if (byMinute == null || byMinute.isEmpty) return null;
+
+    final baseKey = _minuteKey(dose.scheduledTime);
+    for (final candidateKey in <int>[baseKey - 1, baseKey, baseKey + 1]) {
+      final log = byMinute[candidateKey];
+      if (log == null) continue;
       final diff = log.scheduledTime.difference(dose.scheduledTime).abs();
-      return diff.inMinutes <= 1;
-    }, orElse: () => null);
+      if (diff.inMinutes <= 1) return log;
+    }
+
+    return null;
   }
 
   /// Gets doses for a specific day
