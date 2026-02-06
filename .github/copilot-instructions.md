@@ -61,9 +61,7 @@ If the environment lacks Android devices/emulators that can be launched via tool
 - After each logical change: run analyze, then `git add . && git commit -m "Fix: <description>" && git push`.
 
 ## Task tracking
-- `backlog/` is the source of truth for work requests.
-- **CRITICAL (local-only):** `backlog/` MUST NOT be staged or committed to git (the folder is gitignored).
-- **CRITICAL:** Never revert/undo changes in `backlog/*.md` (no checkout/reset/overwrite).
-- Before coding: open the relevant `backlog/*.md` and confirm what is unchecked.
-- After shipping a task: you may check off the exact completed checkbox(es) locally for your own tracking, but do not commit backlog edits.
-- Keep edits minimal: preserve user wording/formatting; only change the checkbox state for items you actually completed.
+- **GitHub Issues** are the source of truth for all work requests.
+- Before coding: read the assigned GitHub Issue to understand requirements and acceptance criteria.
+- After shipping a task: the PR should reference the Issue (e.g., "Fixes #XX") so it auto-closes on merge.
+- Use `gh issue list` and `gh issue view <number>` to check Issue details from the terminal.
