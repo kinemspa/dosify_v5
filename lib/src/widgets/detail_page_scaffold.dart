@@ -256,6 +256,7 @@ class DetailStatsBanner extends StatelessWidget {
     );
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title
