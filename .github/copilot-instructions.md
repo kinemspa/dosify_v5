@@ -106,6 +106,11 @@ When in agent mode, for multi-step tasks or plans, execute all steps in sequence
 
 ## Git Process — For Every Change
 
+0. **Sync Latest `main` (required at session start / before any work)**:
+   - `git status -sb` (if not clean, commit or stash before pulling)
+   - `git fetch origin`
+   - `git pull --ff-only origin main`
+
 1. **Analyze Build**: Before committing, ALWAYS run `flutter analyze` to ensure there are no build errors or fatal warnings.
 2. **Commit & Push Every Change**:
    - After *every single* logical change (even small ones), you must commit and push.
