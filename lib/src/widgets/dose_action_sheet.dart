@@ -1306,6 +1306,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         minChildSize: 0.4,
         maxChildSize: 0.9,
         builder: (context, scrollController) {
+          final mq = MediaQuery.of(context);
+          final bottomInset = mq.padding.bottom + mq.viewInsets.bottom;
           return Container(
             decoration: BoxDecoration(
               color: colorScheme.surface,
@@ -1361,7 +1363,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 Padding(
                   padding: kBottomSheetContentPadding.copyWith(
                     bottom: kBottomSheetContentPadding.bottom +
-                        MediaQuery.of(context).viewPadding.bottom,
+                        bottomInset,
                   ),
                   child: Row(
                     children: [
