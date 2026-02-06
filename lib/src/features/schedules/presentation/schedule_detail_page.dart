@@ -49,6 +49,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
   ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
 
+  @override
+  void initState() {
+    super.initState();
+    _doseLogRepo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+  }
+
   int _computeUtcMinutes(int localMinutes, DateTime now) {
     final localToday = DateTime(
       now.year,
