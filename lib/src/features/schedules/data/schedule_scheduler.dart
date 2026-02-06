@@ -202,30 +202,33 @@ class ScheduleScheduler {
         timeoutAfterMs: timeoutAfterMs,
       );
 
-      final reminderAt = DoseTimingSettings.overdueReminderAt(
+      // Schedule multiple follow-up reminders based on settings
+      final reminders = DoseTimingSettings.overdueRemindersAt(
         schedule: s,
         scheduledTime: when,
       );
-      if (reminderAt == null) return;
-      if (!reminderAt.isAfter(DateTime.now())) return;
+      
+      for (var i = 0; i < reminders.length; i++) {
+        final reminderAt = reminders[i];
+        if (!reminderAt.isAfter(DateTime.now())) continue;
 
-      // Reuse the same notification ID so the overdue reminder
-      // *replaces* the original in the notification shade.
-      final reminderTimeoutMs = missedAt.isAfter(reminderAt)
-          ? missedAt.difference(reminderAt).inMilliseconds
-          : null;
+        // Use the same notification ID so each reminder replaces the previous one
+        final reminderTimeoutMs = missedAt.isAfter(reminderAt)
+            ? missedAt.difference(reminderAt).inMilliseconds
+            : null;
 
-      await NotificationService.scheduleAtAlarmClock(
-        id,
-        reminderAt,
-        title: 'Overdue: ${s.medicationName}',
-        body: '${s.name} • $metrics • due $dueAt',
-        groupKey: groupKey,
-        payload: payload,
-        actions: NotificationService.upcomingDoseActions,
-        expandedLines: <String>[s.name, metrics, 'Due $dueAt'],
-        timeoutAfterMs: reminderTimeoutMs,
-      );
+        await NotificationService.scheduleAtAlarmClock(
+          id,
+          reminderAt,
+          title: 'Overdue: ${s.medicationName}',
+          body: '${s.name} • $metrics • due $dueAt',
+          groupKey: groupKey,
+          payload: payload,
+          actions: NotificationService.upcomingDoseActions,
+          expandedLines: <String>[s.name, metrics, 'Due $dueAt'],
+          timeoutAfterMs: reminderTimeoutMs,
+        );
+      }
     }
 
     // Calculate how many days we can afford to schedule for this schedule

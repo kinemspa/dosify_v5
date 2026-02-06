@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
@@ -42,7 +43,7 @@ class TakeDoseCard extends StatelessWidget {
     );
 
     final dateText = DateFormat('E, MMM d').format(dose.scheduledTime);
-    final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
+    final timeText = DateTimeFormatter.formatTime(context, dose.scheduledTime);
 
     final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
 
@@ -204,7 +205,7 @@ class TakeDoseCard extends StatelessWidget {
       DoseStatus.taken => () {
           final actionTime = dose.existingLog?.actionTime;
           return actionTime != null
-              ? 'Taken at ${DateFormat('h:mm a').format(actionTime)}'
+              ? 'Taken at ${DateTimeFormatter.formatTime(context, actionTime)}'
               : 'Taken';
         }(),
       DoseStatus.skipped => 'Skipped',

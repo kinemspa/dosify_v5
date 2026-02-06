@@ -370,7 +370,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         'upcoming_dose',
         'Upcoming Dose',
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
@@ -400,7 +400,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         'expiry',
         'Expiry',
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         // ignore: deprecated_member_use
         priority: Priority.high,
       ),
@@ -434,7 +434,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         'upcoming_dose',
         'Upcoming Dose',
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
@@ -448,7 +448,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         'upcoming_dose',
         'Upcoming Dose',
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -493,7 +493,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -512,7 +512,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         'low_stock',
         'Low Stock',
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         // ignore: deprecated_member_use
         priority: Priority.high,
         actions: const [
@@ -575,7 +575,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -603,7 +603,7 @@ class NotificationService {
         android: AndroidNotificationDetails(
           channelId,
           channelId,
-          icon: '@mipmap/ic_launcher',
+          icon: 'ic_stat_notification',
           category: AndroidNotificationCategory.alarm,
         ),
       );
@@ -665,7 +665,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // Try to be as precise as allowed by the platform
         // ignore: deprecated_member_use
@@ -693,7 +693,7 @@ class NotificationService {
         android: AndroidNotificationDetails(
           channelId,
           channelId,
-          icon: '@mipmap/ic_launcher',
+          icon: 'ic_stat_notification',
           category: AndroidNotificationCategory.alarm,
         ),
       );
@@ -843,7 +843,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -871,7 +871,7 @@ class NotificationService {
         android: AndroidNotificationDetails(
           channelId,
           channelId,
-          icon: '@mipmap/ic_launcher',
+          icon: 'ic_stat_notification',
           category: AndroidNotificationCategory.alarm,
         ),
       );
@@ -929,7 +929,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         largeIcon: shouldShowSyringeIcon
             ? const DrawableResourceAndroidBitmap('syringe')
             : null,
@@ -1025,7 +1025,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -1097,7 +1097,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -1137,7 +1137,7 @@ class NotificationService {
       android: AndroidNotificationDetails(
         channelId,
         channelId,
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_notification',
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,

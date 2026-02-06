@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
@@ -37,10 +38,7 @@ class ScheduleCard extends StatelessWidget {
       // Compact Card (Concept 9)
       final firstMinutes =
           ScheduleOccurrenceService.normalizedTimesOfDay(s).first;
-      final timeLabel = TimeOfDay(
-        hour: firstMinutes ~/ 60,
-        minute: firstMinutes % 60,
-      ).format(context);
+      final timeLabel = DateTimeFormatter.formatTime(context, DateTime(0, 1, 1, firstMinutes ~/ 60, firstMinutes % 60));
 
       return GlassCardSurface(
         onTap: () =>
@@ -284,7 +282,7 @@ class ScheduleCard extends StatelessWidget {
   String _timesLine(BuildContext context, Schedule s) {
     final ts = ScheduleOccurrenceService.normalizedTimesOfDay(s);
     final label = ts
-        .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
+        .map((m) => DateTimeFormatter.formatTime(context, DateTime(0, 1, 1, m ~/ 60, m % 60)))
         .join(', ');
     if (s.hasCycle && s.cycleEveryNDays != null) {
       final n = s.cycleEveryNDays!;
@@ -304,7 +302,7 @@ class ScheduleCard extends StatelessWidget {
 
   String _fmtWhen(BuildContext context, DateTime dt) {
     final now = DateTime.now();
-    final time = TimeOfDay.fromDateTime(dt).format(context);
+    final time = DateTimeFormatter.formatTime(context, dt);
     final sameDay =
         dt.year == now.year && dt.month == now.month && dt.day == now.day;
     if (sameDay) return 'Today $time';
@@ -537,7 +535,7 @@ class ScheduleCard extends StatelessWidget {
             snoozeUntil.year == now.year &&
             snoozeUntil.month == now.month &&
             snoozeUntil.day == now.day;
-        final time = TimeOfDay.fromDateTime(snoozeUntil).format(context);
+        final time = DateTimeFormatter.formatTime(context, snoozeUntil);
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} • $time';

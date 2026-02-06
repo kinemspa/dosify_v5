@@ -171,8 +171,10 @@ class DetailPageScaffold extends StatelessWidget {
                       // Collapsed title in the top bar (matches Medication Details)
                       Positioned(
                         top: top,
-                        left: 0,
-                        right: 0,
+                        left: kDetailHeaderCollapsedHeight +
+                            kSpacingS, // Account for back button (48px) + spacing
+                        right: kDetailHeaderCollapsedHeight +
+                            kSpacingS, // Account for menu button symmetrically
                         height: barHeight,
                         child: IgnorePointer(
                           child: Opacity(
@@ -256,6 +258,7 @@ class DetailStatsBanner extends StatelessWidget {
     );
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title

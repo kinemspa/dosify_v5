@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
@@ -252,7 +253,7 @@ class DoseDialogDoseFallbackSummary extends StatelessWidget {
     final date = MaterialLocalizations.of(
       context,
     ).formatMediumDate(dose.scheduledTime);
-    final time = TimeOfDay.fromDateTime(dose.scheduledTime).format(context);
+    final time = DateTimeFormatter.formatTime(context, dose.scheduledTime);
 
     final doseText = '${_formatDoseValue(dose.doseValue)} ${dose.doseUnit}';
 

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
@@ -35,7 +36,7 @@ class DoseSummaryRow extends StatelessWidget {
     final statusColor = visual.color;
     final statusIcon = visual.icon;
 
-    final timeStr = DateFormat('h:mm a').format(dose.scheduledTime);
+    final timeStr = DateTimeFormatter.formatTime(context, dose.scheduledTime);
 
     final statusText = disabled
         ? 'Disabled'
@@ -43,7 +44,7 @@ class DoseSummaryRow extends StatelessWidget {
             DoseStatus.taken => () {
                 final actionTime = dose.existingLog?.actionTime;
                 return actionTime != null
-                    ? 'Taken at ${DateFormat('h:mm a').format(actionTime)}'
+                    ? 'Taken at ${DateTimeFormatter.formatTime(context, actionTime)}'
                     : 'Taken';
               }(),
             DoseStatus.skipped => 'Skipped',

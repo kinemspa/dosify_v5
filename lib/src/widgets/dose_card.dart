@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
@@ -68,7 +69,7 @@ class DoseCard extends StatelessWidget {
 
     // Note: label/icon are rendered via the status chip/action button widgets.
 
-    final timeText = DateFormat('h:mm a').format(dose.scheduledTime);
+    final timeText = DateTimeFormatter.formatTime(context, dose.scheduledTime);
 
     final primaryTitleStyle = doseCardPrimaryTitleTextStyle(
       context,

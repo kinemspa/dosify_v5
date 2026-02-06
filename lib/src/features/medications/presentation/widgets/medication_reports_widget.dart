@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
@@ -431,8 +432,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     DoseStatusChangeLog log,
   ) {
     final cs = Theme.of(context).colorScheme;
-    final timeFormat = DateFormat('h:mm a');
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
       child: Row(
@@ -458,7 +457,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 ),
                   const SizedBox(height: kSpacingXXS),
                 Text(
-                  timeFormat.format(log.changeTime),
+                  DateTimeFormatter.formatTime(context, log.changeTime),
                   style: smallHelperTextStyle(
                     context,
                     color: cs.onSurfaceVariant.withValues(
@@ -482,8 +481,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildMissedDoseRow(BuildContext context, CalculatedDose dose) {
     final cs = Theme.of(context).colorScheme;
-    final timeFormat = DateFormat('h:mm a');
-
     final scheduleName = _effectiveScheduleName(
       scheduleId: dose.scheduleId,
       scheduleName: dose.scheduleName,
@@ -518,7 +515,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                   ),
                   const SizedBox(height: kSpacingXXS),
                   Text(
-                    timeFormat.format(dose.scheduledTime),
+                    DateTimeFormatter.formatTime(context, dose.scheduledTime),
                     style: smallHelperTextStyle(
                       context,
                       color: cs.onSurfaceVariant.withValues(
@@ -557,8 +554,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildDoseLogItem(BuildContext context, DoseLog log) {
     final cs = Theme.of(context).colorScheme;
-    final timeFormat = DateFormat('h:mm a');
-
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
     final isAdHoc = log.scheduleId == 'ad_hoc';
@@ -618,7 +613,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                       ),
                       const SizedBox(width: kSpacingS),
                       Text(
-                        timeFormat.format(log.actionTime),
+                        DateTimeFormatter.formatTime(context, log.actionTime),
                         style: smallHelperTextStyle(
                           context,
                           color: cs.onSurfaceVariant.withValues(
@@ -685,9 +680,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
       useRootNavigator: true,
       builder: (dialogContext) {
         final cs = Theme.of(dialogContext).colorScheme;
-        final dateFormat = DateFormat('EEE, MMM d, y');
-        final timeFormat = DateFormat('h:mm a');
-
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
             Future<void> pickDate() async {
@@ -760,7 +752,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                     child: OutlinedButton.icon(
                       onPressed: pickTime,
                       icon: const Icon(Icons.schedule, size: kIconSizeSmall),
-                      label: Text(timeFormat.format(selected)),
+                      label: Text(DateTimeFormatter.formatTime(context, selected)),
                     ),
                   ),
                   const SizedBox(height: kSpacingM),
@@ -1712,8 +1704,6 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
   Widget _buildInventoryEventRow(BuildContext context, InventoryLog log) {
     final cs = Theme.of(context).colorScheme;
-    final timeFormat = DateFormat('h:mm a');
-
     final canEditAdHoc = log.changeType == InventoryChangeType.adHocDose;
     final linkedAdHocDoseLog = canEditAdHoc
         ? Hive.box<DoseLog>('dose_logs').get(log.id)
@@ -1754,7 +1744,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
                 ),
                 const SizedBox(height: kSpacingXXS),
                 Text(
-                  timeFormat.format(log.timestamp),
+                  DateTimeFormatter.formatTime(context, log.timestamp),
                   style: smallHelperTextStyle(
                     context,
                     color: cs.onSurfaceVariant,

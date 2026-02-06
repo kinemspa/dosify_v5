@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
@@ -252,13 +253,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             children: [
               Icon(
                 Icons.medication_outlined,
-                size: 64,
+                size: kEmptyStateIconSizeLarge,
                 color: Theme.of(context).colorScheme.outline,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: kSpacingL),
               Text(
                 'Medication not found',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: cardTitleStyle(context),
               ),
             ],
           ),
@@ -509,8 +510,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             // Keep the same title-fade behavior without rebuilding the whole page on scroll.
                             Positioned(
                               top: top,
-                              left: 0,
-                              right: 0,
+                              left: kDetailHeaderCollapsedHeight +
+                                  kSpacingS, // Account for back button (48px) + spacing
+                              right: kDetailHeaderCollapsedHeight +
+                                  kSpacingS, // Account for menu button symmetrically
                               height: _kDetailHeaderCollapsedHeight,
                               child: IgnorePointer(
                                 child: Opacity(
@@ -523,6 +526,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                             context,
                                             color: onPrimary,
                                           ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ),
@@ -2289,24 +2294,28 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return InkWell(
       onTap: () => _showActiveVialConditionsDialog(context, med),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingL,
+          vertical: kSpacingS,
+        ),
         child: Row(
           children: [
             SizedBox(
-              width: 90,
+              width: kMedicationDetailInlineLabelWidth,
               child: Text(
                 'Conditions',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: smallHelperTextStyle(
+                  context,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            Wrap(spacing: 6, children: conditions),
+            Wrap(spacing: kFieldSpacing, children: conditions),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
             ),
           ],
         ),
@@ -2410,24 +2419,28 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return InkWell(
       onTap: () => _showBackupStockConditionsDialog(context, med),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingL,
+          vertical: kSpacingS,
+        ),
         child: Row(
           children: [
             SizedBox(
-              width: 90,
+              width: kMedicationDetailInlineLabelWidth,
               child: Text(
                 'Conditions',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: smallHelperTextStyle(
+                  context,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            Wrap(spacing: 6, children: conditions),
+            Wrap(spacing: kFieldSpacing, children: conditions),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
             ),
           ],
         ),
@@ -3436,6 +3449,63 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   final box = Hive.box<Medication>('medications');
   final latest = box.get(med.id) ?? med;
 
+  // Check if a saved reconstitution exists for this medication
+  final savedRecon = SavedReconstitutionRepository().ownedForMedication(med.id);
+  final hasSavedRecon = savedRecon != null;
+
+  // Step 1: Choose between Recalculate or Same Recon
+  final reconChoice = await showDialog<String>(
+    context: context,
+    useRootNavigator: true,
+    builder: (dialogContext) {
+      final theme = Theme.of(dialogContext);
+      final cs = theme.colorScheme;
+      
+      return AlertDialog(
+        titleTextStyle: cardTitleStyle(dialogContext)?.copyWith(color: cs.primary),
+        contentTextStyle: bodyTextStyle(dialogContext),
+        title: Text('Reconstitute a new vial of ${med.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Choose how to prepare the new vial:',
+              style: helperTextStyle(dialogContext),
+            ),
+            const SizedBox(height: kSpacingM),
+            SelectableOptionCard(
+              icon: Icons.calculate_outlined,
+              title: 'Recalculate',
+              subtitle: 'Open the Reconstitution Calculator to create a new calculation.',
+              selected: false,
+              onTap: () => Navigator.of(dialogContext).pop('recalculate'),
+            ),
+            const SizedBox(height: kSpacingS),
+            SelectableOptionCard(
+              icon: Icons.history,
+              title: 'Same Recon Calculation',
+              subtitle: hasSavedRecon
+                  ? 'Use the previously saved reconstitution for this medication.'
+                  : 'No saved reconstitution exists for this medication.',
+              selected: false,
+              enabled: hasSavedRecon,
+              onTap: () => Navigator.of(dialogContext).pop('sameRecon'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (reconChoice == null || !context.mounted) return;
+
   // Single-page dialog state
   var selectedMode = 'replace'; // 'replace' | 'topUp'
   var selectedSource = 'fromStock'; // 'fromStock' | 'otherSource'
@@ -3461,6 +3531,73 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   double? topUpPerMl = latest.perMlValue;
   String? topUpDiluentName = latest.diluentName;
   String? topUpReconLabel;
+
+  // If user chose 'sameRecon', load the saved reconstitution immediately
+  if (reconChoice == 'sameRecon' && savedRecon != null) {
+    selectedPerMl = savedRecon.perMlConcentration;
+    selectedDiluentName = savedRecon.diluentName;
+    selectedRecommendedUnits = savedRecon.recommendedUnits;
+    replaceVolumeCtrl.text = fmt2(savedRecon.solventVolumeMl);
+    replaceVolumeSetBy = 'From saved reconstitution';
+    
+    final diluent = savedRecon.diluentName?.trim();
+    selectedReconLabel = diluent == null || diluent.isEmpty
+        ? '${savedRecon.solventVolumeMl.toStringAsFixed(2)} mL'
+        : '${savedRecon.solventVolumeMl.toStringAsFixed(2)} mL $diluent';
+
+    topUpPerMl = savedRecon.perMlConcentration;
+    topUpDiluentName = savedRecon.diluentName;
+  }
+
+  // If user chose 'recalculate', open the calculator first
+  if (reconChoice == 'recalculate') {
+    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
+    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
+    final initialSyringe =
+        (latest.volumePerDose != null && latest.volumePerDose! > 0)
+        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+        : SyringeSizeMl.ml1;
+
+    final result = await showModalBottomSheet<ReconstitutionResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.0),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (ctx, scrollController) => ReconstitutionCalculatorDialog(
+          initialStrengthValue: med.strengthValue,
+          unitLabel: med.strengthUnit.name,
+          initialDoseValue: initialDoseAmount,
+          initialDoseUnit: initialDoseUnit,
+          initialSyringeSize: initialSyringe,
+          initialVialSize: latest.containerVolumeMl ?? vialSize,
+          initialDiluentName: selectedDiluentName,
+        ),
+      ),
+    );
+
+    if (result == null || !context.mounted) {
+      replaceVolumeCtrl.dispose();
+      topUpVolumeCtrl.dispose();
+      return;
+    }
+
+    selectedPerMl = result.perMlConcentration;
+    selectedDiluentName = result.diluentName;
+    selectedRecommendedUnits = result.recommendedUnits;
+    replaceVolumeCtrl.text = fmt2(result.solventVolumeMl);
+    replaceVolumeSetBy = 'From new reconstitution';
+
+    final diluent = result.diluentName?.trim();
+    selectedReconLabel = diluent == null || diluent.isEmpty
+        ? '${result.solventVolumeMl.toStringAsFixed(2)} mL'
+        : '${result.solventVolumeMl.toStringAsFixed(2)} mL $diluent';
+
+    topUpPerMl = result.perMlConcentration;
+    topUpDiluentName = result.diluentName;
+  }
 
   Future<void> pickReconstitution(BuildContext dialogContext) async {
     final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);

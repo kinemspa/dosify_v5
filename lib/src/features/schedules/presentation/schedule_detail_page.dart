@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
@@ -48,6 +49,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   bool _isCalendarExpanded = true;
 
   ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _doseLogRepo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+  }
 
   int _computeUtcMinutes(int localMinutes, DateTime now) {
     final localToday = DateTime(
@@ -380,8 +387,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           builder: (dialogContext, setDialogState) {
             final formatted = times
                 .map(
-                  (m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(
+                  (m) => DateTimeFormatter.formatTime(
                     dialogContext,
+                    DateTime(0, 1, 1, m ~/ 60, m % 60),
                   ),
                 )
                 .toList();
@@ -1230,7 +1238,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   String _formatDateTime(BuildContext context, DateTime dt) {
-    return '${DateFormat('EEE, MMM d, y').format(dt)} • ${TimeOfDay.fromDateTime(dt).format(context)}';
+    return '${DateFormat('EEE, MMM d, y').format(dt)} • ${DateTimeFormatter.formatTime(context, dt)}';
   }
 
   List<Widget> _buildSections(
@@ -1443,7 +1451,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             context,
             label: 'When',
             value:
-                '${DateFormat('EEE, MMM d').format(nextDose)} • ${TimeOfDay.fromDateTime(nextDose).format(context)}',
+                '${DateFormat('EEE, MMM d').format(nextDose)} • ${DateTimeFormatter.formatTime(context, nextDose)}',
             maxLines: 2,
           ),
           buildDetailInfoRow(
@@ -1456,7 +1464,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               context,
               label: 'Recorded',
               value:
-                  '${_getActionLabel(existingLog.action)} at ${TimeOfDay.fromDateTime(existingLog.actionTime).format(context)}',
+                  '${_getActionLabel(existingLog.action)} at ${DateTimeFormatter.formatTime(context, existingLog.actionTime)}',
               highlighted: true,
             ),
           const SizedBox(height: kSpacingS),
@@ -1687,7 +1695,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        TimeOfDay.fromDateTime(dt).format(context),
+                        DateTimeFormatter.formatTime(context, dt),
                         style: cardTitleStyle(
                           context,
                         )?.copyWith(color: cs.onSurface),
@@ -2007,7 +2015,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   String _timesText(BuildContext context, Schedule schedule) {
     final ts = ScheduleOccurrenceService.normalizedTimesOfDay(schedule);
     return ts
-        .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
+        .map((m) => DateTimeFormatter.formatTime(context, DateTime(0, 1, 1, m ~/ 60, m % 60)))
         .join('\n');
   }
 

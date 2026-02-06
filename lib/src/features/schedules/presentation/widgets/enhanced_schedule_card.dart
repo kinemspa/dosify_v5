@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -161,7 +162,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         await _cancelNotificationForDose(dose);
         final when = request.actionTime;
         if (when.isAfter(DateTime.now())) {
-          final time = TimeOfDay.fromDateTime(when).format(context);
+          final time = DateTimeFormatter.formatTime(context, when);
           await NotificationService.scheduleAtAlarmClock(
             ScheduleScheduler.doseNotificationIdFor(
               dose.scheduleId,
@@ -638,7 +639,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     } else if (diff.inMinutes < 60) {
       return 'in ${diff.inMinutes}m';
     } else if (diff.inHours < 24) {
-      return DateFormat('h:mm a').format(dt);
+      return DateTimeFormatter.formatTime(context, dt);
     } else if (diff.inDays == 1) {
       return 'Tomorrow';
     } else {
@@ -824,11 +825,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     } else if (diff.inHours < 24) {
       final hours = diff.inHours;
       final minutes = diff.inMinutes % 60;
-      return 'Today at ${DateFormat('h:mm a').format(dt)} (in ${hours}h ${minutes}m)';
+      return 'Today at ${DateTimeFormatter.formatTime(context, dt)} (in ${hours}h ${minutes}m)';
     } else if (diff.inDays == 1) {
-      return 'Tomorrow at ${DateFormat('h:mm a').format(dt)}';
+      return 'Tomorrow at ${DateTimeFormatter.formatTime(context, dt)}';
     } else {
-      return '${DateFormat('EEEE').format(dt)} at ${DateFormat('h:mm a').format(dt)}';
+      return '${DateFormat('EEEE').format(dt)} at ${DateTimeFormatter.formatTime(context, dt)}';
     }
   }
 
@@ -841,7 +842,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     } else if (diff.inHours < 24) {
       return '${diff.inHours}h ago';
     } else if (diff.inDays == 1) {
-      return 'Yesterday ${DateFormat('h:mm a').format(dt)}';
+      return 'Yesterday ${DateTimeFormatter.formatTime(context, dt)}';
     } else {
       return '${diff.inDays}d ago';
     }
@@ -917,7 +918,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             final hour = m ~/ 60;
             final minute = m % 60;
             final dt = DateTime(0, 0, 0, hour, minute);
-            return DateFormat('h:mm a').format(dt);
+            return DateTimeFormatter.formatTime(context, dt);
           })
           .join(', ');
       return times;
@@ -925,7 +926,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       final hour = widget.schedule.minutesOfDay ~/ 60;
       final minute = widget.schedule.minutesOfDay % 60;
       final dt = DateTime(0, 0, 0, hour, minute);
-      return DateFormat('h:mm a').format(dt);
+      return DateTimeFormatter.formatTime(context, dt);
     }
   }
 

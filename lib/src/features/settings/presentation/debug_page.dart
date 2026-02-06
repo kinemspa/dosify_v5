@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -127,13 +128,10 @@ class DebugPage extends StatelessWidget {
                 body: 'This should appear in ~30 seconds',
               );
               if (!context.mounted) return;
-              final t = TimeOfDay.fromDateTime(
-                DateTime.now().add(const Duration(seconds: 30)),
-              );
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Scheduled test for ${t.format(context)} (~30s, exactAllowWhileIdle)',
+                    'Scheduled test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 30)))} (~30s, exactAllowWhileIdle)',
                   ),
                 ),
               );
@@ -173,16 +171,10 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (!context.mounted) return;
-              final t5 = TimeOfDay.fromDateTime(
-                DateTime.now().add(const Duration(seconds: 5)),
-              );
-              final t6 = TimeOfDay.fromDateTime(
-                DateTime.now().add(const Duration(seconds: 6)),
-              );
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Scheduled: exact @ ${t5.format(context)}, alarm @ ${t6.format(context)}, backup @ +7s',
+                    'Scheduled: exact @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}, alarm @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 6)))}, backup @ +7s',
                   ),
                 ),
               );
@@ -219,16 +211,10 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                final t5 = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(seconds: 5)),
-                );
-                final t6 = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(seconds: 6)),
-                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Scheduled: alarm @ ${t5.format(context)}, exact @ ${t6.format(context)}, backup @ +7s',
+                      'Scheduled: alarm @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}, exact @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 6)))}, backup @ +7s',
                     ),
                   ),
                 );
@@ -250,13 +236,10 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                final t = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(seconds: 5)),
-                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Direct (no schedule) test will show at ${t.format(context)}',
+                      'Direct (no schedule) test will show at ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}',
                     ),
                   ),
                 );
@@ -277,13 +260,10 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                final t = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(minutes: 2)),
-                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Scheduled 2m AlarmClock test for ${t.format(context)} (test_alarm channel)',
+                      'Scheduled 2m AlarmClock test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(minutes: 2)))} (test_alarm channel)',
                     ),
                   ),
                 );
@@ -306,13 +286,10 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                final t = TimeOfDay.fromDateTime(
-                  DateTime.now().add(const Duration(minutes: 2)),
-                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'Scheduled 2m exact test for ${t.format(context)} (test_alarm channel)',
+                      'Scheduled 2m exact test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(minutes: 2)))} (test_alarm channel)',
                     ),
                   ),
                 );

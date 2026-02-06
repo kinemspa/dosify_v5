@@ -125,17 +125,12 @@ If tooling cannot start an emulator or no Android devices are available in the c
 
 ---
 
-# Task Tracking Workflow (backlog/)
+# Task Tracking Workflow (GitHub Issues)
 
-`backlog/` is the single source of truth for work requests.
-
-## CRITICAL RULE (local-only)
-
-- **Files under `backlog/` MUST NOT be staged or committed to git.** The entire folder is intentionally gitignored.
-- **NEVER revert/undo changes in `backlog/*.md`.** Do not run `git checkout -- backlog/...`, do not reset, and do not overwrite user edits.
+**GitHub Issues** are the single source of truth for all work requests.
 
 ## Workflow
 
-- **Always read the relevant file in `backlog/` before starting new work** (e.g., the screen/widget you are about to change).
-- You may update checkboxes locally for your own tracking, but those edits must remain local-only (never committed).
-- **Keep edits minimal**: preserve user wording/formatting; only change checkbox state(s) you actually completed.
+- **Always read the assigned GitHub Issue before starting work** — understand requirements and acceptance criteria.
+- Reference the Issue in your PR (e.g., "Fixes #XX") so it auto-closes on merge.
+- Use `gh issue list` and `gh issue view <number>` to check Issue details from the terminal.

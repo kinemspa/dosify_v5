@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -497,7 +498,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _cancelNotificationForDose(dose);
       final when = request.actionTime;
       if (when.isAfter(DateTime.now())) {
-        final time = TimeOfDay.fromDateTime(when).format(context);
+        final time = DateTimeFormatter.formatTime(context, when);
         await NotificationService.scheduleAtAlarmClock(
           ScheduleScheduler.doseNotificationIdFor(
             dose.scheduleId,
@@ -521,7 +522,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             request.actionTime.year == now.year &&
             request.actionTime.month == now.month &&
             request.actionTime.day == now.day;
-        final time = TimeOfDay.fromDateTime(request.actionTime).format(context);
+        final time = DateTimeFormatter.formatTime(context, request.actionTime);
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';

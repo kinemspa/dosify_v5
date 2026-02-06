@@ -11,9 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
@@ -99,10 +97,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildHomeCards(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    // Rebuild this section whenever any relevant Hive box changes.
-    ref.watch(schedulesBoxChangesProvider);
-    ref.watch(medicationsBoxChangesProvider);
-    ref.watch(doseLogsBoxChangesProvider);
+    // NOTE: Child cards (TodayDosesCard, CalendarCard, ActivityCard) each
+    // watch their own Hive box-change providers independently.  Watching
+    // them *again* here caused a cascading rebuild storm (6-10× per Hive
+    // write) that overwhelmed the emulator.  Removed to prevent that.
 
     final allCardsCollapsed =
         !_isTodayExpanded &&

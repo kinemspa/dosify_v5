@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.da
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 
 import 'package:mcp_toolkit/mcp_toolkit.dart'; // NEW: For MCP bridge to enable inspections/screenshots
@@ -55,6 +56,7 @@ Future<void> main() async {
           await DoseTimingSettings.load();
           await ExperimentalUiSettings.load();
           await SnoozeSettings.load();
+          await DateTimeFormatSettings.load();
           await ExpiryNotificationSettings.load();
 
           NotificationDeepLinkHandler.flushPendingIfAny();

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -509,8 +510,8 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
     Widget buildDayGutter(DateTime timeLocal, {required bool showLabel}) {
       final labelColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
 
-      final dayText = DateFormat('d').format(timeLocal);
-      final monthText = DateFormat('MMM').format(timeLocal).toUpperCase();
+      final dayText = DateTimeFormatter.formatDay(timeLocal);
+      final monthText = DateTimeFormatter.formatMonthAbbr(timeLocal);
 
       return SizedBox(
         width: kNextDoseDateCircleSizeCompact,
