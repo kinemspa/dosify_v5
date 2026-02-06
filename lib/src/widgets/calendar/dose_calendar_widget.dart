@@ -952,6 +952,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final peekRatio = kCalendarSelectedDayStagePeekRatio;
     final minRatio = peekRatio < initialRatio ? peekRatio : initialRatio;
 
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final listBottomPadding = safeBottom + kPageBottomPadding;
+
     return DraggableScrollableSheet(
       controller: _selectedDayStageController,
       initialChildSize: initialRatio,
@@ -973,6 +976,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           child: _buildSelectedDayStageList(
             selectedDate: selectedDate,
             scrollController: scrollController,
+            listBottomPadding: listBottomPadding,
+            includeHandle: true,
+            includeHeader: true,
           ),
         );
       },
@@ -982,6 +988,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   Widget _buildSelectedDayStageList({
     required DateTime selectedDate,
     required ScrollController scrollController,
+    required double listBottomPadding,
+    required bool includeHandle,
+    required bool includeHeader,
   }) {
     final dayDoses = _doses.where((dose) {
       return dose.scheduledTime.year == selectedDate.year &&
@@ -995,9 +1004,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       dosesByHour.putIfAbsent(dose.scheduledTime.hour, () => []).add(dose);
     }
     final hours = dosesByHour.keys.toList()..sort();
-
-    final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding = safeBottom + kPageBottomPadding;
 
     Widget buildHandle(BuildContext context) {
       final theme = Theme.of(context);
@@ -1027,6 +1033,19 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       );
     }
 
+    Widget buildTop(BuildContext context) {
+      if (!includeHandle && !includeHeader) return const SizedBox.shrink();
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (includeHandle) buildHandle(context),
+          if (includeHeader) buildHeader(context),
+        ],
+      );
+    }
+
+    final topCount = (includeHandle ? 1 : 0) + (includeHeader ? 1 : 0);
+
     if (dayDoses.isEmpty) {
       return Scrollbar(
         controller: scrollController,
@@ -1037,8 +1056,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           controller: scrollController,
           padding: calendarStageListPadding(listBottomPadding),
           children: [
-            buildHandle(context),
-            buildHeader(context),
+            buildTop(context),
             const SizedBox(height: kSpacingS),
             const CalendarNoDosesState(showIcon: false, compact: true),
           ],
@@ -1054,12 +1072,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       child: ListView.builder(
         controller: scrollController,
         padding: calendarStageListPadding(listBottomPadding),
-        itemCount: hours.length + 2,
+        itemCount: hours.length + topCount,
         itemBuilder: (context, index) {
-          if (index == 0) return buildHandle(context);
-          if (index == 1) return buildHeader(context);
+          if (topCount > 0 && index == 0) return buildTop(context);
 
-          final hourIndex = index - 2;
+          final hourIndex = index - topCount;
           final hour = hours[hourIndex];
           final hourDoses = dosesByHour[hour] ?? const [];
 
@@ -1384,28 +1401,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   Widget _buildSelectedDayPanel() {
     if (_selectedDate == null) return const SizedBox.shrink();
 
-    final dayDoses = _doses.where((dose) {
-      return dose.scheduledTime.year == _selectedDate!.year &&
-          dose.scheduledTime.month == _selectedDate!.month &&
-          dose.scheduledTime.day == _selectedDate!.day;
-    }).toList();
-
-    // Sort by time
-    dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
-
-    final dosesByHour = <int, List<CalculatedDose>>{};
-    for (final dose in dayDoses) {
-      dosesByHour.putIfAbsent(dose.scheduledTime.hour, () => []).add(dose);
-    }
-    final hours = dosesByHour.keys.toList()..sort();
-
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final listBottomPadding = widget.variant == CalendarVariant.full
-      ? safeBottom + kPageBottomPadding
-      : safeBottom + kSpacingXXL + kSpacingXL;
+        ? safeBottom + kPageBottomPadding
+        : safeBottom + kSpacingXXL + kSpacingXL;
 
     return Padding(
       padding: const EdgeInsets.only(top: kSpacingS),
@@ -1419,49 +1421,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ),
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with date
-            Container(
-              padding: kCalendarSelectedDayHeaderPadding,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _formatSelectedDate(),
-                      style: calendarSelectedDayHeaderTextStyle(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Dose list
-            Expanded(
-              child: dayDoses.isEmpty
-                  ? const CalendarNoDosesState(showIcon: false, compact: true)
-                  : Scrollbar(
-                      controller: _selectedDayScrollController,
-                      thumbVisibility: true,
-                      thickness: kCalendarStageScrollbarThickness,
-                      radius: kCalendarStageScrollbarThumbRadius,
-                      child: ListView.builder(
-                        controller: _selectedDayScrollController,
-                        padding: calendarStageListPadding(listBottomPadding),
-                        itemCount: hours.length,
-                        itemBuilder: (context, index) {
-                          final hour = hours[index];
-                          final hourDoses = dosesByHour[hour] ?? const [];
-
-                          return _buildHourDoseSection(
-                            hour: hour,
-                            hourDoses: hourDoses,
-                          );
-                        },
-                      ),
-                    ),
-            ),
-          ],
+        child: _buildSelectedDayStageList(
+          selectedDate: _selectedDate!,
+          scrollController: _selectedDayScrollController,
+          listBottomPadding: listBottomPadding,
+          includeHandle: false,
+          includeHeader: true,
         ),
       ),
     );
