@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
@@ -167,13 +168,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                           ClipboardData(text: csv),
                                         );
                                         if (!context.mounted) return;
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Medications CSV copied to clipboard',
-                                            ),
-                                          ),
+                                        showAppSnackBar(
+                                          context,
+                                          'Medications CSV copied to clipboard',
                                         );
                                       },
                                 child: const Text('Copy Medications CSV'),
@@ -189,13 +186,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                           ClipboardData(text: csv),
                                         );
                                         if (!context.mounted) return;
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Schedules CSV copied to clipboard',
-                                            ),
-                                          ),
+                                        showAppSnackBar(
+                                          context,
+                                          'Schedules CSV copied to clipboard',
                                         );
                                       },
                                 child: const Text('Copy Schedules CSV'),
@@ -212,13 +205,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                           ClipboardData(text: csv),
                                         );
                                         if (!context.mounted) return;
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Dose logs CSV copied to clipboard',
-                                            ),
-                                          ),
+                                        showAppSnackBar(
+                                          context,
+                                          'Dose logs CSV copied to clipboard',
                                         );
                                       },
                                 child: const Text('Copy Dose Logs CSV'),
@@ -235,13 +224,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                           ClipboardData(text: csv),
                                         );
                                         if (!context.mounted) return;
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Inventory logs CSV copied to clipboard',
-                                            ),
-                                          ),
+                                        showAppSnackBar(
+                                          context,
+                                          'Inventory logs CSV copied to clipboard',
                                         );
                                       },
                                 child: const Text('Copy Inventory Logs CSV'),

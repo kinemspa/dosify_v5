@@ -549,6 +549,21 @@ const EdgeInsets kTightTextButtonPadding = EdgeInsets.symmetric(
   vertical: kSpacingXXS,
 );
 
+/// Top snackbar (app-wide) padding.
+///
+/// Used by [showAppSnackBar] to position the app snackbar at the top of the
+/// screen, within safe areas.
+const EdgeInsets kAppSnackBarOuterPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: kSpacingS,
+);
+
+/// Content padding inside the app snackbar container.
+const EdgeInsets kAppSnackBarInnerPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: kSpacingS,
+);
+
 // ============================================================================
 // BORDER CONSTANTS
 // ============================================================================
@@ -1141,6 +1156,12 @@ const Duration kAnimationFast = Duration(milliseconds: 150);
 const Duration kAnimationNormal = Duration(milliseconds: 250);
 const Duration kAnimationSlow = Duration(milliseconds: 350);
 const Duration kAnimationVerySlow = Duration(milliseconds: 500);
+
+/// Default duration for app snackbars (top-of-screen toasts).
+const Duration kAppSnackBarDuration = Duration(seconds: 3);
+
+/// Short duration for brief instructional snackbars.
+const Duration kAppSnackBarDurationShort = Duration(seconds: 2);
 
 /// Animation curves
 const Curve kCurveDefault = Curves.easeInOut;
@@ -2166,6 +2187,15 @@ TextStyle? bodyTextStyle(BuildContext context) {
     color: Theme.of(
       context,
     ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+  );
+}
+
+/// App snackbar text style (used for top-of-screen snackbars).
+TextStyle? appSnackBarTextStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return bodyTextStyle(context)?.copyWith(
+    color: cs.onPrimary,
+    fontWeight: kFontWeightSemiBold,
   );
 }
 

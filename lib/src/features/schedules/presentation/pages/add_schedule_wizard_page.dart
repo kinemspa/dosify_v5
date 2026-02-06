@@ -19,6 +19,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_wizard_base.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/dose_input_field.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -1664,15 +1665,12 @@ class _AddScheduleWizardPageState
   Future<void> saveSchedule() async {
     if (!canProceed) return;
 
-    final messenger = ScaffoldMessenger.of(context);
-
     // Ensure notifications permission (same safety checks as legacy schedule editor)
     final granted = await NotificationService.ensurePermissionGranted();
     if (!granted && mounted) {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Enable notifications to receive schedule alerts.'),
-        ),
+      showAppSnackBar(
+        context,
+        'Enable notifications to receive schedule alerts.',
       );
     }
 
@@ -1859,9 +1857,7 @@ class _AddScheduleWizardPageState
       await box.put(id, schedule);
     } catch (e) {
       if (mounted) {
-        messenger.showSnackBar(
-          const SnackBar(content: Text('Failed to save schedule')),
-        );
+        showAppSnackBar(context, 'Failed to save schedule');
       }
       return;
     }
@@ -1878,9 +1874,7 @@ class _AddScheduleWizardPageState
     }
 
     if (!mounted) return;
-    messenger.showSnackBar(
-      SnackBar(content: Text('Schedule "${schedule.name}" saved')),
-    );
+    showAppSnackBar(context, 'Schedule "${schedule.name}" saved');
     context.go('/schedules');
   }
 

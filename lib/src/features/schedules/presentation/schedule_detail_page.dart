@@ -26,6 +26,7 @@ import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/schedules_card.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/unified_tinted_card_surface.dart';
@@ -103,21 +104,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
       if (!mounted) return;
       if (successMessage != null && successMessage.trim().isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(successMessage),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showAppSnackBar(context, successMessage);
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update schedule: $e'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAppSnackBar(context, 'Failed to update schedule: $e');
     }
   }
 
@@ -1025,9 +1016,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     if (result['delete'] == true && existingLog != null) {
       await _doseLogRepo.delete(existingLog.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Dose log removed')));
+      showAppSnackBar(context, 'Dose log removed');
       setState(() {});
       return;
     }
@@ -1066,9 +1055,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         ? 'skipped'
         : 'snoozed for 15 minutes';
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Dose $actionText')));
+    showAppSnackBar(context, 'Dose $actionText');
 
     setState(() {});
   }
@@ -1407,20 +1394,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       }
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Schedule set to ${scheduleStatusLabel(updated)}'),
-          behavior: SnackBarBehavior.floating,
-        ),
+      showAppSnackBar(
+        context,
+        'Schedule set to ${scheduleStatusLabel(updated)}',
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update schedule status: $e'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAppSnackBar(context, 'Failed to update schedule status: $e');
     }
   }
 
@@ -2054,11 +2034,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     await ScheduleScheduler.cancelFor(schedule.id);
     await Hive.box<Schedule>('schedules').delete(schedule.id);
     if (context.mounted) {
-      final messenger = ScaffoldMessenger.of(context);
+      showAppSnackBar(context, 'Deleted "${schedule.name}"');
       context.pop();
-      messenger.showSnackBar(
-        SnackBar(content: Text('Deleted "${schedule.name}"')),
-      );
     }
   }
 }

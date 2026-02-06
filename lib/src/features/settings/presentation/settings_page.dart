@@ -16,6 +16,7 @@ import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -115,16 +116,12 @@ class SettingsPage extends ConsumerWidget {
       final ok = await NotificationService.ensurePermissionGranted();
       if (!ok) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notification permission denied')),
-        );
+        showAppSnackBar(context, 'Notification permission denied');
         return;
       }
       await action();
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Test notification sent')));
+      showAppSnackBar(context, 'Test notification sent');
     }
 
     Future<void> showAbout() async {
@@ -453,9 +450,7 @@ class SettingsPage extends ConsumerWidget {
                             Navigator.of(context).pop();
                             await TestDataSeedService.seed();
                             if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Test data added')),
-                            );
+                            showAppSnackBar(context, 'Test data added');
                           },
                         ),
                         ListTile(
@@ -466,14 +461,10 @@ class SettingsPage extends ConsumerWidget {
                             Navigator.of(context).pop();
                             await TestDataSeedService.clear();
                             if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Test data removed'),
-                              ),
-                            );
+                            showAppSnackBar(context, 'Test data removed');
                           },
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: kSpacingS),
                       ],
                     ),
                   );

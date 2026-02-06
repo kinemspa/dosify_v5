@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
@@ -792,9 +793,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           _calculateDosesForWeek(_selectedDate);
           _updateDayDoses();
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
+        showAppSnackBar(context, 'Dose marked as taken');
       },
       onSnooze: (request) async {
         final logId = DoseLogIds.occurrenceId(
@@ -854,9 +853,7 @@ class _NextDoseCardState extends State<NextDoseCard>
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(label)));
+        showAppSnackBar(context, label);
       },
       onSkip: (request) async {
         final logId = DoseLogIds.occurrenceId(
@@ -888,9 +885,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           _calculateDosesForWeek(_selectedDate);
           _updateDayDoses();
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
+        showAppSnackBar(context, 'Dose skipped');
       },
       onDelete: (request) async {
         final baseId = DoseLogIds.occurrenceId(
@@ -944,9 +939,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           _calculateDosesForWeek(_selectedDate);
           _updateDayDoses();
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
+        showAppSnackBar(context, 'Dose log deleted');
       },
     );
   }

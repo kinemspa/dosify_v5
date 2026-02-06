@@ -16,6 +16,7 @@ import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
@@ -252,9 +253,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
           await doseLogRepo.delete(latest.id);
 
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Dose log removed')));
+            showAppSnackBar(context, 'Dose log removed');
           }
         },
       );
@@ -322,9 +321,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
         await doseLogRepo.upsert(updated);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+          showAppSnackBar(context, 'Dose updated');
         }
       },
       onSnooze: (request) async {
@@ -378,9 +375,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
         await doseLogRepo.upsert(updated);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+          showAppSnackBar(context, 'Dose updated');
         }
       },
       onSkip: (request) async {
@@ -432,9 +427,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
         await doseLogRepo.upsert(updated);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+          showAppSnackBar(context, 'Dose updated');
         }
       },
       onDelete: (_) async {
@@ -468,9 +461,7 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
         await doseLogRepo.delete(log.id);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Dose log removed')));
+          showAppSnackBar(context, 'Dose log removed');
         }
       },
     );

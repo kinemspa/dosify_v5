@@ -16,6 +16,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/show_dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -315,21 +316,16 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
           setState(() => _dismissedOccurrenceIds.add(occurrenceId));
           unawaited(_persistDismissed());
 
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(
-              SnackBar(
-                content: const Text('Dose hidden'),
-                action: SnackBarAction(
-                  label: 'Undo',
-                  onPressed: () {
-                    if (!mounted) return;
-                    setState(() => _dismissedOccurrenceIds.remove(occurrenceId));
-                    unawaited(_persistDismissed());
-                  },
-                ),
-              ),
-            );
+          showAppSnackBar(
+            context,
+            'Dose hidden',
+            actionLabel: 'Undo',
+            onAction: () {
+              if (!mounted) return;
+              setState(() => _dismissedOccurrenceIds.remove(occurrenceId));
+              unawaited(_persistDismissed());
+            },
+          );
         },
         child: DoseCard(
           dose: item.dose,

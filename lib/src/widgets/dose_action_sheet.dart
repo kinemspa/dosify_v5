@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
@@ -725,15 +726,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       await repo.upsert(updatedLog);
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Notes saved')));
+        showAppSnackBar(context, 'Notes saved');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving notes: $e')));
+        showAppSnackBar(context, 'Error saving notes: $e');
       }
     }
   }
@@ -811,9 +808,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving dose changes: $e')),
-        );
+        showAppSnackBar(context, 'Error saving dose changes: $e');
       }
     }
   }

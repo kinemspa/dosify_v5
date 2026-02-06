@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -549,13 +550,10 @@ class _AddTabletWizardPageState
                       () => _lowStockThresholdCtrl.text = newVal.toString(),
                     );
                     if (newVal == stock && (v + 1) > stock) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Threshold cannot exceed current stock ($stock tablets)',
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
+                      showAppSnackBar(
+                        context,
+                        'Threshold cannot exceed current stock ($stock tablets)',
+                        duration: kAppSnackBarDurationShort,
                       );
                     }
                   },

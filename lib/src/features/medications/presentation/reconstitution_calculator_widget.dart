@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
@@ -749,18 +750,14 @@ class _ReconstitutionCalculatorWidgetState
 
                       // Show snackbar if hitting constraint
                       if (rawValue != newValue) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              rawValue < sliderMin
-                                  ? 'Minimum value reached'
-                                  : (vialMax != null
-                                        ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
-                                        : 'Limited by syringe capacity'),
-                            ),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
+                        showAppSnackBar(
+                          context,
+                          rawValue < sliderMin
+                              ? 'Minimum value reached'
+                              : (vialMax != null
+                                    ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                                    : 'Limited by syringe capacity'),
+                          duration: kAppSnackBarDurationShort,
                         );
                       }
 
@@ -788,16 +785,12 @@ class _ReconstitutionCalculatorWidgetState
                       interactive: true,
                       maxConstraint: sliderMax,
                       onMaxConstraintHit: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              vialMax != null
-                                  ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
-                                  : 'Limited by syringe capacity',
-                            ),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
+                        showAppSnackBar(
+                          context,
+                          vialMax != null
+                              ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                              : 'Limited by syringe capacity',
+                          duration: kAppSnackBarDurationShort,
                         );
                       },
                       onChanged: (newValue) {
@@ -858,16 +851,12 @@ class _ReconstitutionCalculatorWidgetState
 
                       // Show snackbar if hitting constraint
                       if (rawValue != newValue) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              vialMax != null
-                                  ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
-                                  : 'Limited by syringe capacity',
-                            ),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
+                        showAppSnackBar(
+                          context,
+                          vialMax != null
+                              ? 'Limited by max vial size (${vialMax.toStringAsFixed(1)} mL)'
+                              : 'Limited by syringe capacity',
+                          duration: kAppSnackBarDurationShort,
                         );
                       }
 

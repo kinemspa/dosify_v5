@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 
 class ScheduleCard extends StatelessWidget {
   const ScheduleCard({
@@ -117,8 +118,9 @@ class ScheduleCard extends StatelessWidget {
                       final success = await applyStockDecrement(context, s);
 
                       if (success && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Marked as taken: ${s.name}')),
+                        showAppSnackBar(
+                          context,
+                          'Marked as taken: ${s.name}',
                         );
                       }
                     },
@@ -233,9 +235,7 @@ class ScheduleCard extends StatelessWidget {
 
                     final success = await applyStockDecrement(context, s);
                     if (success && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Marked as taken: ${s.name}')),
-                      );
+                      showAppSnackBar(context, 'Marked as taken: ${s.name}');
                     }
                   },
                   style: FilledButton.styleFrom(
@@ -468,9 +468,7 @@ class ScheduleCard extends StatelessWidget {
     final next = occ?.dt;
     if (next == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No upcoming dose to snooze')),
-        );
+        showAppSnackBar(context, 'No upcoming dose to snooze');
       }
       return;
     }
@@ -539,15 +537,11 @@ class ScheduleCard extends StatelessWidget {
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} • $time';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(label)));
+        showAppSnackBar(context, label);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error snoozing: $e')));
+        showAppSnackBar(context, 'Error snoozing: $e');
       }
     }
   }
@@ -558,9 +552,7 @@ class ScheduleCard extends StatelessWidget {
     final next = occ?.dt;
     if (next == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No upcoming dose to skip')),
-        );
+        showAppSnackBar(context, 'No upcoming dose to skip');
       }
       return;
     }
@@ -606,15 +598,11 @@ class ScheduleCard extends StatelessWidget {
       }
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
+        showAppSnackBar(context, 'Dose skipped');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error skipping dose: $e')));
+        showAppSnackBar(context, 'Error skipping dose: $e');
       }
     }
   }
@@ -650,22 +638,18 @@ Future<bool> confirmTake(BuildContext context, Schedule s) async {
 
 Future<bool> applyStockDecrement(BuildContext context, Schedule s) async {
   if (s.medicationId == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'This schedule is not linked to a saved medication. Edit it to link a medication first.',
-        ),
-      ),
+    showAppSnackBar(
+      context,
+      'This schedule is not linked to a saved medication. Edit it to link a medication first.',
     );
     return false;
   }
   final medsBox = Hive.box<Medication>('medications');
   final med = medsBox.get(s.medicationId);
   if (med == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Linked medication not found. It may have been deleted.'),
-      ),
+    showAppSnackBar(
+      context,
+      'Linked medication not found. It may have been deleted.',
     );
     return false;
   }
@@ -675,12 +659,9 @@ Future<bool> applyStockDecrement(BuildContext context, Schedule s) async {
   // Use centralized helper
   final updated = applyDoseTakenUpdate(med, s);
   if (updated == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Could not compute stock decrement for this dose. Check medication strength/units.',
-        ),
-      ),
+    showAppSnackBar(
+      context,
+      'Could not compute stock decrement for this dose. Check medication strength/units.',
     );
     return false;
   }
@@ -689,10 +670,9 @@ Future<bool> applyStockDecrement(BuildContext context, Schedule s) async {
   // If MDV and we consumed a backup vial (stock decreased) to open new active vial, inform user
   if (med.form == MedicationForm.multiDoseVial &&
       updated.stockValue < prevStock) {
-    if (context.mounted)
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Active vial depleted. Opened new vial.')),
-      );
+    if (context.mounted) {
+      showAppSnackBar(context, 'Active vial depleted. Opened new vial.');
+    }
   }
   return true;
 }

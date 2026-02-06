@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
@@ -108,14 +109,11 @@ class _HomePageState extends ConsumerState<HomePage> {
         !_isCalendarExpanded;
 
     void showCollapseAllInstruction() {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Collapse all cards first to rearrange them.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      showAppSnackBar(
+        context,
+        'Collapse all cards first to rearrange them.',
+        duration: kAppSnackBarDurationShort,
+      );
     }
 
     final todayCard = Builder(

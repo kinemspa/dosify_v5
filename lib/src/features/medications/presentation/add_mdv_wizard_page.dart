@@ -9,6 +9,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/missing_required_fields_card.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -422,9 +423,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     } else {
       context.go('/medications');
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Medication saved')));
+    showAppSnackBar(context, 'Medication saved');
   }
 
   String _newId() => IdGen.newId(prefix: 'med');
@@ -926,13 +925,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     );
                     // Show message if clamped
                     if (newVal == vialVol && (v + 0.5) > vialVol) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Threshold cannot exceed total vial volume ($vialVol mL)',
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
+                      showAppSnackBar(
+                        context,
+                        'Threshold cannot exceed total vial volume ($vialVol mL)',
+                        duration: kAppSnackBarDurationShort,
                       );
                     }
                   },
@@ -1264,13 +1260,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       );
                       // Show message if clamped
                       if (newVal == qty && (v + 1) > qty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Threshold cannot exceed total quantity ($qty vials)',
-                            ),
-                            duration: const Duration(seconds: 2),
-                          ),
+                        showAppSnackBar(
+                          context,
+                          'Threshold cannot exceed total quantity ($qty vials)',
+                          duration: kAppSnackBarDurationShort,
                         );
                       }
                     },

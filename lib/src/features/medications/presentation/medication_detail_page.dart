@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
@@ -756,14 +757,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     }
 
     void showCollapseAllInstruction() {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Collapse all cards first to rearrange them.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      showAppSnackBar(
+        context,
+        'Collapse all cards first to rearrange them.',
+        duration: kAppSnackBarDurationShort,
+      );
     }
 
     final children = <Widget>[
@@ -2809,9 +2807,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(const SnackBar(content: Text('Reconstitution updated')));
+    showAppSnackBar(context, 'Reconstitution updated');
   }
 
   Widget _buildCompactGrid(BuildContext context, List<Widget> children) {
@@ -3433,9 +3429,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
     );
     inventoryLogBox.put(inventoryLog.id, inventoryLog);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    showAppSnackBar(context, message);
   }
 }
 
@@ -4201,12 +4195,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       inventoryLogBox.put(inventoryLog.id, inventoryLog);
 
       final stockText = usedSealedVial ? ' (1 sealed vial used)' : '';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Topped up vial - ${_formatNumber(newVolume)} mL$stockText',
-          ),
-        ),
+      showAppSnackBar(
+        context,
+        'Topped up vial - ${_formatNumber(newVolume)} mL$stockText',
       );
       return;
     }
@@ -4256,12 +4247,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     inventoryLogBox.put(inventoryLog.id, inventoryLog);
 
     final stockText = usedSealedVial ? ' (1 sealed vial used)' : '';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Replaced vial - ${_formatNumber(reconVolume)} mL$stockText',
-        ),
-      ),
+    showAppSnackBar(
+      context,
+      'Replaced vial - ${_formatNumber(reconVolume)} mL$stockText',
     );
   }
 }
@@ -4417,12 +4405,9 @@ Future<void> _showRestockSealedVialsDialog(
     );
     inventoryLogBox.put(inventoryLog.id, inventoryLog);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Added ${result.toInt()} sealed vials (${newStock.toInt()} total)',
-        ),
-      ),
+    showAppSnackBar(
+      context,
+      'Added ${result.toInt()} sealed vials (${newStock.toInt()} total)',
     );
   }
 }
@@ -4506,9 +4491,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
       await logBox.delete(existing.id);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ad-hoc dose deleted')),
-        );
+        showAppSnackBar(context, 'Ad-hoc dose deleted');
       }
     },
   );

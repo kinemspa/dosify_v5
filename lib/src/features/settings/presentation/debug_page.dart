@@ -6,6 +6,7 @@ import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 
 /// Debug page for notification testing and diagnostics
 class DebugPage extends StatelessWidget {
@@ -19,59 +20,48 @@ class DebugPage extends StatelessWidget {
         forceBackButton: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(kSpacingM),
         children: [
           Text(
             'Notification Testing',
             style: sectionTitleStyle(context),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: kSpacingM),
           FilledButton.icon(
             onPressed: () async {
               final ok = await NotificationService.ensurePermissionGranted();
               if (!ok && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Notification permission denied'),
-                  ),
-                );
+                showAppSnackBar(context, 'Notification permission denied');
                 return;
               }
               await NotificationService.showTest();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Test notification sent')),
-                );
+                showAppSnackBar(context, 'Test notification sent');
               }
             },
             icon: const Icon(Icons.notifications_active),
             label: const Text('Send test notification'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               await NotificationService.cancelAll();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Cancelled all scheduled notifications'),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Cancelled all scheduled notifications',
                 );
               }
             },
             icon: const Icon(Icons.cancel_schedule_send_outlined),
             label: const Text('Cancel all scheduled notifications'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               final ok = await NotificationService.ensurePermissionGranted();
               if (!ok && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Notification permission denied'),
-                  ),
-                );
+                showAppSnackBar(context, 'Notification permission denied');
                 return;
               }
 
@@ -128,12 +118,9 @@ class DebugPage extends StatelessWidget {
                 body: 'This should appear in ~30 seconds',
               );
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Scheduled test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 30)))} (~30s, exactAllowWhileIdle)',
-                  ),
-                ),
+              showAppSnackBar(
+                context,
+                'Scheduled test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 30)))} (~30s, exactAllowWhileIdle)',
               );
               // Dump state to console right after scheduling for diagnostics
               await NotificationService.debugDumpStatus();
@@ -141,7 +128,7 @@ class DebugPage extends StatelessWidget {
             icon: const Icon(Icons.timer_outlined),
             label: const Text('Schedule test in 30s'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               // Ladder: T+5 exact, T+6 alarmClock, T+7 backup banner — all on test_alarm channel
@@ -171,19 +158,16 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Scheduled: exact @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}, alarm @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 6)))}, backup @ +7s',
-                  ),
-                ),
+              showAppSnackBar(
+                context,
+                'Scheduled: exact @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}, alarm @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 6)))}, backup @ +7s',
               );
               await NotificationService.debugDumpStatus();
             },
             icon: const Icon(Icons.timer_outlined),
             label: const Text('Schedule test in 5s (exact)'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               // Ladder: T+5 alarmClock, T+6 exact, T+7 backup banner — all on test_alarm channel
@@ -211,12 +195,9 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Scheduled: alarm @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}, exact @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 6)))}, backup @ +7s',
-                    ),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Scheduled: alarm @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}, exact @ ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 6)))}, backup @ +7s',
                 );
               }
               await NotificationService.debugDumpStatus();
@@ -224,7 +205,7 @@ class DebugPage extends StatelessWidget {
             icon: const Icon(Icons.alarm_on),
             label: const Text('Schedule test in 5s (AlarmClock)'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               // Direct, no-schedule 5s test on test_alarm channel (diagnostics only)
@@ -236,19 +217,16 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Direct (no schedule) test will show at ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}',
-                    ),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Direct (no schedule) test will show at ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(seconds: 5)))}',
                 );
               }
             },
             icon: const Icon(Icons.timer),
             label: const Text('Direct test in 5s (no scheduling)'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000;
@@ -260,12 +238,9 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Scheduled 2m AlarmClock test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(minutes: 2)))} (test_alarm channel)',
-                    ),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Scheduled 2m AlarmClock test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(minutes: 2)))} (test_alarm channel)',
                 );
               }
               // Dump state to console right after scheduling for diagnostics
@@ -274,7 +249,7 @@ class DebugPage extends StatelessWidget {
             icon: const Icon(Icons.schedule_send),
             label: const Text('Schedule test in 2m (AlarmClock)'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000;
@@ -286,12 +261,9 @@ class DebugPage extends StatelessWidget {
                 channelId: 'test_alarm',
               );
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Scheduled 2m exact test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(minutes: 2)))} (test_alarm channel)',
-                    ),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Scheduled 2m exact test for ${DateTimeFormatter.formatTime(context, DateTime.now().add(const Duration(minutes: 2)))} (test_alarm channel)',
                 );
               }
               await NotificationService.debugDumpStatus();
@@ -299,7 +271,7 @@ class DebugPage extends StatelessWidget {
             icon: const Icon(Icons.timer_10),
             label: const Text('Schedule test in 2m (exact)'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               final id = DateTime.now().millisecondsSinceEpoch % 100000000;
@@ -310,12 +282,9 @@ class DebugPage extends StatelessWidget {
                 body: '30s via AlarmClock',
               );
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Scheduled 30s test via AlarmClock (local, non-tz)',
-                    ),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Scheduled 30s test via AlarmClock (local, non-tz)',
                 );
               }
               // Dump state to console right after scheduling for diagnostics
@@ -324,12 +293,12 @@ class DebugPage extends StatelessWidget {
             icon: const Icon(Icons.alarm_on),
             label: const Text('Schedule test in 30s (AlarmClock)'),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: kSpacingL),
           Text(
             'System Settings',
             style: sectionTitleStyle(context),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: kSpacingM),
           FilledButton.icon(
             onPressed: () async {
               await NotificationService.openExactAlarmsSettings();
@@ -337,7 +306,7 @@ class DebugPage extends StatelessWidget {
             icon: const Icon(Icons.alarm_on_outlined),
             label: const Text('Open Alarms & reminders settings'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               await NotificationService.openChannelSettings('upcoming_dose');
@@ -345,22 +314,21 @@ class DebugPage extends StatelessWidget {
             icon: const Icon(Icons.settings_applications_outlined),
             label: const Text('Open \"Upcoming Dose\" channel settings'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               await NotificationService.debugDumpStatus();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Dumped notification debug info to console'),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Dumped notification debug info to console',
                 );
               }
             },
             icon: const Icon(Icons.bug_report_outlined),
             label: const Text('Dump notification debug info'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
               final ignoring =
@@ -370,10 +338,9 @@ class DebugPage extends StatelessWidget {
                 // Also open the general settings page as some OEMs/emulators need manual toggle
                 await NotificationService.openBatteryOptimizationSettings();
               } else if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Battery optimizations already ignored'),
-                  ),
+                showAppSnackBar(
+                  context,
+                  'Battery optimizations already ignored',
                 );
               }
             },

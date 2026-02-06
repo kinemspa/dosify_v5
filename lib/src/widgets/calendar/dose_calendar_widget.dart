@@ -16,6 +16,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_day_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
@@ -434,15 +435,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _loadDoses();
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
+            showAppSnackBar(context, 'Dose marked as taken');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+            showAppSnackBar(context, 'Error: $e');
       }
     }
   }
@@ -526,15 +523,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(label)));
+        showAppSnackBar(context, label);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        showAppSnackBar(context, 'Error: $e');
       }
     }
   }
@@ -574,15 +567,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _loadDoses();
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
+            showAppSnackBar(context, 'Dose skipped');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+            showAppSnackBar(context, 'Error: $e');
       }
     }
   }
@@ -616,15 +605,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _loadDoses();
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose reset to pending')));
+            showAppSnackBar(context, 'Dose reset to pending');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+            showAppSnackBar(context, 'Error: $e');
       }
     }
   }

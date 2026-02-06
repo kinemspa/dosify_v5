@@ -6,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -815,9 +816,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
     if (!mounted) return;
     if (saved == true) {
       setState(() {});
-      ScaffoldMessenger.of(
-        this.context,
-      ).showSnackBar(const SnackBar(content: Text('Dose updated')));
+      showAppSnackBar(this.context, 'Dose updated');
     }
   }
 
@@ -840,9 +839,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
     void showUpdatedSnackBar(String message) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        this.context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      showAppSnackBar(this.context, message);
     }
 
     return DoseActionSheet.show(
@@ -1056,9 +1053,7 @@ class _MedicationReportsWidgetState extends State<MedicationReportsWidget>
 
     void showUpdatedSnackBar(String message) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        this.context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      showAppSnackBar(this.context, message);
     }
 
     DoseLog buildLog(

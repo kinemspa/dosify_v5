@@ -29,6 +29,7 @@ import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/next_dose_row.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 
 /// Enhanced expandable schedule card for medication detail page
@@ -131,9 +132,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
+        showAppSnackBar(context, 'Dose marked as taken');
       },
       onSnooze: (request) async {
         final logId = DoseLogIds.occurrenceId(
@@ -183,9 +182,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose snoozed')));
+        showAppSnackBar(context, 'Dose snoozed');
       },
       onSkip: (request) async {
         final logId = DoseLogIds.occurrenceId(
@@ -214,9 +211,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
+        showAppSnackBar(context, 'Dose skipped');
       },
       onDelete: (request) async {
         final logBox = Hive.box<DoseLog>('dose_logs');
@@ -263,9 +258,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
+        showAppSnackBar(context, 'Dose log deleted');
       },
     );
   }
@@ -1087,19 +1080,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
       if (mounted) {
         setState(() {});
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                const Text('Dose recorded successfully'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showAppSnackBar(context, 'Dose recorded successfully');
       }
     }
   }
@@ -1149,12 +1130,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
       if (mounted) {
         setState(() {});
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Dose skipped'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showAppSnackBar(context, 'Dose skipped');
       }
     }
   }
@@ -1217,13 +1193,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
       if (mounted) {
         setState(() {});
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Dose snoozed for ${snoozeDuration.inMinutes} minutes',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
+        showAppSnackBar(
+          context,
+          'Dose snoozed for ${snoozeDuration.inMinutes} minutes',
         );
       }
     }
@@ -1283,11 +1255,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     if (mounted) {
       setState(() {});
       final refreshed = scheduleBox.get(widget.schedule.id) ?? widget.schedule;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Schedule set to ${scheduleStatusLabel(refreshed)}'),
-          behavior: SnackBarBehavior.floating,
-        ),
+      showAppSnackBar(
+        context,
+        'Schedule set to ${scheduleStatusLabel(refreshed)}',
       );
     }
   }
@@ -1389,25 +1359,17 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       scheduleBox.put(widget.schedule.id, updated);
 
       setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Dose updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
+      showAppSnackBar(
+        context,
+        'Dose updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}',
       );
     }
   }
 
   void _quickEditTimes() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Time editing coming soon. Use the edit button to modify times.',
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
+    showAppSnackBar(
+      context,
+      'Time editing coming soon. Use the edit button to modify times.',
     );
   }
 }

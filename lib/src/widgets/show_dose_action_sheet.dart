@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_dose_metrics.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 
 Future<void> showDoseActionSheetFromModels(
@@ -97,9 +98,7 @@ Future<void> showDoseActionSheetFromModels(
       }
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose marked as taken')));
+        showAppSnackBar(context, 'Dose marked as taken');
       }
     },
     onSnooze: (request) async {
@@ -158,9 +157,7 @@ Future<void> showDoseActionSheetFromModels(
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(label)));
+        showAppSnackBar(context, label);
       }
     },
     onSkip: (request) async {
@@ -189,9 +186,7 @@ Future<void> showDoseActionSheetFromModels(
       await cancelNotificationForDose();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose skipped')));
+        showAppSnackBar(context, 'Dose skipped');
       }
     },
     onDelete: (request) async {
@@ -237,9 +232,7 @@ Future<void> showDoseActionSheetFromModels(
       await cancelNotificationForDose();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Dose log deleted')));
+        showAppSnackBar(context, 'Dose log deleted');
       }
     },
   );

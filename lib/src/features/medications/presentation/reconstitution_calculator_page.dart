@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
@@ -325,9 +326,7 @@ class _ReconstitutionCalculatorPageState
       _loadedSavedId = id;
     });
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Saved reconstitution')));
+    showAppSnackBar(context, 'Saved reconstitution');
   }
 
   Future<void> _renameSaved(SavedReconstitutionCalculation item) async {
