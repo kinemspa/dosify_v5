@@ -1,4 +1,5 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -57,12 +58,12 @@ class NextDoseDateBadge extends StatelessWidget {
 
     final isToday = hasNext && _isSameDay(nextDose!, DateTime.now());
 
-    final dayText = hasNext ? DateFormat('d').format(nextDose!) : '—';
+    final dayText = hasNext ? DateTimeFormatter.formatDay(nextDose!) : '—';
     final monthText = isToday
         ? ''
-        : (hasNext ? DateFormat('MMM').format(nextDose!).toUpperCase() : '');
+        : (hasNext ? DateTimeFormatter.formatMonthAbbr(nextDose!) : '');
     final timeText = hasNext
-        ? TimeOfDay.fromDateTime(nextDose!).format(context)
+        ? DateTimeFormatter.formatTimeCompact(context, nextDose!)
         : 'No upcoming';
 
     final timeTextParts = timeText.split(' ');

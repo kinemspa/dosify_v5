@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -446,7 +447,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
   Future<void> _showSnoozePastNextDoseAlert(DateTime max) {
     final date = MaterialLocalizations.of(context).formatMediumDate(max);
-    final time = TimeOfDay.fromDateTime(max).format(context);
+    final time = DateTimeFormatter.formatTime(context, max);
     return showDialog<void>(
       context: context,
       useRootNavigator: true,
@@ -922,9 +923,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                         color: _statusAccentColor(context),
                       ),
                       label: Text(
-                        TimeOfDay.fromDateTime(
-                          _selectedActionTime,
-                        ).format(context),
+                        DateTimeFormatter.formatTime(context, _selectedActionTime,
+                        ),
                       ),
                     ),
                   ),
@@ -1199,7 +1199,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                   final date = MaterialLocalizations.of(
                     context,
                   ).formatMediumDate(max);
-                  final time = TimeOfDay.fromDateTime(max).format(context);
+                  final time = DateTimeFormatter.formatTime(context, max);
                   return 'Must be before the next scheduled dose ($date • $time).';
                 }(), style: helperTextStyle(context)),
                 const SizedBox(height: kSpacingS),
@@ -1275,7 +1275,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     final date = MaterialLocalizations.of(
                       context,
                     ).formatMediumDate(dt);
-                    final time = TimeOfDay.fromDateTime(dt).format(context);
+                    final time = DateTimeFormatter.formatTime(context, dt);
                     return '$date • $time';
                   }()),
                 ),
