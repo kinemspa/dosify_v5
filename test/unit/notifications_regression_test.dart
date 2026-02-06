@@ -52,6 +52,7 @@ void main() {
     DoseTimingSettings.value.value = const DoseTimingConfig(
       missedGracePercent: 50,
       overdueReminderPercent: 50,
+      followUpReminderCount: 1,
     );
 
     // Daily schedule at 00:30 (minutesOfDay) with multiple times per day.

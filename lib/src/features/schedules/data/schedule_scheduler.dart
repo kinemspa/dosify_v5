@@ -202,30 +202,41 @@ class ScheduleScheduler {
         timeoutAfterMs: timeoutAfterMs,
       );
 
-      final reminderAt = DoseTimingSettings.overdueReminderAt(
+      // Schedule follow-up reminders
+      final reminderTimes = DoseTimingSettings.followUpReminderTimes(
         schedule: s,
         scheduledTime: when,
       );
-      if (reminderAt == null) return;
-      if (!reminderAt.isAfter(DateTime.now())) return;
 
-      // Reuse the same notification ID so the overdue reminder
-      // *replaces* the original in the notification shade.
-      final reminderTimeoutMs = missedAt.isAfter(reminderAt)
-          ? missedAt.difference(reminderAt).inMilliseconds
-          : null;
+      for (var i = 0; i < reminderTimes.length; i++) {
+        final reminderAt = reminderTimes[i];
+        if (!reminderAt.isAfter(DateTime.now())) continue;
 
-      await NotificationService.scheduleAtAlarmClock(
-        id,
-        reminderAt,
-        title: 'Overdue: ${s.medicationName}',
-        body: '${s.name} • $metrics • due $dueAt',
-        groupKey: groupKey,
-        payload: payload,
-        actions: NotificationService.upcomingDoseActions,
-        expandedLines: <String>[s.name, metrics, 'Due $dueAt'],
-        timeoutAfterMs: reminderTimeoutMs,
-      );
+        // Use unique IDs for each follow-up reminder
+        final reminderId = i == 0
+            ? id // First reminder reuses the main notification ID
+            : overdueNotificationIdFor(s.id, when) + i;
+
+        final reminderTimeoutMs = missedAt.isAfter(reminderAt)
+            ? missedAt.difference(reminderAt).inMilliseconds
+            : null;
+
+        final reminderTitle = reminderTimes.length == 1
+            ? 'Overdue: ${s.medicationName}'
+            : 'Overdue (${i + 1}/${reminderTimes.length}): ${s.medicationName}';
+
+        await NotificationService.scheduleAtAlarmClock(
+          reminderId,
+          reminderAt,
+          title: reminderTitle,
+          body: '${s.name} • $metrics • due $dueAt',
+          groupKey: groupKey,
+          payload: payload,
+          actions: NotificationService.upcomingDoseActions,
+          expandedLines: <String>[s.name, metrics, 'Due $dueAt'],
+          timeoutAfterMs: reminderTimeoutMs,
+        );
+      }
     }
 
     // Calculate how many days we can afford to schedule for this schedule
