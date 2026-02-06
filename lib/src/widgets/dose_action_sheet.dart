@@ -1359,7 +1359,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 ),
                 Expanded(child: formContent(context, scrollController)),
                 Padding(
-                  padding: kBottomSheetContentPadding,
+                  padding: kBottomSheetContentPadding.copyWith(
+                    bottom: kBottomSheetContentPadding.bottom +
+                        MediaQuery.of(context).viewPadding.bottom,
+                  ),
                   child: Row(
                     children: [
                       Expanded(

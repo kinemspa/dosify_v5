@@ -1,19 +1,11 @@
-name: CI
+name: "Copilot Setup Steps"
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+on: workflow_dispatch
 
 jobs:
-  analyze-and-test:
+  copilot-setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +22,5 @@ jobs:
 
       - run: flutter pub get
 
-      - run: flutter analyze
-
-      - name: Run tests (skip goldens)
-        run: flutter test --exclude-tags golden --timeout 120s
+      # Copilot agent will use flutter analyze to validate changes
+      - run: echo "Environment ready for Copilot coding agent"
