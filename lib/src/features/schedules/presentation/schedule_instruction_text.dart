@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 
 String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
@@ -59,7 +60,7 @@ String _timesLabel(BuildContext context, Schedule s) {
   if (times.isEmpty) return '—';
 
   final labels = times
-      .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60).format(context))
+      .map((m) => DateTimeFormatter.formatTime(context, DateTime(0, 1, 1, m ~/ 60, m % 60)))
       .toList();
 
   if (labels.length == 1) return labels.single;

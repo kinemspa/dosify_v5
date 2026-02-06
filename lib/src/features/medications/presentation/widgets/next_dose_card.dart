@@ -1,23 +1,41 @@
 // ignore_for_file: unused_element, unused_local_variable
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -460,7 +478,7 @@ class _NextDoseCardState extends State<NextDoseCard>
 
                     // ROW 2: Time (Big)
                     Text(
-                      DateFormat('h:mm a').format(dose.scheduledTime),
+                      DateTimeFormatter.formatTime(context, dose.scheduledTime),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: isOverdue
@@ -822,7 +840,7 @@ class _NextDoseCardState extends State<NextDoseCard>
         await cancelNotificationForDose();
         final when = request.actionTime;
         if (when.isAfter(DateTime.now())) {
-          final time = TimeOfDay.fromDateTime(when).format(context);
+          final time = DateTimeFormatter.formatTime(context, when);
           await NotificationService.scheduleAtAlarmClock(
             ScheduleScheduler.doseNotificationIdFor(
               dose.scheduleId,
@@ -849,7 +867,7 @@ class _NextDoseCardState extends State<NextDoseCard>
             request.actionTime.year == now.year &&
             request.actionTime.month == now.month &&
             request.actionTime.day == now.day;
-        final time = TimeOfDay.fromDateTime(request.actionTime).format(context);
+        final time = DateTimeFormatter.formatTime(context, request.actionTime);
         final label = sameDay
             ? 'Dose snoozed until $time'
             : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
