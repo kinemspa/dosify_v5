@@ -25,7 +25,6 @@ import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/schedules_card.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
@@ -46,7 +45,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   bool _isScheduleDetailsExpanded = true;
   bool _isTodayExpanded = true;
   bool _isActivityExpanded = true;
-  bool _isSchedulesExpanded = true;
   bool _isCalendarExpanded = true;
 
   ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
@@ -69,7 +67,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return utc.hour * 60 + utc.minute;
   }
 
-  List<int> _computeUtcDays(Set<int> localDays, int localMinutes, DateTime now) {
+  List<int> _computeUtcDays(
+    Set<int> localDays,
+    int localMinutes,
+    DateTime now,
+  ) {
     final utcDays = <int>[];
     for (final d in localDays) {
       final delta = (d - now.weekday) % 7;
@@ -206,9 +208,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                       signed: false,
                     ),
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d*'),
-                      ),
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                     ],
                     decoration: buildFieldDecoration(dialogContext, hint: '0'),
                     textAlign: TextAlign.center,
@@ -220,9 +220,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     value: selectedUnit,
                     decoration: buildFieldDecoration(dialogContext),
                     items: units
-                        .map(
-                          (u) => DropdownMenuItem(value: u, child: Text(u)),
-                        )
+                        .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                         .toList(),
                     onChanged: (v) {
                       if (v == null) return;
@@ -245,10 +243,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   onPressed: () {
                     final v = double.tryParse(controller.text.trim());
                     if (v == null || v <= 0) return;
-                    Navigator.of(dialogContext).pop(<String, Object?>{
-                      'value': v,
-                      'unit': selectedUnit,
-                    });
+                    Navigator.of(
+                      dialogContext,
+                    ).pop(<String, Object?>{'value': v, 'unit': selectedUnit});
                   },
                   child: const Text('Save'),
                 ),
@@ -265,7 +262,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final value = result['value'] as double?;
     final unit = (result['unit'] as String?)?.trim();
     if (value == null || unit == null || unit.isEmpty) return;
-    if (value == s.doseValue && unit.toLowerCase() == s.doseUnit.toLowerCase()) {
+    if (value == s.doseValue &&
+        unit.toLowerCase() == s.doseUnit.toLowerCase()) {
       return;
     }
 
@@ -350,8 +348,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   Future<void> _editScheduleTimes(BuildContext context, Schedule s) async {
-    final initial =
-        ScheduleOccurrenceService.normalizedTimesOfDay(s).toList()..sort();
+    final initial = ScheduleOccurrenceService.normalizedTimesOfDay(s).toList()
+      ..sort();
     final result = await showDialog<List<int>>(
       context: context,
       useRootNavigator: true,
@@ -363,10 +361,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             context: dialogContext,
             initialTime: times.isEmpty
                 ? const TimeOfDay(hour: 8, minute: 0)
-                : TimeOfDay(
-                    hour: times.last ~/ 60,
-                    minute: times.last % 60,
-                  ),
+                : TimeOfDay(hour: times.last ~/ 60, minute: times.last % 60),
           );
           if (picked == null) return;
           final minutes = picked.hour * 60 + picked.minute;
@@ -486,7 +481,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         var mode = initialMode;
         var days = initialDays.toSet();
         var cycleN = initialCycleN;
-        var anchor = DateTime(initialAnchor.year, initialAnchor.month, initialAnchor.day);
+        var anchor = DateTime(
+          initialAnchor.year,
+          initialAnchor.month,
+          initialAnchor.day,
+        );
         var daysOfMonth = initialDom.toSet();
         var missing = initialMissing;
 
@@ -498,7 +497,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               final picked = await showDatePicker(
                 context: dialogContext,
                 initialDate: anchor,
-                firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+                firstDate: DateTime.now().subtract(
+                  const Duration(days: 365 * 5),
+                ),
                 lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
               );
               if (picked == null) return;
@@ -539,29 +540,30 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                       Wrap(
                         spacing: kSpacingS,
                         runSpacing: kSpacingS,
-                        children: const <int, String>{
-                          1: 'Mon',
-                          2: 'Tue',
-                          3: 'Wed',
-                          4: 'Thu',
-                          5: 'Fri',
-                          6: 'Sat',
-                          7: 'Sun',
-                        }.entries.map((e) {
-                          return FilterChip(
-                            label: Text(e.value),
-                            selected: days.contains(e.key),
-                            onSelected: (selected) {
-                              setDialogState(() {
-                                if (selected) {
-                                  days.add(e.key);
-                                } else {
-                                  days.remove(e.key);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
+                        children:
+                            const <int, String>{
+                              1: 'Mon',
+                              2: 'Tue',
+                              3: 'Wed',
+                              4: 'Thu',
+                              5: 'Fri',
+                              6: 'Sat',
+                              7: 'Sun',
+                            }.entries.map((e) {
+                              return FilterChip(
+                                label: Text(e.value),
+                                selected: days.contains(e.key),
+                                onSelected: (selected) {
+                                  setDialogState(() {
+                                    if (selected) {
+                                      days.add(e.key);
+                                    } else {
+                                      days.remove(e.key);
+                                    }
+                                  });
+                                },
+                              );
+                            }).toList(),
                       ),
                       const SizedBox(height: kSpacingS),
                       OutlinedButton(
@@ -584,7 +586,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                           hint: 'Days',
                         ),
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         onDec: () {
                           final v = int.tryParse(cycleCtrl.text) ?? cycleN;
                           final next = (v - 1).clamp(1, 365);
@@ -604,7 +608,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         },
                       ),
                       const SizedBox(height: kSpacingM),
-                      Text('Anchor date', style: helperTextStyle(dialogContext)),
+                      Text(
+                        'Anchor date',
+                        style: helperTextStyle(dialogContext),
+                      ),
                       const SizedBox(height: kSpacingS),
                       DateButton36(
                         label: DateFormat('EEE, MMM d, y').format(anchor),
@@ -708,12 +715,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     if (result == null) return;
 
     final now = DateTime.now();
-    final firstLocalMinutes =
-      ScheduleOccurrenceService.normalizedTimesOfDay(s).first;
+    final firstLocalMinutes = ScheduleOccurrenceService.normalizedTimesOfDay(
+      s,
+    ).first;
     final minutesUtc = _computeUtcMinutes(firstLocalMinutes, now);
-    final timesUtc = ScheduleOccurrenceService.normalizedTimesOfDay(s)
-      .map((m) => _computeUtcMinutes(m, now))
-      .toList();
+    final timesUtc = ScheduleOccurrenceService.normalizedTimesOfDay(
+      s,
+    ).map((m) => _computeUtcMinutes(m, now)).toList();
 
     switch (result.mode) {
       case _ScheduleEditMode.daysOfWeek:
@@ -755,8 +763,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           context,
           s.copyWithDetails(
             daysOfMonth: result.daysOfMonth,
-            monthlyMissingDayBehaviorCode:
-                result.missingDayBehavior.index,
+            monthlyMissingDayBehaviorCode: result.missingDayBehavior.index,
             cycleEveryNDays: null,
             cycleAnchorDate: null,
           ),
@@ -783,16 +790,16 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           content: Text('Current: $currentLabel'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(
-                const _DateEditResult.cancel(),
-              ),
+              onPressed: () => Navigator.of(
+                dialogContext,
+              ).pop(const _DateEditResult.cancel()),
               child: const Text('Cancel'),
             ),
             if (current != null)
               TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(
-                  const _DateEditResult.clear(),
-                ),
+                onPressed: () => Navigator.of(
+                  dialogContext,
+                ).pop(const _DateEditResult.clear()),
                 child: const Text('Clear'),
               ),
             FilledButton(
@@ -805,7 +812,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     initialDate.month,
                     initialDate.day,
                   ),
-                  firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+                  firstDate: DateTime.now().subtract(
+                    const Duration(days: 365 * 5),
+                  ),
                   lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                 );
                 if (d == null) return;
@@ -838,7 +847,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final today = DateTime(now.year, now.month, now.day);
     final nextStart = selectedDay.isAtSameMomentAs(today)
         ? now
-      : DateTime(date.year, date.month, date.day);
+        : DateTime(date.year, date.month, date.day);
 
     if (s.startAt != null && s.startAt!.isAtSameMomentAs(nextStart)) return;
     await _upsertSchedule(
@@ -865,16 +874,16 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           content: Text('Current: $currentLabel'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(
-                const _DateEditResult.cancel(),
-              ),
+              onPressed: () => Navigator.of(
+                dialogContext,
+              ).pop(const _DateEditResult.cancel()),
               child: const Text('Cancel'),
             ),
             if (current != null)
               TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(
-                  const _DateEditResult.clear(),
-                ),
+                onPressed: () => Navigator.of(
+                  dialogContext,
+                ).pop(const _DateEditResult.clear()),
                 child: const Text('Clear'),
               ),
             FilledButton(
@@ -887,7 +896,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     initialDate.month,
                     initialDate.day,
                   ),
-                  firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+                  firstDate: DateTime.now().subtract(
+                    const Duration(days: 365 * 5),
+                  ),
                   lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                 );
                 if (d == null) return;
@@ -915,15 +926,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final date = picked.date;
     if (date == null) return;
 
-    final nextEnd = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      23,
-      59,
-      59,
-      999,
-    );
+    final nextEnd = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
     if (s.endAt != null && s.endAt!.isAtSameMomentAs(nextEnd)) return;
 
     await _upsertSchedule(
@@ -1029,7 +1032,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     ].join('\n');
 
     final log = DoseLog(
-      id: existingLog?.id ??
+      id:
+          existingLog?.id ??
           DoseLogIds.occurrenceId(
             scheduleId: schedule.id,
             scheduledTime: scheduledTime,
@@ -1118,6 +1122,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           final nextDose = _nextOccurrence(s);
           final mergedTitle = _mergedTitle(s);
 
+          final medsBox = Hive.box<Medication>('medications');
+          final medId = s.medicationId;
+          final med = medId == null || medId.isEmpty
+              ? null
+              : medsBox.get(medId);
+
           return DetailPageScaffold(
             title: 'Schedule Details',
             expandedHeight: kDetailHeaderExpandedHeightCompact,
@@ -1129,6 +1139,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               schedule: s,
               nextDose: nextDose,
               title: mergedTitle,
+              medication: med,
               onPauseResumePressed: () => _promptPauseFromHeader(context, s),
             ),
             sections: _buildSections(context, s, nextDose),
@@ -1259,8 +1270,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           valueListenable: Hive.box<Medication>('medications').listenable(),
           builder: (context, Box<Medication> medBox, _) {
             final medId = s.medicationId;
-            final med =
-                medId == null || medId.isEmpty ? null : medBox.get(medId);
+            final med = medId == null || medId.isEmpty
+                ? null
+                : medBox.get(medId);
 
             final meds = med == null ? <Medication>[] : <Medication>[med];
             final included = med == null ? <String>{} : <String>{med.id};
@@ -1279,17 +1291,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 setState(() => _isActivityExpanded = expanded);
               },
             );
-          },
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: SchedulesCard(
-          scope: SchedulesCardScope.schedule(s.id),
-          isExpanded: _isSchedulesExpanded,
-          onExpandedChanged: (expanded) {
-            if (!mounted) return;
-            setState(() => _isSchedulesExpanded = expanded);
           },
         ),
       ),
@@ -1989,7 +1990,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   String _timesText(BuildContext context, Schedule schedule) {
     final ts = ScheduleOccurrenceService.normalizedTimesOfDay(schedule);
     return ts
-        .map((m) => DateTimeFormatter.formatTime(context, DateTime(0, 1, 1, m ~/ 60, m % 60)))
+        .map(
+          (m) => DateTimeFormatter.formatTime(
+            context,
+            DateTime(0, 1, 1, m ~/ 60, m % 60),
+          ),
+        )
         .join('\n');
   }
 

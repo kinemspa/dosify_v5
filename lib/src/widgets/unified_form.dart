@@ -71,7 +71,7 @@ class SectionFormCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: titleStyle ?? sectionTitleStyle(context),
+                  style: titleStyle ?? cardSectionTitleStyle(context),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -223,7 +223,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         title,
-                        style: titleStyle ?? sectionTitleStyle(context),
+                        style: titleStyle ?? cardSectionTitleStyle(context),
                       ),
                     ),
                     if (normalizedTrailing != null) normalizedTrailing,

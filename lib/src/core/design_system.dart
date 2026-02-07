@@ -2083,6 +2083,14 @@ TextStyle? sectionTitleStyle(BuildContext context) {
   );
 }
 
+/// Card heading style (primary-colored).
+///
+/// Use for section/card headers like Home cards and detail screen cards.
+TextStyle? cardSectionTitleStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return sectionTitleStyle(context)?.copyWith(color: cs.primary);
+}
+
 /// Review-card heading style (e.g. wizard Step 5 review sections).
 TextStyle? reviewCardTitleStyle(BuildContext context) {
   return sectionTitleStyle(context);

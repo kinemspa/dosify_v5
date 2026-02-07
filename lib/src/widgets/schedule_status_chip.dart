@@ -9,15 +9,18 @@ class ScheduleStatusChip extends StatelessWidget {
     super.key,
     required this.schedule,
     this.dense = false,
+    this.solid = false,
   });
 
   final Schedule schedule;
   final bool dense;
+  final bool solid;
 
   @override
   Widget build(BuildContext context) {
     final label = scheduleStatusLabel(schedule);
     final color = _statusColor(context, schedule);
+    final onColor = _onStatusColor(context, schedule);
     final horizontalPadding = dense ? kSpacingXXS : kSpacingS;
     final verticalPadding = dense ? kSpacingXXS : kSpacingXS;
     final borderRadius = dense ? kBorderRadiusChipTight : kBorderRadiusChip;
@@ -28,10 +31,10 @@ class ScheduleStatusChip extends StatelessWidget {
         vertical: verticalPadding,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: kOpacityMinimal),
+        color: solid ? color : color.withValues(alpha: kOpacityMinimal),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: color.withValues(alpha: kOpacityMedium),
+          color: solid ? color : color.withValues(alpha: kOpacityMedium),
           width: kBorderWidthThin,
         ),
       ),
@@ -40,10 +43,17 @@ class ScheduleStatusChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: (dense
-                    ? microHelperTextStyle(context, color: color)
-                    : smallHelperTextStyle(context, color: color))
-                ?.copyWith(fontWeight: kFontWeightSemiBold),
+            style:
+                (dense
+                        ? microHelperTextStyle(
+                            context,
+                            color: solid ? onColor : color,
+                          )
+                        : smallHelperTextStyle(
+                            context,
+                            color: solid ? onColor : color,
+                          ))
+                    ?.copyWith(fontWeight: kFontWeightSemiBold),
           ),
         ],
       ),
@@ -62,6 +72,21 @@ class ScheduleStatusChip extends StatelessWidget {
         return cs.error;
       case ScheduleStatus.completed:
         return cs.primary;
+    }
+  }
+
+  Color _onStatusColor(BuildContext context, Schedule schedule) {
+    final cs = Theme.of(context).colorScheme;
+
+    switch (schedule.status) {
+      case ScheduleStatus.active:
+        return cs.onPrimary;
+      case ScheduleStatus.paused:
+        return cs.onTertiary;
+      case ScheduleStatus.disabled:
+        return cs.onError;
+      case ScheduleStatus.completed:
+        return cs.onPrimary;
     }
   }
 }
