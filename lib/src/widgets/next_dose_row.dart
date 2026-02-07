@@ -24,8 +24,8 @@ class NextDoseRow extends StatelessWidget {
         ? microHelperTextStyle(context)
         : helperTextStyle(context);
     final valueStyleBase = dense
-        ? bodyTextStyle(context)
-        : bodyTextStyle(context);
+        ? microHelperTextStyle(context)
+        : helperTextStyle(context);
 
     final primaryValue = _primaryValueText(context);
     final secondaryLine = _secondaryLineText(context);
@@ -58,7 +58,9 @@ class NextDoseRow extends StatelessWidget {
                 primaryValue,
                 style: valueStyleBase?.copyWith(
                   fontWeight: kFontWeightSemiBold,
-                  color: cs.onSurface,
+                  color: cs.onSurfaceVariant.withValues(
+                    alpha: kOpacityMediumHigh,
+                  ),
                 ),
                 textAlign: TextAlign.right,
                 maxLines: 1,
