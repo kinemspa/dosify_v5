@@ -35,7 +35,7 @@ class CalendarHeader extends StatelessWidget {
 
     return Container(
       height: kCalendarHeaderHeight,
-      padding: const EdgeInsets.symmetric(horizontal: kSpacingM, vertical: kSpacingS),
+      padding: kCalendarHeaderPadding,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
@@ -52,9 +52,9 @@ class CalendarHeader extends StatelessWidget {
             icon: const Icon(Icons.chevron_left),
             onPressed: onPreviousMonth,
             tooltip: 'Previous',
-            iconSize: 20,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            iconSize: kIconSizeMedium,
+            padding: kNoPadding,
+            constraints: kCalendarHeaderNavButtonConstraints,
           ),
 
           // Date display
@@ -75,22 +75,19 @@ class CalendarHeader extends StatelessWidget {
             icon: const Icon(Icons.chevron_right),
             onPressed: onNextMonth,
             tooltip: 'Next',
-            iconSize: 20,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            iconSize: kIconSizeMedium,
+            padding: kNoPadding,
+            constraints: kCalendarHeaderNavButtonConstraints,
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: kSpacingS),
 
           // Today button
-          OutlinedButton(
+          FilledButton(
             onPressed: onToday,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: kSpacingS,
-                vertical: kSpacingXS,
-              ),
-              minimumSize: const Size(0, 32),
+            style: FilledButton.styleFrom(
+              padding: kCalendarTodayButtonPadding,
+              minimumSize: kCalendarTodayButtonMinSize,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
@@ -102,14 +99,14 @@ class CalendarHeader extends StatelessWidget {
           ),
 
           if (showViewToggle) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: kSpacingS),
             IconButton(
               icon: Icon(_getViewIcon()),
               onPressed: _cycleView,
               tooltip: 'Change view',
-              iconSize: 20,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              iconSize: kIconSizeMedium,
+              padding: kNoPadding,
+              constraints: kCalendarHeaderNavButtonConstraints,
             ),
           ],
         ],

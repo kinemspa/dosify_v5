@@ -30,6 +30,7 @@ class CalendarCard extends ConsumerStatefulWidget {
     super.key,
     required this.scope,
     this.title = 'Calendar',
+    this.showOpenCalendarAction = true,
     this.isExpanded,
     this.onExpandedChanged,
     this.reserveReorderHandleGutterWhenCollapsed = false,
@@ -40,6 +41,9 @@ class CalendarCard extends ConsumerStatefulWidget {
 
   final CalendarCardScope scope;
   final String title;
+
+  /// When false, hides the trailing "open full calendar" action.
+  final bool showOpenCalendarAction;
 
   /// If provided, expansion state is controlled by the parent.
   final bool? isExpanded;
@@ -84,19 +88,21 @@ class _CalendarCardState extends ConsumerState<CalendarCard> {
       frameless: widget.frameless,
       title: widget.title,
       isExpanded: _expanded,
-      trailing: IconButton(
-        onPressed: () => context.pushNamed(
-          'calendar',
-          extra: <String, dynamic>{
-            'scheduleId': scheduleId,
-            'medicationId': medicationId,
-          },
-        ),
-        tooltip: 'Open full calendar',
-        constraints: kTightIconButtonConstraints,
-        padding: kNoPadding,
-        icon: const Icon(Icons.open_in_new_rounded, size: kIconSizeMedium),
-      ),
+      trailing: widget.showOpenCalendarAction
+          ? IconButton(
+              onPressed: () => context.pushNamed(
+                'calendar',
+                extra: <String, dynamic>{
+                  'scheduleId': scheduleId,
+                  'medicationId': medicationId,
+                },
+              ),
+              tooltip: 'Open full calendar',
+              constraints: kTightIconButtonConstraints,
+              padding: kNoPadding,
+              icon: const Icon(Icons.open_in_new_rounded, size: kIconSizeMedium),
+            )
+          : null,
       reserveReorderHandleGutterWhenCollapsed:
           widget.reserveReorderHandleGutterWhenCollapsed,
       onExpandedChanged: _setExpanded,

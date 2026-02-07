@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
@@ -122,6 +123,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final calendarCard = CalendarCard(
       scope: const CalendarCardScope.all(),
       isExpanded: _isCalendarExpanded,
+      showOpenCalendarAction: false,
       reserveReorderHandleGutterWhenCollapsed: true,
       onExpandedChanged: (expanded) {
         if (!mounted) return;
@@ -231,7 +233,13 @@ class _HomePageState extends ConsumerState<HomePage> {
               ],
             ),
             if (entry.key != orderedIds.length - 1)
-              const SizedBox(height: kSpacingL),
+              Divider(
+                height: kSpacingL,
+                thickness: kBorderWidthThin,
+                indent: kSpacingS,
+                endIndent: kSpacingS,
+                color: cs.outlineVariant.withValues(alpha: kOpacityMinimal),
+              ),
           ],
         ),
     ];
@@ -267,7 +275,10 @@ class _HomePageState extends ConsumerState<HomePage> {
           clipBehavior: Clip.none,
           children: [
             Text(
-              'Upcoming doses, schedules, and calendar',
+              DateTimeFormatter.formatInstructionalToday(
+                context,
+                DateTime.now(),
+              ),
               style: helperTextStyle(context),
             ),
             const SizedBox(height: kSpacingL),

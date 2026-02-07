@@ -14,6 +14,41 @@ import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
 class DateTimeFormatter {
   const DateTimeFormatter._();
 
+  /// Format a day-of-month as an ordinal (e.g., "1st", "2nd", "3rd", "4th").
+  static String formatDayOrdinal(DateTime dateTime) {
+    final day = dateTime.day;
+    final mod100 = day % 100;
+    if (mod100 >= 11 && mod100 <= 13) {
+      return '${day}th';
+    }
+
+    switch (day % 10) {
+      case 1:
+        return '${day}st';
+      case 2:
+        return '${day}nd';
+      case 3:
+        return '${day}rd';
+      default:
+        return '${day}th';
+    }
+  }
+
+  /// Format a friendly, instructional Home header line.
+  ///
+  /// Example: "Today is Sunday the 27th of April 2026. The time is 3:14 PM."
+  static String formatInstructionalToday(
+    BuildContext context,
+    DateTime dateTime,
+  ) {
+    final weekday = formatWeekdayName(dateTime);
+    final day = formatDayOrdinal(dateTime);
+    final month = formatMonthName(dateTime);
+    final year = formatYear(dateTime);
+    final time = formatTime(context, dateTime);
+    return 'Today is $weekday the $day of $month $year. The time is $time.';
+  }
+
   /// Format a DateTime as a time string (e.g., "3:45 PM" or "15:45").
   ///
   /// Respects the user's time format preference (12h/24h/system).

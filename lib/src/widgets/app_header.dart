@@ -104,7 +104,7 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
               },
             )
           : Padding(
-              padding: const EdgeInsets.only(left: kSpacingS),
+              padding: kAppBarLogoPadding,
               child: Image.asset(
                 kWhiteLogoAssetPath,
                 height: kAppBarLogoHeight,

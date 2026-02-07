@@ -1,11 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:dosifi_v5/src/core/clock.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -16,7 +14,6 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/show_dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -78,12 +75,8 @@ class TodayDosesCard extends ConsumerStatefulWidget {
 }
 
 class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
-  static const _prefsDismissedPrefix = 'today_card_dismissed:';
-
   bool _internalExpanded = true;
   bool _showAll = false;
-  final ScrollController _previewScrollController = ScrollController();
-  final Set<String> _dismissedOccurrenceIds = <String>{};
 
   bool get _expanded => widget.isExpanded ?? _internalExpanded;
 
@@ -95,48 +88,6 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       _internalExpanded = expanded;
       if (!expanded) _showAll = false;
     });
-  }
-
-  String get _prefsKeyDismissed =>
-      '$_prefsDismissedPrefix${widget.scope.persistenceKey}';
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_restoreDismissed());
-  }
-
-  @override
-  void dispose() {
-    _previewScrollController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _restoreDismissed() async {
-    final prefs = await SharedPreferences.getInstance();
-    final stored = prefs.getStringList(_prefsKeyDismissed);
-    if (stored == null || stored.isEmpty) return;
-
-    if (!mounted) return;
-    setState(() {
-      _dismissedOccurrenceIds
-        ..clear()
-        ..addAll(stored);
-    });
-  }
-
-  Future<void> _persistDismissed() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      _prefsKeyDismissed,
-      _dismissedOccurrenceIds.toList(growable: false),
-    );
-  }
-
-  void _restoreAllDismissed() {
-    if (_dismissedOccurrenceIds.isEmpty) return;
-    setState(_dismissedOccurrenceIds.clear);
-    unawaited(_persistDismissed());
   }
 
   List<
@@ -235,8 +186,6 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     // Rebuild whenever any relevant box changes.
     ref.watch(schedulesBoxChangesProvider);
     ref.watch(medicationsBoxChangesProvider);
@@ -268,19 +217,36 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
 
     final items = _resolveTodayDoses(schedules, medsById, logsById);
 
-    final visibleItems = items
-        .where((item) {
-          final id = DoseLogIds.occurrenceId(
-            scheduleId: item.dose.scheduleId,
-            scheduledTime: item.dose.scheduledTime,
-          );
-          return !_dismissedOccurrenceIds.contains(id);
-        })
-        .toList(growable: false);
+    final hasMoreThanPreview = items.length > kHomeTodayMaxPreviewItems;
+    final previewItems = _showAll
+        ? items
+        : items.take(kHomeTodayMaxPreviewItems).toList(growable: false);
 
-    final hiddenCount = items.length - visibleItems.length;
-    final hasMoreThanPreview = visibleItems.length > kHomeTodayMaxPreviewItems;
-    final showScrollablePreview = hasMoreThanPreview && !_showAll;
+    final scheduledCount = items.length;
+    final upcomingCount = items
+        .where(
+          (i) => i.dose.status == DoseStatus.pending || i.dose.status == DoseStatus.due,
+        )
+        .length;
+    final missedCount =
+        items.where((i) => i.dose.status == DoseStatus.overdue).length;
+    final snoozedCount =
+        items.where((i) => i.dose.status == DoseStatus.snoozed).length;
+    final takenCount = items.where((i) => i.dose.status == DoseStatus.taken).length;
+    final skippedCount =
+        items.where((i) => i.dose.status == DoseStatus.skipped).length;
+
+    DateTime? nextUpcomingTime;
+    for (final item in items) {
+      final status = item.dose.status;
+      if (status == DoseStatus.due || status == DoseStatus.pending) {
+        nextUpcomingTime = item.dose.scheduledTime;
+        break;
+      }
+    }
+    final nextUpcomingLabel = nextUpcomingTime == null
+        ? null
+        : DateTimeFormatter.formatTime(context, nextUpcomingTime);
 
     Widget buildDoseRow(
       BuildContext context,
@@ -293,82 +259,37 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       })
       item,
     ) {
-      final occurrenceId = DoseLogIds.occurrenceId(
-        scheduleId: item.dose.scheduleId,
-        scheduledTime: item.dose.scheduledTime,
-      );
-
-      return Dismissible(
-        key: ValueKey<String>('today_dose_$occurrenceId'),
-        direction: DismissDirection.endToStart,
-        background: const SizedBox.shrink(),
-        secondaryBackground: Container(
-          alignment: Alignment.centerRight,
-          padding: kStandardCardPadding,
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHighest,
-            borderRadius: kStandardBorderRadius,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.visibility_off_rounded,
-                size: kIconSizeMedium,
-                color: cs.onSurfaceVariant,
-              ),
-              const SizedBox(width: kSpacingS),
-              Text('Hide', style: helperTextStyle(context)),
-            ],
-          ),
+      return DoseCard(
+        dose: item.dose,
+        medicationName: item.medication.name,
+        strengthOrConcentrationLabel: item.strengthLabel,
+        doseMetrics: item.metrics,
+        isActive: item.schedule.isActive,
+        medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
+          item.medication.form,
         ),
-        onDismissed: (_) {
-          setState(() => _dismissedOccurrenceIds.add(occurrenceId));
-          unawaited(_persistDismissed());
-
-          showAppSnackBar(
-            context,
-            'Dose hidden',
-            actionLabel: 'Undo',
-            onAction: () {
-              if (!mounted) return;
-              setState(() => _dismissedOccurrenceIds.remove(occurrenceId));
-              unawaited(_persistDismissed());
-            },
-          );
-        },
-        child: DoseCard(
+        doseNumber: ScheduleOccurrenceService.occurrenceNumber(
+          item.schedule,
+          item.dose.scheduledTime,
+        ),
+        onTap: () => showDoseActionSheetFromModels(
+          context,
           dose: item.dose,
-          medicationName: item.medication.name,
-          strengthOrConcentrationLabel: item.strengthLabel,
-          doseMetrics: item.metrics,
-          isActive: item.schedule.isActive,
-          medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
-            item.medication.form,
-          ),
-          doseNumber: ScheduleOccurrenceService.occurrenceNumber(
-            item.schedule,
-            item.dose.scheduledTime,
-          ),
-          onTap: () => showDoseActionSheetFromModels(
-            context,
-            dose: item.dose,
-            schedule: item.schedule,
-            medication: item.medication,
-          ),
-          onQuickAction: (status) => showDoseActionSheetFromModels(
-            context,
-            dose: item.dose,
-            schedule: item.schedule,
-            medication: item.medication,
-            initialStatus: status,
-          ),
-          onPrimaryAction: () => showDoseActionSheetFromModels(
-            context,
-            dose: item.dose,
-            schedule: item.schedule,
-            medication: item.medication,
-          ),
+          schedule: item.schedule,
+          medication: item.medication,
+        ),
+        onQuickAction: (status) => showDoseActionSheetFromModels(
+          context,
+          dose: item.dose,
+          schedule: item.schedule,
+          medication: item.medication,
+          initialStatus: status,
+        ),
+        onPrimaryAction: () => showDoseActionSheetFromModels(
+          context,
+          dose: item.dose,
+          schedule: item.schedule,
+          medication: item.medication,
         ),
       );
     }
@@ -378,67 +299,48 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       frameless: widget.frameless,
       title: widget.title,
       isExpanded: _expanded,
-      trailing: hiddenCount <= 0
-          ? null
-          : IconButton(
-              onPressed: _restoreAllDismissed,
-              tooltip: 'Restore hidden doses',
-              constraints: kTightIconButtonConstraints,
-              padding: kNoPadding,
-              icon: const Icon(Icons.restore_rounded, size: kIconSizeMedium),
-            ),
       reserveReorderHandleGutterWhenCollapsed:
           widget.reserveReorderHandleGutterWhenCollapsed,
       onExpandedChanged: _setExpanded,
       children: [
-        if (items.isEmpty)
-          const UnifiedEmptyState(title: 'No upcoming doses')
-        else if (visibleItems.isEmpty)
-          const UnifiedEmptyState(title: 'All doses hidden')
-        else if (!hasMoreThanPreview)
-          for (final item in visibleItems) ...[
-            buildDoseRow(context, item),
-            const SizedBox(height: kSpacingS),
-          ]
-        else ...[
-          Row(
-            children: [
-              Expanded(
-                child: buildHelperText(
-                  context,
-                  'Swipe left to hide',
-                  fullWidth: true,
+        if (items.isNotEmpty) ...[
+          DefaultTextStyle(
+            style: helperTextStyle(context) ?? const TextStyle(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  [
+                    'Scheduled $scheduledCount',
+                    if (upcomingCount > 0)
+                      nextUpcomingLabel == null
+                          ? 'Upcoming $upcomingCount'
+                          : 'Upcoming $upcomingCount (next $nextUpcomingLabel)',
+                    if (missedCount > 0) 'Missed $missedCount',
+                    if (snoozedCount > 0) 'Snoozed $snoozedCount',
+                  ].join(' · '),
                 ),
-              ),
-              const SizedBox(width: kSpacingS),
-              Icon(
-                Icons.swipe_left_rounded,
-                size: kIconSizeSmall,
-                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
-              ),
-            ],
+                if (takenCount > 0 || skippedCount > 0)
+                  Text(
+                    [
+                      if (takenCount > 0) 'Taken $takenCount',
+                      if (skippedCount > 0) 'Skipped $skippedCount',
+                    ].join(' · '),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: kSpacingS),
-          if (showScrollablePreview)
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: kHomeTodayDosePreviewListMaxHeight,
-              ),
-              child: ListView.separated(
-                controller: _previewScrollController,
-                padding: kNoPadding,
-                itemCount: visibleItems.length,
-                separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
-                itemBuilder: (context, i) =>
-                    buildDoseRow(context, visibleItems[i]),
-              ),
-            )
-          else
-            for (final item in visibleItems) ...[
-              buildDoseRow(context, item),
-              const SizedBox(height: kSpacingS),
-            ],
-          if (showScrollablePreview) const MoreContentIndicator(),
+        ],
+        if (items.isEmpty)
+          const UnifiedEmptyState(title: 'No upcoming doses')
+        else ...[
+          for (final item in previewItems) ...[
+            buildDoseRow(context, item),
+            const SizedBox(height: kSpacingS),
+          ],
+          if (hasMoreThanPreview && !_showAll)
+            const MoreContentIndicator(label: ''),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(

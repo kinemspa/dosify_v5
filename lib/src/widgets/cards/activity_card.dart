@@ -97,6 +97,7 @@ class _ActivityCardState extends State<ActivityCard> {
                         onChanged: widget.onIncludedMedicationIdsChanged!,
                         buttonLabel:
                             '${widget.includedMedicationIds.length}/${meds.length} meds',
+                        primaryFill: true,
                       ),
               ),
               const SizedBox(width: kSpacingXS),

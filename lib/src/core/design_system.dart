@@ -45,6 +45,11 @@ const String kAndroidLegacyIconAssetPath =
 const double kAppBarLogoHeight = 22;
 const double kAppBarLogoWidth = 22;
 
+/// App bar logo padding.
+///
+/// Used by [GradientAppBar] when showing the logo as the leading widget.
+const EdgeInsets kAppBarLogoPadding = EdgeInsets.only(left: kSpacingM);
+
 const double kAboutDialogLogoSize = 48;
 const double kSettingsAboutTileLogoSize = 28;
 
@@ -403,6 +408,29 @@ const int kCalendarMonthMaxDoseIndicators = 3;
 const double kCalendarDayCellBorderRadius = kBorderRadiusSmall / 2;
 const double kCalendarTodayButtonBorderRadius = kBorderRadiusSmall / 2;
 const double kCalendarDayOverflowTextOpacity = kOpacityMedium;
+
+/// Calendar header padding.
+const EdgeInsets kCalendarHeaderPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingM,
+  vertical: kSpacingS,
+);
+
+/// Calendar header navigation button constraints.
+///
+/// Matches our standard compact control height.
+const BoxConstraints kCalendarHeaderNavButtonConstraints = BoxConstraints(
+  minWidth: kFieldHeight,
+  minHeight: kFieldHeight,
+);
+
+/// Calendar header "Today" button padding.
+const EdgeInsets kCalendarTodayButtonPadding = EdgeInsets.symmetric(
+  horizontal: kSpacingS,
+  vertical: kSpacingXS,
+);
+
+/// Calendar header "Today" button minimum size.
+const Size kCalendarTodayButtonMinSize = Size(0, 32);
 
 /// In the full-screen calendar, allocate a fixed portion of the available
 /// height to the selected-day list panel so the calendar grid remains stable

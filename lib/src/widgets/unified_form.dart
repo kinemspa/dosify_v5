@@ -330,6 +330,7 @@ class MoreContentIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final fg = cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
+    final showLabel = label.trim().isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(top: kSpacingXS),
@@ -337,8 +338,13 @@ class MoreContentIndicator extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label, style: helperTextStyle(context)?.copyWith(color: fg)),
-            const SizedBox(width: kSpacingXS),
+            if (showLabel) ...[
+              Text(
+                label,
+                style: helperTextStyle(context)?.copyWith(color: fg),
+              ),
+              const SizedBox(width: kSpacingXS),
+            ],
             Icon(icon, size: kIconSizeLarge, color: fg),
           ],
         ),
@@ -546,6 +552,7 @@ class MultiSelectDropdown36<T> extends StatefulWidget {
     required this.onChanged,
     required this.buttonLabel,
     this.icon = Icons.tune_rounded,
+    this.primaryFill = false,
   });
 
   final List<MultiSelectItem<T>> items;
@@ -553,6 +560,7 @@ class MultiSelectDropdown36<T> extends StatefulWidget {
   final ValueChanged<Set<T>> onChanged;
   final String buttonLabel;
   final IconData icon;
+  final bool primaryFill;
 
   @override
   State<MultiSelectDropdown36<T>> createState() =>
@@ -596,28 +604,56 @@ class _MultiSelectDropdown36State<T> extends State<MultiSelectDropdown36<T>> {
       builder: (context, controller, child) {
         return SizedBox(
           height: kFieldHeight,
-          child: OutlinedButton.icon(
-            onPressed: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-            icon: Icon(widget.icon, size: kIconSizeSmall),
-            label: Align(
-              alignment: Alignment.centerLeft,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  widget.buttonLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          child: widget.primaryFill
+              ? FilledButton.icon(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  style: FilledButton.styleFrom(
+                    padding: kButtonContentPadding,
+                    minimumSize: const Size(0, kFieldHeight),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  icon: Icon(widget.icon, size: kIconSizeSmall),
+                  label: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        widget.buttonLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                )
+              : OutlinedButton.icon(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  icon: Icon(widget.icon, size: kIconSizeSmall),
+                  label: Align(
+                    alignment: Alignment.centerLeft,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        widget.buttonLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
         );
       },
       menuChildren: [
