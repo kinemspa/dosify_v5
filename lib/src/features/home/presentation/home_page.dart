@@ -23,7 +23,6 @@ class HomePage extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
-
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
@@ -43,11 +42,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    _cardOrder = <String>[
-      _kCardToday,
-      _kCardActivity,
-      _kCardCalendar,
-    ];
+    _cardOrder = <String>[_kCardToday, _kCardActivity, _kCardCalendar];
     unawaited(_restoreCardOrder());
   }
 
@@ -67,11 +62,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     final stored = prefs.getStringList(_prefsKeyCardOrder());
     if (stored == null || stored.isEmpty) return;
 
-    final allowed = <String>{
-      _kCardToday,
-      _kCardActivity,
-      _kCardCalendar,
-    };
+    final allowed = <String>{_kCardToday, _kCardActivity, _kCardCalendar};
     final filtered = _dedupeCardIdsPreserveOrder(
       stored.where(allowed.contains),
     );
@@ -104,9 +95,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     // write) that overwhelmed the emulator.  Removed to prevent that.
 
     final allCardsCollapsed =
-        !_isTodayExpanded &&
-      !_isActivityExpanded &&
-        !_isCalendarExpanded;
+        !_isTodayExpanded && !_isActivityExpanded && !_isCalendarExpanded;
 
     void showCollapseAllInstruction() {
       showAppSnackBar(
@@ -250,6 +239,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return ReorderableListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      clipBehavior: Clip.none,
       buildDefaultDragHandles: false,
       onReorder: (oldIndex, newIndex) {
         setState(() {
@@ -274,6 +264,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       body: Padding(
         padding: kPagePaddingNoBottom,
         child: ListView(
+          clipBehavior: Clip.none,
           children: [
             Text(
               'Upcoming doses, schedules, and calendar',

@@ -68,6 +68,8 @@ class DoseCard extends StatelessWidget {
 
     // Note: label/icon are rendered via the status chip/action button widgets.
 
+    final dateLabel =
+        '${DateTimeFormatter.formatWeekdayAbbr(dose.scheduledTime)} ${DateTimeFormatter.formatDateShort(dose.scheduledTime)}';
     final timeText = DateTimeFormatter.formatTime(context, dose.scheduledTime);
 
     final primaryTitleStyle = doseCardPrimaryTitleTextStyle(
@@ -118,6 +120,18 @@ class DoseCard extends StatelessWidget {
                       showTodayIcon: true,
                     ),
                     const SizedBox(height: kSpacingXS),
+                    Text(
+                      dateLabel,
+                      style: microHelperTextStyle(context)?.copyWith(
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMediumHigh,
+                        ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: kSpacingXXS),
                     Text(
                       timeText,
                       style: doseCardTimeTextStyle(

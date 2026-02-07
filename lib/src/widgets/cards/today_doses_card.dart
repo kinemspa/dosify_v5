@@ -424,18 +424,13 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
               constraints: const BoxConstraints(
                 maxHeight: kHomeTodayDosePreviewListMaxHeight,
               ),
-              child: Scrollbar(
+              child: ListView.separated(
                 controller: _previewScrollController,
-                thumbVisibility: true,
-                child: ListView.separated(
-                  controller: _previewScrollController,
-                  padding: kNoPadding,
-                  itemCount: visibleItems.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: kSpacingS),
-                  itemBuilder: (context, i) =>
-                      buildDoseRow(context, visibleItems[i]),
-                ),
+                padding: kNoPadding,
+                itemCount: visibleItems.length,
+                separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
+                itemBuilder: (context, i) =>
+                    buildDoseRow(context, visibleItems[i]),
               ),
             )
           else

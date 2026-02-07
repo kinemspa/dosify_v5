@@ -132,6 +132,16 @@ class DateTimeFormatter {
     return intl.DateFormat('MMMM').format(dateTime);
   }
 
+  /// Format weekday abbreviation (e.g., "Mon", "Tue").
+  static String formatWeekdayAbbr(DateTime dateTime) {
+    return intl.DateFormat('EEE').format(dateTime);
+  }
+
+  /// Format weekday name (e.g., "Monday", "Tuesday").
+  static String formatWeekdayName(DateTime dateTime) {
+    return intl.DateFormat('EEEE').format(dateTime);
+  }
+
   /// Format year (e.g., "2024").
   static String formatYear(DateTime dateTime) {
     return intl.DateFormat('yyyy').format(dateTime);
