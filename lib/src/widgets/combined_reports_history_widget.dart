@@ -18,11 +18,13 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 
 sealed class _CombinedHistoryItem {
-  const _CombinedHistoryItem({required this.time, required this.medicationName});
+  const _CombinedHistoryItem({
+    required this.time,
+    required this.medicationName,
+  });
 
   final DateTime time;
   final String medicationName;
@@ -34,7 +36,7 @@ sealed class _CombinedHistoryItem {
 
 class _DoseHistoryItem extends _CombinedHistoryItem {
   _DoseHistoryItem({required this.log})
-      : super(time: log.actionTime, medicationName: log.medicationName);
+    : super(time: log.actionTime, medicationName: log.medicationName);
 
   final DoseLog log;
 
@@ -73,9 +75,9 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
           children: [
             Text(
               '${_formatAmount(displayValue)} $displayUnit',
-              style: bodyTextStyle(context)?.copyWith(
-                fontWeight: kFontWeightSemiBold,
-              ),
+              style: bodyTextStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightSemiBold),
             ),
             Text(
               '•',
@@ -112,7 +114,7 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
 
 class _InventoryHistoryItem extends _CombinedHistoryItem {
   _InventoryHistoryItem({required this.log})
-      : super(time: log.timestamp, medicationName: log.medicationName);
+    : super(time: log.timestamp, medicationName: log.medicationName);
 
   final InventoryLog log;
 
@@ -131,9 +133,9 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
       children: [
         Text(
           log.description,
-          style: bodyTextStyle(context)?.copyWith(
-            fontWeight: kFontWeightSemiBold,
-          ),
+          style: bodyTextStyle(
+            context,
+          )?.copyWith(fontWeight: kFontWeightSemiBold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -171,22 +173,23 @@ class CombinedReportsHistoryWidget extends StatefulWidget {
       _CombinedReportsHistoryWidgetState();
 }
 
-class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWidget> {
-  late int _maxItems;
+class _CombinedReportsHistoryWidgetState
+    extends State<CombinedReportsHistoryWidget> {
+  static const int _pageSize = 10;
 
-  static const int _pageStep = 25;
+  int _pageIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _maxItems = widget.initialMaxItems;
+    _pageIndex = 0;
   }
 
   @override
   void didUpdateWidget(covariant CombinedReportsHistoryWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.includedMedicationIds != widget.includedMedicationIds) {
-      _maxItems = widget.initialMaxItems;
+      _pageIndex = 0;
     }
   }
 
@@ -497,37 +500,36 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
       return timeLocal.year * 10000 + timeLocal.month * 100 + timeLocal.day;
     }
 
-    Widget buildDayGutter(DateTime timeLocal, {required bool showLabel}) {
-      final labelColor = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
+    Widget buildDateHeader(DateTime localTime) {
+      final label =
+          '${DateTimeFormatter.formatWeekdayAbbr(localTime)} · ${DateTimeFormatter.formatDateShort(localTime)}';
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(kSpacingS, kSpacingS, kSpacingS, 0),
+        child: Text(
+          label,
+          style: helperTextStyle(context)?.copyWith(
+            fontWeight: kFontWeightSemiBold,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    }
 
-      final dayText = DateTimeFormatter.formatDay(timeLocal);
-      final monthText = DateTimeFormatter.formatMonthAbbr(timeLocal);
-
+    Widget buildTimeLabel(DateTime localTime) {
+      final text = DateTimeFormatter.formatTimeCompact(context, localTime);
       return SizedBox(
         width: kNextDoseDateCircleSizeCompact,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (showLabel) ...[
-              Text(
-                dayText,
-                style: nextDoseBadgeDayTextStyle(
-                  context,
-                  dense: true,
-                  color: labelColor,
-                ),
-              ),
-              Text(
-                monthText,
-                style: nextDoseBadgeMonthTextStyle(
-                  context,
-                  dense: true,
-                  color: labelColor,
-                ),
-              ),
-            ] else
-              const SizedBox(height: kNextDoseDateCircleSizeCompact),
-          ],
+        child: Text(
+          text,
+          style: smallHelperTextStyle(
+            context,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
         ),
       );
     }
@@ -545,14 +547,14 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
 
             final doseLogs = doseLogBox.values
                 .where((l) => included.contains(l.medicationId))
-              .where((l) => range == null || range.contains(l.actionTime))
+                .where((l) => range == null || range.contains(l.actionTime))
                 .toList(growable: false);
 
             final doseLogIds = doseLogs.map((l) => l.id).toSet();
 
             final inventoryLogs = inventoryLogBox.values
                 .where((l) => included.contains(l.medicationId))
-              .where((l) => range == null || range.contains(l.timestamp))
+                .where((l) => range == null || range.contains(l.timestamp))
                 // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
                 // Prefer the DoseLog entry since it supports edits.
                 .where(
@@ -567,8 +569,18 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
               for (final log in inventoryLogs) _InventoryHistoryItem(log: log),
             ]..sort((a, b) => b.time.compareTo(a.time));
 
-            final displayItems = items.take(_maxItems).toList(growable: false);
-            final hasMore = displayItems.length < items.length;
+            final pageCount = (items.length / _pageSize).ceil();
+            if (pageCount == 0) {
+              _pageIndex = 0;
+            } else if (_pageIndex >= pageCount) {
+              _pageIndex = pageCount - 1;
+            }
+
+            final start = _pageIndex * _pageSize;
+            final end = (start + _pageSize).clamp(0, items.length);
+            final displayItems = items
+                .sublist(start, end)
+                .toList(growable: false);
 
             final content = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -582,16 +594,13 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                   ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(
-                      kSpacingS,
-                      0,
-                      kSpacingS,
-                      0,
-                    ),
+                    padding: const EdgeInsets.only(bottom: kSpacingXS),
                     itemCount: displayItems.length,
                     separatorBuilder: (context, index) => Divider(
                       height: 1,
-                      color: cs.outlineVariant.withValues(alpha: kOpacityVeryLow),
+                      color: cs.outlineVariant.withValues(
+                        alpha: kOpacityVeryLow,
+                      ),
                     ),
                     itemBuilder: (context, index) {
                       final item = displayItems[index];
@@ -622,32 +631,24 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                             padding: const EdgeInsets.symmetric(
                               vertical: kSpacingXS / 2,
                             ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                buildDayGutter(
-                                  localTime,
-                                  showLabel: showDayLabel,
-                                ),
-                                const SizedBox(width: kSpacingS),
-                                Expanded(
+                                if (showDayLabel) buildDateHeader(localTime),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    kSpacingS,
+                                    kSpacingXS,
+                                    kSpacingS,
+                                    kSpacingXS,
+                                  ),
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      NextDoseDateBadge(
-                                        nextDose: item.time,
-                                        isActive: true,
-                                        dense: true,
-                                        denseContent:
-                                            NextDoseBadgeDenseContent.time,
-                                        showNextLabel: false,
-                                        showTodayIcon: true,
-                                      ),
+                                      buildTimeLabel(localTime),
                                       const SizedBox(width: kSpacingS),
-                                      Expanded(
-                                        child: item.buildTitle(context),
-                                      ),
+                                      Expanded(child: item.buildTitle(context)),
                                       const SizedBox(width: kSpacingS),
                                       Container(
                                         width: kStepperButtonSize,
@@ -674,26 +675,50 @@ class _CombinedReportsHistoryWidgetState extends State<CombinedReportsHistoryWid
                       );
                     },
                   ),
-                  if (hasMore) ...[
-                    const SizedBox(height: kSpacingS),
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _maxItems += _pageStep;
-                          });
-                        },
-                        icon: const Icon(
-                          Icons.expand_more,
-                          size: kIconSizeSmall,
+                  if (pageCount > 1) ...[
+                    const SizedBox(height: kSpacingXS),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          onPressed: _pageIndex <= 0
+                              ? null
+                              : () => setState(() => _pageIndex -= 1),
+                          constraints: kTightIconButtonConstraints,
+                          padding: kNoPadding,
+                          icon: Icon(
+                            Icons.keyboard_arrow_left,
+                            size: kIconSizeSmall,
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumHigh,
+                            ),
+                          ),
                         ),
-                        label: Text(
-                          'Load more',
-                          style: helperTextStyle(
-                            context,
-                          )?.copyWith(fontWeight: kFontWeightSemiBold),
+                        const SizedBox(width: kSpacingXS),
+                        Text(
+                          '${_pageIndex + 1}/$pageCount',
+                          style: microHelperTextStyle(context)?.copyWith(
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumHigh,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: kSpacingXS),
+                        IconButton(
+                          onPressed: _pageIndex >= (pageCount - 1)
+                              ? null
+                              : () => setState(() => _pageIndex += 1),
+                          constraints: kTightIconButtonConstraints,
+                          padding: kNoPadding,
+                          icon: Icon(
+                            Icons.keyboard_arrow_right,
+                            size: kIconSizeSmall,
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumHigh,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],

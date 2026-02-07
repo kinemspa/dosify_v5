@@ -4,7 +4,6 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/combined_reports_history_widget.dart';
-import 'package:dosifi_v5/src/widgets/dose_action_legend_row.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -61,9 +60,7 @@ class _ActivityCardState extends State<ActivityCard> {
   @override
   Widget build(BuildContext context) {
     final meds = widget.medications.toList()
-      ..sort(
-        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-      );
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     return CollapsibleSectionFormCard(
       neutral: widget.neutral,
@@ -80,30 +77,29 @@ class _ActivityCardState extends State<ActivityCard> {
           Row(
             children: [
               Expanded(
-                child:
-                    widget.onIncludedMedicationIdsChanged == null
-                        ? Text(
+                child: widget.onIncludedMedicationIdsChanged == null
+                    ? Text(
+                        '${widget.includedMedicationIds.length}/${meds.length} meds',
+                        style: helperTextStyle(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : MultiSelectDropdown36<String>(
+                        items: meds
+                            .map(
+                              (m) => MultiSelectItem<String>(
+                                value: m.id,
+                                label: m.name,
+                              ),
+                            )
+                            .toList(growable: false),
+                        selectedValues: widget.includedMedicationIds,
+                        onChanged: widget.onIncludedMedicationIdsChanged!,
+                        buttonLabel:
                             '${widget.includedMedicationIds.length}/${meds.length} meds',
-                            style: helperTextStyle(context),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        : MultiSelectDropdown36<String>(
-                            items: meds
-                                .map(
-                                  (m) => MultiSelectItem<String>(
-                                    value: m.id,
-                                    label: m.name,
-                                  ),
-                                )
-                                .toList(growable: false),
-                            selectedValues: widget.includedMedicationIds,
-                            onChanged: widget.onIncludedMedicationIdsChanged!,
-                            buttonLabel:
-                                '${widget.includedMedicationIds.length}/${meds.length} meds',
-                          ),
+                      ),
               ),
-              const SizedBox(width: kSpacingS),
+              const SizedBox(width: kSpacingXS),
               SizedBox(
                 width: kCompactControlMaxWidth,
                 child: SmallDropdown36<ReportTimeRangePreset>(
@@ -125,8 +121,7 @@ class _ActivityCardState extends State<ActivityCard> {
             ],
           ),
           const SizedBox(height: kSpacingS),
-          const DoseActionLegendRow(includeInventory: true, showHelp: true),
-          const SizedBox(height: kSpacingM),
+          const SizedBox(height: kSpacingXS),
           if (widget.includedMedicationIds.isEmpty)
             const UnifiedEmptyState(title: 'No medications selected')
           else
