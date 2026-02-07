@@ -1,6 +1,5 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
-import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
@@ -11,7 +10,6 @@ import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
-import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +21,16 @@ import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 
 enum _MedView { list, compact, large }
 
-enum _SortBy { name, nextDose, mostUsed, manufacturer, form, stock, strength, expiry }
+enum _SortBy {
+  name,
+  nextDose,
+  mostUsed,
+  manufacturer,
+  form,
+  stock,
+  strength,
+  expiry,
+}
 
 enum _FilterBy {
   all,
@@ -288,9 +295,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
             schedules: schedules,
           );
 
-              // Ensure initial stock values so large cards can show current vs
-              // initial amounts.
-              _ensureInitialStockValues(items);
+          // Ensure initial stock values so large cards can show current vs
+          // initial amounts.
+          _ensureInitialStockValues(items);
 
           if (items.isEmpty) {
             return Column(
@@ -304,9 +311,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                         Icon(
                           Icons.search_off,
                           size: kEmptyStateIconSize,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
                               .withValues(alpha: kOpacityMedium),
                         ),
                         const SizedBox(height: kSpacingM),
@@ -529,9 +534,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   List<Medication> _getFilteredAndSortedMedications(
-    List<Medication> medications,
-    {required List<Schedule> schedules}
-  ) {
+    List<Medication> medications, {
+    required List<Schedule> schedules,
+  }) {
     var items = List<Medication>.from(medications);
 
     final nextDoseByMedId = <String, DateTime>{};
@@ -702,116 +707,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     );
   }
 
-  DateTime _effectiveCreatedAtForExpiry(Medication m, DateTime expiry) {
-    if (m.reconstitutedVialExpiry == expiry && m.reconstitutedAt != null) {
-      return m.reconstitutedAt!;
-    }
-    return m.createdAt;
-  }
-
-  Widget? _buildMedicationStatusBadgesRow(BuildContext context, Medication m) {
-    if (!ExperimentalUiSettings.value.value.showMedicationListStatusBadges) {
-      return null;
-    }
-
-    final cs = Theme.of(context).colorScheme;
-    final pills = <Widget>[];
-
-    final stockInfo = MedicationDisplayHelpers.calculateStock(m);
-    if (stockInfo.current <= 0) {
-      pills.add(
-        StatusPill(
-          label: 'Empty',
-          color: cs.error,
-          icon: Icons.inventory_2_outlined,
-        ),
-      );
-    } else if (stockInfo.percentage <= (kStockWarningRemainingRatio * 100)) {
-      pills.add(
-        StatusPill(
-          label: 'Low stock',
-          color: stockStatusColorFromPercentage(
-            context,
-            percentage: stockInfo.percentage,
-          ),
-          icon: Icons.inventory_2_outlined,
-        ),
-      );
-    }
-
-    final effectiveExpiry = _effectiveExpiry(m);
-    if (effectiveExpiry != null) {
-      final createdAt = _effectiveCreatedAtForExpiry(m, effectiveExpiry);
-      final now = DateTime.now();
-      if (!effectiveExpiry.isAfter(now)) {
-        pills.add(
-          StatusPill(
-            label: 'Expired',
-            color: cs.error,
-            icon: Icons.event_busy,
-          ),
-        );
-      } else {
-        final ratio = expiryRemainingRatio(
-          createdAt: createdAt,
-          expiry: effectiveExpiry,
-          now: now,
-        );
-        if (ratio <= kExpiryWarningRemainingRatio) {
-          pills.add(
-            StatusPill(
-              label: ratio <= kExpiryCriticalRemainingRatio
-                  ? 'Expiring'
-                  : 'Soon',
-              color: expiryStatusColor(
-                context,
-                createdAt: createdAt,
-                expiry: effectiveExpiry,
-                now: now,
-              ),
-              icon: Icons.event,
-            ),
-          );
-        }
-      }
-    }
-
-    if (_isFrozen(m)) {
-      pills.add(
-        StatusPill(
-          label: 'Freezer',
-          color: cs.secondary,
-          icon: Icons.severe_cold,
-        ),
-      );
-    } else if (_isRefrigerated(m)) {
-      pills.add(
-        StatusPill(
-          label: 'Fridge',
-          color: cs.primary,
-          icon: Icons.ac_unit,
-        ),
-      );
-    }
-
-    if (_isLightSensitive(m)) {
-      pills.add(
-        StatusPill(
-          label: 'Light',
-          color: cs.tertiary,
-          icon: Icons.wb_sunny_outlined,
-        ),
-      );
-    }
-
-    if (pills.isEmpty) return null;
-    return Wrap(
-      spacing: kSpacingXXS,
-      runSpacing: kSpacingXXS,
-      children: pills,
-    );
-  }
-
   Widget _buildCompactListRow(BuildContext context, Medication m) {
     final cs = Theme.of(context).colorScheme;
 
@@ -822,8 +717,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final detailLabel = manufacturer.isEmpty
         ? strengthLabel
         : '$manufacturer · $strengthLabel';
-
-    final badges = _buildMedicationStatusBadgesRow(context, m);
 
     return Material(
       color: Colors.transparent,
@@ -858,10 +751,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (badges != null) ...[
-                      const SizedBox(height: kSpacingXXS),
-                      badges,
-                    ],
                   ],
                 ),
               ),
@@ -883,7 +772,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   if (m.expiry != null) ...[
                     const SizedBox(height: kSpacingXS),
                     Text(
-                      _formatDateDdMm(m.expiry!),
+                      'Exp. ${_formatDateDdMm(m.expiry!)}',
                       style: smallHelperTextStyle(
                         context,
                         color: expiryStatusColor(
@@ -1435,10 +1324,7 @@ class _MedLargeCard extends StatelessWidget {
             Expanded(
               child: Text(
                 scheduleLabel,
-                style: smallHelperTextStyle(
-                  context,
-                  color: scheduleTextColor,
-                ),
+                style: smallHelperTextStyle(context, color: scheduleTextColor),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
