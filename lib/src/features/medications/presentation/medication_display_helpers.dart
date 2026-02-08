@@ -315,6 +315,23 @@ class MedicationDisplayHelpers {
       isCountUnit: isCountUnit,
     );
   }
+
+  static String? primaryStorageLocation(Medication m) {
+    if (m.form == MedicationForm.multiDoseVial) {
+      return _pickLocation(m.activeVialStorageLocation, m.storageLocation) ??
+          _pickLocation(m.backupVialsStorageLocation, m.storageLocation);
+    }
+
+    return _pickLocation(m.storageLocation, null);
+  }
+
+  static String? _pickLocation(String? primary, String? fallback) {
+    final p = primary?.trim();
+    if (p != null && p.isNotEmpty) return p;
+    final f = fallback?.trim();
+    if (f != null && f.isNotEmpty) return f;
+    return null;
+  }
 }
 
 class StockDisplayInfo {

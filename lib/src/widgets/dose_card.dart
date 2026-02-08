@@ -29,6 +29,8 @@ class DoseCard extends StatelessWidget {
     this.primaryActionLabel,
     this.onPrimaryAction,
     this.onQuickAction,
+    this.detailLines,
+    this.footer,
     super.key,
   });
 
@@ -48,6 +50,8 @@ class DoseCard extends StatelessWidget {
   final String? primaryActionLabel;
   final VoidCallback? onPrimaryAction;
   final ValueChanged<DoseStatus>? onQuickAction;
+  final List<Widget>? detailLines;
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +93,11 @@ class DoseCard extends StatelessWidget {
         ? statusColor.withValues(alpha: kOpacityFull)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
 
+    final normalizedDetailLines =
+        (detailLines ?? const <Widget>[]).where((w) => w is! SizedBox).toList();
+    final hasDetails = normalizedDetailLines.isNotEmpty;
+    final hasFooter = footer != null;
+
     return Container(
       decoration: buildDoseCardDecoration(
         context: context,
@@ -105,121 +114,134 @@ class DoseCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(radius),
           child: Padding(
             padding: contentPadding,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    NextDoseDateBadge(
-                      nextDose: dose.scheduledTime,
-                      isActive: isActive,
-                      dense: true,
-                      activeColor: statusColor,
-                      showNextLabel: false,
-                      showTodayIcon: true,
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    Text(
-                      dateLabel,
-                      style: microHelperTextStyle(context)?.copyWith(
-                        color: cs.onSurfaceVariant.withValues(
-                          alpha: kOpacityMediumHigh,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        NextDoseDateBadge(
+                          nextDose: dose.scheduledTime,
+                          isActive: isActive,
+                          dense: true,
+                          activeColor: statusColor,
+                          showNextLabel: false,
+                          showTodayIcon: true,
                         ),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: kSpacingXXS),
-                    Text(
-                      timeText,
-                      style: doseCardTimeTextStyle(
-                        context,
-                        color: isActive
-                            ? statusColor.withValues(alpha: kOpacityFull)
-                            : cs.onSurfaceVariant.withValues(
-                                alpha: kOpacityMediumLow,
-                              ),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                    if (doseNumber != null) ...[
-                      const SizedBox(height: kSpacingXXS),
-                      Text(
-                        'Dose $doseNumber',
-                        style: doseCardDoseNumberTextStyle(
-                          context,
-                          color: isActive
-                              ? statusColor.withValues(alpha: kOpacityFull)
-                              : cs.onSurfaceVariant.withValues(
-                                  alpha: kOpacityMediumLow,
-                                ),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                    if (leadingFooter != null) ...[
-                      const SizedBox(height: kSpacingXS),
-                      leadingFooter!,
-                    ],
-                  ],
-                ),
-                SizedBox(width: columnGap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              medicationName,
-                              style: primaryTitleStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: kSpacingXS),
+                        Text(
+                          dateLabel,
+                          style: microHelperTextStyle(context)?.copyWith(
+                            color: cs.onSurfaceVariant.withValues(
+                              alpha: kOpacityMediumHigh,
                             ),
                           ),
-                          if (titleTrailing != null) ...[
-                            const SizedBox(width: kSpacingS),
-                            titleTrailing!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: kSpacingXXS),
+                        Text(
+                          timeText,
+                          style: doseCardTimeTextStyle(
+                            context,
+                            color: isActive
+                                ? statusColor.withValues(alpha: kOpacityFull)
+                                : cs.onSurfaceVariant.withValues(
+                                    alpha: kOpacityMediumLow,
+                                  ),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                        if (doseNumber != null) ...[
+                          const SizedBox(height: kSpacingXXS),
+                          Text(
+                            'Dose $doseNumber',
+                            style: doseCardDoseNumberTextStyle(
+                              context,
+                              color: isActive
+                                  ? statusColor.withValues(alpha: kOpacityFull)
+                                  : cs.onSurfaceVariant.withValues(
+                                      alpha: kOpacityMediumLow,
+                                    ),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        if (leadingFooter != null) ...[
+                          const SizedBox(height: kSpacingXS),
+                          leadingFooter!,
+                        ],
+                      ],
+                    ),
+                    SizedBox(width: columnGap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  medicationName,
+                                  style: primaryTitleStyle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (titleTrailing != null) ...[
+                                const SizedBox(width: kSpacingS),
+                                titleTrailing!,
+                              ],
+                            ],
+                          ),
+                          Text(
+                            dose.scheduleName,
+                            style: secondaryTitleStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            takeText,
+                            style: doseCardTakeMetricsTextStyle(
+                              context,
+                              color: takeColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (hasDetails) ...[
+                            const SizedBox(height: kSpacingXXS),
+                            ...normalizedDetailLines,
                           ],
                         ],
                       ),
-                      Text(
-                        dose.scheduleName,
-                        style: secondaryTitleStyle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        takeText,
-                        style: doseCardTakeMetricsTextStyle(
-                          context,
-                          color: takeColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    if (showActions) ...[
+                      SizedBox(width: columnGap),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          DoseCardStatusChip(
+                            status: effectiveStatus,
+                            disabled: disabled,
+                            compact: compact,
+                          ),
+                        ],
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                if (showActions) ...[
-                  SizedBox(width: columnGap),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      DoseCardStatusChip(
-                        status: effectiveStatus,
-                        disabled: disabled,
-                        compact: compact,
-                      ),
-                    ],
-                  ),
+                if (hasFooter) ...[
+                  const SizedBox(height: kSpacingS),
+                  footer!,
                 ],
               ],
             ),
