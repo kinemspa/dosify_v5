@@ -102,8 +102,9 @@ double? _inferInitialDesiredDoseAmount(Medication med) {
   final savedDose = savedRecon?.recommendedDose;
   if (savedDose != null && savedDose > 0) return savedDose;
 
-  final inferredFromSaved =
-      savedRecon != null ? _inferDoseAmountFromReconCalc(savedRecon) : null;
+  final inferredFromSaved = savedRecon != null
+      ? _inferDoseAmountFromReconCalc(savedRecon)
+      : null;
   return inferredFromSaved ?? _inferDoseAmountFromSavedRecon(med);
 }
 
@@ -257,10 +258,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 color: Theme.of(context).colorScheme.outline,
               ),
               const SizedBox(height: kSpacingL),
-              Text(
-                'Medication not found',
-                style: cardTitleStyle(context),
-              ),
+              Text('Medication not found', style: cardTitleStyle(context)),
             ],
           ),
         ),
@@ -510,9 +508,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             // Keep the same title-fade behavior without rebuilding the whole page on scroll.
                             Positioned(
                               top: top,
-                              left: kDetailHeaderCollapsedHeight +
+                              left:
+                                  kDetailHeaderCollapsedHeight +
                                   kSpacingS, // Account for back button (48px) + spacing
-                              right: kDetailHeaderCollapsedHeight +
+                              right:
+                                  kDetailHeaderCollapsedHeight +
                                   kSpacingS, // Account for menu button symmetrically
                               height: _kDetailHeaderCollapsedHeight,
                               child: IgnorePointer(
@@ -946,7 +946,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 // Description & Notes
                 if (med.description != null && med.description!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: kSpacingXS),
                     child: Text(
                       med.description!,
                       style: helperTextStyle(
@@ -960,7 +960,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
                 if (med.notes != null && med.notes!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: kSpacingS),
                     child: Text(
                       med.notes!,
                       style: hintTextStyle(context)?.copyWith(
@@ -1174,7 +1174,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         child: InkWell(
                           onTap: () =>
                               _showRestockSealedVialsDialog(context, med),
-                          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+                          borderRadius: BorderRadius.circular(
+                            kBorderRadiusSmall,
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: kSpacingM,
@@ -1465,9 +1467,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                       ),
                       label: Text(
                         'Delete Medication',
-                        style: bodyTextStyle(context)?.copyWith(
-                          color: colorScheme.error,
-                        ),
+                        style: bodyTextStyle(
+                          context,
+                        )?.copyWith(color: colorScheme.error),
                       ),
                     ),
                   ),
@@ -1958,16 +1960,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-    Widget _buildMiniChip(BuildContext context, String label, {IconData? icon}) {
-      final cs = Theme.of(context).colorScheme;
+  Widget _buildMiniChip(BuildContext context, String label, {IconData? icon}) {
+    final cs = Theme.of(context).colorScheme;
 
-      return StatusPill(
-        label: label,
-        color: cs.primary,
-        icon: icon,
-        dense: true,
-      );
-    }
+    return StatusPill(label: label, color: cs.primary, icon: icon, dense: true);
+  }
 
   String _getStorageConditionsLabel(Medication med) {
     final conditions = <String>[];
@@ -1981,7 +1978,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
   Widget _buildStorageConditionsDisplay(BuildContext context, Medication med) {
     final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1991,7 +1987,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           children: [
             Text(
               'Storage Conditions',
-              style: theme.textTheme.labelSmall?.copyWith(
+              style: smallHelperTextStyle(
+                context,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
@@ -2036,10 +2033,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     required bool isEnabled,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: kSpacingXXS),
       child: Row(
         children: [
           Icon(
@@ -2050,7 +2046,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           const SizedBox(width: kSpacingS),
           Text(
             label,
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: smallHelperTextStyle(
+              context,
               color: isEnabled
                   ? colorScheme.onSurface
                   : colorScheme.outlineVariant,
@@ -2059,12 +2056,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           const Spacer(),
           Text(
             isEnabled ? 'On' : 'Off',
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: smallHelperTextStyle(
+              context,
               color: isEnabled
                   ? colorScheme.primary
                   : colorScheme.outlineVariant,
-              fontWeight: kFontWeightMedium,
-            ),
+            )?.copyWith(fontWeight: kFontWeightMedium),
           ),
         ],
       ),
@@ -2165,7 +2162,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         children: [
           // Info banner
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: kSpacingL,
+              vertical: kSpacingS + kSpacingXXS,
+            ),
             decoration: BoxDecoration(
               color: colorScheme.primaryContainer.withValues(alpha: 0.3),
               borderRadius: const BorderRadius.vertical(
@@ -2176,14 +2176,15 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               children: [
                 Icon(
                   Icons.science_outlined,
-                  size: 16,
+                  size: kIconSizeSmall,
                   color: colorScheme.primary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: kSpacingS),
                 Expanded(
                   child: Text(
                     'Vial currently in use for injections',
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: helperTextStyle(
+                      context,
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -2195,21 +2196,25 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           // Volume remaining (prominent display)
           if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingL,
+                vertical: kSpacingM,
+              ),
               child: Row(
                 children: [
                   Text(
                     'Volume',
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: helperTextStyle(
+                      context,
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     '${_formatNumber(med.activeVialVolume ?? med.containerVolumeMl!)} / ${_formatNumber(med.containerVolumeMl!)} mL',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: cardTitleStyle(context)?.copyWith(
                       color: colorScheme.primary,
+                      fontWeight: kFontWeightBold,
                     ),
                   ),
                 ],
@@ -2218,8 +2223,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
           Divider(
             height: 1,
-            indent: 16,
-            endIndent: 16,
+            indent: kSpacingL,
+            endIndent: kSpacingL,
             color: colorScheme.outlineVariant.withValues(alpha: 0.2),
           ),
 
@@ -2312,7 +2317,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             Icon(
               Icons.chevron_right,
               size: kIconSizeSmall,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
+              color: colorScheme.onSurfaceVariant.withValues(
+                alpha: kOpacityLow,
+              ),
             ),
           ],
         ),
@@ -2437,7 +2444,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             Icon(
               Icons.chevron_right,
               size: kIconSizeSmall,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
+              color: colorScheme.onSurfaceVariant.withValues(
+                alpha: kOpacityLow,
+              ),
             ),
           ],
         ),
@@ -2523,7 +2532,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       children: [
         // Section title with count
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingL,
+            vertical: kSpacingS,
+          ),
           child: Row(
             children: [
               Icon(
@@ -2531,7 +2543,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                 size: 18,
                 color: colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: kSpacingS),
               Text(
                 'Sealed Vials',
                 style: sectionTitleStyle(
@@ -2550,7 +2562,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         ),
 
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: kSpacingL),
           child: Text(
             'Used for reconstitution.',
             style: helperTextStyle(context),
@@ -2743,7 +2755,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           initialDoseValue: initialDoseAmount,
           initialDoseUnit: initialDoseUnit,
           initialSyringeSize: initialSyringe,
-          initialVialSize: savedRecon?.solventVolumeMl ?? latest.containerVolumeMl,
+          initialVialSize:
+              savedRecon?.solventVolumeMl ?? latest.containerVolumeMl,
           initialDiluentName: savedRecon?.diluentName ?? latest.diluentName,
         ),
       ),
@@ -2758,8 +2771,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       latest.copyWith(
         perMlValue: result.perMlConcentration,
         containerVolumeMl: result.solventVolumeMl,
-        volumePerDose:
-            result.recommendedUnits / SyringeType.ml_1_0.unitsPerMl,
+        volumePerDose: result.recommendedUnits / SyringeType.ml_1_0.unitsPerMl,
         diluentName: result.diluentName ?? latest.diluentName,
         activeVialVolume: result.solventVolumeMl,
         reconstitutedAt: DateTime.now(),
@@ -2851,11 +2863,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       children: [
         // Label with fixed width for alignment
         SizedBox(
-          width: 110,
+          width: kMedicationDetailCompactInfoLabelWidth,
           child: Text(
             label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: kOpacityMedium),
+            style: bodyTextStyle(context)?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(
+                alpha: kOpacityMedium,
+              ),
               fontWeight: kFontWeightMedium,
             ),
           ),
@@ -2864,9 +2878,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         Expanded(
           child: Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: bodyTextStyle(context)?.copyWith(
               fontWeight: highlighted ? kFontWeightBold : kFontWeightMedium,
-              fontStyle: isItalic || isPlaceholder
+              fontStyle: (isItalic || isPlaceholder)
                   ? FontStyle.italic
                   : FontStyle.normal,
               color: warning
@@ -2884,7 +2898,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           Icon(
             Icons.chevron_right,
             size: 18,
-            color: theme.colorScheme.onSurface.withValues(alpha: kOpacityVeryLow),
+            color: theme.colorScheme.onSurface.withValues(
+              alpha: kOpacityVeryLow,
+            ),
           ),
       ],
     );
@@ -3279,10 +3295,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
               const SizedBox(height: kSpacingL),
 
               // Mode selection - Radio buttons instead of chips
-              Text(
-                'Refill Method:',
-                style: fieldLabelStyle(stateContext),
-              ),
+              Text('Refill Method:', style: fieldLabelStyle(stateContext)),
               const SizedBox(height: kSpacingS),
               RadioListTile<String>(
                 title: const Text('Add to current stock'),
@@ -3306,10 +3319,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
               // Amount input (only for Add mode)
               if (selectedMode == 'add') ...[
                 const SizedBox(height: kSpacingS),
-                Text(
-                  'Amount to Add:',
-                  style: fieldLabelStyle(stateContext),
-                ),
+                Text('Amount to Add:', style: fieldLabelStyle(stateContext)),
                 const SizedBox(height: kSpacingS),
                 Center(
                   child: StepperRow36(
@@ -3453,9 +3463,11 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     builder: (dialogContext) {
       final theme = Theme.of(dialogContext);
       final cs = theme.colorScheme;
-      
+
       return AlertDialog(
-        titleTextStyle: cardTitleStyle(dialogContext)?.copyWith(color: cs.primary),
+        titleTextStyle: cardTitleStyle(
+          dialogContext,
+        )?.copyWith(color: cs.primary),
         contentTextStyle: bodyTextStyle(dialogContext),
         title: Text('Reconstitute a new vial of ${med.name}'),
         content: Column(
@@ -3470,7 +3482,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
             SelectableOptionCard(
               icon: Icons.calculate_outlined,
               title: 'Recalculate',
-              subtitle: 'Open the Reconstitution Calculator to create a new calculation.',
+              subtitle:
+                  'Open the Reconstitution Calculator to create a new calculation.',
               selected: false,
               onTap: () => Navigator.of(dialogContext).pop('recalculate'),
             ),
@@ -3532,7 +3545,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     selectedRecommendedUnits = savedRecon.recommendedUnits;
     replaceVolumeCtrl.text = fmt2(savedRecon.solventVolumeMl);
     replaceVolumeSetBy = 'From saved reconstitution';
-    
+
     final diluent = savedRecon.diluentName?.trim();
     selectedReconLabel = diluent == null || diluent.isEmpty
         ? '${savedRecon.solventVolumeMl.toStringAsFixed(2)} mL'
@@ -3554,7 +3567,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     final result = await showModalBottomSheet<ReconstitutionResult>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.0),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surface.withValues(alpha: 0.0),
       builder: (ctx) => DraggableScrollableSheet(
         initialChildSize: 0.9,
         minChildSize: 0.5,
@@ -4301,9 +4316,9 @@ Future<void> _showRestockSealedVialsDialog(
                     ),
                     Text(
                       '$currentStock',
-                      style: bodyTextStyle(context)?.copyWith(
-                        fontWeight: kFontWeightBold,
-                      ),
+                      style: bodyTextStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightBold),
                     ),
                   ],
                 ),
@@ -4313,9 +4328,9 @@ Future<void> _showRestockSealedVialsDialog(
               // Amount input
               Text(
                 'Add vials:',
-                style: bodyTextStyle(context)?.copyWith(
-                  fontWeight: kFontWeightMedium,
-                ),
+                style: bodyTextStyle(
+                  context,
+                )?.copyWith(fontWeight: kFontWeightMedium),
               ),
               const SizedBox(height: kSpacingS),
               Center(
@@ -4821,7 +4836,7 @@ void _editForm(BuildContext context, Medication med) async {
         return SimpleDialogOption(
           onPressed: () => Navigator.pop(context, form),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: kSpacingS),
             child: Text(_formLabel(form)),
           ),
         );
