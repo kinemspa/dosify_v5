@@ -82,6 +82,8 @@ class DoseActionSheet extends StatefulWidget {
       context: context,
       useSafeArea: true,
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
       backgroundColor: cs.surface.withValues(alpha: kOpacityTransparent),
       builder: (context) => DoseActionSheet(
         dose: dose,
@@ -212,30 +214,29 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       };
     }
 
-    return SizedBox(
-      width: double.infinity,
-      height: kStandardFieldHeight,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: cs.onSurface,
-        ),
-        onPressed: () => _applyStatusOption(nextOption(option)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(iconFor(option), size: kIconSizeSmall),
-            const SizedBox(width: kSpacingS),
-            Text(
-              labelFor(option),
-              style: bodyTextStyle(context),
-            ),
-            const SizedBox(width: kSpacingS),
-            Icon(
-              Icons.autorenew_rounded,
-              size: kIconSizeSmall,
-              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
-            ),
-          ],
+    final accent = _statusAccentColor(context);
+
+    return Center(
+      child: SizedBox(
+        height: kStandardFieldHeight,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: accent,
+            foregroundColor: cs.onPrimary,
+            visualDensity: VisualDensity.compact,
+          ),
+          onPressed: () => _applyStatusOption(nextOption(option)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(iconFor(option), size: kIconSizeSmall),
+              const SizedBox(width: kSpacingS),
+              Text(
+                labelFor(option),
+                style: bodyTextStyle(context)?.copyWith(color: cs.onPrimary),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -386,12 +387,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       ],
       if (!_isAdHoc) ...[
         Text('Dose change', style: sectionTitleStyle(context)),
-        const SizedBox(height: kSpacingS),
-        Text(
-          'Use this to record the actual dose taken, if different from the scheduled dose.',
-          style: helperTextStyle(context),
-        ),
-        const SizedBox(height: kSpacingS),
+        const SizedBox(height: kSpacingXS),
         Builder(
           builder: (context) {
             final schedule = Hive.box<Schedule>(
@@ -484,57 +480,32 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     },
                   ),
                 ),
-                const SizedBox(height: kSpacingS),
+                const SizedBox(height: kSpacingXS),
                 LabelFieldRow(
                   label: 'Syringe',
-                  field: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: kSpacingS,
-                        runSpacing: kSpacingXS,
-                        children: SyringeTypeLookup.commonPresets
-                            .map(
-                              (t) => PrimaryChoiceChip(
-                                label: Text(t.name),
-                                selected: t == syringe,
-                                onSelected: (_) {
-                                  if (t == _mdvSyringeType) return;
-                                  setState(() {
-                                    _mdvSyringeType = t;
-                                    _hasChanged = true;
-                                  });
-                                },
-                              ),
-                            )
-                            .toList(),
-                      ),
-                      const SizedBox(height: kSpacingS),
-                      SmallDropdown36<SyringeType>(
-                        value: syringe,
-                        items: SyringeType.values
-                            .where((t) => t != SyringeType.ml_10_0)
-                            .map(
-                              (t) => DropdownMenuItem<SyringeType>(
-                                value: t,
-                                child: Text(t.name),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          if (value == null || value == _mdvSyringeType) {
-                            return;
-                          }
-                          setState(() {
-                            _mdvSyringeType = value;
-                            _hasChanged = true;
-                          });
-                        },
-                      ),
-                    ],
+                  field: SmallDropdown36<SyringeType>(
+                    value: syringe,
+                    items: SyringeType.values
+                        .where((t) => t != SyringeType.ml_10_0)
+                        .map(
+                          (t) => DropdownMenuItem<SyringeType>(
+                            value: t,
+                            child: Text(t.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null || value == _mdvSyringeType) {
+                        return;
+                      }
+                      setState(() {
+                        _mdvSyringeType = value;
+                        _hasChanged = true;
+                      });
+                    },
                   ),
                 ),
-                const SizedBox(height: kSpacingS),
+                const SizedBox(height: kSpacingXS),
                 Row(
                   children: [
                     Expanded(
@@ -574,7 +545,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     ),
                   ],
                 ),
-                const SizedBox(height: kSpacingS),
+                const SizedBox(height: kSpacingXS),
                 // Gauge is embedded in the dose card preview.
               ],
             );
@@ -810,11 +781,25 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       syringe.maxUnits.toDouble(),
     );
 
-    return WhiteSyringeGauge(
-      totalUnits: syringe.maxUnits.toDouble(),
-      fillUnits: fillUnits,
-      interactive: false,
-      showValueLabel: false,
+    final cs = Theme.of(context).colorScheme;
+    final captionStyle = microHelperTextStyle(context)?.copyWith(
+      color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+    );
+    final syringeLabel = syringe.name.replaceAll('ml', 'mL');
+    final unitsLabel = fillUnits.round();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        WhiteSyringeGauge(
+          totalUnits: syringe.maxUnits.toDouble(),
+          fillUnits: fillUnits,
+          interactive: false,
+          showValueLabel: false,
+        ),
+        const SizedBox(height: kSpacingXS),
+        Text('$unitsLabel units on $syringeLabel syringe', style: captionStyle),
+      ],
     );
   }
 
@@ -1532,7 +1517,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             _buildNotesField(context),
             const SizedBox(height: kSpacingM),
             CollapsibleSectionFormCard(
-              title: 'Edit details',
+              title: 'Advanced',
               isExpanded: _editExpanded,
               onExpandedChanged: (v) => setState(() => _editExpanded = v),
               children: _buildEditSectionChildren(context),
@@ -1544,8 +1529,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
     if (widget.presentation == DoseActionSheetPresentation.bottomSheet) {
       return DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
+        initialChildSize: 0.8,
+        minChildSize: 0.55,
         maxChildSize: 0.9,
         builder: (context, scrollController) {
           final mq = MediaQuery.of(context);
