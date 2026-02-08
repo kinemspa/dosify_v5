@@ -244,103 +244,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
   List<Widget> _buildEditSectionChildren(BuildContext context) {
     return [
-      Text('Date & Time', style: sectionTitleStyle(context)),
-      const SizedBox(height: kSpacingS),
-      Row(
-        children: [
-          Expanded(
-            child: SizedBox(
-              height: kStandardFieldHeight,
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedActionTime,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (picked == null) return;
-                  if (!context.mounted) return;
-                  setState(() {
-                    _selectedActionTime = DateTime(
-                      picked.year,
-                      picked.month,
-                      picked.day,
-                      _selectedActionTime.hour,
-                      _selectedActionTime.minute,
-                    );
-                    if (_selectedStatus == DoseStatus.snoozed) {
-                      _selectedSnoozeUntil = _selectedActionTime;
-                    }
-                    _hasChanged = true;
-                  });
-                },
-                icon: Icon(
-                  _selectedStatus == DoseStatus.taken
-                      ? Icons.check_circle_rounded
-                      : Icons.calendar_today,
-                  size: kIconSizeSmall,
-                  color: _statusAccentColor(context),
-                ),
-                label: Text(
-                  MaterialLocalizations.of(
-                    context,
-                  ).formatMediumDate(_selectedActionTime),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: kSpacingS),
-          Expanded(
-            child: SizedBox(
-              height: kStandardFieldHeight,
-              child: OutlinedButton.icon(
-                onPressed: () async {
-                  final picked = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.fromDateTime(_selectedActionTime),
-                  );
-                  if (picked == null) return;
-                  if (!context.mounted) return;
-                  setState(() {
-                    _selectedActionTime = DateTime(
-                      _selectedActionTime.year,
-                      _selectedActionTime.month,
-                      _selectedActionTime.day,
-                      picked.hour,
-                      picked.minute,
-                    );
-                    if (_selectedStatus == DoseStatus.snoozed) {
-                      _selectedSnoozeUntil = _selectedActionTime;
-                    }
-                    _hasChanged = true;
-                  });
-                },
-                icon: Icon(
-                  Icons.schedule,
-                  size: kIconSizeSmall,
-                  color: _statusAccentColor(context),
-                ),
-                label: Text(
-                  DateTimeFormatter.formatTime(context, _selectedActionTime),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      if (!_isAdHoc) ...[
-        const SizedBox(height: kSpacingXS),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: _useScheduledTimeIfAvailable,
-            icon: const Icon(Icons.restore_rounded, size: kIconSizeSmall),
-            label: const Text('Use scheduled time'),
-          ),
-        ),
-      ],
-      const SizedBox(height: kSpacingM),
       if (_isAdHoc && widget.dose.existingLog != null) ...[
         Text('Amount', style: sectionTitleStyle(context)),
         const SizedBox(height: kSpacingS),
@@ -553,15 +456,115 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         ),
         const SizedBox(height: kSpacingM),
       ],
-      if (_selectedStatus == DoseStatus.snoozed) ...[
-        Text('Snooze Until', style: sectionTitleStyle(context)),
+    ];
+  }
+
+  Widget _buildTakenTimeField(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Time taken', style: sectionTitleStyle(context)),
+        const SizedBox(height: kSpacingS),
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: kStandardFieldHeight,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedActionTime,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked == null) return;
+                    if (!context.mounted) return;
+                    setState(() {
+                      _selectedActionTime = DateTime(
+                        picked.year,
+                        picked.month,
+                        picked.day,
+                        _selectedActionTime.hour,
+                        _selectedActionTime.minute,
+                      );
+                      _hasChanged = true;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.check_circle_rounded,
+                    size: kIconSizeSmall,
+                    color: _statusAccentColor(context),
+                  ),
+                  label: Text(
+                    MaterialLocalizations.of(
+                      context,
+                    ).formatMediumDate(_selectedActionTime),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: kSpacingS),
+            Expanded(
+              child: SizedBox(
+                height: kStandardFieldHeight,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.fromDateTime(_selectedActionTime),
+                    );
+                    if (picked == null) return;
+                    if (!context.mounted) return;
+                    setState(() {
+                      _selectedActionTime = DateTime(
+                        _selectedActionTime.year,
+                        _selectedActionTime.month,
+                        _selectedActionTime.day,
+                        picked.hour,
+                        picked.minute,
+                      );
+                      _hasChanged = true;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.schedule,
+                    size: kIconSizeSmall,
+                    color: _statusAccentColor(context),
+                  ),
+                  label: Text(
+                    DateTimeFormatter.formatTime(context, _selectedActionTime),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (!_isAdHoc) ...[
+          const SizedBox(height: kSpacingXS),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: _useScheduledTimeIfAvailable,
+              icon: const Icon(Icons.restore_rounded, size: kIconSizeSmall),
+              label: const Text('Use scheduled time'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSnoozeUntilField(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Snooze until', style: sectionTitleStyle(context)),
         const SizedBox(height: kSpacingS),
         if (_maxSnoozeUntil() != null) ...[
           Text(() {
             final max = _maxSnoozeUntil()!;
-            final date = MaterialLocalizations.of(
-              context,
-            ).formatMediumDate(max);
+            final date = MaterialLocalizations.of(context).formatMediumDate(max);
             final time = DateTimeFormatter.formatTime(context, max);
             return 'Next dose is at $date • $time.';
           }(), style: helperTextStyle(context)),
@@ -616,17 +619,14 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             icon: const Icon(Icons.snooze_rounded, size: kIconSizeSmall),
             label: Text(() {
               final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-              final date = MaterialLocalizations.of(
-                context,
-              ).formatMediumDate(dt);
+              final date = MaterialLocalizations.of(context).formatMediumDate(dt);
               final time = DateTimeFormatter.formatTime(context, dt);
               return '$date • $time';
             }()),
           ),
         ),
-        const SizedBox(height: kSpacingM),
       ],
-    ];
+    );
   }
 
   Widget _buildNotesField(BuildContext context) {
@@ -1513,6 +1513,14 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             _buildStatusToggle(context),
             const SizedBox(height: kSpacingXS),
             _buildStatusHint(context),
+            if (_selectedStatus == DoseStatus.taken) ...[
+              const SizedBox(height: kSpacingM),
+              _buildTakenTimeField(context),
+            ],
+            if (_selectedStatus == DoseStatus.snoozed) ...[
+              const SizedBox(height: kSpacingM),
+              _buildSnoozeUntilField(context),
+            ],
             const SizedBox(height: kSpacingM),
             _buildNotesField(context),
             const SizedBox(height: kSpacingM),
