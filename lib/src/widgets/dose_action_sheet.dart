@@ -22,7 +22,6 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_dialog_dose_preview.dart';
-import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
@@ -530,7 +529,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         if (_maxSnoozeUntil() != null) ...[
           Text(() {
             final max = _maxSnoozeUntil()!;
-            final date = MaterialLocalizations.of(context).formatMediumDate(max);
+            final date = MaterialLocalizations.of(
+              context,
+            ).formatMediumDate(max);
             final time = DateTimeFormatter.formatTime(context, max);
             return 'Next dose is at $date • $time.';
           }(), style: helperTextStyle(context)),
@@ -585,7 +586,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             icon: const Icon(Icons.snooze_rounded, size: kIconSizeSmall),
             label: Text(() {
               final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-              final date = MaterialLocalizations.of(context).formatMediumDate(dt);
+              final date = MaterialLocalizations.of(
+                context,
+              ).formatMediumDate(dt);
               final time = DateTimeFormatter.formatTime(context, dt);
               return '$date • $time';
             }()),
@@ -710,12 +713,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         strengthOrConcentrationLabel: strengthLabel,
         doseMetrics: metrics,
         isActive: schedule?.isActive ?? true,
-        titleTrailing: DoseStatusBadge(
-          status: _selectedStatus,
-          disabled: !(schedule?.isActive ?? true),
-          dense: true,
-          showPending: true,
-        ),
         medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
           med.form,
         ),
@@ -726,7 +723,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 widget.dose.scheduledTime,
               ),
         statusOverride: _selectedStatus,
-        showActions: false,
         detailLines: metaLines,
         footer: mdvGaugeInCard,
         onTap: () {},
@@ -1530,9 +1526,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                                 children: [
                                   Text(
                                     'Take dose',
-                                    style: cardTitleStyle(context)?.copyWith(
-                                      color: colorScheme.primary,
-                                    ),
+                                    style: cardTitleStyle(
+                                      context,
+                                    )?.copyWith(color: colorScheme.primary),
                                   ),
                                   Text(
                                     'Confirm status, adjust timing if needed, add notes, and save.',
