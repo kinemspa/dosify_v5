@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -1192,11 +1194,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         await _setScheduleStatus(context, s, active: false, pausedUntil: null);
         return;
       case SchedulePauseDialogChoice.pauseUntilDate:
+        final nowDate = DateUtils.dateOnly(DateTime.now());
         final picked = await showDatePicker(
           context: context,
-          initialDate: DateTime.now().add(const Duration(days: 1)),
-          firstDate: DateTime.now(),
-          lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+          initialDate: nowDate.add(const Duration(days: 1)),
+          firstDate: nowDate,
+          lastDate: nowDate.add(const Duration(days: 365 * 10)),
         );
         if (picked == null) return;
         final endOfDay = DateTime(
@@ -1205,6 +1208,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           picked.day,
           23,
           59,
+          59,
+          999,
         );
         await _setScheduleStatus(
           context,
@@ -1387,12 +1392,21 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       final scheduleBox = Hive.box<Schedule>('schedules');
       final updated = s.copyWith(active: active, pausedUntil: pausedUntil);
 
-      await ScheduleScheduler.cancelFor(s.id);
+      // Update UI state fast, and do notification cancel/schedule work
+      // in the background (best-effort) so we don't block the screen.
       await scheduleBox.put(s.id, updated);
-
-      if (updated.isActive) {
-        await ScheduleScheduler.scheduleFor(updated);
-      }
+      unawaited(
+        Future<void>(() async {
+          try {
+            await ScheduleScheduler.cancelFor(s.id);
+            if (updated.isActive) {
+              await ScheduleScheduler.scheduleFor(updated);
+            }
+          } catch (_) {
+            // Best-effort only.
+          }
+        }),
+      );
 
       if (!mounted) return;
       showAppSnackBar(

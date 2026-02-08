@@ -110,15 +110,30 @@ class DetailPageScaffold extends StatelessWidget {
                     value: 'medications',
                     child: Text('Medications'),
                   ),
-                  const PopupMenuItem(value: 'supplies', child: Text('Supplies')),
-                  const PopupMenuItem(value: 'schedules', child: Text('Schedules')),
-                  const PopupMenuItem(value: 'calendar', child: Text('Calendar')),
+                  const PopupMenuItem(
+                    value: 'supplies',
+                    child: Text('Supplies'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'schedules',
+                    child: Text('Schedules'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'calendar',
+                    child: Text('Calendar'),
+                  ),
                   const PopupMenuItem(
                     value: 'reconstitution',
                     child: Text('Reconstitution Calculator'),
                   ),
-                  const PopupMenuItem(value: 'analytics', child: Text('Analytics')),
-                  const PopupMenuItem(value: 'settings', child: Text('Settings')),
+                  const PopupMenuItem(
+                    value: 'analytics',
+                    child: Text('Analytics'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'settings',
+                    child: Text('Settings'),
+                  ),
                   if (showEditInMenu || showDeleteInMenu) ...[
                     const PopupMenuDivider(),
                     if (showEditInMenu)
@@ -153,7 +168,8 @@ class DetailPageScaffold extends StatelessWidget {
                 final collapsed =
                     collapsedHeight ?? kDetailHeaderCollapsedHeight;
                 final scrollProgress =
-                    ((expanded - constraints.maxHeight) / (expanded - collapsed))
+                    ((expanded - constraints.maxHeight) /
+                            (expanded - collapsed))
                         .clamp(0.0, 1.0);
 
                 // Match Medication Details: title is only visible when near-collapsed.
@@ -171,9 +187,11 @@ class DetailPageScaffold extends StatelessWidget {
                       // Collapsed title in the top bar (matches Medication Details)
                       Positioned(
                         top: top,
-                        left: kDetailHeaderCollapsedHeight +
+                        left:
+                            kDetailHeaderCollapsedHeight +
                             kSpacingS, // Account for back button (48px) + spacing
-                        right: kDetailHeaderCollapsedHeight +
+                        right:
+                            kDetailHeaderCollapsedHeight +
                             kSpacingS, // Account for menu button symmetrically
                         height: barHeight,
                         child: IgnorePointer(
@@ -314,6 +332,7 @@ class DetailStatItem extends StatelessWidget {
     required this.label,
     required this.value,
     this.alignEnd = false,
+    this.valueMaxLines = 1,
     super.key,
   });
 
@@ -321,14 +340,18 @@ class DetailStatItem extends StatelessWidget {
   final String label;
   final String value;
   final bool alignEnd;
+  final int? valueMaxLines;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final muted = cs.onPrimary.withValues(alpha: kOpacityMedium);
-    final alignment = alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final rowAlignment =
-        alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start;
+    final alignment = alignEnd
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
+    final rowAlignment = alignEnd
+        ? MainAxisAlignment.end
+        : MainAxisAlignment.start;
     final textAlign = alignEnd ? TextAlign.right : TextAlign.left;
 
     return Column(
@@ -353,8 +376,10 @@ class DetailStatItem extends StatelessWidget {
             context,
           )?.copyWith(color: cs.onPrimary, fontWeight: kFontWeightSemiBold),
           textAlign: textAlign,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          maxLines: valueMaxLines,
+          overflow: (valueMaxLines == null || valueMaxLines != 1)
+              ? null
+              : TextOverflow.ellipsis,
         ),
       ],
     );

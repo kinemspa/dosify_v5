@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -34,6 +35,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
         icon: Icons.medication_outlined,
         label: 'Dose',
         value: _doseDisplay(schedule, medication),
+        valueMaxLines: 4,
       ),
       row1Right: _HeaderPauseResumeAction(
         schedule: schedule,
@@ -43,12 +45,14 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
         icon: Icons.repeat,
         label: 'Type',
         value: _scheduleTypeText(schedule),
+        valueMaxLines: schedule.hasDaysOfMonth ? 3 : 1,
       ),
       row2Right: DetailStatItem(
         icon: Icons.access_time,
         label: 'Times',
         value: _timesText(context, schedule),
         alignEnd: true,
+        valueMaxLines: 6,
       ),
       row3Left: DetailStatItem(
         icon: Icons.event_outlined,
@@ -77,24 +81,40 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
 
   String _doseDisplay(Schedule s, Medication? med) {
     if (med != null) {
-      final metrics = MedicationDisplayHelpers.doseMetricsSummary(
+      final showSlash =
+          s.doseVolumeMicroliter != null &&
+          (s.doseIU != null || med.form == MedicationForm.multiDoseVial);
+
+      final metricsLine = MedicationDisplayHelpers.doseMetricsSummary(
         med,
         doseTabletQuarters: s.doseTabletQuarters,
         doseCapsules: s.doseCapsules,
         doseSyringes: s.doseSyringes,
         doseVials: s.doseVials,
-        doseMassMcg: s.doseMassMcg?.toDouble(),
         doseVolumeMicroliter: s.doseVolumeMicroliter?.toDouble(),
         syringeUnits: s.doseIU?.toDouble(),
+        doseMassMcg: null,
+        separator: showSlash ? ' / ' : ' • ',
       ).trim();
 
-      final strength = MedicationDisplayHelpers.strengthOrConcentrationLabel(
-        med,
-      ).trim();
+      final strengthLabel =
+          MedicationDisplayHelpers.strengthOrConcentrationLabel(med).trim();
 
-      if (metrics.isNotEmpty && strength.isNotEmpty) {
-        return '$metrics • $strength';
+      final lines = <String>[];
+      if (metricsLine.isNotEmpty) lines.add(metricsLine);
+      if (strengthLabel.isNotEmpty) {
+        final strengthPrefix = med.form == MedicationForm.tablet
+            ? 'Tablet strength'
+            : 'Med strength';
+        lines.add('$strengthPrefix - $strengthLabel');
       }
+      if (s.doseMassMcg != null) {
+        lines.add(
+          'Dose strength - ${MedicationDisplayHelpers.formatDoseMassFromMcg(med, s.doseMassMcg!.toDouble())}',
+        );
+      }
+
+      if (lines.isNotEmpty) return lines.join('\n');
     }
 
     final doseValue = s.doseValue;
@@ -109,7 +129,11 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
 
   String _scheduleTypeText(Schedule schedule) {
     if (schedule.hasCycle) return 'Cycle';
-    if (schedule.hasDaysOfMonth) return 'Days of month';
+    if (schedule.hasDaysOfMonth) {
+      final days = (schedule.daysOfMonth ?? const <int>[]).toList()..sort();
+      if (days.isEmpty) return 'Days of month';
+      return 'Days of month\n${days.join(', ')}';
+    }
     final ds = schedule.daysOfWeek.toSet();
     if (ds.isEmpty || ds.length == 7) return 'Daily';
     return 'Days of week';
@@ -120,7 +144,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
     return times
         .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
         .map((t) => t.format(context))
-        .join(', ');
+        .join('\n');
   }
 
   String _timeUntil(DateTime dt) {
