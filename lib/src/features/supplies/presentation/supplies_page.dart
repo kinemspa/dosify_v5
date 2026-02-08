@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/unified_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -288,44 +289,13 @@ class _SuppliesPageState extends State<SuppliesPage> {
         return ListView.separated(
           padding: kPagePadding,
           itemCount: items.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
           itemBuilder: (context, i) {
             final s = items[i];
             final cur = repo.currentStock(s.id);
             final low = repo.isLowStock(s);
-            return ListTile(
-              title: Text(s.name, style: cardTitleStyle(context)),
-              subtitle: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _stockLine(s, cur),
-                      style: helperTextStyle(
-                        context,
-                        color: _stockColor(context, s, cur),
-                      )?.copyWith(fontWeight: kFontWeightSemiBold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (s.expiry != null) ...[
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      _formatDdMm(s.expiry!),
-                      style: helperTextStyle(
-                        context,
-                        color: low
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              leading: Icon(
-                low ? Icons.warning_amber_rounded : Icons.inventory_2,
-                color: low ? Theme.of(context).colorScheme.secondary : null,
-              ),
+            return UnifiedCardSurface(
+              variant: UnifiedCardVariant.compact,
               onTap: () async {
                 await showModalBottomSheet<void>(
                   context: context,
@@ -334,6 +304,51 @@ class _SuppliesPageState extends State<SuppliesPage> {
                   builder: (_) => StockAdjustSheet(supply: s),
                 );
               },
+              child: Row(
+                children: [
+                  Icon(
+                    low ? Icons.warning_amber_rounded : Icons.inventory_2,
+                    color: low ? Theme.of(context).colorScheme.secondary : null,
+                  ),
+                  const SizedBox(width: kSpacingM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.name, style: cardTitleStyle(context)),
+                        const SizedBox(height: kSpacingXXS),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _stockLine(s, cur),
+                                style: helperTextStyle(
+                                  context,
+                                  color: _stockColor(context, s, cur),
+                                )?.copyWith(fontWeight: kFontWeightSemiBold),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (s.expiry != null) ...[
+                              const SizedBox(width: kSpacingS),
+                              Text(
+                                _formatDdMm(s.expiry!),
+                                style: helperTextStyle(
+                                  context,
+                                  color: low
+                                      ? Theme.of(context).colorScheme.error
+                                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         );
@@ -419,15 +434,12 @@ class _SupplyCard extends StatelessWidget {
       );
     }
 
-    return Card(
-      elevation: dense ? kElevationNone : kElevationLow,
-      child: InkWell(
-        onTap: openAdjustSheet,
-        child: Padding(
-          padding: dense ? kCompactCardPadding : kStandardCardPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return UnifiedCardSurface(
+      variant: dense ? UnifiedCardVariant.compact : UnifiedCardVariant.standard,
+      onTap: openAdjustSheet,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
               if (!dense)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -572,7 +584,7 @@ class _SupplyCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
