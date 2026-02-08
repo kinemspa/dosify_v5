@@ -1,3 +1,4 @@
+// Copilot coding agent test - safe to remove
 import 'dart:async'; // NEW: For runZonedGuarded (error handling to MCP)
 
 // Flutter imports:
