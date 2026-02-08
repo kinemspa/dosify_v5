@@ -255,6 +255,11 @@ const double kMedicationDetailInlineLabelWidth = 90;
 /// Centralized to avoid hardcoded sizes in feature code.
 const double kMedicationDetailCompactInfoLabelWidth = 110;
 
+/// Top padding between Medication Detail header name/form and manufacturer.
+///
+/// Keep this centralized to avoid inline literal paddings in feature UI.
+const double kMedicationDetailHeaderManufacturerTopPadding = 1;
+
 /// Medication header text limits
 const int kMedicationHeaderDescriptionMaxChars = 90;
 

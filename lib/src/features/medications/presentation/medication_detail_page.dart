@@ -32,6 +32,8 @@ import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_detail_header_identity.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_sealed_vials_editor_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -409,100 +411,16 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 0,
                                 t,
                               ),
-                              child: Align(
-                                alignment: Alignment.topLeft,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () =>
-                                          _editName(context, updatedMed),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            updatedMed.name,
-                                            style:
-                                                medicationDetailHeaderNameTextStyle(
-                                                  context,
-                                                  color: headerForeground,
-                                                  t: t,
-                                                ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          if (t < 0.8) ...[
-                                            const SizedBox(height: kSpacingXS),
-                                            Container(
-                                              padding:
-                                                  kMedicationDetailFormChipPadding,
-                                              decoration: BoxDecoration(
-                                                color: onPrimary.withValues(
-                                                  alpha: 0.2,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                      kBorderRadiusChipTight,
-                                                    ),
-                                                border: Border.all(
-                                                  color: onPrimary.withValues(
-                                                    alpha: 0.3,
-                                                  ),
-                                                  width: kBorderWidthThin,
-                                                ),
-                                              ),
-                                              child: Text(
-                                                _formLabel(updatedMed.form),
-                                                style:
-                                                    medicationDetailFormChipTextStyle(
-                                                      context,
-                                                      color: headerForeground,
-                                                    ),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                    if (updatedMed.manufacturer != null &&
-                                        updatedMed.manufacturer!.isNotEmpty &&
-                                        t < 0.5)
-                                      GestureDetector(
-                                        onTap: () => _editManufacturer(
-                                          context,
-                                          updatedMed,
-                                        ),
-                                        child: Opacity(
-                                          opacity: (1.0 - t * 2.0).clamp(
-                                            0.0,
-                                            1.0,
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 1,
-                                            ),
-                                            child: Text(
-                                              updatedMed.manufacturer!,
-                                              style:
-                                                  microHelperTextStyle(
-                                                    context,
-                                                    color: onPrimary.withValues(
-                                                      alpha: 0.7,
-                                                    ),
-                                                  )?.copyWith(
-                                                    fontWeight:
-                                                        kFontWeightNormal,
-                                                    letterSpacing: 0.2,
-                                                  ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
+                              child: MedicationDetailHeaderIdentity(
+                                name: updatedMed.name,
+                                formLabel: _formLabel(updatedMed.form),
+                                manufacturer: updatedMed.manufacturer,
+                                headerForeground: headerForeground,
+                                onPrimary: onPrimary,
+                                t: t,
+                                onTapName: () => _editName(context, updatedMed),
+                                onTapManufacturer: () =>
+                                    _editManufacturer(context, updatedMed),
                               ),
                             ),
                             // Keep the same title-fade behavior without rebuilding the whole page on scroll.
@@ -2524,91 +2442,24 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   }
 
   Widget _buildBackupStockSection(BuildContext context, Medication med) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section title with count
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: kSpacingL,
-            vertical: kSpacingS,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.inventory_2_outlined,
-                size: 18,
-                color: colorScheme.primary,
-              ),
-              const SizedBox(width: kSpacingS),
-              Text(
-                'Sealed Vials',
-                style: sectionTitleStyle(
-                  context,
-                )?.copyWith(color: colorScheme.primary),
-              ),
-              const Spacer(),
-              Text(
-                '${_formatNumber(med.stockValue).split('.')[0]} sealed vials',
-                style: bodyTextStyle(
-                  context,
-                )?.copyWith(fontWeight: kFontWeightBold),
-              ),
-            ],
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: kSpacingL),
-          child: Text(
-            'Used for reconstitution.',
-            style: helperTextStyle(context),
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Details
-        _buildDetailTile(
-          context,
-          'Batch #',
-          med.backupVialsBatchNumber ?? 'Not set',
-          isPlaceholder: med.backupVialsBatchNumber == null,
-          onTap: () => _editBackupVialBatch(context, med),
-        ),
-        _buildDetailTile(
-          context,
-          'Expiry',
-          med.backupVialsExpiry != null
-              ? _formatExpiry(med.backupVialsExpiry!)
-              : 'Not set',
-          isPlaceholder: med.backupVialsExpiry == null,
-          isWarning:
-              med.backupVialsExpiry != null &&
-              _isExpiringSoon(med.backupVialsExpiry!),
-          onTap: () => _editBackupVialExpiry(context, med),
-        ),
-        _buildDetailTile(
-          context,
-          'Location',
-          med.backupVialsStorageLocation ?? 'Not set',
-          isPlaceholder: med.backupVialsStorageLocation == null,
-          onTap: () => _editBackupVialLocation(context, med),
-        ),
-
-        Divider(
-          height: 1,
-          indent: 16,
-          endIndent: 16,
-          color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-        ),
-
-        // Storage conditions
-        _buildBackupStockConditionsRow(context, med),
-      ],
+    return MedicationSealedVialsEditorCard(
+      sealedVialsCountLabel:
+          '${_formatNumber(med.stockValue).split('.')[0]} sealed vials',
+      batchNumberValue: med.backupVialsBatchNumber ?? 'Not set',
+      batchNumberIsPlaceholder: med.backupVialsBatchNumber == null,
+      onEditBatchNumber: () => _editBackupVialBatch(context, med),
+      expiryValue: med.backupVialsExpiry != null
+          ? _formatExpiry(med.backupVialsExpiry!)
+          : 'Not set',
+      expiryIsPlaceholder: med.backupVialsExpiry == null,
+      expiryIsWarning:
+          med.backupVialsExpiry != null &&
+          _isExpiringSoon(med.backupVialsExpiry!),
+      onEditExpiry: () => _editBackupVialExpiry(context, med),
+      locationValue: med.backupVialsStorageLocation ?? 'Not set',
+      locationIsPlaceholder: med.backupVialsStorageLocation == null,
+      onEditLocation: () => _editBackupVialLocation(context, med),
+      conditionsRow: _buildBackupStockConditionsRow(context, med),
     );
   }
 
