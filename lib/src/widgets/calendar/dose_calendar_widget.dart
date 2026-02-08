@@ -773,17 +773,20 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       }
     }
 
-    Widget buildBody({double? panelHeight}) {
+    Widget buildBody({double? panelHeight, required double effectiveHeight}) {
       final showSelectedDayStage =
           widget.showSelectedDayPanel &&
           _selectedDate != null &&
           _currentView != CalendarView.day;
 
-      final stageInitialRatio = switch (_currentView) {
-        CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
-        CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
-        CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
-      };
+      final stageInitialRatio = widget.variant == CalendarVariant.full
+          ? _selectedDayStageInitialRatioForFullHeight(
+              effectiveHeight,
+              showHeader: showHeader,
+              showUpNextCard:
+                  widget.variant == CalendarVariant.full && widget.showUpNextCard,
+            )
+          : null;
 
       Widget buildCalendarArea() {
         if (_isLoading) {
@@ -848,17 +851,32 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               SizedBox(height: panelHeight, child: _buildSelectedHourPanel())
             else
               Expanded(child: _buildSelectedHourPanel()),
-          if (showSelectedDayStage && widget.variant != CalendarVariant.full)
-            const SizedBox(height: kSpacingS),
-          if (showSelectedDayStage && widget.variant != CalendarVariant.full)
-            if (widget.variant == CalendarVariant.compact)
-              Flexible(fit: FlexFit.loose, child: _buildSelectedDayPanel())
-            else if (panelHeight != null)
-              SizedBox(height: panelHeight, child: _buildSelectedDayPanel())
-            else
-              Expanded(child: _buildSelectedDayPanel()),
         ],
       );
+
+      // Non-full variants: render the selected-day panel as an overlay so the
+      // calendar grid doesn't get squashed to make room.
+      if (showSelectedDayStage && widget.variant != CalendarVariant.full) {
+        final ratio = switch (_currentView) {
+          CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
+          CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
+          CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
+        };
+        final overlayHeight = effectiveHeight * ratio;
+
+        return Stack(
+          children: [
+            Positioned.fill(child: bodyColumn),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: overlayHeight,
+              child: _buildSelectedDayPanel(),
+            ),
+          ],
+        );
+      }
 
       // Full variant: selected-day panel becomes a draggable stage that hugs
       // the bottom and can expand to full screen (covering header + calendar).
@@ -866,7 +884,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return Stack(
           children: [
             Positioned.fill(child: bodyColumn),
-            _buildSelectedDayStageSheet(initialRatio: stageInitialRatio),
+            _buildSelectedDayStageSheet(
+              initialRatio: stageInitialRatio ?? kCalendarSelectedDayPanelHeightRatioMonth,
+            ),
           ],
         );
       }
@@ -898,7 +918,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             ? effectiveHeight * selectedDayPanelRatio
             : null;
 
-        final body = buildBody(panelHeight: panelHeight);
+        final body = buildBody(
+          panelHeight: panelHeight,
+          effectiveHeight: effectiveHeight,
+        );
 
         if (widget.embedInParentCard) {
           return SizedBox(height: effectiveHeight, child: body);
@@ -1034,55 +1057,43 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final topCount = (includeHandle || includeHeader) ? 1 : 0;
 
     if (dayDoses.isEmpty) {
-      return Scrollbar(
+      return ListView(
         controller: scrollController,
-        thumbVisibility: true,
-        thickness: kCalendarStageScrollbarThickness,
-        radius: kCalendarStageScrollbarThumbRadius,
-        child: ListView(
-          controller: scrollController,
-          padding: calendarStageListPadding(listBottomPadding),
-          children: [
-            buildTop(context),
-            const SizedBox(height: kSpacingS),
-            const CalendarNoDosesState(showIcon: false, compact: true),
-          ],
-        ),
+        padding: calendarStageListPadding(listBottomPadding),
+        children: [
+          buildTop(context),
+          const SizedBox(height: kSpacingS),
+          const CalendarNoDosesState(showIcon: false, compact: true),
+        ],
       );
     }
 
-    return Scrollbar(
+    return ListView.builder(
       controller: scrollController,
-      thumbVisibility: true,
-      thickness: kCalendarStageScrollbarThickness,
-      radius: kCalendarStageScrollbarThumbRadius,
-      child: ListView.builder(
-        controller: scrollController,
-        padding: calendarStageListPadding(listBottomPadding),
-        itemCount: hours.length + topCount,
-        itemBuilder: (context, index) {
-          if (topCount > 0 && index == 0) return buildTop(context);
+      padding: calendarStageListPadding(listBottomPadding),
+      itemCount: hours.length + topCount,
+      itemBuilder: (context, index) {
+        if (topCount > 0 && index == 0) return buildTop(context);
 
-          final hourIndex = index - topCount;
-          final hour = hours[hourIndex];
-          final hourDoses = dosesByHour[hour] ?? const [];
+        final hourIndex = index - topCount;
+        final hour = hours[hourIndex];
+        final hourDoses = dosesByHour[hour] ?? const [];
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (hourIndex == 0) const SizedBox(height: kSpacingS),
-              if (hourIndex != 0)
-                Divider(
-                  height: kSpacingM,
-                  thickness: kBorderWidthThin,
-                  color: Theme.of(context).colorScheme.outlineVariant
-                      .withValues(alpha: kOpacityVeryLow),
-                ),
-              _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
-            ],
-          );
-        },
-      ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (hourIndex == 0) const SizedBox(height: kSpacingS),
+            if (hourIndex != 0)
+              Divider(
+                height: kSpacingM,
+                thickness: kBorderWidthThin,
+                color: Theme.of(context).colorScheme.outlineVariant
+                    .withValues(alpha: kOpacityVeryLow),
+              ),
+            _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
+          ],
+        );
+      },
     );
   }
 
@@ -1172,36 +1183,92 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           }
         }
       },
-      child: Scrollbar(
+      child: ListView.builder(
         controller: _dayStageScrollController,
-        thumbVisibility: true,
-        thickness: kCalendarStageScrollbarThickness,
-        radius: kCalendarStageScrollbarThumbRadius,
-        child: ListView.builder(
-          controller: _dayStageScrollController,
-          padding: calendarStageListPadding(listBottomPadding),
-          itemCount: hours.length,
-          itemBuilder: (context, index) {
-            final hour = hours[index];
-            final hourDoses = dosesByHour[hour] ?? const [];
+        padding: calendarStageListPadding(listBottomPadding),
+        itemCount: hours.length,
+        itemBuilder: (context, index) {
+          final hour = hours[index];
+          final hourDoses = dosesByHour[hour] ?? const [];
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (index != 0)
-                    Divider(
-                      height: kSpacingM,
-                      thickness: kBorderWidthThin,
-                      color: Theme.of(context).colorScheme.outlineVariant
-                          .withValues(alpha: kOpacityVeryLow),
-                    ),
-                  _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
-                ],
-              );
-          },
-        ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (index != 0)
+                Divider(
+                  height: kSpacingM,
+                  thickness: kBorderWidthThin,
+                  color: Theme.of(context).colorScheme.outlineVariant
+                      .withValues(alpha: kOpacityVeryLow),
+                ),
+              _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  double _selectedDayStageInitialRatioForFullHeight(
+    double effectiveHeight, {
+    required bool showHeader,
+    required bool showUpNextCard,
+  }) {
+    final peekRatio = kCalendarSelectedDayStagePeekRatio;
+    final maxInitialRatio = kCalendarSelectedDayStageMaxInitialRatio;
+
+    if (_currentView == CalendarView.day) {
+      return kCalendarSelectedDayPanelHeightRatioDay;
+    }
+
+    final headerHeight = showHeader ? kCalendarHeaderHeight : 0.0;
+
+    // Up-next card height is content-dependent; keep stage ratio stable.
+    // (We still adapt to the calendar grid's variable week count.)
+    final upNextReservedHeight = showUpNextCard ? 0.0 : 0.0;
+
+    final viewHeight = switch (_currentView) {
+      CalendarView.week => kCalendarWeekHeaderHeight + kCalendarWeekGridHeight,
+      CalendarView.month => _monthViewIntrinsicHeight(),
+      CalendarView.day => 0.0,
+    };
+
+    final visibleTopHeight = headerHeight + upNextReservedHeight + viewHeight;
+    final computed = 1.0 - (visibleTopHeight / effectiveHeight);
+
+    final fallback = switch (_currentView) {
+      CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
+      CalendarView.month => kCalendarSelectedDayPanelHeightRatioMonth,
+      CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
+    };
+
+    return computed.isFinite
+      ? computed.clamp(peekRatio, maxInitialRatio).toDouble()
+      : fallback;
+  }
+
+  double _monthViewIntrinsicHeight() {
+    // Matches CalendarMonthView's layout: day headers + week rows * day height.
+    final localizations = MaterialLocalizations.of(context);
+    final startOnMonday = localizations.firstDayOfWeekIndex == 1;
+
+    final firstDayOfMonth = DateTime(_currentDate.year, _currentDate.month, 1);
+    int weekday = firstDayOfMonth.weekday;
+    weekday = weekday == 7 ? 0 : weekday; // Sun=0
+
+    final daysToSubtract = startOnMonday ? weekday : (weekday == 0 ? 0 : weekday);
+    final first = firstDayOfMonth.subtract(Duration(days: daysToSubtract));
+
+    final lastDayOfMonth = DateTime(_currentDate.year, _currentDate.month + 1, 0);
+    final lastWeekday = lastDayOfMonth.weekday; // 1-7 (Mon-Sun)
+    final normalized = lastWeekday == 7 ? 0 : lastWeekday; // Sun=0
+    final daysToAdd = startOnMonday ? (7 - lastWeekday) % 7 : (6 - normalized);
+
+    final last = lastDayOfMonth.add(Duration(days: daysToAdd));
+    final totalDays = last.difference(first).inDays + 1;
+    final rowCount = (totalDays / 7).ceil();
+
+    return kCalendarMonthDayHeaderHeight + (rowCount * kCalendarDayHeight);
   }
 
   Widget _buildSelectedHourPanel() {

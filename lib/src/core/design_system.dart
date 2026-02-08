@@ -279,6 +279,7 @@ const EdgeInsets kMedicationDetailFormChipPadding = EdgeInsets.symmetric(
 /// Calendar component sizing
 const double kCalendarDayHeight =
     52; // Height of day cell in month view (reduced from 80)
+const double kCalendarMonthDayHeaderHeight = 28;
 const double kCalendarHourHeight = 60; // Height of hour row in day view
 const double kCalendarDoseBlockHeight = 60; // Default dose block height
 const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
@@ -308,6 +309,7 @@ const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.only(
 /// When collapsed, the stage should leave a visible "tab" at the bottom to
 /// indicate it can be dragged upward.
 const double kCalendarSelectedDayStagePeekRatio = 0.10;
+const double kCalendarSelectedDayStageMaxInitialRatio = 0.85;
 
 /// Selected-day stage header spacing (kept compact so it fits in peek mode).
 const EdgeInsets kCalendarSelectedDayStageHandleMargin = EdgeInsets.symmetric(

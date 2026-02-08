@@ -101,6 +101,7 @@ class CalendarMonthView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final datesToDisplay = _datesToDisplay;
+    final rowCount = (datesToDisplay.length / 7).ceil();
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -120,6 +121,7 @@ class CalendarMonthView extends StatelessWidget {
         }
       },
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Day headers
           _DayHeaders(
@@ -128,44 +130,34 @@ class CalendarMonthView extends StatelessWidget {
             selectedWeekday: selectedDate?.weekday,
           ),
           // Calendar grid
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final rowCount = (datesToDisplay.length / 7).ceil();
-                // Keep month-view cells from growing too tall on large screens,
-                // while still shrinking when vertical space is constrained.
-                final cellHeight =
-                    (constraints.maxHeight / rowCount)
-                        .clamp(0.0, kCalendarDayHeight)
-                        .toDouble();
+          SizedBox(
+            height: rowCount * kCalendarDayHeight,
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7,
+                mainAxisExtent: kCalendarDayHeight,
+              ),
+              itemCount: datesToDisplay.length,
+              itemBuilder: (context, index) {
+                final date = datesToDisplay[index];
+                final dayDoses = _getDosesForDay(date);
+                final isToday = _isToday(date);
+                final isCurrentMonth = _isCurrentMonth(date);
+                final isSelected =
+                    selectedDate != null &&
+                    date.year == selectedDate!.year &&
+                    date.month == selectedDate!.month &&
+                    date.day == selectedDate!.day;
 
-                return GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 7,
-                    mainAxisExtent: cellHeight,
-                  ),
-                  itemCount: datesToDisplay.length,
-                  itemBuilder: (context, index) {
-                    final date = datesToDisplay[index];
-                    final dayDoses = _getDosesForDay(date);
-                    final isToday = _isToday(date);
-                    final isCurrentMonth = _isCurrentMonth(date);
-                    final isSelected =
-                        selectedDate != null &&
-                        date.year == selectedDate!.year &&
-                        date.month == selectedDate!.month &&
-                        date.day == selectedDate!.day;
-
-                    return CalendarDayCell(
-                      date: date,
-                      doses: dayDoses,
-                      isCurrentMonth: isCurrentMonth,
-                      isToday: isToday,
-                      isSelected: isSelected,
-                      onTap: onDayTap != null ? () => onDayTap!(date) : null,
-                    );
-                  },
+                return CalendarDayCell(
+                  date: date,
+                  doses: dayDoses,
+                  isCurrentMonth: isCurrentMonth,
+                  isToday: isToday,
+                  isSelected: isSelected,
+                  onTap: onDayTap != null ? () => onDayTap!(date) : null,
                 );
               },
             ),
@@ -209,7 +201,7 @@ class _DayHeaders extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      height: kStandardFieldHeight,
+      height: kCalendarMonthDayHeaderHeight,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(

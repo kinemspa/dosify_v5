@@ -86,6 +86,7 @@ class CalendarHeader extends StatelessWidget {
           FilledButton(
             onPressed: onToday,
             style: FilledButton.styleFrom(
+              foregroundColor: colorScheme.onPrimary,
               padding: kCalendarTodayButtonPadding,
               minimumSize: kCalendarTodayButtonMinSize,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -95,7 +96,12 @@ class CalendarHeader extends StatelessWidget {
                 ),
               ),
             ),
-            child: Text('Today', style: calendarDayOverflowTextStyle(context)),
+            child: Text(
+              'Today',
+              style: calendarDayOverflowTextStyle(
+                context,
+              )?.copyWith(color: colorScheme.onPrimary),
+            ),
           ),
 
           if (showViewToggle) ...[
