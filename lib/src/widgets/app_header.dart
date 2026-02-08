@@ -32,8 +32,15 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final showBack = Navigator.of(context).canPop() || forceBackButton;
 
-    final hasSupplies =
-      Hive.isBoxOpen('supplies') && Hive.box<dynamic>('supplies').isNotEmpty;
+    var hasSupplies = false;
+    try {
+      const boxName = 'supplies';
+      if (Hive.isBoxOpen(boxName)) {
+        hasSupplies = Hive.box<dynamic>(boxName).isNotEmpty;
+      }
+    } catch (_) {
+      hasSupplies = false;
+    }
 
     final effectiveActions = <Widget>[
       ...?actions,

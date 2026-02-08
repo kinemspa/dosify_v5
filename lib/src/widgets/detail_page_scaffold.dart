@@ -49,8 +49,15 @@ class DetailPageScaffold extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final headerForeground = cs.onPrimary;
 
-    final hasSupplies =
-      Hive.isBoxOpen('supplies') && Hive.box<dynamic>('supplies').isNotEmpty;
+    var hasSupplies = false;
+    try {
+      const boxName = 'supplies';
+      if (Hive.isBoxOpen(boxName)) {
+        hasSupplies = Hive.box<dynamic>(boxName).isNotEmpty;
+      }
+    } catch (_) {
+      hasSupplies = false;
+    }
 
     return Scaffold(
       body: CustomScrollView(
