@@ -97,12 +97,12 @@ class _ActivityCardState extends State<ActivityCard> {
                         onChanged: widget.onIncludedMedicationIdsChanged!,
                         buttonLabel:
                             '${widget.includedMedicationIds.length}/${meds.length} meds',
-                        primaryFill: true,
+                        primaryFill: false,
                       ),
               ),
               const SizedBox(width: kSpacingXS),
               SizedBox(
-                width: kCompactControlMaxWidth,
+                width: kCompactControlWidth,
                 child: SmallDropdown36<ReportTimeRangePreset>(
                   value: widget.rangePreset,
                   items: ReportTimeRangePreset.values
@@ -121,7 +121,6 @@ class _ActivityCardState extends State<ActivityCard> {
               ),
             ],
           ),
-          const SizedBox(height: kSpacingS),
           const SizedBox(height: kSpacingXS),
           if (widget.includedMedicationIds.isEmpty)
             const UnifiedEmptyState(title: 'No medications selected')

@@ -19,6 +19,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
+import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
 
 sealed class _CombinedHistoryItem {
   const _CombinedHistoryItem({
@@ -61,6 +62,7 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
   @override
   Widget buildTitle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final statusColor = doseActionVisualSpec(context, log.action).color;
 
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
@@ -77,7 +79,7 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
               '${_formatAmount(displayValue)} $displayUnit',
               style: bodyTextStyle(
                 context,
-              )?.copyWith(fontWeight: kFontWeightSemiBold),
+              )?.copyWith(fontWeight: kFontWeightSemiBold, color: statusColor),
             ),
             Text(
               '•',
@@ -127,6 +129,10 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
   @override
   Widget buildTitle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final statusColor = inventoryChangeVisualSpec(
+      context,
+      log.changeType,
+    ).color;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +141,7 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
           log.description,
           style: bodyTextStyle(
             context,
-          )?.copyWith(fontWeight: kFontWeightSemiBold),
+          )?.copyWith(fontWeight: kFontWeightSemiBold, color: statusColor),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -501,10 +507,11 @@ class _CombinedReportsHistoryWidgetState
     }
 
     Widget buildDateHeader(DateTime localTime) {
+      final localizations = MaterialLocalizations.of(context);
       final label =
-          '${DateTimeFormatter.formatWeekdayAbbr(localTime)} · ${DateTimeFormatter.formatDateShort(localTime)}';
+          '${DateTimeFormatter.formatWeekdayAbbr(localTime)} · ${localizations.formatShortDate(localTime)}';
       return Padding(
-        padding: const EdgeInsets.fromLTRB(kSpacingS, kSpacingS, kSpacingS, 0),
+        padding: const EdgeInsets.fromLTRB(kSpacingS, kSpacingXS, kSpacingS, 0),
         child: Text(
           label,
           style: helperTextStyle(context)?.copyWith(
@@ -520,18 +527,26 @@ class _CombinedReportsHistoryWidgetState
     Widget buildTimeLabel(DateTime localTime) {
       final text = DateTimeFormatter.formatTimeCompact(context, localTime);
       return SizedBox(
-        width: kNextDoseDateCircleSizeCompact,
+        width: kNextDoseDateCircleSizeLarge,
         child: Text(
           text,
           style: smallHelperTextStyle(
             context,
             color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          softWrap: true,
           textAlign: TextAlign.center,
         ),
       );
+    }
+
+    String doseActionBadgeLabel(DoseAction action) {
+      return switch (action) {
+        DoseAction.taken => 'TAKEN',
+        DoseAction.skipped => 'SKIPPED',
+        DoseAction.snoozed => 'SNOOZED',
+      };
     }
 
     final doseLogBox = Hive.box<DoseLog>('dose_logs');
@@ -629,7 +644,7 @@ class _CombinedReportsHistoryWidgetState
                           onTap: onTap,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                              vertical: kSpacingXS / 2,
+                              vertical: kSpacingXXS,
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -638,33 +653,43 @@ class _CombinedReportsHistoryWidgetState
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(
                                     kSpacingS,
-                                    kSpacingXS,
+                                    kSpacingXXS,
                                     kSpacingS,
-                                    kSpacingXS,
+                                    kSpacingXXS,
                                   ),
                                   child: Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        CrossAxisAlignment.center,
                                     children: [
                                       buildTimeLabel(localTime),
                                       const SizedBox(width: kSpacingS),
                                       Expanded(child: item.buildTitle(context)),
                                       const SizedBox(width: kSpacingS),
-                                      Container(
-                                        width: kStepperButtonSize,
-                                        height: kStepperButtonSize,
-                                        decoration: BoxDecoration(
-                                          color: iconColor.withValues(
-                                            alpha: kOpacitySubtle,
+                                      if (item is _DoseHistoryItem)
+                                        UnifiedStatusBadge(
+                                          label: doseActionBadgeLabel(
+                                            item.log.action,
                                           ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          spec.icon,
-                                          size: kIconSizeSmall,
+                                          icon: spec.icon,
                                           color: iconColor,
+                                          dense: true,
+                                        )
+                                      else
+                                        Container(
+                                          width: kStepperButtonSize,
+                                          height: kStepperButtonSize,
+                                          decoration: BoxDecoration(
+                                            color: iconColor.withValues(
+                                              alpha: kOpacitySubtle,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            spec.icon,
+                                            size: kIconSizeSmall,
+                                            color: iconColor,
+                                          ),
                                         ),
-                                      ),
                                     ],
                                   ),
                                 ),
