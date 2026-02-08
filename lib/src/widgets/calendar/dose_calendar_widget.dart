@@ -1029,7 +1029,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       );
     }
 
-    final topCount = (includeHandle ? 1 : 0) + (includeHeader ? 1 : 0);
+    // The handle + header are rendered together as a *single* top widget.
+    // Treat it as one list item so hour indexing stays valid.
+    final topCount = (includeHandle || includeHeader) ? 1 : 0;
 
     if (dayDoses.isEmpty) {
       return Scrollbar(
