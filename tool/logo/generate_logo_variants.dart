@@ -5,14 +5,20 @@ import 'package:image/image.dart' as img;
 const String _primaryLogoPath = 'assets/logo/logo_001_primary.png';
 const String _whiteLogoPath = 'assets/logo/logo_001_white.png';
 const String _androidIconPath = 'assets/logo/logo_001_android_icon.png';
+const String _androidAdaptiveForegroundPath =
+  'assets/logo/logo_001_white_adaptive_fg.png';
+const String _splashLogoPath = 'assets/logo/logo_001_white_splash.png';
 const String _androidNotificationLargeIconPath =
   'android/app/src/main/res/drawable/ic_notification_large.png';
 
 // App brand seed (matches lib/src/app/app.dart)
 const int _brandFillArgb = 0xFF09A8BD;
 
-// Matches the generator's ic_launcher.xml inset (16%).
-const double _adaptiveInsetFraction = 0.16;
+// Insets are expressed as a fraction of the canvas size per side.
+// Larger inset => smaller visible logo.
+const double _legacyIconInsetFraction = 0.22;
+const double _adaptiveForegroundInsetFraction = 0.26;
+const double _splashInsetFraction = 0.32;
 
 Future<void> main() async {
   final primaryBytes = File(_primaryLogoPath).readAsBytesSync();
@@ -28,17 +34,37 @@ Future<void> main() async {
     ..createSync(recursive: true)
     ..writeAsBytesSync(img.encodePng(whiteLogo));
 
+  final adaptiveFg = _composeTransparentPadded(
+    source: whiteLogo,
+    size: 1024,
+    insetFraction: _adaptiveForegroundInsetFraction,
+  );
+  File(_androidAdaptiveForegroundPath)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(img.encodePng(adaptiveFg));
+
+  final splashLogo = _composeTransparentPadded(
+    source: whiteLogo,
+    size: 1024,
+    insetFraction: _splashInsetFraction,
+  );
+  File(_splashLogoPath)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(img.encodePng(splashLogo));
+
   final androidIcon = _composeAndroidIcon(
     whiteLogo: whiteLogo,
     size: 1024,
     fillArgb: _brandFillArgb,
-    insetFraction: _adaptiveInsetFraction,
+    insetFraction: _legacyIconInsetFraction,
   );
   File(_androidIconPath)
     ..createSync(recursive: true)
     ..writeAsBytesSync(img.encodePng(androidIcon));
 
   stdout.writeln('Wrote: $_whiteLogoPath');
+  stdout.writeln('Wrote: $_androidAdaptiveForegroundPath');
+  stdout.writeln('Wrote: $_splashLogoPath');
   stdout.writeln('Wrote: $_androidIconPath');
 
   final notificationIcon = img.copyResize(
@@ -51,6 +77,39 @@ Future<void> main() async {
     ..createSync(recursive: true)
     ..writeAsBytesSync(img.encodePng(notificationIcon));
   stdout.writeln('Wrote: $_androidNotificationLargeIconPath');
+}
+
+img.Image _composeTransparentPadded({
+  required img.Image source,
+  required int size,
+  required double insetFraction,
+}) {
+  final canvas = img.Image(width: size, height: size);
+
+  // Transparent background by default.
+  img.fill(canvas, color: img.ColorRgba8(0, 0, 0, 0));
+
+  final targetMax = (size * (1.0 - 2 * insetFraction)).round();
+  final scale = _scaleToFit(
+    srcWidth: source.width,
+    srcHeight: source.height,
+    maxWidth: targetMax,
+    maxHeight: targetMax,
+  );
+  final scaledW = (source.width * scale).round();
+  final scaledH = (source.height * scale).round();
+
+  final resized = img.copyResize(
+    source,
+    width: scaledW,
+    height: scaledH,
+    interpolation: img.Interpolation.cubic,
+  );
+
+  final dstX = ((size - resized.width) / 2).round();
+  final dstY = ((size - resized.height) / 2).round();
+  img.compositeImage(canvas, resized, dstX: dstX, dstY: dstY);
+  return canvas;
 }
 
 img.Image _makeWhite(img.Image source) {
