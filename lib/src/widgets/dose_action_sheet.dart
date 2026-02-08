@@ -1470,6 +1470,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
     if (widget.presentation == DoseActionSheetPresentation.bottomSheet) {
       return DraggableScrollableSheet(
+        expand: false,
         initialChildSize: 0.8,
         minChildSize: 0.55,
         maxChildSize: 0.9,
