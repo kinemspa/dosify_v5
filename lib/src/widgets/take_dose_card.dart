@@ -42,8 +42,14 @@ class TakeDoseCard extends StatelessWidget {
       dose,
     );
 
-    final dateText = DateFormat('E, MMM d').format(dose.scheduledTime);
-    final timeText = DateTimeFormatter.formatTime(context, dose.scheduledTime);
+    final localTime = dose.scheduledTime.toLocal();
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final weekday = DateFormat.E(localeTag).format(localTime);
+    final shortDate = MaterialLocalizations.of(context).formatCompactDate(
+      localTime,
+    );
+    final dateText = '$weekday $shortDate';
+    final timeText = DateTimeFormatter.formatTime(context, localTime);
 
     final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
 

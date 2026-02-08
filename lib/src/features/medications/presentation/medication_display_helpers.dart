@@ -175,21 +175,32 @@ class MedicationDisplayHelpers {
         break;
     }
 
-    if (doseMassMcg != null) {
-      metrics.add(formatStrengthFromMcg(doseMassMcg));
-    }
-
-    if (doseVolumeMicroliter != null) {
-      metrics.add(formatDoseVolumeFromMicroliter(doseVolumeMicroliter));
-    }
-
-    if (effectiveSyringeUnits != null) {
-      metrics.add(
-        formatSyringeUnits(
-          effectiveSyringeUnits,
-          longLabel: med.form == MedicationForm.multiDoseVial,
-        ),
-      );
+    // Administration method first, especially for MDV (Units → mL → mcg/mg).
+    if (med.form == MedicationForm.multiDoseVial) {
+      if (effectiveSyringeUnits != null) {
+        metrics.add(formatSyringeUnits(effectiveSyringeUnits, longLabel: true));
+      }
+      if (doseVolumeMicroliter != null) {
+        metrics.add(formatDoseVolumeFromMicroliter(doseVolumeMicroliter));
+      }
+      if (doseMassMcg != null) {
+        metrics.add(formatStrengthFromMcg(doseMassMcg));
+      }
+    } else {
+      if (doseMassMcg != null) {
+        metrics.add(formatStrengthFromMcg(doseMassMcg));
+      }
+      if (doseVolumeMicroliter != null) {
+        metrics.add(formatDoseVolumeFromMicroliter(doseVolumeMicroliter));
+      }
+      if (effectiveSyringeUnits != null) {
+        metrics.add(
+          formatSyringeUnits(
+            effectiveSyringeUnits,
+            longLabel: false,
+          ),
+        );
+      }
     }
 
     if (metrics.isEmpty) return '';

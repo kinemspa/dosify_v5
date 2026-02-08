@@ -55,7 +55,13 @@ class DoseSummaryRow extends StatelessWidget {
           };
 
     final doseInfo = '${_formatNumber(dose.doseValue)} ${dose.doseUnit}';
-    final dateStr = DateFormat('E, MMM d').format(dose.scheduledTime);
+    final localTime = dose.scheduledTime.toLocal();
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final weekday = DateFormat.E(localeTag).format(localTime);
+    final shortDate = MaterialLocalizations.of(context).formatCompactDate(
+      localTime,
+    );
+    final dateStr = '$weekday $shortDate';
 
     final line2 = showMedicationName
         ? '${dose.medicationName} • $doseInfo'

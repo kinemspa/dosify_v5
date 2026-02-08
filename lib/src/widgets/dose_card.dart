@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:intl/intl.dart' as intl;
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -60,6 +61,7 @@ class DoseCard extends StatelessWidget {
     final radius = compact ? kBorderRadiusSmall : kBorderRadiusMedium;
     final contentPadding = doseCardContentPadding(compact: compact);
     final columnGap = doseCardColumnGap(compact: compact);
+    final badgeToDateGap = compact ? kSpacingXXS : kSpacingXS;
 
     final effectiveStatus = statusOverride ?? dose.status;
     final disabled = !isActive;
@@ -72,9 +74,14 @@ class DoseCard extends StatelessWidget {
 
     // Note: label/icon are rendered via the status chip/action button widgets.
 
-    final dateLabel =
-        '${DateTimeFormatter.formatWeekdayAbbr(dose.scheduledTime)} ${DateTimeFormatter.formatDateShort(dose.scheduledTime)}';
-    final timeText = DateTimeFormatter.formatTime(context, dose.scheduledTime);
+    final localTime = dose.scheduledTime.toLocal();
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final weekday = intl.DateFormat.E(localeTag).format(localTime);
+    final shortDate = MaterialLocalizations.of(context).formatCompactDate(
+      localTime,
+    );
+    final dateLabel = '$weekday $shortDate';
+    final timeText = DateTimeFormatter.formatTime(context, localTime);
 
     final primaryTitleStyle = doseCardPrimaryTitleTextStyle(
       context,
@@ -131,7 +138,7 @@ class DoseCard extends StatelessWidget {
                           showNextLabel: false,
                           showTodayIcon: true,
                         ),
-                        const SizedBox(height: kSpacingXS),
+                        SizedBox(height: badgeToDateGap),
                         Text(
                           dateLabel,
                           style: microHelperTextStyle(context)?.copyWith(

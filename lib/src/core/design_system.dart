@@ -1600,7 +1600,7 @@ TextStyle? doseCardTakeMetricsTextStyle(
 EdgeInsets doseCardContentPadding({required bool compact}) {
   return EdgeInsets.symmetric(
     horizontal: compact ? kSpacingL : kSpacingXL,
-    vertical: compact ? kSpacingS : kSpacingS,
+    vertical: compact ? kSpacingXS : kSpacingS,
   );
 }
 

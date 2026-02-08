@@ -1,6 +1,7 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 
 enum NextDoseBadgeLabelStyle { standard, tall }
 
@@ -55,15 +56,31 @@ class NextDoseDateBadge extends StatelessWidget {
 
     final shouldShowNext = showNextLabel && isEnabled;
 
-    final isToday = hasNext && _isSameDay(nextDose!, DateTime.now());
+    final DateTime? nextLocal = nextDose?.toLocal();
+    final isToday = nextLocal != null && _isSameDay(nextLocal, DateTime.now());
 
-    final dayText = hasNext ? DateTimeFormatter.formatDay(nextDose!) : '—';
+    final dayText = nextLocal != null
+        ? DateTimeFormatter.formatDay(nextLocal)
+        : '—';
     final monthText = isToday
         ? ''
-        : (hasNext ? DateTimeFormatter.formatMonthAbbr(nextDose!) : '');
-    final timeText = hasNext
-        ? DateTimeFormatter.formatTimeCompact(context, nextDose!)
+        : (nextLocal != null
+              ? DateTimeFormatter.formatMonthAbbr(nextLocal)
+              : '');
+    final timeText = nextLocal != null
+        ? DateTimeFormatter.formatTimeCompact(context, nextLocal)
         : 'No upcoming';
+
+    final todayDateText = isToday
+        ? () {
+            final localeTag = Localizations.localeOf(context).toLanguageTag();
+            final weekday = intl.DateFormat.E(localeTag).format(nextLocal);
+            final shortDate = MaterialLocalizations.of(
+              context,
+            ).formatCompactDate(nextLocal);
+            return '$weekday $shortDate';
+          }()
+        : null;
 
     final timeTextParts = timeText.split(' ');
     final timeMain = timeTextParts.isNotEmpty ? timeTextParts.first : timeText;
@@ -94,8 +111,7 @@ class NextDoseDateBadge extends StatelessWidget {
                 style: nextDoseBadgeMonthTextStyle(
                   context,
                   dense: true,
-                  color:
-                      primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+                  color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
                 ),
               ),
           ],
@@ -127,14 +143,28 @@ class NextDoseDateBadge extends StatelessWidget {
                   color: primaryTextColor,
                 ),
               ),
-            if (monthText.isNotEmpty)
+
+            if (isToday && showTodayIcon && todayDateText != null)
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  todayDateText,
+                  style: nextDoseBadgeMonthTextStyle(
+                    context,
+                    dense: dense,
+                    color: primaryTextColor.withValues(
+                      alpha: kOpacityMediumHigh,
+                    ),
+                  ),
+                ),
+              )
+            else if (monthText.isNotEmpty)
               Text(
                 monthText,
                 style: nextDoseBadgeMonthTextStyle(
                   context,
                   dense: dense,
-                  color:
-                      primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+                  color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
                 ),
               ),
           ],
