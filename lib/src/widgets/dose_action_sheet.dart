@@ -21,6 +21,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_value_formatter.dar
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/dose_card_meta_lines.dart';
 import 'package:dosifi_v5/src/widgets/dose_dialog_dose_preview.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -651,9 +652,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             syringeUnits: schedule.doseIU?.toDouble(),
           );
 
-    final stockInfo = MedicationDisplayHelpers.calculateStock(med);
-    final location = MedicationDisplayHelpers.primaryStorageLocation(med);
-
     String? lastDoseLine() {
       final log = _lastTakenLog;
       final at = log?.actionTime;
@@ -673,33 +671,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       return 'Last: $amount • $date';
     }
 
-    final cs = Theme.of(context).colorScheme;
-    final metaStyle = microHelperTextStyle(context)?.copyWith(
-      color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+    final metaLines = buildDoseCardInventoryMetaLines(
+      context,
+      medication: med,
+      lastDoseLine: lastDoseLine(),
     );
-
-    final metaLines = <Widget>[
-      Text(
-        'Remaining: ${stockInfo.label}',
-        style: metaStyle,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      if (location != null)
-        Text(
-          'Location: $location',
-          style: metaStyle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      if (lastDoseLine() != null)
-        Text(
-          lastDoseLine()!,
-          style: metaStyle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-    ];
 
     final mdvGaugeInCard = med.form == MedicationForm.multiDoseVial
         ? _buildMdvGaugeInCard(context, med: med)

@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
+import 'package:dosifi_v5/src/widgets/dose_card_meta_lines.dart';
 import 'package:dosifi_v5/src/widgets/show_dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
@@ -225,16 +226,23 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
     final scheduledCount = items.length;
     final upcomingCount = items
         .where(
-          (i) => i.dose.status == DoseStatus.pending || i.dose.status == DoseStatus.due,
+          (i) =>
+              i.dose.status == DoseStatus.pending ||
+              i.dose.status == DoseStatus.due,
         )
         .length;
-    final missedCount =
-        items.where((i) => i.dose.status == DoseStatus.overdue).length;
-    final snoozedCount =
-        items.where((i) => i.dose.status == DoseStatus.snoozed).length;
-    final takenCount = items.where((i) => i.dose.status == DoseStatus.taken).length;
-    final skippedCount =
-        items.where((i) => i.dose.status == DoseStatus.skipped).length;
+    final missedCount = items
+        .where((i) => i.dose.status == DoseStatus.overdue)
+        .length;
+    final snoozedCount = items
+        .where((i) => i.dose.status == DoseStatus.snoozed)
+        .length;
+    final takenCount = items
+        .where((i) => i.dose.status == DoseStatus.taken)
+        .length;
+    final skippedCount = items
+        .where((i) => i.dose.status == DoseStatus.skipped)
+        .length;
 
     DateTime? nextUpcomingTime;
     for (final item in items) {
@@ -267,6 +275,10 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
         isActive: item.schedule.isActive,
         medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
           item.medication.form,
+        ),
+        detailLines: buildDoseCardInventoryMetaLines(
+          context,
+          medication: item.medication,
         ),
         doseNumber: ScheduleOccurrenceService.occurrenceNumber(
           item.schedule,
