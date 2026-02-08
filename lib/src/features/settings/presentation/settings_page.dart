@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
@@ -13,16 +14,77 @@ import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
+import 'package:dosifi_v5/src/core/utils/developer_options.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends ConsumerState<SettingsPage> {
+  static const _unlockTapTarget = 7;
+
+  late final Future<PackageInfo> _packageInfo;
+  bool _devEnabled = false;
+  int _tapCount = 0;
+  DateTime? _lastTapAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _packageInfo = PackageInfo.fromPlatform();
+    _loadDevEnabled();
+  }
+
+  Future<void> _loadDevEnabled() async {
+    final enabled = await DeveloperOptions.isEnabled();
+    if (!mounted) return;
+    setState(() => _devEnabled = enabled);
+  }
+
+  Future<void> _handleBuildTap(BuildContext context) async {
+    if (_devEnabled) {
+      showAppSnackBar(context, 'Developer options already enabled');
+      return;
+    }
+
+    final now = DateTime.now();
+    final resetWindowMs = 2000;
+    if (_lastTapAt == null ||
+        now.difference(_lastTapAt!).inMilliseconds > resetWindowMs) {
+      _tapCount = 0;
+    }
+    _lastTapAt = now;
+    _tapCount += 1;
+
+    final remaining = (_unlockTapTarget - _tapCount).clamp(0, _unlockTapTarget);
+    if (remaining > 0) {
+      showAppSnackBar(
+        context,
+        'Tap $remaining more time${remaining == 1 ? '' : 's'} to enable developer options',
+      );
+      return;
+    }
+
+    await DeveloperOptions.setEnabled(true);
+
+    // Mirror to prefs directly to avoid any caching surprises.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(DeveloperOptions.prefsKey, true);
+
+    if (!mounted) return;
+    setState(() => _devEnabled = true);
+    showAppSnackBar(context, 'Developer options enabled');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
 
@@ -125,7 +187,7 @@ class SettingsPage extends ConsumerWidget {
     }
 
     Future<void> showAbout() async {
-      final info = await PackageInfo.fromPlatform();
+      final info = await _packageInfo;
       if (!context.mounted) return;
 
       final versionText = info.buildNumber.trim().isEmpty
@@ -387,91 +449,108 @@ class SettingsPage extends ConsumerWidget {
             onTap: () => context.push('/settings/final-card-decisions'),
           ),
           const SizedBox(height: kSpacingL),
-          Text(
-            'Experimental',
-            style: cardTitleStyle(
-              context,
-            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
-          ),
-          const SizedBox(height: kSpacingS),
-          ValueListenableBuilder<ExperimentalUiConfig>(
-            valueListenable: ExperimentalUiSettings.value,
-            builder: (context, config, _) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SwitchListTile(
-                    secondary: const Icon(Icons.sell_outlined),
-                    title: const Text('Medication list status badges'),
-                    subtitle: const Text(
-                      'Show compact badges like Low stock, Expiring, Fridge, etc.',
-                    ),
-                    value: config.showMedicationListStatusBadges,
-                    onChanged:
-                        ExperimentalUiSettings.setShowMedicationListStatusBadges,
-                  ),
-                  SwitchListTile(
-                    secondary: const Icon(Icons.view_carousel_outlined),
-                    title: const Text('Wide Card Samples entry'),
-                    subtitle: const Text(
-                      'Show the exploratory card mockups page in Settings',
-                    ),
-                    value: config.showWideCardSamplesEntry,
-                    onChanged:
-                        ExperimentalUiSettings.setShowWideCardSamplesEntry,
-                  ),
-                ],
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.science_outlined),
-            title: const Text('Test Data'),
-            subtitle: const Text(
-              'Add or remove sample medications & schedules',
+          if (_devEnabled) ...[
+            const SizedBox(height: kSpacingL),
+            Text(
+              'Developer options',
+              style: cardTitleStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
             ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              if (!context.mounted) return;
-              await showModalBottomSheet<void>(
-                context: context,
-                builder: (context) {
-                  return SafeArea(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.add_circle_outline),
-                          title: const Text('Add test data'),
-                          subtitle: const Text(
-                            'Creates 5 medications and 5 schedules',
-                          ),
-                          onTap: () async {
-                            Navigator.of(context).pop();
-                            await TestDataSeedService.seed();
-                            if (!context.mounted) return;
-                            showAppSnackBar(context, 'Test data added');
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.delete_outline),
-                          title: const Text('Remove test data'),
-                          subtitle: const Text('Deletes the seeded items only'),
-                          onTap: () async {
-                            Navigator.of(context).pop();
-                            await TestDataSeedService.clear();
-                            if (!context.mounted) return;
-                            showAppSnackBar(context, 'Test data removed');
-                          },
-                        ),
-                        const SizedBox(height: kSpacingS),
-                      ],
+            const SizedBox(height: kSpacingS),
+            Text(
+              'Experimental features, diagnostics, and test tools.',
+              style: helperTextStyle(context),
+            ),
+            const SizedBox(height: kSpacingS),
+            Text(
+              'Experimental',
+              style: cardTitleStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+            ),
+            const SizedBox(height: kSpacingS),
+            ValueListenableBuilder<ExperimentalUiConfig>(
+              valueListenable: ExperimentalUiSettings.value,
+              builder: (context, config, _) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SwitchListTile(
+                      secondary: const Icon(Icons.sell_outlined),
+                      title: const Text('Medication list status badges'),
+                      subtitle: const Text(
+                        'Show compact badges like Low stock, Expiring, Fridge, etc.',
+                      ),
+                      value: config.showMedicationListStatusBadges,
+                      onChanged: ExperimentalUiSettings
+                          .setShowMedicationListStatusBadges,
                     ),
-                  );
-                },
-              );
-            },
-          ),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.view_carousel_outlined),
+                      title: const Text('Wide Card Samples entry'),
+                      subtitle: const Text(
+                        'Show the exploratory card mockups page in Settings',
+                      ),
+                      value: config.showWideCardSamplesEntry,
+                      onChanged:
+                          ExperimentalUiSettings.setShowWideCardSamplesEntry,
+                    ),
+                  ],
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.science_outlined),
+              title: const Text('Test Data'),
+              subtitle: const Text(
+                'Add or remove sample medications & schedules',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                if (!context.mounted) return;
+                await showModalBottomSheet<void>(
+                  context: context,
+                  builder: (context) {
+                    return SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.add_circle_outline),
+                            title: const Text('Add test data'),
+                            subtitle: const Text(
+                              'Creates 5 medications and 5 schedules',
+                            ),
+                            onTap: () async {
+                              Navigator.of(context).pop();
+                              await TestDataSeedService.seed();
+                              if (!context.mounted) return;
+                              showAppSnackBar(context, 'Test data added');
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.delete_outline),
+                            title: const Text('Remove test data'),
+                            subtitle: const Text(
+                              'Deletes the seeded items only',
+                            ),
+                            onTap: () async {
+                              Navigator.of(context).pop();
+                              await TestDataSeedService.clear();
+                              if (!context.mounted) return;
+                              showAppSnackBar(context, 'Test data removed');
+                            },
+                          ),
+                          const SizedBox(height: kSpacingS),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
           const SizedBox(height: kSpacingL),
           Text(
             'Notifications',
@@ -603,46 +682,51 @@ class SettingsPage extends ConsumerWidget {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications_active_outlined),
-            title: const Text('Show test dose reminder'),
-            subtitle: const Text('Preview the Upcoming Dose notification'),
-            trailing: const Icon(Icons.play_arrow_rounded),
-            onTap: () => runNotificationTest(NotificationService.showTest),
-          ),
-          ListTile(
-            leading: const Icon(Icons.stacked_bar_chart_outlined),
-            title: const Text('Show test grouped reminders'),
-            subtitle: const Text('Preview grouped upcoming doses'),
-            trailing: const Icon(Icons.play_arrow_rounded),
-            onTap: () => runNotificationTest(
-              NotificationService.showTestGroupedUpcomingDoseReminders,
+          if (_devEnabled) ...[
+            ListTile(
+              leading: const Icon(Icons.notifications_active_outlined),
+              title: const Text('Show test dose reminder'),
+              subtitle: const Text('Preview the Upcoming Dose notification'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(NotificationService.showTest),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.inventory_2_outlined),
-            title: const Text('Show test low stock'),
-            subtitle: const Text('Preview Refill/Restock actions'),
-            trailing: const Icon(Icons.play_arrow_rounded),
-            onTap: () => runNotificationTest(
-              NotificationService.showTestLowStockReminder,
+            ListTile(
+              leading: const Icon(Icons.stacked_bar_chart_outlined),
+              title: const Text('Show test grouped reminders'),
+              subtitle: const Text('Preview grouped upcoming doses'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(
+                NotificationService.showTestGroupedUpcomingDoseReminders,
+              ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.event_busy_outlined),
-            title: const Text('Show test expiry reminder'),
-            subtitle: const Text('Preview an Expiry notification'),
-            trailing: const Icon(Icons.play_arrow_rounded),
-            onTap: () =>
-                runNotificationTest(NotificationService.showTestExpiryReminder),
-          ),
-          ListTile(
-            leading: const Icon(Icons.bug_report),
-            title: const Text('Debug & Diagnostics'),
-            subtitle: const Text('Notification testing and system diagnostics'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings/debug'),
-          ),
+            ListTile(
+              leading: const Icon(Icons.inventory_2_outlined),
+              title: const Text('Show test low stock'),
+              subtitle: const Text('Preview Refill/Restock actions'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(
+                NotificationService.showTestLowStockReminder,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.event_busy_outlined),
+              title: const Text('Show test expiry reminder'),
+              subtitle: const Text('Preview an Expiry notification'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(
+                NotificationService.showTestExpiryReminder,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bug_report),
+              title: const Text('Debug & Diagnostics'),
+              subtitle: const Text(
+                'Notification testing and system diagnostics',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/debug'),
+            ),
+          ],
 
           const SizedBox(height: kSpacingL),
           Text(
@@ -652,6 +736,28 @@ class SettingsPage extends ConsumerWidget {
             )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
           const SizedBox(height: kSpacingS),
+          FutureBuilder<PackageInfo>(
+            future: _packageInfo,
+            builder: (context, snapshot) {
+              final info = snapshot.data;
+              final versionText = info == null
+                  ? 'Loading…'
+                  : info.buildNumber.trim().isEmpty
+                  ? info.version
+                  : '${info.version} (${info.buildNumber})';
+
+              final subtitle = _devEnabled
+                  ? 'Developer options enabled'
+                  : 'Tap 7 times to enable developer options';
+
+              return ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: const Text('Build'),
+                subtitle: Text('$versionText · $subtitle'),
+                onTap: () => _handleBuildTap(context),
+              );
+            },
+          ),
           ListTile(
             leading: Image.asset(
               kPrimaryLogoAssetPath,
