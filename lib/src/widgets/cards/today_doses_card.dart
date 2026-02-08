@@ -79,6 +79,31 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
   bool _internalExpanded = true;
   bool _showAll = false;
 
+  List<InlineSpan> _buildCountSpans(
+    BuildContext context,
+    List<(String label, int count, String? suffix)> parts,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final baseStyle = helperTextStyle(context) ?? const TextStyle();
+    final numberStyle = baseStyle.copyWith(color: cs.primary);
+
+    final spans = <InlineSpan>[];
+    for (final part in parts) {
+      final label = part.$1;
+      final count = part.$2;
+      final suffix = part.$3;
+      if (spans.isNotEmpty) {
+        spans.add(TextSpan(text: ' · ', style: baseStyle));
+      }
+      spans.add(TextSpan(text: '$label ', style: baseStyle));
+      spans.add(TextSpan(text: '$count', style: numberStyle));
+      if (suffix != null && suffix.trim().isNotEmpty) {
+        spans.add(TextSpan(text: suffix, style: baseStyle));
+      }
+    }
+    return spans;
+  }
+
   bool get _expanded => widget.isExpanded ?? _internalExpanded;
 
   void _setExpanded(bool expanded) {
@@ -321,28 +346,36 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  [
-                    'Scheduled $scheduledCount',
-                    if (upcomingCount > 0)
-                      nextUpcomingLabel == null
-                          ? 'Upcoming $upcomingCount'
-                          : 'Upcoming $upcomingCount (next $nextUpcomingLabel)',
-                    if (missedCount > 0) 'Missed $missedCount',
-                    if (snoozedCount > 0) 'Snoozed $snoozedCount',
-                  ].join(' · '),
+                RichText(
+                  text: TextSpan(
+                    children: _buildCountSpans(context, [
+                      ('Scheduled', scheduledCount, null),
+                      if (upcomingCount > 0)
+                        (
+                          'Upcoming',
+                          upcomingCount,
+                          nextUpcomingLabel == null
+                              ? null
+                              : ' (next $nextUpcomingLabel)',
+                        ),
+                      if (missedCount > 0) ('Missed', missedCount, null),
+                      if (snoozedCount > 0) ('Snoozed', snoozedCount, null),
+                    ]),
+                  ),
                 ),
                 if (takenCount > 0 || skippedCount > 0)
-                  Text(
-                    [
-                      if (takenCount > 0) 'Taken $takenCount',
-                      if (skippedCount > 0) 'Skipped $skippedCount',
-                    ].join(' · '),
+                  RichText(
+                    text: TextSpan(
+                      children: _buildCountSpans(context, [
+                        if (takenCount > 0) ('Taken', takenCount, null),
+                        if (skippedCount > 0) ('Skipped', skippedCount, null),
+                      ]),
+                    ),
                   ),
               ],
             ),
           ),
-          const SizedBox(height: kSpacingS),
+          const SizedBox(height: kSpacingXS),
         ],
         if (items.isEmpty)
           const UnifiedEmptyState(title: 'No upcoming doses')
@@ -351,17 +384,27 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
             buildDoseRow(context, item),
             const SizedBox(height: kSpacingS),
           ],
-          if (hasMoreThanPreview && !_showAll)
-            const MoreContentIndicator(label: ''),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                setState(() => _showAll = !_showAll);
-              },
-              child: Text(_showAll ? 'Show less' : 'Show all'),
+          if (hasMoreThanPreview)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(
+                  padding: kTightTextButtonPadding,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
+                onPressed: () {
+                  setState(() => _showAll = !_showAll);
+                },
+                icon: Icon(
+                  _showAll
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                  size: kIconSizeLarge,
+                ),
+                label: Text(_showAll ? 'Show less' : 'Show all'),
+              ),
             ),
-          ),
         ],
       ],
     );

@@ -278,7 +278,7 @@ const EdgeInsets kMedicationDetailFormChipPadding = EdgeInsets.symmetric(
 
 /// Calendar component sizing
 const double kCalendarDayHeight =
-  52; // Height of day cell in month view (reduced from 80)
+    52; // Height of day cell in month view (reduced from 80)
 const double kCalendarHourHeight = 60; // Height of hour row in day view
 const double kCalendarDoseBlockHeight = 60; // Default dose block height
 const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
@@ -1018,6 +1018,12 @@ const double kCardShadowOpacity = 0.08;
 const double kCardShadowBlurRadius = 24.0;
 const Offset kCardShadowOffset = Offset(0, 8);
 
+/// Slightly tighter shadow for [DoseCard] so it doesn't get clipped inside
+/// animated/overflowing containers (e.g. collapsible cards).
+const double kDoseCardShadowOpacity = 0.07;
+const double kDoseCardShadowBlurRadius = 16.0;
+const Offset kDoseCardShadowOffset = Offset(0, 6);
+
 /// Builds a standard card decoration with consistent styling across the app.
 /// Use this for all cards displayed on light backgrounds.
 BoxDecoration buildStandardCardDecoration({
@@ -1066,6 +1072,16 @@ BoxDecoration buildDoseCardDecoration({
     useGradient: false,
     showBorder: true,
     borderRadius: borderRadius,
+  ).copyWith(
+    boxShadow: [
+      BoxShadow(
+        color: Theme.of(
+          context,
+        ).colorScheme.shadow.withValues(alpha: kDoseCardShadowOpacity),
+        blurRadius: kDoseCardShadowBlurRadius,
+        offset: kDoseCardShadowOffset,
+      ),
+    ],
   );
 }
 
