@@ -6,6 +6,7 @@ import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
+import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -175,66 +176,67 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final cs = Theme.of(context).colorScheme;
     final option = _currentStatusOption();
 
-    ButtonSegment<_DoseStatusOption> segment(
-      _DoseStatusOption value, {
-      required String label,
-      required IconData icon,
-    }) {
-      return ButtonSegment<_DoseStatusOption>(
-        value: value,
-        label: Text(label),
-        icon: Icon(icon, size: kIconSizeSmall),
-      );
+    String labelFor(_DoseStatusOption o) {
+      return switch (o) {
+        _DoseStatusOption.scheduled => 'Scheduled',
+        _DoseStatusOption.taken => 'Taken',
+        _DoseStatusOption.snoozed => 'Snoozed',
+        _DoseStatusOption.skipped => 'Skipped',
+        _DoseStatusOption.delete => 'Delete',
+      };
+    }
+
+    IconData iconFor(_DoseStatusOption o) {
+      return switch (o) {
+        _DoseStatusOption.scheduled => Icons.event_available_rounded,
+        _DoseStatusOption.taken => Icons.check_circle_rounded,
+        _DoseStatusOption.snoozed => Icons.snooze_rounded,
+        _DoseStatusOption.skipped => Icons.do_not_disturb_on_rounded,
+        _DoseStatusOption.delete => Icons.delete_outline_rounded,
+      };
+    }
+
+    _DoseStatusOption nextOption(_DoseStatusOption current) {
+      if (_isAdHoc) {
+        return current == _DoseStatusOption.taken
+            ? _DoseStatusOption.delete
+            : _DoseStatusOption.taken;
+      }
+
+      return switch (current) {
+        _DoseStatusOption.scheduled => _DoseStatusOption.taken,
+        _DoseStatusOption.taken => _DoseStatusOption.snoozed,
+        _DoseStatusOption.snoozed => _DoseStatusOption.skipped,
+        _DoseStatusOption.skipped => _DoseStatusOption.scheduled,
+        _DoseStatusOption.delete => _DoseStatusOption.taken,
+      };
     }
 
     return SizedBox(
       width: double.infinity,
-      child: SegmentedButton<_DoseStatusOption>(
-        segments: <ButtonSegment<_DoseStatusOption>>[
-          if (!_isAdHoc)
-            segment(
-              _DoseStatusOption.scheduled,
-              label: 'Scheduled',
-              icon: Icons.event_available_rounded,
-            ),
-          segment(
-            _DoseStatusOption.taken,
-            label: 'Taken',
-            icon: Icons.check_circle_rounded,
-          ),
-          if (_isAdHoc)
-            segment(
-              _DoseStatusOption.delete,
-              label: 'Delete',
-              icon: Icons.delete_outline_rounded,
-            ),
-          if (!_isAdHoc)
-            segment(
-              _DoseStatusOption.snoozed,
-              label: 'Snoozed',
-              icon: Icons.snooze_rounded,
-            ),
-          if (!_isAdHoc)
-            segment(
-              _DoseStatusOption.skipped,
-              label: 'Skipped',
-              icon: Icons.do_not_disturb_on_rounded,
-            ),
-        ],
-        selected: <_DoseStatusOption>{option},
-        showSelectedIcon: false,
-        style: ButtonStyle(
-          visualDensity: VisualDensity.compact,
-          foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return cs.onPrimary;
-            }
-            return cs.onSurface;
-          }),
+      height: kStandardFieldHeight,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: cs.onSurface,
         ),
-        onSelectionChanged: (selection) {
-          _applyStatusOption(selection.first);
-        },
+        onPressed: () => _applyStatusOption(nextOption(option)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(iconFor(option), size: kIconSizeSmall),
+            const SizedBox(width: kSpacingS),
+            Text(
+              labelFor(option),
+              style: bodyTextStyle(context),
+            ),
+            const SizedBox(width: kSpacingS),
+            Icon(
+              Icons.autorenew_rounded,
+              size: kIconSizeSmall,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -653,20 +655,28 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         ),
         const SizedBox(height: kSpacingM),
       ],
-      Text('Notes', style: sectionTitleStyle(context)),
-      const SizedBox(height: kSpacingS),
-      TextField(
-        controller: _notesController,
-        onChanged: (_) => setState(() => _hasChanged = true),
-        style: bodyTextStyle(context),
-        decoration: buildFieldDecoration(
-          context,
-          hint: 'Add any notes about this dose…',
-        ),
-        maxLines: 3,
-        textCapitalization: kTextCapitalizationDefault,
-      ),
     ];
+  }
+
+  Widget _buildNotesField(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Notes', style: sectionTitleStyle(context)),
+        const SizedBox(height: kSpacingS),
+        TextField(
+          controller: _notesController,
+          onChanged: (_) => setState(() => _hasChanged = true),
+          style: bodyTextStyle(context),
+          decoration: buildFieldDecoration(
+            context,
+            hint: 'Add any notes about this dose…',
+          ),
+          maxLines: 3,
+          textCapitalization: kTextCapitalizationDefault,
+        ),
+      ],
+    );
   }
 
   Widget _buildDoseCardPreview(BuildContext context) {
@@ -730,7 +740,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
     final metaLines = <Widget>[
       Text(
-        'Left: ${stockInfo.label}',
+        'Remaining: ${stockInfo.label}',
         style: metaStyle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -891,11 +901,18 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           _doseOverrideUnit ?? widget.dose.doseUnit,
         );
 
-        _mdvSyringeType = _defaultMdvSyringeType(
-          med,
-          overrideValue: _originalDoseOverrideValue,
-          overrideUnit: _doseOverrideUnit ?? widget.dose.doseUnit,
+        final recon = SavedReconstitutionRepository().ownedForMedication(
+          med.id,
         );
+        final savedSyringeSizeMl = recon?.syringeSizeMl;
+
+        _mdvSyringeType = savedSyringeSizeMl != null && savedSyringeSizeMl > 0
+            ? SyringeTypeLookup.forVolumeMl(savedSyringeSizeMl)
+            : _defaultMdvSyringeType(
+                med,
+                overrideValue: _originalDoseOverrideValue,
+                overrideUnit: _doseOverrideUnit ?? widget.dose.doseUnit,
+              );
 
         _doseOverrideUnit = _mdvDoseChangeUnitLabel(
           _mdvDoseChangeMode!,
@@ -1512,6 +1529,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             const SizedBox(height: kSpacingXS),
             _buildStatusHint(context),
             const SizedBox(height: kSpacingM),
+            _buildNotesField(context),
+            const SizedBox(height: kSpacingM),
             CollapsibleSectionFormCard(
               title: 'Edit details',
               isExpanded: _editExpanded,
@@ -1545,20 +1564,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     context,
                     scrollController,
                     leading: [
-                      // Handle + header inside the scrollable so dragging here expands the sheet.
-                      Container(
-                        width: kBottomSheetHandleWidth,
-                        height: kBottomSheetHandleHeight,
-                        margin: kBottomSheetHandleMargin,
-                        decoration: BoxDecoration(
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: kOpacityLow,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            kBottomSheetHandleRadius,
-                          ),
-                        ),
-                      ),
                       Padding(
                         padding: kBottomSheetHeaderPadding.copyWith(
                           bottom: kSpacingM,
@@ -1571,7 +1576,9 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                                 children: [
                                   Text(
                                     'Take dose',
-                                    style: sectionTitleStyle(context),
+                                    style: cardTitleStyle(context)?.copyWith(
+                                      color: colorScheme.primary,
+                                    ),
                                   ),
                                   Text(
                                     'Confirm status, adjust timing if needed, add notes, and save.',
@@ -1579,10 +1586,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                                   ),
                                 ],
                               ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.pop(context),
                             ),
                           ],
                         ),
@@ -1689,7 +1692,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           child: Text(
             _hasChanged
                 ? 'Tap Save & Close to apply changes.'
-                : 'Select a status, add notes, then tap Save & Close.',
+                : 'Tap status to cycle, add notes, then tap Save & Close.',
             style: helperTextStyle(context),
           ),
         ),
