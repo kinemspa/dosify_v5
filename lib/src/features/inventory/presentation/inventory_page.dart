@@ -185,15 +185,8 @@ class _InventoryPageState extends State<InventoryPage> {
                               final supplyLow = supplyItems
                                   .where(supplyRepo.isLowStock)
                                   .length;
-                              final soon = DateTime.now().add(
-                                const Duration(days: 30),
-                              );
                               final supplyExpiringSoon = supplyItems
-                                  .where(
-                                    (s) =>
-                                        s.expiry != null &&
-                                        s.expiry!.isBefore(soon),
-                                  )
+                                  .where(supplyRepo.isExpiringSoon)
                                   .length;
 
                               return Column(

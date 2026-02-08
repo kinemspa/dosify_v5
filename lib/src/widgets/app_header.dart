@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -31,6 +32,9 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final showBack = Navigator.of(context).canPop() || forceBackButton;
 
+    final hasSupplies =
+      Hive.isBoxOpen('supplies') && Hive.box<dynamic>('supplies').isNotEmpty;
+
     final effectiveActions = <Widget>[
       ...?actions,
       PopupMenuButton<String>(
@@ -58,19 +62,20 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
               context.go('/settings');
           }
         },
-        itemBuilder: (context) => const [
-          PopupMenuItem(value: 'home', child: Text('Home')),
-          PopupMenuItem(value: 'medications', child: Text('Medications')),
-          PopupMenuItem(value: 'supplies', child: Text('Supplies')),
-          PopupMenuItem(value: 'inventory', child: Text('Inventory')),
-          PopupMenuItem(value: 'schedules', child: Text('Schedules')),
-          PopupMenuItem(value: 'calendar', child: Text('Calendar')),
-          PopupMenuItem(
+        itemBuilder: (context) => [
+          const PopupMenuItem(value: 'home', child: Text('Home')),
+          const PopupMenuItem(value: 'medications', child: Text('Medications')),
+          if (hasSupplies)
+            const PopupMenuItem(value: 'supplies', child: Text('Supplies')),
+          const PopupMenuItem(value: 'inventory', child: Text('Inventory')),
+          const PopupMenuItem(value: 'schedules', child: Text('Schedules')),
+          const PopupMenuItem(value: 'calendar', child: Text('Calendar')),
+          const PopupMenuItem(
             value: 'reconstitution',
             child: Text('Reconstitution Calculator'),
           ),
-          PopupMenuItem(value: 'analytics', child: Text('Analytics')),
-          PopupMenuItem(value: 'settings', child: Text('Settings')),
+          const PopupMenuItem(value: 'analytics', child: Text('Analytics')),
+          const PopupMenuItem(value: 'settings', child: Text('Settings')),
         ],
       ),
     ];

@@ -9,6 +9,8 @@ class SupplyRepository {
   static const suppliesBoxName = 'supplies';
   static const movementsBoxName = 'stock_movements';
 
+  static const Duration defaultExpiringSoonWithin = Duration(days: 30);
+
   Box<Supply> get _supplies => Hive.box<Supply>(suppliesBoxName);
   Box<StockMovement> get _movements =>
       Hive.box<StockMovement>(movementsBoxName);
@@ -55,5 +57,16 @@ class SupplyRepository {
     if (s.reorderThreshold == null) return false;
     final cur = currentStock(s.id);
     return cur <= s.reorderThreshold!;
+  }
+
+  bool isExpiringSoon(
+    Supply s, {
+    DateTime? now,
+    Duration within = defaultExpiringSoonWithin,
+  }) {
+    final expiry = s.expiry;
+    if (expiry == null) return false;
+    final base = now ?? DateTime.now();
+    return expiry.isBefore(base.add(within));
   }
 }

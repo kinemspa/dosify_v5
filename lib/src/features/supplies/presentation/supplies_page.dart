@@ -15,6 +15,7 @@ import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:dosifi_v5/src/widgets/large_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -105,10 +106,9 @@ class _SuppliesPageState extends State<SuppliesPage> {
                 case _SuppliesFilterBy.lowStock:
                   items = items.where(repo.isLowStock).toList();
                 case _SuppliesFilterBy.expiringSoon:
-                  final soon = DateTime.now().add(const Duration(days: 30));
                   items = items
                       .where(
-                        (s) => s.expiry != null && s.expiry!.isBefore(soon),
+                        (s) => repo.isExpiringSoon(s),
                       )
                       .toList();
               }
@@ -288,53 +288,10 @@ class _SuppliesPageState extends State<SuppliesPage> {
         return ListView.separated(
           padding: kPagePadding,
           itemCount: items.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
+          separatorBuilder: (_, __) => const SizedBox(height: kSpacingS),
           itemBuilder: (context, i) {
             final s = items[i];
-            final cur = repo.currentStock(s.id);
-            final low = repo.isLowStock(s);
-            return ListTile(
-              title: Text(s.name, style: cardTitleStyle(context)),
-              subtitle: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _stockLine(s, cur),
-                      style: helperTextStyle(
-                        context,
-                        color: _stockColor(context, s, cur),
-                      )?.copyWith(fontWeight: kFontWeightSemiBold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (s.expiry != null) ...[
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      _formatDdMm(s.expiry!),
-                      style: helperTextStyle(
-                        context,
-                        color: low
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              leading: Icon(
-                low ? Icons.warning_amber_rounded : Icons.inventory_2,
-                color: low ? Theme.of(context).colorScheme.secondary : null,
-              ),
-              onTap: () async {
-                await showModalBottomSheet<void>(
-                  context: context,
-                  showDragHandle: true,
-                  isScrollControlled: true,
-                  builder: (_) => StockAdjustSheet(supply: s),
-                );
-              },
-            );
+            return SupplyCard(s: s, repo: repo, dense: true);
           },
         );
       case _SuppliesView.compact:
@@ -352,7 +309,7 @@ class _SuppliesPageState extends State<SuppliesPage> {
           ),
           itemCount: items.length,
           itemBuilder: (context, i) =>
-              _SupplyCard(s: items[i], repo: repo, dense: true),
+              SupplyCard(s: items[i], repo: repo, dense: true),
         );
       case _SuppliesView.large:
         return GridView.builder(
@@ -365,41 +322,21 @@ class _SuppliesPageState extends State<SuppliesPage> {
           ),
           itemCount: items.length,
           itemBuilder: (context, i) =>
-              _SupplyCard(s: items[i], repo: repo, dense: false),
+              SupplyCard(s: items[i], repo: repo, dense: false),
         );
     }
   }
 
-  String _formatDdMm(DateTime d) => DateFormat('dd/MM').format(d);
-
-  String _stockLine(Supply s, double cur) {
-    final unit = _unitLabel(s.unit);
-    if (s.reorderThreshold != null && s.reorderThreshold! > 0) {
-      final total = s.reorderThreshold!;
-      return '${cur.toStringAsFixed(0)}/${total.toStringAsFixed(0)} $unit';
-    }
-    return '${cur.toStringAsFixed(0)} $unit';
-  }
-
-  Color _stockColor(BuildContext context, Supply s, double cur) {
-    final theme = Theme.of(context);
-    if (s.reorderThreshold != null && s.reorderThreshold! > 0) {
-      final pct = (cur / s.reorderThreshold!).clamp(0.0, 1.0);
-      return stockStatusColorFromRatio(context, pct);
-    }
-    if (SupplyRepository().isLowStock(s)) return theme.colorScheme.error;
-    return theme.colorScheme.onSurface;
-  }
-
-  String _unitLabel(SupplyUnit u) => switch (u) {
-    SupplyUnit.pcs => 'pcs',
-    SupplyUnit.ml => 'mL',
-    SupplyUnit.l => 'L',
-  };
+  // Stock/expiry rendering is handled by SupplyCard.
 }
 
-class _SupplyCard extends StatelessWidget {
-  const _SupplyCard({required this.s, required this.repo, required this.dense});
+class SupplyCard extends StatelessWidget {
+  const SupplyCard({
+    required this.s,
+    required this.repo,
+    required this.dense,
+    super.key,
+  });
   final Supply s;
   final SupplyRepository repo;
   final bool dense;
@@ -407,6 +344,7 @@ class _SupplyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final cur = repo.currentStock(s.id);
     final low = repo.isLowStock(s);
 
@@ -419,160 +357,167 @@ class _SupplyCard extends StatelessWidget {
       );
     }
 
-    return Card(
-      elevation: dense ? kElevationNone : kElevationLow,
-      child: InkWell(
-        onTap: openAdjustSheet,
-        child: Padding(
-          padding: dense ? kCompactCardPadding : kStandardCardPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final title = Text(
+      s.name,
+      style: dense
+          ? bodyTextStyle(context)?.copyWith(
+              fontWeight: kFontWeightBold,
+              height: kLineHeightTight,
+            )
+          : cardTitleStyle(context),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+
+    final category = (s.category ?? '').trim().isEmpty
+        ? null
+        : Text(
+            s.category!,
+            style: microHelperTextStyle(
+              context,
+              color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          );
+
+    final stockLine = Text(
+      _stockLine(s, cur),
+      style: (dense
+              ? microHelperTextStyle(
+                  context,
+                  color: _stockColor(context, s, cur),
+                )
+              : helperTextStyle(
+                  context,
+                  color: _stockColor(context, s, cur),
+                ))
+          ?.copyWith(fontWeight: dense ? null : kFontWeightSemiBold),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+
+    final expiryLabel = s.expiry == null
+        ? null
+        : Text(
+            dense
+                ? DateFormat('d/M').format(s.expiry!)
+                : DateFormat('dd/MM/yy').format(s.expiry!),
+            style: (dense
+                    ? microHelperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMediumHigh,
+                        ),
+                      )
+                    : smallHelperTextStyle(
+                        context,
+                        color:
+                            low ? cs.error : cs.onSurfaceVariant,
+                      ))
+                ?.copyWith(fontWeight: dense ? null : kFontWeightSemiBold),
+          );
+
+    final trailing = Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (low)
+          Icon(
+            Icons.warning,
+            size: kIconSizeXSmall,
+            color: cs.error,
+          ),
+        if (!dense && expiryLabel != null) ...[
+          const SizedBox(height: kFieldSpacing),
+          expiryLabel,
+        ],
+        if (dense && expiryLabel != null) expiryLabel,
+      ],
+    );
+
+    final Widget leading;
+    if (dense) {
+      leading = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          title,
+          const SizedBox(height: kSpacingXXS),
+          Row(
             children: [
-              if (!dense)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: kScheduleWizardSummaryIconSize,
-                      height: kScheduleWizardSummaryIconSize,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.colorScheme.tertiaryContainer,
-                            theme.colorScheme.tertiary,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: kStandardBorderRadius,
-                      ),
-                      child: Icon(
-                        Icons.inventory_2,
-                        color: theme.colorScheme.onTertiary,
-                      ),
-                    ),
-                    const SizedBox(width: kSpacingM),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            s.name,
-                            style: cardTitleStyle(context),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (s.category?.trim().isNotEmpty ?? false) ...[
-                            const SizedBox(height: kSpacingXXS),
-                            Text(
-                              s.category!,
-                              style: microHelperTextStyle(
-                                context,
-                                color: theme.colorScheme.onSurfaceVariant
-                                    .withValues(alpha: kOpacityMediumHigh),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (low)
-                          Icon(
-                            Icons.warning,
-                            size: kIconSizeXSmall,
-                            color: theme.colorScheme.error,
-                          ),
-                        if (s.expiry != null) ...[
-                          const SizedBox(height: kFieldSpacing),
-                          Text(
-                            DateFormat('dd/MM/yy').format(s.expiry!),
-                            style: smallHelperTextStyle(
-                              context,
-                              color: low
-                                  ? theme.colorScheme.error
-                                  : theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-
-              if (!dense) const SizedBox(height: kSpacingXS),
-
-              if (dense) ...[
-                Text(
-                  s.name,
-                  style: bodyTextStyle(context)?.copyWith(
-                    fontWeight: kFontWeightBold,
-                    height: kLineHeightTight,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: kSpacingXXS),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _stockLine(s, cur),
-                        style: microHelperTextStyle(
-                          context,
-                          color: _stockColor(context, s, cur),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (s.expiry != null)
-                      Text(
-                        DateFormat('d/M').format(s.expiry!),
-                        style: microHelperTextStyle(
-                          context,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: kOpacityMediumHigh,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ] else ...[
-                Text(
-                  _stockLine(s, cur),
-                  style: helperTextStyle(
-                    context,
-                    color: _stockColor(context, s, cur),
-                  )?.copyWith(fontWeight: kFontWeightSemiBold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-
-              if (!dense) const Spacer(),
-              if (!dense)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: openAdjustSheet,
-                    style: TextButton.styleFrom(
-                      padding: kTightTextButtonPadding,
-                      minimumSize: Size.zero,
-                      visualDensity: VisualDensity.compact,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text('Adjust'),
-                  ),
-                ),
+              Expanded(child: stockLine),
             ],
           ),
-        ),
-      ),
+        ],
+      );
+    } else {
+      leading = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: kScheduleWizardSummaryIconSize,
+                height: kScheduleWizardSummaryIconSize,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      cs.tertiaryContainer,
+                      cs.tertiary,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: kStandardBorderRadius,
+                ),
+                child: Icon(
+                  Icons.inventory_2,
+                  color: cs.onTertiary,
+                ),
+              ),
+              const SizedBox(width: kSpacingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    title,
+                    if (category != null) ...[
+                      const SizedBox(height: kSpacingXXS),
+                      category,
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: kSpacingXS),
+          stockLine,
+        ],
+      );
+    }
+
+    final footer = dense
+        ? null
+        : Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: openAdjustSheet,
+              style: TextButton.styleFrom(
+                padding: kTightTextButtonPadding,
+                minimumSize: Size.zero,
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Adjust'),
+            ),
+          );
+
+    return LargeCard(
+      dense: dense,
+      onTap: openAdjustSheet,
+      leading: leading,
+      trailing: trailing,
+      footer: footer,
     );
   }
 
