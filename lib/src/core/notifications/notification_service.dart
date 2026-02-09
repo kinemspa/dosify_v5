@@ -899,6 +899,7 @@ class NotificationService {
     String? payload,
     List<AndroidNotificationAction>? actions,
     List<String>? expandedLines,
+    AndroidBitmap<Object>? bigPicture,
     int? timeoutAfterMs,
   }) async {
     await _ensureTimeZoneReady();
@@ -922,8 +923,31 @@ class NotificationService {
       _log('Adjusted (alarm clock) time to future: $tzTime');
     }
     final shouldShowSyringeIcon =
-        Platform.isAndroid && channelId == _upcomingDose.id && !setAsGroupSummary;
+        Platform.isAndroid &&
+        channelId == _upcomingDose.id &&
+        !setAsGroupSummary;
     final shouldUseExpandedStyle = shouldShowSyringeIcon;
+
+    final StyleInformation? styleInformation = shouldUseExpandedStyle
+        ? (bigPicture != null
+              ? BigPictureStyleInformation(
+                  bigPicture,
+                  contentTitle: title,
+                  summaryText: 'Take • Snooze • Skip',
+                  hideExpandedLargeIcon: true,
+                )
+              : (expandedLines != null && expandedLines.isNotEmpty
+                    ? InboxStyleInformation(
+                        expandedLines,
+                        contentTitle: title,
+                        summaryText: 'Take • Snooze • Skip',
+                      )
+                    : BigTextStyleInformation(
+                        body,
+                        contentTitle: title,
+                        summaryText: 'Take • Snooze • Skip',
+                      )))
+        : null;
 
     final details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -939,19 +963,7 @@ class NotificationService {
         groupKey: groupKey,
         setAsGroupSummary: setAsGroupSummary,
         actions: actions,
-        styleInformation: shouldUseExpandedStyle
-            ? (expandedLines != null && expandedLines.isNotEmpty
-                ? InboxStyleInformation(
-                    expandedLines,
-                    contentTitle: title,
-                    summaryText: 'Take • Snooze • Skip',
-                  )
-                : BigTextStyleInformation(
-                    body,
-                    contentTitle: title,
-                    summaryText: 'Take • Snooze • Skip',
-                  ))
-            : null,
+        styleInformation: styleInformation,
         timeoutAfter: timeoutAfterMs,
       ),
     );
