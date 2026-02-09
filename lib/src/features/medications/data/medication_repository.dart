@@ -8,6 +8,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
 
 /// Repository for medication data access
 /// Abstracts Hive database operations for better testability and maintainability
@@ -25,6 +26,13 @@ class MedicationRepository {
   /// Save or update a medication
   Future<void> upsert(Medication med) async {
     await _box.put(med.id, med);
+
+    // Best-effort: keep expiry notifications in sync with edits.
+    try {
+      await ExpiryNotificationScheduler.rescheduleForMedication(med);
+    } catch (_) {
+      // Best-effort.
+    }
   }
 
   /// Delete a medication
@@ -55,11 +63,20 @@ class MedicationRepository {
       await SavedReconstitutionRepository().deleteForMedication(id);
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('Failed to delete owned saved reconstitution for med $id: $e');
+        debugPrint(
+          'Failed to delete owned saved reconstitution for med $id: $e',
+        );
       }
     }
 
     await _box.delete(id);
+
+    // Best-effort: remove any scheduled expiry reminders for this medication.
+    try {
+      await ExpiryNotificationScheduler.cancelForMedicationId(id);
+    } catch (_) {
+      // Best-effort.
+    }
   }
 
   /// Watch a medication for changes (returns Stream)
@@ -93,31 +110,39 @@ class MedicationRepository {
 
   /// Get medications that are low on stock (below 25%)
   List<Medication> getLowStock() {
-    return _box.values.where((m) {
-      final maxStock = m.initialStockValue ?? m.stockValue;
-      if (maxStock <= 0) return false;
-      return (m.stockValue / maxStock) < 0.25;
-    }).toList(growable: false);
+    return _box.values
+        .where((m) {
+          final maxStock = m.initialStockValue ?? m.stockValue;
+          if (maxStock <= 0) return false;
+          return (m.stockValue / maxStock) < 0.25;
+        })
+        .toList(growable: false);
   }
 
   /// Get medications expiring soon (within 30 days)
   List<Medication> getExpiringSoon() {
     final now = DateTime.now();
     final threshold = now.add(const Duration(days: 30));
-    
-    return _box.values.where((m) {
-      final expiry = m.expiry;
-      return expiry != null && expiry.isAfter(now) && expiry.isBefore(threshold);
-    }).toList(growable: false);
+
+    return _box.values
+        .where((m) {
+          final expiry = m.expiry;
+          return expiry != null &&
+              expiry.isAfter(now) &&
+              expiry.isBefore(threshold);
+        })
+        .toList(growable: false);
   }
 
   /// Get medications that are expired
   List<Medication> getExpired() {
     final now = DateTime.now();
-    return _box.values.where((m) {
-      final expiry = m.expiry;
-      return expiry != null && expiry.isBefore(now);
-    }).toList(growable: false);
+    return _box.values
+        .where((m) {
+          final expiry = m.expiry;
+          return expiry != null && expiry.isBefore(now);
+        })
+        .toList(growable: false);
   }
 
   /// Search medications by name
@@ -131,7 +156,9 @@ class MedicationRepository {
   /// Get medications stored in a specific location
   List<Medication> getByLocation(String location) {
     return _box.values
-        .where((m) => m.storageLocation?.toLowerCase() == location.toLowerCase())
+        .where(
+          (m) => m.storageLocation?.toLowerCase() == location.toLowerCase(),
+        )
         .toList(growable: false);
   }
 

@@ -11,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
+import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
@@ -114,9 +116,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     children: [
                       Text(
                         title,
-                        style: cardTitleStyle(context)?.copyWith(
-                          fontWeight: kFontWeightBold,
-                        ),
+                        style: cardTitleStyle(
+                          context,
+                        )?.copyWith(fontWeight: kFontWeightBold),
                       ),
                       const SizedBox(height: kSpacingS),
                       Text(description),
@@ -136,8 +138,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         label: '$selected%',
                         onChanged: (v) {
                           setState(() {
-                            final snapped =
-                                (v / step).round() * step;
+                            final snapped = (v / step).round() * step;
                             selected = snapped.clamp(min, max);
                           });
                         },
@@ -319,22 +320,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   subtitle: const Text(
                                     'Use device time format',
                                   ),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(TimeFormat.system),
+                                  onTap: () => Navigator.of(
+                                    context,
+                                  ).pop(TimeFormat.system),
                                 ),
                                 ListTile(
                                   leading: const Icon(Icons.schedule),
                                   title: const Text('12-hour'),
                                   subtitle: const Text('3:45 PM'),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(TimeFormat.hour12),
+                                  onTap: () => Navigator.of(
+                                    context,
+                                  ).pop(TimeFormat.hour12),
                                 ),
                                 ListTile(
                                   leading: const Icon(Icons.access_time),
                                   title: const Text('24-hour'),
                                   subtitle: const Text('15:45'),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(TimeFormat.hour24),
+                                  onTap: () => Navigator.of(
+                                    context,
+                                  ).pop(TimeFormat.hour24),
                                 ),
                               ],
                             ),
@@ -365,29 +369,30 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   subtitle: const Text(
                                     'Use device date format',
                                   ),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(DateFormat.system),
+                                  onTap: () => Navigator.of(
+                                    context,
+                                  ).pop(DateFormat.system),
                                 ),
                                 ListTile(
                                   leading: const Icon(Icons.today),
                                   title: const Text('MM/DD/YYYY'),
                                   subtitle: const Text('12/31/2024'),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(DateFormat.mdy),
+                                  onTap: () =>
+                                      Navigator.of(context).pop(DateFormat.mdy),
                                 ),
                                 ListTile(
                                   leading: const Icon(Icons.today),
                                   title: const Text('DD/MM/YYYY'),
                                   subtitle: const Text('31/12/2024'),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(DateFormat.dmy),
+                                  onTap: () =>
+                                      Navigator.of(context).pop(DateFormat.dmy),
                                 ),
                                 ListTile(
                                   leading: const Icon(Icons.today),
                                   title: const Text('YYYY-MM-DD'),
                                   subtitle: const Text('2024-12-31'),
-                                  onTap: () => Navigator.of(context)
-                                      .pop(DateFormat.ymd),
+                                  onTap: () =>
+                                      Navigator.of(context).pop(DateFormat.ymd),
                                 ),
                               ],
                             ),
@@ -679,6 +684,54 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   max: 100,
                   step: 5,
                 ),
+              );
+            },
+          ),
+
+          ValueListenableBuilder<ExpiryNotificationConfig>(
+            valueListenable: ExpiryNotificationSettings.value,
+            builder: (context, config, _) {
+              return ListTile(
+                leading: const Icon(Icons.event_busy_outlined),
+                title: const Text('Expiry reminder timing'),
+                subtitle: Text('${config.leadDays} days before'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  final selected = await showModalBottomSheet<int>(
+                    context: context,
+                    builder: (context) {
+                      return SafeArea(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.calendar_view_week),
+                              title: const Text('7 days before'),
+                              onTap: () => Navigator.of(context).pop(7),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.calendar_month),
+                              title: const Text('14 days before'),
+                              onTap: () => Navigator.of(context).pop(14),
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.calendar_today),
+                              title: const Text('30 days before'),
+                              onTap: () => Navigator.of(context).pop(30),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+
+                  if (selected == null) return;
+                  await ExpiryNotificationSettings.setLeadDays(selected);
+
+                  // Best-effort: apply immediately.
+                  await ExpiryNotificationScheduler.rescheduleAll();
+                },
               );
             },
           ),
