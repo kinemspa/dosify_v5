@@ -13,10 +13,9 @@ ThemeData _goldenTheme() {
   const primarySeed = kDetailHeaderGradientStart;
   const secondarySeed = kDoseStatusSnoozedOrange;
 
-  final scheme = ColorScheme.fromSeed(seedColor: primarySeed).copyWith(
-    primary: primarySeed,
-    secondary: secondarySeed,
-  );
+  final scheme = ColorScheme.fromSeed(
+    seedColor: primarySeed,
+  ).copyWith(primary: primarySeed, secondary: secondarySeed);
 
   return ThemeData(
     colorScheme: scheme,
@@ -46,9 +45,36 @@ Widget _wrapForGolden(Widget child) {
   );
 }
 
-CalculatedDose _dose({
-  required DateTime scheduledTime,
+Widget _wrapForGoldenConstrained(
+  Widget child, {
+  double width = 380,
+  double? textScaleFactor,
 }) {
+  return MaterialApp(
+    theme: _goldenTheme(),
+    home: MediaQuery(
+      data: MediaQueryData(
+        textScaler: TextScaler.linear(textScaleFactor ?? 1.0),
+      ),
+      child: Scaffold(
+        body: Center(
+          child: RepaintBoundary(
+            key: const ValueKey<String>('golden'),
+            child: ConstrainedBox(
+              constraints: BoxConstraints.tightFor(width: width),
+              child: Padding(
+                padding: const EdgeInsets.all(kSpacingM),
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+CalculatedDose _dose({required DateTime scheduledTime}) {
   return CalculatedDose(
     scheduleId: 'schedule-1',
     scheduleName: 'Morning Routine',
@@ -59,7 +85,6 @@ CalculatedDose _dose({
   );
 }
 
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -69,9 +94,7 @@ void main() {
 
   group('DoseCard goldens', () {
     testWidgets('pending (active)', (tester) async {
-      final dose = _dose(
-        scheduledTime: DateTime(2026, 1, 26, 9),
-      );
+      final dose = _dose(scheduledTime: DateTime(2026, 1, 26, 9));
 
       await tester.pumpWidget(
         _wrapForGolden(
@@ -97,9 +120,7 @@ void main() {
     });
 
     testWidgets('taken (active)', (tester) async {
-      final dose = _dose(
-        scheduledTime: DateTime(2026, 1, 26, 9),
-      );
+      final dose = _dose(scheduledTime: DateTime(2026, 1, 26, 9));
 
       await tester.pumpWidget(
         _wrapForGolden(
@@ -125,9 +146,7 @@ void main() {
     });
 
     testWidgets('overdue (active)', (tester) async {
-      final dose = _dose(
-        scheduledTime: DateTime(2026, 1, 26, 9),
-      );
+      final dose = _dose(scheduledTime: DateTime(2026, 1, 26, 9));
 
       await tester.pumpWidget(
         _wrapForGolden(
@@ -153,9 +172,7 @@ void main() {
     });
 
     testWidgets('disabled (inactive schedule)', (tester) async {
-      final dose = _dose(
-        scheduledTime: DateTime(2026, 1, 26, 9),
-      );
+      final dose = _dose(scheduledTime: DateTime(2026, 1, 26, 9));
 
       await tester.pumpWidget(
         _wrapForGolden(
@@ -181,9 +198,7 @@ void main() {
     });
 
     testWidgets('compact (pending)', (tester) async {
-      final dose = _dose(
-        scheduledTime: DateTime(2026, 1, 26, 9),
-      );
+      final dose = _dose(scheduledTime: DateTime(2026, 1, 26, 9));
 
       await tester.pumpWidget(
         _wrapForGolden(
@@ -209,9 +224,7 @@ void main() {
     });
 
     testWidgets('compact (long metrics)', (tester) async {
-      final dose = _dose(
-        scheduledTime: DateTime(2026, 1, 26, 9),
-      );
+      final dose = _dose(scheduledTime: DateTime(2026, 1, 26, 9));
 
       await tester.pumpWidget(
         _wrapForGolden(
@@ -233,6 +246,38 @@ void main() {
       await expectLater(
         find.byKey(const ValueKey<String>('golden')),
         matchesGoldenFile('goldens/dose_card_compact_long.png'),
+      );
+    });
+
+    testWidgets('compact pending - compact width with large text', (
+      tester,
+    ) async {
+      final dose = _dose(scheduledTime: DateTime(2026, 1, 26, 9));
+
+      await tester.pumpWidget(
+        _wrapForGoldenConstrained(
+          DoseCard(
+            dose: dose,
+            medicationName: 'Very Long Medication Name That Should Ellipsize',
+            strengthOrConcentrationLabel: '250 mcg/mL',
+            doseMetrics: '0.75 mL (75 units) • 1.25 mg equiv',
+            onTap: () {},
+            isActive: true,
+            compact: true,
+            showActions: true,
+            statusOverride: DoseStatus.pending,
+          ),
+          width: 320,
+          textScaleFactor: 1.3,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byKey(const ValueKey<String>('golden')),
+        matchesGoldenFile(
+          'goldens/dose_card_compact_pending_compact_large_text.png',
+        ),
       );
     });
   });

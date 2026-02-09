@@ -135,12 +135,15 @@ class NextDoseDateBadge extends StatelessWidget {
                 ),
               )
             else
-              Text(
-                dayText,
-                style: nextDoseBadgeDayTextStyle(
-                  context,
-                  dense: dense,
-                  color: primaryTextColor,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  dayText,
+                  style: nextDoseBadgeDayTextStyle(
+                    context,
+                    dense: dense,
+                    color: primaryTextColor,
+                  ),
                 ),
               ),
 
@@ -159,12 +162,17 @@ class NextDoseDateBadge extends StatelessWidget {
                 ),
               )
             else if (monthText.isNotEmpty)
-              Text(
-                monthText,
-                style: nextDoseBadgeMonthTextStyle(
-                  context,
-                  dense: dense,
-                  color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  monthText,
+                  style: nextDoseBadgeMonthTextStyle(
+                    context,
+                    dense: dense,
+                    color: primaryTextColor.withValues(
+                      alpha: kOpacityMediumHigh,
+                    ),
+                  ),
                 ),
               ),
           ],
