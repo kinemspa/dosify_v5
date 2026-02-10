@@ -29,7 +29,11 @@ class MedicationRepository {
 
     // Best-effort: keep expiry notifications in sync with edits.
     try {
-      await ExpiryNotificationScheduler.rescheduleForMedication(med);
+      if (!kIsWeb) {
+        await ExpiryNotificationScheduler.rescheduleForMedication(
+          med,
+        ).timeout(const Duration(seconds: 2));
+      }
     } catch (_) {
       // Best-effort.
     }
@@ -73,7 +77,11 @@ class MedicationRepository {
 
     // Best-effort: remove any scheduled expiry reminders for this medication.
     try {
-      await ExpiryNotificationScheduler.cancelForMedicationId(id);
+      if (!kIsWeb) {
+        await ExpiryNotificationScheduler.cancelForMedicationId(
+          id,
+        ).timeout(const Duration(seconds: 2));
+      }
     } catch (_) {
       // Best-effort.
     }
