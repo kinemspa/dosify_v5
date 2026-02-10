@@ -807,10 +807,20 @@ class _AddCapsuleWizardPageState
           : storageInstructions,
     );
 
-    await repo.upsert(med);
-
-    if (mounted) {
-      context.go('/medications');
+    try {
+      await repo.upsert(med);
+      if (mounted) {
+        if (widget.initial != null) {
+          context.pop();
+        } else {
+          context.go('/medications');
+        }
+      }
+    } catch (e, stack) {
+      debugPrint('AddCapsuleWizardPage: save failed: $e\n$stack');
+      if (mounted) {
+        showAppSnackBar(context, 'Error saving: $e');
+      }
     }
   }
 

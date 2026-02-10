@@ -376,45 +376,57 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       diluentName: _reconResult?.diluentName,
     );
 
-    await repo.upsert(med);
+    try {
+      await repo.upsert(med);
+    } catch (e, stack) {
+      debugPrint('AddMdvWizardPage: save failed: $e\n$stack');
+      if (mounted) {
+        showAppSnackBar(context, 'Error saving: $e');
+      }
+      return;
+    }
 
-    // Also persist the medication's current reconstitution settings as an
-    // owned saved reconstitution. This is used for defaults (e.g. dose) and
+    // Best-effort: persist the medication's current reconstitution settings as
+    // an owned saved reconstitution. This is used for defaults (e.g. dose) and
     // is deleted automatically when the medication is deleted.
     if (med.form == MedicationForm.multiDoseVial && _reconResult != null) {
-      final ownedId = SavedReconstitutionRepository.ownedIdForMedication(
-        med.id,
-      );
-      final existing = _savedReconRepo.get(ownedId);
-      final ownedName = _savedReconRepo.buildOwnedDisplayName(
-        medicationName: med.name,
-        strengthValue: med.strengthValue,
-        strengthUnit: med.strengthUnit.name,
-        solventVolumeMl: _reconResult!.solventVolumeMl,
-        recommendedDose: _reconResult!.recommendedDose,
-        doseUnit: _reconResult!.doseUnit,
-      );
+      try {
+        final ownedId = SavedReconstitutionRepository.ownedIdForMedication(
+          med.id,
+        );
+        final existing = _savedReconRepo.get(ownedId);
+        final ownedName = _savedReconRepo.buildOwnedDisplayName(
+          medicationName: med.name,
+          strengthValue: med.strengthValue,
+          strengthUnit: med.strengthUnit.name,
+          solventVolumeMl: _reconResult!.solventVolumeMl,
+          recommendedDose: _reconResult!.recommendedDose,
+          doseUnit: _reconResult!.doseUnit,
+        );
 
-      final owned = SavedReconstitutionCalculation(
-        id: ownedId,
-        name: ownedName,
-        ownerMedicationId: med.id,
-        medicationName: med.name,
-        strengthValue: med.strengthValue,
-        strengthUnit: med.strengthUnit.name,
-        solventVolumeMl: _reconResult!.solventVolumeMl,
-        perMlConcentration: _reconResult!.perMlConcentration,
-        recommendedUnits: _reconResult!.recommendedUnits,
-        syringeSizeMl: _reconResult!.syringeSizeMl,
-        diluentName: _reconResult!.diluentName,
-        recommendedDose: _reconResult!.recommendedDose,
-        doseUnit: _reconResult!.doseUnit,
-        maxVialSizeMl: _reconResult!.maxVialSizeMl,
-        createdAt: existing?.createdAt,
-        updatedAt: DateTime.now(),
-      );
+        final owned = SavedReconstitutionCalculation(
+          id: ownedId,
+          name: ownedName,
+          ownerMedicationId: med.id,
+          medicationName: med.name,
+          strengthValue: med.strengthValue,
+          strengthUnit: med.strengthUnit.name,
+          solventVolumeMl: _reconResult!.solventVolumeMl,
+          perMlConcentration: _reconResult!.perMlConcentration,
+          recommendedUnits: _reconResult!.recommendedUnits,
+          syringeSizeMl: _reconResult!.syringeSizeMl,
+          diluentName: _reconResult!.diluentName,
+          recommendedDose: _reconResult!.recommendedDose,
+          doseUnit: _reconResult!.doseUnit,
+          maxVialSizeMl: _reconResult!.maxVialSizeMl,
+          createdAt: existing?.createdAt,
+          updatedAt: DateTime.now(),
+        );
 
-      await _savedReconRepo.upsert(owned);
+        await _savedReconRepo.upsert(owned);
+      } catch (e, stack) {
+        debugPrint('AddMdvWizardPage: save owned recon failed: $e\n$stack');
+      }
     }
 
     if (!mounted) return;
