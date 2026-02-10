@@ -29,7 +29,7 @@ void showAppSnackBar(
       SnackBar(
         content: Text(message, style: appSnackBarTextStyle(context)),
         backgroundColor: kAppSnackBarBackgroundColor,
-        behavior: SnackBarBehavior.floating,
+        behavior: SnackBarBehavior.fixed,
       ),
     );
     return;
@@ -40,47 +40,43 @@ void showAppSnackBar(
   final entry = OverlayEntry(
     builder: (context) {
       return Positioned(
-        top: 0,
+        bottom: 0,
         left: 0,
         right: 0,
         child: SafeArea(
-          bottom: false,
+          top: false,
           child: Padding(
             padding: kAppSnackBarOuterPadding,
             child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: kCardMaxWidth),
-                child: Material(
-                  color: kAppSnackBarBackgroundColor,
-                  borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-                  child: Padding(
-                    padding: kAppSnackBarInnerPadding,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            message,
-                            style: appSnackBarTextStyle(context),
-                          ),
+              alignment: Alignment.bottomCenter,
+              child: Material(
+                color: kAppSnackBarBackgroundColor,
+                borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                child: Padding(
+                  padding: kAppSnackBarInnerPadding,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          message,
+                          style: appSnackBarTextStyle(context),
                         ),
-                        if (actionLabel != null && onAction != null) ...[
-                          const SizedBox(width: kSpacingS),
-                          TextButton(
-                            style: TextButton.styleFrom(
-                              padding: kTightTextButtonPadding,
-                              foregroundColor: kAppSnackBarForegroundColor,
-                            ),
-                            onPressed: () {
-                              clearAppSnackBars();
-                              onAction();
-                            },
-                            child: Text(actionLabel),
+                      ),
+                      if (actionLabel != null && onAction != null) ...[
+                        const SizedBox(width: kSpacingS),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: kTightTextButtonPadding,
+                            foregroundColor: kAppSnackBarForegroundColor,
                           ),
-                        ],
+                          onPressed: () {
+                            clearAppSnackBars();
+                            onAction();
+                          },
+                          child: Text(actionLabel),
+                        ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),

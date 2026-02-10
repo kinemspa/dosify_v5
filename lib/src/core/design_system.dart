@@ -599,13 +599,14 @@ const EdgeInsets kTightTextButtonPadding = EdgeInsets.symmetric(
   vertical: kSpacingXXS,
 );
 
-/// Top snackbar (app-wide) padding.
+/// App snackbar (app-wide) outer padding.
 ///
-/// Used by [showAppSnackBar] to position the app snackbar at the top of the
-/// screen, within safe areas.
-const EdgeInsets kAppSnackBarOuterPadding = EdgeInsets.symmetric(
-  horizontal: kSpacingM,
-  vertical: kSpacingS,
+/// Used by [showAppSnackBar] to position the app snackbar within safe areas.
+const EdgeInsets kAppSnackBarOuterPadding = EdgeInsets.fromLTRB(
+  kSpacingM,
+  kSpacingS,
+  kSpacingM,
+  kSpacingM,
 );
 
 /// Content padding inside the app snackbar container.
@@ -617,8 +618,10 @@ const EdgeInsets kAppSnackBarInnerPadding = EdgeInsets.symmetric(
 /// App snackbar colors.
 ///
 /// Used by [showAppSnackBar] to ensure the snackbar is clearly visible.
-const Color kAppSnackBarBackgroundColor = kDetailHeaderGradientEnd;
-const Color kAppSnackBarForegroundColor = Colors.white;
+///
+/// Intentionally light background with dark text for legibility.
+const Color kAppSnackBarBackgroundColor = Colors.white;
+const Color kAppSnackBarForegroundColor = Colors.black87;
 
 // ============================================================================
 // BORDER CONSTANTS
@@ -2270,7 +2273,7 @@ TextStyle? bodyTextStyle(BuildContext context) {
   );
 }
 
-/// App snackbar text style (used for top-of-screen snackbars).
+/// App snackbar text style (used for app snackbars).
 TextStyle? appSnackBarTextStyle(BuildContext context) {
   return bodyTextStyle(context)?.copyWith(
     color: kAppSnackBarForegroundColor,
