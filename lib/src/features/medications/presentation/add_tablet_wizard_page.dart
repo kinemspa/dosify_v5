@@ -807,10 +807,16 @@ class _AddTabletWizardPageState
           : storageInstructions,
     );
 
-    await repo.upsert(med);
-
-    if (mounted) {
-      context.go('/medications');
+    try {
+      await repo.upsert(med);
+      if (mounted) {
+        context.go('/medications');
+      }
+    } catch (e, stack) {
+      debugPrint('AddTabletWizardPage: save failed: $e\n$stack');
+      if (mounted) {
+        showAppSnackBar(context, 'Error saving: $e');
+      }
     }
   }
 

@@ -25,7 +25,13 @@ class MedicationRepository {
 
   /// Save or update a medication
   Future<void> upsert(Medication med) async {
-    await _box.put(med.id, med);
+    if (kIsWeb) {
+      await _box
+          .put(med.id, med)
+          .timeout(const Duration(seconds: 3));
+    } else {
+      await _box.put(med.id, med);
+    }
 
     // Best-effort: keep expiry notifications in sync with edits.
     try {
