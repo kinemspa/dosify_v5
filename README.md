@@ -10,6 +10,10 @@ Quickstart (Windows PowerShell)
 - Static checks: flutter analyze
 - Run on device/emulator: flutter run
 
+Web smoke testing (Chrome)
+- Run on Chrome with a fixed port (keeps web persistence stable): `scripts/dev/run_chrome.ps1`
+- Manual equivalent: `flutter run -d chrome --web-port 5000`
+
 Build
 - Debug APK: flutter build apk --debug
 - Release APK: flutter build apk --release
