@@ -402,6 +402,7 @@ class _AddCapsuleWizardPageState
               label: 'Strength *',
               field: StepperRow36(
                 controller: _strengthValueCtrl,
+                onChanged: (_) => setState(() {}),
                 onDec: () {
                   final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
                   setState(
