@@ -120,6 +120,12 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   bool _editExpanded = false;
   DoseLog? _lastTakenLog;
 
+  DateTime _clampDate(DateTime value, {required DateTime first, required DateTime last}) {
+    if (value.isBefore(first)) return first;
+    if (value.isAfter(last)) return last;
+    return value;
+  }
+
   bool get _isAdHoc => widget.dose.existingLog?.scheduleId == 'ad_hoc';
 
   Color _statusAccentColor(BuildContext context) {
@@ -473,11 +479,18 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           height: kStandardFieldHeight,
           child: OutlinedButton.icon(
             onPressed: () async {
+              final firstDate = DateUtils.dateOnly(DateTime(2000));
+              final lastDate = DateUtils.dateOnly(DateTime(2100));
+              final initialDate = _clampDate(
+                DateUtils.dateOnly(_selectedActionTime),
+                first: firstDate,
+                last: lastDate,
+              );
               final pickedDate = await showDatePicker(
                 context: context,
-                initialDate: _selectedActionTime,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
+                initialDate: initialDate,
+                firstDate: firstDate,
+                lastDate: lastDate,
               );
               if (pickedDate == null) return;
               if (!context.mounted) return;
@@ -547,11 +560,19 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
               final initial = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
               final max = _maxSnoozeUntil();
 
+              final firstDate = DateUtils.dateOnly(now);
+              final lastDate = DateUtils.dateOnly(DateTime(2100));
+              final initialDate = _clampDate(
+                DateUtils.dateOnly(initial),
+                first: firstDate,
+                last: lastDate,
+              );
+
               final pickedDate = await showDatePicker(
                 context: context,
-                initialDate: initial,
-                firstDate: now,
-                lastDate: DateTime(2100),
+                initialDate: initialDate,
+                firstDate: firstDate,
+                lastDate: lastDate,
               );
               if (pickedDate == null) return;
               if (!context.mounted) return;
