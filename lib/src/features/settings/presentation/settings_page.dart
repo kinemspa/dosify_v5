@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
+import 'package:dosifi_v5/src/core/backup/backup_models.dart';
+import 'package:dosifi_v5/src/core/backup/google_drive_backup_service.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
@@ -33,6 +35,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   static const _unlockTapTarget = 7;
 
   late final Future<PackageInfo> _packageInfo;
+  late final GoogleDriveBackupService _backupService;
   bool _devEnabled = false;
   int _tapCount = 0;
   DateTime? _lastTapAt;
@@ -41,6 +44,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void initState() {
     super.initState();
     _packageInfo = PackageInfo.fromPlatform();
+    _backupService = GoogleDriveBackupService();
     _loadDevEnabled();
   }
 
@@ -206,6 +210,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           filterQuality: FilterQuality.high,
         ),
       );
+    }
+
+    Future<T?> runWithBusyDialog<T>(
+      String title,
+      Future<T> Function() action,
+    ) async {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(title),
+            content: const Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: kSpacingM),
+                Expanded(child: Text('Please wait…')),
+              ],
+            ),
+          );
+        },
+      );
+
+      try {
+        final result = await action();
+        if (context.mounted) Navigator.of(context).pop();
+        return result;
+      } catch (_) {
+        if (context.mounted) Navigator.of(context).pop();
+        rethrow;
+      }
     }
 
     return Scaffold(
@@ -780,6 +815,94 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onTap: () => context.push('/settings/debug'),
             ),
           ],
+
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Backup & Restore',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: const Icon(Icons.cloud_upload_outlined),
+            title: const Text('Backup to Google Drive'),
+            subtitle: const Text('Saves a copy of your app data'),
+            trailing: const Icon(Icons.play_arrow_rounded),
+            onTap: () async {
+              try {
+                final result = await runWithBusyDialog(
+                  'Backing up…',
+                  _backupService.backupToDrive,
+                );
+                if (!context.mounted || result == null) return;
+                showAppSnackBar(
+                  context,
+                  'Backup complete (${result.hiveBoxesIncluded} boxes, ${result.sharedPrefsKeysIncluded} settings)',
+                );
+              } on BackupFormatException catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, e.message);
+              } catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, 'Backup failed: $e');
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.cloud_download_outlined),
+            title: const Text('Restore from Google Drive'),
+            subtitle: const Text('Overwrites local data with your backup'),
+            trailing: const Icon(Icons.warning_amber_rounded),
+            onTap: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Restore backup?'),
+                    content: const Text(
+                      'This will overwrite your local app data with the latest Google Drive backup.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('Restore'),
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (confirmed != true) return;
+
+              try {
+                final result = await runWithBusyDialog(
+                  'Restoring…',
+                  _backupService.restoreLatestFromDrive,
+                );
+                if (!context.mounted || result == null) return;
+
+                final missing = result.hiveBoxesMissing.isEmpty
+                    ? ''
+                    : ' Missing: ${result.hiveBoxesMissing.join(', ')}.';
+
+                showAppSnackBar(
+                  context,
+                  'Restore complete (${result.hiveBoxesRestored} boxes, ${result.sharedPrefsKeysRestored} settings). Restart app for full refresh.$missing',
+                );
+              } on BackupFormatException catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, e.message);
+              } catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, 'Restore failed: $e');
+              }
+            },
+          ),
 
           const SizedBox(height: kSpacingL),
           Text(
