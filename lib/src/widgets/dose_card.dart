@@ -6,7 +6,6 @@ import 'package:intl/intl.dart' as intl;
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
@@ -81,7 +80,6 @@ class DoseCard extends StatelessWidget {
       localTime,
     );
     final dateLabel = '$weekday $shortDate';
-    final timeText = DateTimeFormatter.formatTime(context, localTime);
 
     final primaryTitleStyle = doseCardPrimaryTitleTextStyle(
       context,
@@ -135,6 +133,7 @@ class DoseCard extends StatelessWidget {
                           isActive: isActive,
                           dense: true,
                           activeColor: statusColor,
+                          denseContent: NextDoseBadgeDenseContent.time,
                           showNextLabel: false,
                           showTodayIcon: true,
                         ),
@@ -145,21 +144,6 @@ class DoseCard extends StatelessWidget {
                             color: cs.onSurfaceVariant.withValues(
                               alpha: kOpacityMediumHigh,
                             ),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: kSpacingXXS),
-                        Text(
-                          timeText,
-                          style: doseCardTimeTextStyle(
-                            context,
-                            color: isActive
-                                ? statusColor.withValues(alpha: kOpacityFull)
-                                : cs.onSurfaceVariant.withValues(
-                                    alpha: kOpacityMediumLow,
-                                  ),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -19,14 +19,14 @@ List<Widget> buildDoseCardInventoryMetaLines(
 
   return <Widget>[
     Text(
-      'Remaining: ${stockInfo.label}',
+      stockInfo.label,
       style: metaStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     ),
     if (location != null)
       Text(
-        'Location: $location',
+        location,
         style: metaStyle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
