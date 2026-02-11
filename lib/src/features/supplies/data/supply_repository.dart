@@ -2,6 +2,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/hive/hive_box_safe_write.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 
@@ -16,7 +17,7 @@ class SupplyRepository {
       Hive.box<StockMovement>(movementsBoxName);
 
   Future<void> upsert(Supply s) async {
-    await _supplies.put(s.id, s);
+    await _supplies.putSafe(s.id, s);
   }
 
   Future<void> delete(String id) async {
@@ -26,15 +27,15 @@ class SupplyRepository {
         .map((m) => m.id)
         .toList();
     for (final mid in toDelete) {
-      await _movements.delete(mid);
+      await _movements.deleteSafe(mid);
     }
-    await _supplies.delete(id);
+    await _supplies.deleteSafe(id);
   }
 
   List<Supply> allSupplies() => _supplies.values.toList(growable: false);
 
   Future<void> addMovement(StockMovement m) async {
-    await _movements.put(m.id, m);
+    await _movements.putSafe(m.id, m);
   }
 
   List<StockMovement> movementsFor(String supplyId) {

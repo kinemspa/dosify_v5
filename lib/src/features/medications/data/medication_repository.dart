@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/hive/hive_box_safe_write.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
@@ -27,18 +28,8 @@ class MedicationRepository {
 
   /// Save or update a medication
   Future<void> upsert(Medication med) async {
-    // On web (IndexedDB), the first few writes can be noticeably slower.
-    // A short timeout here can make saving appear "broken" even though it would succeed.
-    if (kIsWeb) {
-      try {
-        await _box.put(med.id, med).timeout(const Duration(seconds: 15));
-      } on TimeoutException {
-        // One retry without an aggressive timeout.
-        await _box.put(med.id, med);
-      }
-    } else {
-      await _box.put(med.id, med);
-    }
+    // Use a web-safe write path to avoid "silent hangs" on IndexedDB.
+    await _box.putSafe(med.id, med);
 
     // Best-effort: keep expiry notifications in sync with edits.
     try {
@@ -71,7 +62,7 @@ class MedicationRepository {
           debugPrint('Failed to cancel notifications for schedule ${s.id}: $e');
         }
       }
-      await scheduleBox.delete(s.id);
+      await scheduleBox.deleteSafe(s.id);
     }
 
     // Delete medication-owned saved reconstitutions.
@@ -86,7 +77,7 @@ class MedicationRepository {
       }
     }
 
-    await _box.delete(id);
+    await _box.deleteSafe(id);
 
     // Best-effort: remove any scheduled expiry reminders for this medication.
     try {
