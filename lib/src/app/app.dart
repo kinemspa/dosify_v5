@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -441,6 +442,15 @@ class DosifiApp extends ConsumerWidget {
       theme: light,
       darkTheme: dark,
       themeMode: themeMode,
+      // Ensure desktop/web input devices can interact with scrollables.
+      // This helps mouse/trackpad drag scrolling on web/desktop.
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.trackpad,
+        },
+      ),
       routerConfig: router,
       builder: (context, child) {
         final mq = MediaQuery.of(context);

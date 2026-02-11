@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // Package imports:
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -25,10 +27,15 @@ class MedicationRepository {
 
   /// Save or update a medication
   Future<void> upsert(Medication med) async {
+    // On web (IndexedDB), the first few writes can be noticeably slower.
+    // A short timeout here can make saving appear "broken" even though it would succeed.
     if (kIsWeb) {
-      await _box
-          .put(med.id, med)
-          .timeout(const Duration(seconds: 3));
+      try {
+        await _box.put(med.id, med).timeout(const Duration(seconds: 15));
+      } on TimeoutException {
+        // One retry without an aggressive timeout.
+        await _box.put(med.id, med);
+      }
     } else {
       await _box.put(med.id, med);
     }
