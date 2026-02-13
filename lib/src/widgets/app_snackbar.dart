@@ -41,9 +41,7 @@ void showAppSnackBar(
     builder: (context) {
       final mediaQuery = MediaQuery.maybeOf(context);
       final safeTop = mediaQuery?.padding.top ?? 0;
-      final screenHeight = mediaQuery?.size.height ?? 0;
-      final topOffset =
-          safeTop + (screenHeight * kAppSnackBarTopScreenFraction);
+      final topOffset = safeTop + kAppSnackBarTopOffsetBelowHeader;
 
       return Positioned(
         top: topOffset,
