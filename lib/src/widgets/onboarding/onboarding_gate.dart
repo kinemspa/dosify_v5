@@ -82,66 +82,64 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
       message:
           'This is your dashboard with an overall view of medications, schedules, and due doses.',
       targetAlignment: Alignment(0, -0.70),
-      bubbleAlignment: Alignment(0, -0.25),
     ),
     _CoachStep(
       title: 'Medications',
       message:
           'Add medications here and track stock, expiry, and core medication details.',
       targetAlignment: Alignment(-0.25, 0.92),
-      bubbleAlignment: Alignment(0, 0.48),
     ),
     _CoachStep(
       title: 'Schedules',
       message:
           'Create dose schedules here. You receive notifications from these schedules.',
       targetAlignment: Alignment(0.25, 0.92),
-      bubbleAlignment: Alignment(0, 0.48),
     ),
     _CoachStep(
       title: 'Schedule links',
       message:
           'Each schedule is attached to a medication, and doses are attached to a schedule.',
       targetAlignment: Alignment(0.25, 0.92),
-      bubbleAlignment: Alignment(0, 0.48),
     ),
     _CoachStep(
       title: 'Medication details',
       message:
           'Medication details include an ad hoc dose action for doses taken outside a schedule.',
       targetAlignment: Alignment(-0.25, 0.92),
-      bubbleAlignment: Alignment(0, 0.48),
     ),
     _CoachStep(
       title: 'Reconstitution calculator',
       message:
           'Quickly calculate and save reconstitutions for later use when adding medications.',
       targetAlignment: Alignment(-0.25, 0.92),
-      bubbleAlignment: Alignment(0, 0.48),
     ),
     _CoachStep(
       title: 'Multi-dose vial support',
       message:
           'Multi-dose vials include a built-in reconstitution calculator in their add/edit flow.',
       targetAlignment: Alignment(-0.25, 0.92),
-      bubbleAlignment: Alignment(0, 0.48),
     ),
     _CoachStep(
       title: 'Analytics',
       message: 'Get reports and trend insights across your dose activity and history.',
       targetAlignment: Alignment(0.68, -0.82),
-      bubbleAlignment: Alignment(0, -0.30),
     ),
     _CoachStep(
       title: 'Inventory',
       message:
           'See a quick overview of what remains in stock and what has been used over time.',
       targetAlignment: Alignment(0.68, -0.82),
-      bubbleAlignment: Alignment(0, -0.30),
     ),
   ];
 
   bool get _isLastStep => _stepIndex == _steps.length - 1;
+
+  Alignment _bubbleAlignmentForTarget(Alignment target) {
+    final isLowerHalf = target.y > 0.25;
+    final bubbleY = isLowerHalf ? 0.40 : -0.40;
+    final bubbleX = target.x.clamp(-0.55, 0.55);
+    return Alignment(bubbleX, bubbleY);
+  }
 
   Future<void> _goNext() async {
     if (_isLastStep) {
@@ -157,6 +155,7 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
   Widget build(BuildContext context) {
     final step = _steps[_stepIndex];
     final cs = Theme.of(context).colorScheme;
+    final bubbleAlignment = _bubbleAlignmentForTarget(step.targetAlignment);
 
     return Material(
       color: Colors.black.withValues(alpha: 0.50),
@@ -168,7 +167,7 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                 CustomPaint(
                   size: Size(constraints.maxWidth, constraints.maxHeight),
                   painter: _CoachConnectorPainter(
-                    bubbleAlignment: step.bubbleAlignment,
+                    bubbleAlignment: bubbleAlignment,
                     targetAlignment: step.targetAlignment,
                     color: cs.primary,
                   ),
@@ -189,7 +188,7 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                   ),
                 ),
                 Align(
-                  alignment: step.bubbleAlignment,
+                  alignment: bubbleAlignment,
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 220),
                     switchInCurve: Curves.easeOut,
@@ -223,9 +222,15 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                         children: [
                           Text(
                             step.title,
-                            style: sectionTitleStyle(
-                              context,
-                            )?.copyWith(color: cs.onPrimary),
+                            style:
+                                sectionTitleStyle(context)?.copyWith(
+                                  color: cs.onPrimary,
+                                ) ??
+                                TextStyle(
+                                  color: cs.onPrimary,
+                                  fontSize: kFontSizeLarge,
+                                  fontWeight: kFontWeightBold,
+                                ),
                           ),
                           const SizedBox(height: kSpacingXS),
                           Text(
@@ -250,6 +255,10 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                 onPressed: widget.onFinish,
                                 style: TextButton.styleFrom(
                                   foregroundColor: cs.onPrimary,
+                                  textStyle: TextStyle(
+                                    color: cs.onPrimary,
+                                    fontWeight: kFontWeightSemiBold,
+                                  ),
                                 ),
                                 child: const Text('Skip'),
                               ),
@@ -257,8 +266,18 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                               FilledButton(
                                 onPressed: _goNext,
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: cs.onPrimary,
-                                  foregroundColor: cs.primary,
+                                  backgroundColor: cs.primary.withValues(
+                                    alpha: kOpacityMedium,
+                                  ),
+                                  foregroundColor: cs.onPrimary,
+                                  side: BorderSide(
+                                    color: cs.onPrimary,
+                                    width: kBorderWidthThin,
+                                  ),
+                                  textStyle: TextStyle(
+                                    color: cs.onPrimary,
+                                    fontWeight: kFontWeightSemiBold,
+                                  ),
                                 ),
                                 child: Text(_isLastStep ? 'Done' : 'Next'),
                               ),
@@ -283,13 +302,11 @@ class _CoachStep {
     required this.title,
     required this.message,
     required this.targetAlignment,
-    required this.bubbleAlignment,
   });
 
   final String title;
   final String message;
   final Alignment targetAlignment;
-  final Alignment bubbleAlignment;
 }
 
 class _CoachConnectorPainter extends CustomPainter {
