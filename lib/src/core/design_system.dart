@@ -51,6 +51,13 @@ const double kBrandedLaunchLogoMinWidth = 220;
 const double kBrandedLaunchLogoMaxWidth = 420;
 const double kBrandedLaunchLogoWidthFactor = 0.82;
 
+/// First-run onboarding layout sizing.
+const double kOnboardingContentMaxWidth = 520;
+const double kOnboardingLogoWidthFactor = 0.62;
+const double kOnboardingLogoMinWidth = 160;
+const double kOnboardingLogoMaxWidth = 280;
+const double kOnboardingTipIconSize = kIconSizeLarge;
+
 /// Logo sizing (in-app)
 const double kAppBarLogoHeight = 22;
 const double kAppBarLogoWidth = 22;
