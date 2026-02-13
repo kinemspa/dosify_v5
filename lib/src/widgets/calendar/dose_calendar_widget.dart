@@ -169,11 +169,37 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     };
   }
 
+  bool _showHeaderForCurrentVariant() {
+    return widget.showHeaderOverride ??
+        (widget.variant != CalendarVariant.mini);
+  }
+
+  double _currentEffectiveHeightForStage() {
+    final renderObject = context.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      final h = renderObject.size.height;
+      if (h.isFinite && h > 0) return h;
+    }
+
+    final fallbackHeight = switch (widget.variant) {
+      CalendarVariant.mini => kHomeMiniCalendarHeight,
+      CalendarVariant.compact => kDetailCompactCalendarHeight,
+      CalendarVariant.full => MediaQuery.sizeOf(context).height * 0.75,
+    };
+    return widget.height ?? fallbackHeight;
+  }
+
   void _snapSelectedDayStageToInitial() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (!_selectedDayStageController.isAttached) return;
-      final initial = _selectedDayStageInitialRatio();
+      final initial = widget.variant == CalendarVariant.full
+          ? _selectedDayStageInitialRatioForFullHeight(
+              _currentEffectiveHeightForStage(),
+              showHeader: _showHeaderForCurrentVariant(),
+              showUpNextCard: widget.showUpNextCard,
+            )
+          : _selectedDayStageInitialRatio();
       _selectedDayStageController.animateTo(
         initial,
         duration: kAnimationNormal,
@@ -334,7 +360,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     });
     _loadDoses();
 
-    if (_currentView != CalendarView.day && widget.variant == CalendarVariant.full) {
+    if (_currentView != CalendarView.day &&
+        widget.variant == CalendarVariant.full) {
       _snapSelectedDayStageToInitial();
     }
   }
@@ -352,7 +379,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       // In Week/Month views, tapping a date selects that day.
       // Day view is only entered via explicit view switching.
       final selected = _selectedDate;
-      final isSameDay = selected != null &&
+      final isSameDay =
+          selected != null &&
           selected.year == date.year &&
           selected.month == date.month &&
           selected.day == date.day;
@@ -435,11 +463,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _loadDoses();
 
       if (mounted) {
-            showAppSnackBar(context, 'Dose marked as taken');
+        showAppSnackBar(context, 'Dose marked as taken');
       }
     } catch (e) {
       if (mounted) {
-            showAppSnackBar(context, 'Error: $e');
+        showAppSnackBar(context, 'Error: $e');
       }
     }
   }
@@ -567,11 +595,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _loadDoses();
 
       if (mounted) {
-            showAppSnackBar(context, 'Dose skipped');
+        showAppSnackBar(context, 'Dose skipped');
       }
     } catch (e) {
       if (mounted) {
-            showAppSnackBar(context, 'Error: $e');
+        showAppSnackBar(context, 'Error: $e');
       }
     }
   }
@@ -605,11 +633,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _loadDoses();
 
       if (mounted) {
-            showAppSnackBar(context, 'Dose reset to pending');
+        showAppSnackBar(context, 'Dose reset to pending');
       }
     } catch (e) {
       if (mounted) {
-            showAppSnackBar(context, 'Error: $e');
+        showAppSnackBar(context, 'Error: $e');
       }
     }
   }
@@ -718,10 +746,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final showHeader =
-      widget.showHeaderOverride ?? (widget.variant != CalendarVariant.mini);
-    final showViewToggle = widget.showViewToggleOverride ??
-      (widget.variant == CalendarVariant.full);
+    final showHeader = _showHeaderForCurrentVariant();
+    final showViewToggle =
+        widget.showViewToggleOverride ??
+        (widget.variant == CalendarVariant.full);
 
     CalculatedDose? nextDose;
     if (_doses.isNotEmpty) {
@@ -784,7 +812,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               effectiveHeight,
               showHeader: showHeader,
               showUpNextCard:
-                  widget.variant == CalendarVariant.full && widget.showUpNextCard,
+                  widget.variant == CalendarVariant.full &&
+                  widget.showUpNextCard,
             )
           : null;
 
@@ -885,7 +914,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           children: [
             Positioned.fill(child: bodyColumn),
             _buildSelectedDayStageSheet(
-              initialRatio: stageInitialRatio ?? kCalendarSelectedDayPanelHeightRatioMonth,
+              initialRatio:
+                  stageInitialRatio ??
+                  kCalendarSelectedDayPanelHeightRatioMonth,
             ),
           ],
         );
@@ -1004,8 +1035,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       return dose.scheduledTime.year == selectedDate.year &&
           dose.scheduledTime.month == selectedDate.month &&
           dose.scheduledTime.day == selectedDate.day;
-    }).toList()
-      ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+    }).toList()..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
 
     final dosesByHour = <int, List<CalculatedDose>>{};
     for (final dose in dayDoses) {
@@ -1087,8 +1117,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               Divider(
                 height: kSpacingM,
                 thickness: kBorderWidthThin,
-                color: Theme.of(context).colorScheme.outlineVariant
-                    .withValues(alpha: kOpacityVeryLow),
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withValues(alpha: kOpacityVeryLow),
               ),
             _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
           ],
@@ -1165,8 +1196,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final listBottomPadding = widget.variant == CalendarVariant.full
-      ? safeBottom + kPageBottomPadding
-      : safeBottom + kSpacingXXL + kSpacingXL;
+        ? safeBottom + kPageBottomPadding
+        : safeBottom + kSpacingXXL + kSpacingXL;
 
     if (dayDoses.isEmpty) {
       return const CalendarNoDosesState();
@@ -1243,8 +1274,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     };
 
     return computed.isFinite
-      ? computed.clamp(peekRatio, maxInitialRatio).toDouble()
-      : fallback;
+        ? computed.clamp(peekRatio, maxInitialRatio).toDouble()
+        : fallback;
   }
 
   double _monthViewIntrinsicHeight() {
@@ -1256,10 +1287,16 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     int weekday = firstDayOfMonth.weekday;
     weekday = weekday == 7 ? 0 : weekday; // Sun=0
 
-    final daysToSubtract = startOnMonday ? weekday : (weekday == 0 ? 0 : weekday);
+    final daysToSubtract = startOnMonday
+        ? weekday
+        : (weekday == 0 ? 0 : weekday);
     final first = firstDayOfMonth.subtract(Duration(days: daysToSubtract));
 
-    final lastDayOfMonth = DateTime(_currentDate.year, _currentDate.month + 1, 0);
+    final lastDayOfMonth = DateTime(
+      _currentDate.year,
+      _currentDate.month + 1,
+      0,
+    );
     final lastWeekday = lastDayOfMonth.weekday; // 1-7 (Mon-Sun)
     final normalized = lastWeekday == 7 ? 0 : lastWeekday; // Sun=0
     final daysToAdd = startOnMonday ? (7 - lastWeekday) % 7 : (6 - normalized);
@@ -1289,8 +1326,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final listBottomPadding = widget.variant == CalendarVariant.full
-      ? safeBottom + kPageBottomPadding
-      : safeBottom + kSpacingL;
+        ? safeBottom + kPageBottomPadding
+        : safeBottom + kSpacingL;
 
     return Padding(
       padding: const EdgeInsets.only(top: kSpacingS),
