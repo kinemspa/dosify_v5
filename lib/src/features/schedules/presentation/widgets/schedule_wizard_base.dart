@@ -97,6 +97,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
 
   Widget _buildUnifiedHeader() {
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final headerFg = medicationDetailHeaderForegroundColor(context);
 
     return Container(
       width: double.infinity,
@@ -120,10 +121,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
+                    icon: Icon(Icons.arrow_back, color: headerFg),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   Expanded(
@@ -131,7 +129,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
                       widget.wizardTitle,
                       style: wizardHeaderTitleTextStyle(
                         context,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: headerFg,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -167,9 +165,8 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
                                 ),
                                 decoration: BoxDecoration(
                                   color: i < _currentStep
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onPrimary
-                                            .withValues(alpha: 0.25),
+                                      ? headerFg
+                                      : headerFg.withValues(alpha: 0.25),
                                   borderRadius: BorderRadius.circular(1),
                                 ),
                               ),
@@ -184,9 +181,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
                     child: Text(
                       getStepLabel(_currentStep),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                        color: headerFg.withValues(alpha: 0.85),
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.3,
                       ),
@@ -197,9 +192,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
                   Divider(
                     height: 1,
                     thickness: 1,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onPrimary.withValues(alpha: 0.15),
+                    color: headerFg.withValues(alpha: 0.15),
                   ),
                   // Summary content
                   Container(
@@ -212,9 +205,7 @@ abstract class ScheduleWizardState<T extends ScheduleWizardBase>
               secondChild: Divider(
                 height: 1,
                 thickness: 1,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onPrimary.withValues(alpha: 0.15),
+                color: headerFg.withValues(alpha: 0.15),
               ),
             ),
           ],
@@ -251,18 +242,19 @@ class _StepCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final headerFg = medicationDetailHeaderForegroundColor(context);
     return Container(
       width: 22,
       height: 22,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isCompleted || isActive
-            ? cs.onPrimary
-            : cs.onPrimary.withValues(alpha: 0.2),
+            ? headerFg
+            : headerFg.withValues(alpha: 0.2),
         border: Border.all(
           color: isCompleted || isActive
-              ? cs.onPrimary
-              : cs.onPrimary.withValues(alpha: 0.3),
+              ? headerFg
+              : headerFg.withValues(alpha: 0.3),
           width: isActive ? 1.5 : 1,
         ),
       ),
@@ -275,7 +267,7 @@ class _StepCircle extends StatelessWidget {
                   context,
                   color: isActive
                       ? cs.primary
-                      : cs.onPrimary.withValues(alpha: 0.6),
+                      : headerFg.withValues(alpha: 0.6),
                 )?.copyWith(fontWeight: kFontWeightExtraBold),
               ),
       ),

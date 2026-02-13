@@ -319,6 +319,7 @@ class _AddScheduleWizardPageState
   @override
   Widget buildSummaryContent() {
     final med = _selectedMed;
+    final headerFg = medicationDetailHeaderForegroundColor(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -328,16 +329,10 @@ class _AddScheduleWizardPageState
               width: kScheduleWizardSummaryIconSize,
               height: kScheduleWizardSummaryIconSize,
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onPrimary.withValues(alpha: 0.15),
+                color: headerFg.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(kBorderRadiusSmall),
               ),
-              child: Icon(
-                _getMedicationIcon(),
-                size: 20,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
+              child: Icon(_getMedicationIcon(), size: 20, color: headerFg),
             ),
             const SizedBox(width: kScheduleWizardSummaryIconGap),
             Expanded(
@@ -347,7 +342,7 @@ class _AddScheduleWizardPageState
                   Text(
                     _selectedMed?.name ?? 'Select Medication',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: headerFg,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -355,9 +350,7 @@ class _AddScheduleWizardPageState
                     Text(
                       _medStrengthOrConcentrationSummaryLabel(med),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                        color: headerFg.withValues(alpha: 0.85),
                       ),
                     ),
                   if (med != null)
@@ -365,9 +358,7 @@ class _AddScheduleWizardPageState
                       _remainingStockSummaryLabel(med),
                       style: helperTextStyle(
                         context,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                        color: headerFg.withValues(alpha: 0.85),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -378,9 +369,7 @@ class _AddScheduleWizardPageState
                     Text(
                       'Dose: ${_doseMetricsSummaryLabel(separator: ' = ')}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                        color: headerFg.withValues(alpha: 0.85),
                       ),
                     ),
                 ],
@@ -395,9 +384,7 @@ class _AddScheduleWizardPageState
             child: Text(
               _getPatternSummary(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                color: headerFg.withValues(alpha: 0.85),
               ),
             ),
           ),
