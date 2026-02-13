@@ -1,3 +1,6 @@
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -5,6 +8,8 @@ class OnboardingSettings {
   OnboardingSettings._();
 
   static const String _prefsKeyCompleted = 'onboarding.completed_v1';
+
+  static final ValueNotifier<int> replaySignal = ValueNotifier<int>(0);
 
   static Future<bool> isCompleted() async {
     final prefs = await SharedPreferences.getInstance();
@@ -19,5 +24,10 @@ class OnboardingSettings {
   static Future<void> resetForTesting() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_prefsKeyCompleted);
+  }
+
+  static Future<void> replay() async {
+    await resetForTesting();
+    replaySignal.value = replaySignal.value + 1;
   }
 }

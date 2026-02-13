@@ -18,6 +18,7 @@ import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.da
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
+import 'package:dosifi_v5/src/core/ui/onboarding_settings.dart';
 import 'package:dosifi_v5/src/core/utils/developer_options.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
 import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
@@ -441,6 +442,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                 ],
               );
+            },
+          ),
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Onboarding',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: const Icon(Icons.tips_and_updates_outlined),
+            title: const Text('Replay onboarding'),
+            subtitle: const Text('Show welcome splash and quick tips again'),
+            onTap: () async {
+              await OnboardingSettings.replay();
             },
           ),
           const SizedBox(height: kSpacingL),

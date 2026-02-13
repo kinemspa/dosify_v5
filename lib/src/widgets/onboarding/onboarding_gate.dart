@@ -22,6 +22,11 @@ class _OnboardingGateState extends State<OnboardingGate> {
   @override
   void initState() {
     super.initState();
+    OnboardingSettings.replaySignal.addListener(_handleReplaySignal);
+    unawaited(_load());
+  }
+
+  void _handleReplaySignal() {
     unawaited(_load());
   }
 
@@ -35,6 +40,12 @@ class _OnboardingGateState extends State<OnboardingGate> {
     await OnboardingSettings.markCompleted();
     if (!mounted) return;
     setState(() => _completed = true);
+  }
+
+  @override
+  void dispose() {
+    OnboardingSettings.replaySignal.removeListener(_handleReplaySignal);
+    super.dispose();
   }
 
   @override
