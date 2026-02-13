@@ -75,14 +75,19 @@ class _ActivityCardState extends State<ActivityCard> {
           const UnifiedEmptyState(title: 'No medications')
         else ...[
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Expanded(
+              SizedBox(
+                width: kCompactControlWidth,
                 child: widget.onIncludedMedicationIdsChanged == null
-                    ? Text(
-                        '${widget.includedMedicationIds.length}/${meds.length} meds',
-                        style: helperTextStyle(context),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ? Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '${widget.includedMedicationIds.length}/${meds.length} meds',
+                          style: helperTextStyle(context),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       )
                     : MultiSelectDropdown36<String>(
                         items: meds
@@ -100,7 +105,7 @@ class _ActivityCardState extends State<ActivityCard> {
                         primaryFill: false,
                       ),
               ),
-              const SizedBox(width: kSpacingXS),
+              const SizedBox(width: kSpacingXXS),
               SizedBox(
                 width: kCompactControlWidth,
                 child: SmallDropdown36<ReportTimeRangePreset>(
