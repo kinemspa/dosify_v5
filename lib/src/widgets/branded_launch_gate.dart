@@ -13,13 +13,34 @@ class BrandedLaunchGate extends StatefulWidget {
   State<BrandedLaunchGate> createState() => _BrandedLaunchGateState();
 }
 
-class _BrandedLaunchGateState extends State<BrandedLaunchGate> {
+class _BrandedLaunchGateState extends State<BrandedLaunchGate>
+    with SingleTickerProviderStateMixin {
   bool _showBranding = true;
   Timer? _timer;
+  late final AnimationController _taglineController;
+  late final Animation<double> _taglineOpacity;
+  late final Animation<Offset> _taglineOffset;
 
   @override
   void initState() {
     super.initState();
+    _taglineController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
+    _taglineOpacity = CurvedAnimation(
+      parent: _taglineController,
+      curve: Curves.easeOut,
+    );
+    _taglineOffset = Tween<Offset>(
+      begin: const Offset(0, 0.22),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _taglineController, curve: Curves.easeOutCubic),
+    );
+
+    _taglineController.forward();
+
     _timer = Timer(kBrandedLaunchHoldDuration, () {
       if (!mounted) return;
       setState(() => _showBranding = false);
@@ -29,6 +50,7 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate> {
   @override
   void dispose() {
     _timer?.cancel();
+    _taglineController.dispose();
     super.dispose();
   }
 
@@ -67,10 +89,16 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate> {
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: kSpacingM),
-                        Text(
-                          kPrimaryBrandTagline,
-                          textAlign: TextAlign.center,
-                          style: splashTaglineTextStyle(context),
+                        FadeTransition(
+                          opacity: _taglineOpacity,
+                          child: SlideTransition(
+                            position: _taglineOffset,
+                            child: Text(
+                              kPrimaryBrandTagline,
+                              textAlign: TextAlign.center,
+                              style: splashTaglineTextStyle(context),
+                            ),
+                          ),
                         ),
                       ],
                     ),

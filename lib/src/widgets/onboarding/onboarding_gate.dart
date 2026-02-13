@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -53,275 +54,246 @@ class _OnboardingGateState extends State<OnboardingGate> {
     final completed = _completed;
     if (completed == null || completed) return widget.child;
 
-    return _OnboardingFlow(onFinish: _finish);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        widget.child,
+        _OnboardingCoachOverlay(onFinish: _finish),
+      ],
+    );
   }
 }
 
-class _OnboardingFlow extends StatefulWidget {
-  const _OnboardingFlow({required this.onFinish});
+class _OnboardingCoachOverlay extends StatefulWidget {
+  const _OnboardingCoachOverlay({required this.onFinish});
 
   final Future<void> Function() onFinish;
 
   @override
-  State<_OnboardingFlow> createState() => _OnboardingFlowState();
+  State<_OnboardingCoachOverlay> createState() => _OnboardingCoachOverlayState();
 }
 
-class _OnboardingFlowState extends State<_OnboardingFlow> {
-  static const int _welcomeIndex = 0;
+class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
+  int _stepIndex = 0;
 
-  final PageController _pageController = PageController();
-  int _pageIndex = 0;
-
-  final List<_OnboardingTip> _tips = const [
-    _OnboardingTip(
-      icon: Icons.today_rounded,
-      title: 'Today card',
-      body:
-          'See what is due now, and quickly mark doses as taken, skipped, or snoozed.',
+  final List<_CoachStep> _steps = const [
+    _CoachStep(
+      title: 'Home screen',
+      message:
+          'This is your dashboard with an overall view of medications, schedules, and due doses.',
+      targetAlignment: Alignment(0, -0.70),
+      bubbleAlignment: Alignment(0, -0.25),
     ),
-    _OnboardingTip(
-      icon: Icons.medication_rounded,
-      title: 'Medication tracking',
-      body:
-          'Track medicine details, strength, stock, expiry, and storage in one place.',
+    _CoachStep(
+      title: 'Medications',
+      message:
+          'Add medications here and track stock, expiry, and core medication details.',
+      targetAlignment: Alignment(-0.25, 0.92),
+      bubbleAlignment: Alignment(0, 0.48),
     ),
-    _OnboardingTip(
-      icon: Icons.schedule_rounded,
+    _CoachStep(
       title: 'Schedules',
-      body:
-          'Create flexible schedules with multiple times and keep your routine consistent.',
+      message:
+          'Create dose schedules here. You receive notifications from these schedules.',
+      targetAlignment: Alignment(0.25, 0.92),
+      bubbleAlignment: Alignment(0, 0.48),
     ),
-    _OnboardingTip(
-      icon: Icons.science_rounded,
+    _CoachStep(
+      title: 'Schedule links',
+      message:
+          'Each schedule is attached to a medication, and doses are attached to a schedule.',
+      targetAlignment: Alignment(0.25, 0.92),
+      bubbleAlignment: Alignment(0, 0.48),
+    ),
+    _CoachStep(
+      title: 'Medication details',
+      message:
+          'Medication details include an ad hoc dose action for doses taken outside a schedule.',
+      targetAlignment: Alignment(-0.25, 0.92),
+      bubbleAlignment: Alignment(0, 0.48),
+    ),
+    _CoachStep(
       title: 'Reconstitution calculator',
-      body:
-          'Use the calculator for vial workflows and keep dose metrics organized.',
+      message:
+          'Quickly calculate and save reconstitutions for later use when adding medications.',
+      targetAlignment: Alignment(-0.25, 0.92),
+      bubbleAlignment: Alignment(0, 0.48),
+    ),
+    _CoachStep(
+      title: 'Multi-dose vial support',
+      message:
+          'Multi-dose vials include a built-in reconstitution calculator in their add/edit flow.',
+      targetAlignment: Alignment(-0.25, 0.92),
+      bubbleAlignment: Alignment(0, 0.48),
+    ),
+    _CoachStep(
+      title: 'Analytics',
+      message: 'Get reports and trend insights across your dose activity and history.',
+      targetAlignment: Alignment(0.68, -0.82),
+      bubbleAlignment: Alignment(0, -0.30),
+    ),
+    _CoachStep(
+      title: 'Inventory',
+      message:
+          'See a quick overview of what remains in stock and what has been used over time.',
+      targetAlignment: Alignment(0.68, -0.82),
+      bubbleAlignment: Alignment(0, -0.30),
     ),
   ];
 
-  int get _lastTipPageIndex => _tips.length;
-
-  bool get _isWelcomePage => _pageIndex == _welcomeIndex;
-
-  bool get _isLastPage => _pageIndex == _lastTipPageIndex;
+  bool get _isLastStep => _stepIndex == _steps.length - 1;
 
   Future<void> _goNext() async {
-    if (_isLastPage) {
+    if (_isLastStep) {
       await widget.onFinish();
       return;
     }
 
-    final nextIndex = _pageIndex + 1;
-    await _pageController.animateToPage(
-      nextIndex,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-    );
-  }
-
-  Future<void> _goBack() async {
-    if (_isWelcomePage) return;
-    final previousIndex = _pageIndex - 1;
-    await _pageController.animateToPage(
-      previousIndex,
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+    if (!mounted) return;
+    setState(() => _stepIndex += 1);
   }
 
   @override
   Widget build(BuildContext context) {
+    final step = _steps[_stepIndex];
     final cs = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: kPagePadding,
-          child: Column(
-            children: [
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() => _pageIndex = index);
-                  },
-                  children: [
-                    _WelcomeSplashPage(onStart: _goNext),
-                    for (final tip in _tips) _OnboardingTipPage(tip: tip),
-                  ],
-                ),
-              ),
-              const SizedBox(height: kSpacingM),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: widget.onFinish,
-                    child: const Text('Skip'),
-                  ),
-                  const Spacer(),
-                  if (!_isWelcomePage)
-                    OutlinedButton(
-                      onPressed: _goBack,
-                      child: const Text('Back'),
-                    ),
-                  if (!_isWelcomePage) const SizedBox(width: kSpacingS),
-                  FilledButton(
-                    onPressed: _goNext,
-                    child: Text(_isLastPage ? 'Get Started' : 'Next'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: kSpacingS),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  for (var i = 0; i <= _lastTipPageIndex; i++)
-                    Container(
-                      width: kSpacingS,
-                      height: kSpacingS,
-                      margin: const EdgeInsets.symmetric(horizontal: kSpacingXXS),
-                      decoration: BoxDecoration(
-                        color: i == _pageIndex
-                            ? cs.primary
-                            : cs.outlineVariant.withValues(alpha: kOpacityLow),
-                        borderRadius: BorderRadius.circular(kBorderRadiusFull),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: kSpacingXS),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _WelcomeSplashPage extends StatelessWidget {
-  const _WelcomeSplashPage({required this.onStart});
-
-  final VoidCallback onStart;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final logoWidth =
-            (constraints.maxWidth * kOnboardingLogoWidthFactor).clamp(
-              kOnboardingLogoMinWidth,
-              kOnboardingLogoMaxWidth,
-            );
-
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: kOnboardingContentMaxWidth),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(kBorderRadiusLarge),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: kSpacingL,
-                  vertical: kSpacingXL,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      kSplashLogoAssetPath,
-                      width: logoWidth,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: kSpacingM),
-                    Text(
-                      'Welcome to Dosifi',
-                      textAlign: TextAlign.center,
-                      style: homeHeroTitleStyle(context)?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: kSpacingXS),
-                    Text(
-                      kPrimaryBrandTagline,
-                      textAlign: TextAlign.center,
-                      style: splashTaglineTextStyle(context),
-                    ),
-                    const SizedBox(height: kSpacingL),
-                    FilledButton(
-                      onPressed: onStart,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                        foregroundColor: Theme.of(context).colorScheme.primary,
-                      ),
-                      child: const Text('Start Quick Tips'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _OnboardingTipPage extends StatelessWidget {
-  const _OnboardingTipPage({required this.tip});
-
-  final _OnboardingTip tip;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: kOnboardingContentMaxWidth),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(kSpacingL),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+    return Material(
+      color: Colors.black.withValues(alpha: 0.50),
+      child: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
               children: [
-                Icon(tip.icon, size: kOnboardingTipIconSize, color: cs.primary),
-                const SizedBox(height: kSpacingS),
-                Text(
-                  tip.title,
-                  textAlign: TextAlign.center,
-                  style: sectionTitleStyle(context),
+                CustomPaint(
+                  size: Size(constraints.maxWidth, constraints.maxHeight),
+                  painter: _CoachConnectorPainter(
+                    bubbleAlignment: step.bubbleAlignment,
+                    targetAlignment: step.targetAlignment,
+                    color: cs.primary,
+                  ),
                 ),
-                const SizedBox(height: kSpacingS),
-                Text(
-                  tip.body,
-                  textAlign: TextAlign.center,
-                  style: helperTextStyle(context),
+                Align(
+                  alignment: step.targetAlignment,
+                  child: Container(
+                    width: kOnboardingCoachTargetSize,
+                    height: kOnboardingCoachTargetSize,
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: kOpacityMedium),
+                      borderRadius: BorderRadius.circular(kBorderRadiusFull),
+                      border: Border.all(
+                        color: cs.onPrimary,
+                        width: kBorderWidthMedium,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: step.bubbleAlignment,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: kOnboardingCoachBubbleMaxWidth,
+                    ),
+                    child: Card(
+                      child: Padding(
+                        padding: kOnboardingCoachBubblePadding,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(step.title, style: sectionTitleStyle(context)),
+                            const SizedBox(height: kSpacingXS),
+                            Text(step.message, style: helperTextStyle(context)),
+                            const SizedBox(height: kSpacingS),
+                            Row(
+                              children: [
+                                Text(
+                                  '${_stepIndex + 1}/${_steps.length}',
+                                  style: smallHelperTextStyle(context),
+                                ),
+                                const Spacer(),
+                                TextButton(
+                                  onPressed: widget.onFinish,
+                                  child: const Text('Skip'),
+                                ),
+                                const SizedBox(width: kSpacingXS),
+                                FilledButton(
+                                  onPressed: _goNext,
+                                  child: Text(_isLastStep ? 'Done' : 'Next'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _OnboardingTip {
-  const _OnboardingTip({
-    required this.icon,
+class _CoachStep {
+  const _CoachStep({
     required this.title,
-    required this.body,
+    required this.message,
+    required this.targetAlignment,
+    required this.bubbleAlignment,
   });
 
-  final IconData icon;
   final String title;
-  final String body;
+  final String message;
+  final Alignment targetAlignment;
+  final Alignment bubbleAlignment;
+}
+
+class _CoachConnectorPainter extends CustomPainter {
+  _CoachConnectorPainter({
+    required this.bubbleAlignment,
+    required this.targetAlignment,
+    required this.color,
+  });
+
+  final Alignment bubbleAlignment;
+  final Alignment targetAlignment;
+  final Color color;
+
+  Offset _alignmentToOffset(Size size, Alignment alignment) {
+    return Offset(
+      (alignment.x + 1) * 0.5 * size.width,
+      (alignment.y + 1) * 0.5 * size.height,
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bubbleCenter = _alignmentToOffset(size, bubbleAlignment);
+    final targetCenter = _alignmentToOffset(size, targetAlignment);
+
+    final direction = targetCenter - bubbleCenter;
+    final magnitude = math.max(direction.distance, 1.0).toDouble();
+    final unit = direction / magnitude;
+
+    final start = bubbleCenter + (unit * 34);
+    final end = targetCenter - (unit * 28);
+
+    final linePaint = Paint()
+      ..color = color.withValues(alpha: kOpacityHigh)
+      ..strokeWidth = kBorderWidthMedium
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawLine(start, end, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CoachConnectorPainter oldDelegate) {
+    return oldDelegate.bubbleAlignment != bubbleAlignment ||
+        oldDelegate.targetAlignment != targetAlignment ||
+        oldDelegate.color != color;
+  }
 }

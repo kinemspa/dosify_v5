@@ -57,6 +57,10 @@ const double kOnboardingLogoWidthFactor = 0.62;
 const double kOnboardingLogoMinWidth = 160;
 const double kOnboardingLogoMaxWidth = 280;
 const double kOnboardingTipIconSize = kIconSizeLarge;
+const double kOnboardingCoachBubbleMaxWidth = 360;
+const double kOnboardingCoachTargetSize = 44;
+const double kOnboardingCoachPointerSize = 12;
+const EdgeInsets kOnboardingCoachBubblePadding = EdgeInsets.all(kSpacingM);
 
 /// Logo sizing (in-app)
 const double kAppBarLogoHeight = 22;
