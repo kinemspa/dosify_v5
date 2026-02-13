@@ -39,7 +39,6 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
@@ -55,7 +54,6 @@ import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
-// DoseHistoryWidget replaced by MedicationReportsWidget
 
 /// Modern, revolutionized medication detail screen with:
 /// - Hero header with gradient and key stats
@@ -131,7 +129,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   late ScrollController _scrollController;
   bool _isDetailsExpanded = true; // Collapsible state for details card
   bool _isScheduleExpanded = true; // Collapsible state for schedule card
-  bool _isReportsExpanded = true; // Collapsible state for reports card
   bool _isReconstitutionExpanded = true; // Collapsible state for reconstitution
   bool _isTodayExpanded = true; // Collapsible state for today card
   bool _isActivityExpanded = true; // Collapsible state for activity card
@@ -141,7 +138,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
   late final List<String> _cardOrder;
 
-  static const String _kCardReports = 'reports';
   static const String _kCardSchedule = 'schedule';
   static const String _kCardDetails = 'details';
   static const String _kCardReconstitution = 'reconstitution';
@@ -161,7 +157,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       _kCardToday,
       _kCardActivity,
       _kCardCalendar,
-      _kCardReports,
       _kCardSchedule,
       _kCardDetails,
     ];
@@ -613,14 +608,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           setState(() => _isCalendarExpanded = expanded);
         },
       ),
-      _kCardReports: MedicationReportsWidget(
-        medication: med,
-        isExpanded: _isReportsExpanded,
-        onExpandedChanged: (expanded) {
-          if (!mounted) return;
-          setState(() => _isReportsExpanded = expanded);
-        },
-      ),
       _kCardSchedule: _buildScheduleCard(
         context,
         med,
@@ -635,15 +622,12 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         !_isTodayExpanded &&
         !_isActivityExpanded &&
         !_isCalendarExpanded &&
-        !_isReportsExpanded &&
         !_isScheduleExpanded &&
         !_isDetailsExpanded &&
         (!hasReconstitutionCard || !_isReconstitutionExpanded);
 
     bool isExpandedForCardId(String id) {
       switch (id) {
-        case _kCardReports:
-          return _isReportsExpanded;
         case _kCardToday:
           return _isTodayExpanded;
         case _kCardActivity:
