@@ -38,8 +38,18 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 /// Assets
 const String kPrimaryLogoAssetPath = 'assets/logo/logo_001_primary.png';
 const String kWhiteLogoAssetPath = 'assets/logo/logo_001_white.png';
+const String kSplashLogoAssetPath = kWhiteLogoAssetPath;
 const String kAndroidLegacyIconAssetPath =
     'assets/logo/logo_001_android_icon.png';
+const String kPrimaryBrandTagline = 'Track Smarter Every Day';
+
+/// Branded app-launch hold timing.
+const Duration kBrandedLaunchHoldDuration = Duration(milliseconds: 650);
+
+/// Branded launch logo sizing.
+const double kBrandedLaunchLogoMinWidth = 220;
+const double kBrandedLaunchLogoMaxWidth = 420;
+const double kBrandedLaunchLogoWidthFactor = 0.82;
 
 /// Logo sizing (in-app)
 const double kAppBarLogoHeight = 22;
@@ -2274,6 +2284,18 @@ TextStyle? bodyTextStyle(BuildContext context) {
     color: Theme.of(
       context,
     ).colorScheme.onSurface.withValues(alpha: kOpacityMediumHigh),
+  );
+}
+
+/// Branded splash tagline style.
+TextStyle? splashTaglineTextStyle(BuildContext context) {
+  return Theme.of(context).textTheme.titleSmall?.copyWith(
+    fontSize: kFontSizeLarge,
+    fontWeight: kFontWeightSemiBold,
+    color: Theme.of(
+      context,
+    ).colorScheme.onPrimary.withValues(alpha: kOpacityMediumHigh),
+    letterSpacing: 0.2,
   );
 }
 
