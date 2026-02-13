@@ -4,10 +4,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/ui/onboarding_settings.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 
 class OnboardingGate extends StatefulWidget {
   const OnboardingGate({required this.child, super.key});
@@ -114,6 +116,7 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
       routePath: '/medications/',
       usesPrefixMatch: true,
       waitForUserNavigation: true,
+      openMedicationDetailIfAvailable: true,
       targetAlignment: Alignment(0, -0.18),
     ),
     _CoachStep(
@@ -152,10 +155,34 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
   }
 
   bool _isOnStepRoute(_CoachStep step, String currentPath) {
+    if (step.openMedicationDetailIfAvailable &&
+        !_hasAnyMedications() &&
+        currentPath == '/medications') {
+      return true;
+    }
+
     if (step.usesPrefixMatch) {
       return currentPath.startsWith(step.routePath);
     }
     return currentPath == step.routePath;
+  }
+
+  bool _hasAnyMedications() {
+    final box = Hive.box<Medication>('medications');
+    return box.isNotEmpty;
+  }
+
+  void _openMedicationDetailIfAvailable() {
+    final box = Hive.box<Medication>('medications');
+    if (box.isEmpty) {
+      context.go('/medications');
+      return;
+    }
+
+    final meds = box.values.toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    final firstMedicationId = meds.first.id;
+    context.go('/medications/$firstMedicationId');
   }
 
   void _syncRouteForStep(_CoachStep step, String currentPath) {
@@ -185,6 +212,9 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
     final onExpectedRoute = _isOnStepRoute(step, currentPath);
 
     if (step.waitForUserNavigation && !onExpectedRoute) {
+      if (step.openMedicationDetailIfAvailable) {
+        _openMedicationDetailIfAvailable();
+      }
       return;
     }
 
@@ -374,6 +404,7 @@ class _CoachStep {
     required this.targetAlignment,
     this.usesPrefixMatch = false,
     this.waitForUserNavigation = false,
+    this.openMedicationDetailIfAvailable = false,
   });
 
   final String title;
@@ -382,6 +413,7 @@ class _CoachStep {
   final Alignment targetAlignment;
   final bool usesPrefixMatch;
   final bool waitForUserNavigation;
+  final bool openMedicationDetailIfAvailable;
 }
 
 class _CoachConnectorPainter extends CustomPainter {
