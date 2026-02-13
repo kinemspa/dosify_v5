@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -32,16 +31,6 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final showBack = Navigator.of(context).canPop() || forceBackButton;
 
-    var hasSupplies = false;
-    try {
-      const boxName = 'supplies';
-      if (Hive.isBoxOpen(boxName)) {
-        hasSupplies = Hive.box<dynamic>(boxName).isNotEmpty;
-      }
-    } catch (_) {
-      hasSupplies = false;
-    }
-
     final effectiveActions = <Widget>[
       ...?actions,
       PopupMenuButton<String>(
@@ -53,8 +42,6 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
               context.go('/');
             case 'medications':
               context.go('/medications');
-            case 'supplies':
-              context.go('/supplies');
             case 'inventory':
               context.go('/inventory');
             case 'schedules':
@@ -72,8 +59,6 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
         itemBuilder: (context) => [
           const PopupMenuItem(value: 'home', child: Text('Home')),
           const PopupMenuItem(value: 'medications', child: Text('Medications')),
-          if (hasSupplies)
-            const PopupMenuItem(value: 'supplies', child: Text('Supplies')),
           const PopupMenuItem(value: 'inventory', child: Text('Inventory')),
           const PopupMenuItem(value: 'schedules', child: Text('Schedules')),
           const PopupMenuItem(value: 'calendar', child: Text('Calendar')),

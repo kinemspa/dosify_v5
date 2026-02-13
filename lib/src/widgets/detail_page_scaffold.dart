@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -49,16 +48,6 @@ class DetailPageScaffold extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final headerForeground = cs.onPrimary;
 
-    var hasSupplies = false;
-    try {
-      const boxName = 'supplies';
-      if (Hive.isBoxOpen(boxName)) {
-        hasSupplies = Hive.box<dynamic>(boxName).isNotEmpty;
-      }
-    } catch (_) {
-      hasSupplies = false;
-    }
-
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -95,8 +84,6 @@ class DetailPageScaffold extends StatelessWidget {
                       context.go('/');
                     case 'medications':
                       context.go('/medications');
-                    case 'supplies':
-                      context.go('/supplies');
                     case 'schedules':
                       context.go('/schedules');
                     case 'calendar':
@@ -121,11 +108,6 @@ class DetailPageScaffold extends StatelessWidget {
                     value: 'medications',
                     child: Text('Medications'),
                   ),
-                  if (hasSupplies)
-                    const PopupMenuItem(
-                      value: 'supplies',
-                      child: Text('Supplies'),
-                    ),
                   const PopupMenuItem(
                     value: 'schedules',
                     child: Text('Schedules'),
