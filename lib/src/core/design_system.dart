@@ -619,6 +619,9 @@ const EdgeInsets kAppSnackBarOuterPadding = EdgeInsets.fromLTRB(
   kSpacingXS,
 );
 
+/// App snackbar vertical placement as a fraction of screen height.
+const double kAppSnackBarTopScreenFraction = 0.25;
+
 /// Content padding inside the app snackbar container.
 const EdgeInsets kAppSnackBarInnerPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
