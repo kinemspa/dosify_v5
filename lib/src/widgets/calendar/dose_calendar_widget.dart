@@ -322,9 +322,22 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           break;
         case CalendarView.week:
           _currentDate = _currentDate.subtract(const Duration(days: 7));
+          if (_selectedDate != null) {
+            _selectedDate = _selectedDate!.subtract(const Duration(days: 7));
+            _currentDate = _selectedDate!;
+          }
           break;
         case CalendarView.month:
-          _currentDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
+          if (_selectedDate != null) {
+            _selectedDate = _shiftMonthKeepingDay(_selectedDate!, -1);
+            _currentDate = _selectedDate!;
+          } else {
+            _currentDate = DateTime(
+              _currentDate.year,
+              _currentDate.month - 1,
+              1,
+            );
+          }
           break;
       }
     });
@@ -339,13 +352,34 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           break;
         case CalendarView.week:
           _currentDate = _currentDate.add(const Duration(days: 7));
+          if (_selectedDate != null) {
+            _selectedDate = _selectedDate!.add(const Duration(days: 7));
+            _currentDate = _selectedDate!;
+          }
           break;
         case CalendarView.month:
-          _currentDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
+          if (_selectedDate != null) {
+            _selectedDate = _shiftMonthKeepingDay(_selectedDate!, 1);
+            _currentDate = _selectedDate!;
+          } else {
+            _currentDate = DateTime(
+              _currentDate.year,
+              _currentDate.month + 1,
+              1,
+            );
+          }
           break;
       }
     });
     _loadDoses();
+  }
+
+  DateTime _shiftMonthKeepingDay(DateTime source, int monthDelta) {
+    final targetYear = source.year + ((source.month - 1 + monthDelta) ~/ 12);
+    final targetMonth = ((source.month - 1 + monthDelta) % 12) + 1;
+    final maxDay = DateUtils.getDaysInMonth(targetYear, targetMonth);
+    final targetDay = source.day > maxDay ? maxDay : source.day;
+    return DateTime(targetYear, targetMonth, targetDay);
   }
 
   void _onTodayPressed() {

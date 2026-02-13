@@ -40,7 +40,9 @@ class CalendarHeader extends StatelessWidget {
         color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: kOpacityVeryLow),
+            color: colorScheme.outlineVariant.withValues(
+              alpha: kOpacityVeryLow,
+            ),
             width: kBorderWidthMedium,
           ),
         ),
@@ -223,18 +225,18 @@ class CalendarHeader extends StatelessWidget {
 
   String _formatMonthTitle() {
     final months = [
-      'January',
-      'February',
-      'March',
-      'April',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
       'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
 
     return '${months[currentDate.month - 1]} ${currentDate.year}';
