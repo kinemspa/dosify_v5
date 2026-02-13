@@ -441,7 +441,7 @@ class _AddScheduleWizardPageState
               .toStringAsFixed(2)
               .replaceFirst(RegExp(r'\.0+$'), '')
               .replaceFirst(RegExp(r'(\.\d*[1-9])0+$'), r'$1');
-    return 'Remaining: $formatted';
+    return formatted;
   }
 
   String _doseSummaryLabel() {
