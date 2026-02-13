@@ -2158,7 +2158,7 @@ TextStyle? cardSectionTitleStyle(BuildContext context) {
 
 /// Review-card heading style (e.g. wizard Step 5 review sections).
 TextStyle? reviewCardTitleStyle(BuildContext context) {
-  return sectionTitleStyle(context);
+  return cardSectionTitleStyle(context);
 }
 
 /// Field label style (in LabelFieldRow)
