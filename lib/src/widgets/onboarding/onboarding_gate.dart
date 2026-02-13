@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/ui/onboarding_settings.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -151,7 +152,31 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
   bool get _isLastStep => _stepIndex == _steps.length - 1;
 
   String _currentPath(BuildContext context) {
-    return GoRouterState.of(context).uri.path;
+    final rootContext = rootNavigatorKey.currentContext;
+    if (rootContext != null) {
+      return GoRouter.of(rootContext).routeInformationProvider.value.uri.path;
+    }
+
+    try {
+      return GoRouter.of(context).routeInformationProvider.value.uri.path;
+    } catch (_) {
+      return '/';
+    }
+  }
+
+  void _goToPath(String path) {
+    final rootContext = rootNavigatorKey.currentContext;
+    if (rootContext != null) {
+      GoRouter.of(rootContext).go(path);
+      return;
+    }
+
+    if (!mounted) return;
+    try {
+      GoRouter.of(context).go(path);
+    } catch (_) {
+      // No-op when router context is not available yet.
+    }
   }
 
   bool _isOnStepRoute(_CoachStep step, String currentPath) {
@@ -175,14 +200,14 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
   void _openMedicationDetailIfAvailable() {
     final box = Hive.box<Medication>('medications');
     if (box.isEmpty) {
-      context.go('/medications');
+      _goToPath('/medications');
       return;
     }
 
     final meds = box.values.toList()
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     final firstMedicationId = meds.first.id;
-    context.go('/medications/$firstMedicationId');
+    _goToPath('/medications/$firstMedicationId');
   }
 
   void _syncRouteForStep(_CoachStep step, String currentPath) {
@@ -195,7 +220,7 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _queuedRouteSync = false;
       if (!mounted) return;
-      context.go(step.routePath);
+      _goToPath(step.routePath);
     });
   }
 
@@ -228,7 +253,7 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
 
     final next = _steps[_stepIndex];
     if (!next.waitForUserNavigation) {
-      context.go(next.routePath);
+      _goToPath(next.routePath);
     }
   }
 

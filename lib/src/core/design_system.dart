@@ -44,7 +44,7 @@ const String kAndroidLegacyIconAssetPath =
 const String kPrimaryBrandTagline = 'Track Smarter Every Day';
 
 /// Branded app-launch hold timing.
-const Duration kBrandedLaunchHoldDuration = Duration(milliseconds: 650);
+const Duration kBrandedLaunchHoldDuration = Duration(milliseconds: 1200);
 
 /// Branded launch logo sizing.
 const double kBrandedLaunchLogoMinWidth = 220;
@@ -2304,11 +2304,9 @@ TextStyle? bodyTextStyle(BuildContext context) {
 /// Branded splash tagline style.
 TextStyle? splashTaglineTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.titleSmall?.copyWith(
-    fontSize: kFontSizeLarge,
+    fontSize: kFontSizeDetailHeaderTitle,
     fontWeight: kFontWeightSemiBold,
-    color: Theme.of(
-      context,
-    ).colorScheme.onPrimary.withValues(alpha: kOpacityMediumHigh),
+    color: Theme.of(context).colorScheme.onPrimary,
     letterSpacing: 0.2,
   );
 }
