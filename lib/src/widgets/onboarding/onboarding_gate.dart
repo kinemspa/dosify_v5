@@ -190,41 +190,81 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                 ),
                 Align(
                   alignment: step.bubbleAlignment,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: kOnboardingCoachBubbleMaxWidth,
-                    ),
-                    child: Card(
-                      child: Padding(
-                        padding: kOnboardingCoachBubblePadding,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(step.title, style: sectionTitleStyle(context)),
-                            const SizedBox(height: kSpacingXS),
-                            Text(step.message, style: helperTextStyle(context)),
-                            const SizedBox(height: kSpacingS),
-                            Row(
-                              children: [
-                                Text(
-                                  '${_stepIndex + 1}/${_steps.length}',
-                                  style: smallHelperTextStyle(context),
-                                ),
-                                const Spacer(),
-                                TextButton(
-                                  onPressed: widget.onFinish,
-                                  child: const Text('Skip'),
-                                ),
-                                const SizedBox(width: kSpacingXS),
-                                FilledButton(
-                                  onPressed: _goNext,
-                                  child: Text(_isLastStep ? 'Done' : 'Next'),
-                                ),
-                              ],
-                            ),
-                          ],
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position:
+                              Tween<Offset>(
+                                begin: const Offset(0, 0.08),
+                                end: Offset.zero,
+                              ).animate(animation),
+                          child: child,
                         ),
+                      );
+                    },
+                    child: Container(
+                      key: ValueKey<int>(_stepIndex),
+                      constraints: const BoxConstraints(
+                        maxWidth: kOnboardingCoachBubbleMaxWidth,
+                      ),
+                      padding: kOnboardingCoachBubblePadding,
+                      decoration: BoxDecoration(
+                        color: cs.primary,
+                        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            step.title,
+                            style: sectionTitleStyle(
+                              context,
+                            )?.copyWith(color: cs.onPrimary),
+                          ),
+                          const SizedBox(height: kSpacingXS),
+                          Text(
+                            step.message,
+                            style: helperTextStyle(
+                              context,
+                              color: cs.onPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: kSpacingS),
+                          Row(
+                            children: [
+                              Text(
+                                '${_stepIndex + 1}/${_steps.length}',
+                                style: smallHelperTextStyle(
+                                  context,
+                                  color: cs.onPrimary,
+                                ),
+                              ),
+                              const Spacer(),
+                              TextButton(
+                                onPressed: widget.onFinish,
+                                style: TextButton.styleFrom(
+                                  foregroundColor: cs.onPrimary,
+                                ),
+                                child: const Text('Skip'),
+                              ),
+                              const SizedBox(width: kSpacingXS),
+                              FilledButton(
+                                onPressed: _goNext,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: cs.onPrimary,
+                                  foregroundColor: cs.primary,
+                                ),
+                                child: Text(_isLastStep ? 'Done' : 'Next'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
