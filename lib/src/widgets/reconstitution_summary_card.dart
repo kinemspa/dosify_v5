@@ -18,6 +18,8 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     this.containerVolumeMl,
     this.perMlValue,
     this.volumePerDose,
+    this.doseStrengthValue,
+    this.doseStrengthUnit,
     this.reconFluidName,
     this.syringeSizeMl,
     this.compact = false,
@@ -30,6 +32,8 @@ class ReconstitutionSummaryCard extends StatelessWidget {
   final double? containerVolumeMl;
   final double? perMlValue;
   final double? volumePerDose;
+  final double? doseStrengthValue;
+  final String? doseStrengthUnit;
   final String? reconFluidName;
   final double? syringeSizeMl;
   final bool compact;
@@ -48,12 +52,14 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     final cs = theme.colorScheme;
 
     final baseForeground = showCardSurface
-      ? reconForegroundColor(context)
-      : cs.onSurface;
+        ? reconForegroundColor(context)
+        : cs.onSurface;
 
     // The recon opacities assume white text on a dark background.
     // When rendering on normal surfaces, cap darkness per design system.
-    final baseTextAlpha = showCardSurface ? kReconTextHighOpacity : kOpacityFull;
+    final baseTextAlpha = showCardSurface
+        ? kReconTextHighOpacity
+        : kOpacityFull;
 
     final baseTextColor = baseForeground.withValues(alpha: baseTextAlpha);
     final baseStyle = reconSummaryBaseTextStyle(context, color: baseTextColor);
@@ -96,6 +102,11 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     );
 
     final hasVolumePerDose = volumePerDose != null && volumePerDose! > 0;
+    final hasDoseStrength =
+        doseStrengthValue != null &&
+        doseStrengthValue! > 0 &&
+        doseStrengthUnit != null &&
+        doseStrengthUnit!.trim().isNotEmpty;
     final hasSyringeSize = syringeSizeMl != null && syringeSizeMl! > 0;
     final unitsPerMl = SyringeType.ml_1_0.unitsPerMl;
     final doseUnits = hasVolumePerDose ? (volumePerDose! * unitsPerMl) : null;
@@ -103,11 +114,11 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     return Container(
       padding: showCardSurface
           ? (compact
-              ? const EdgeInsets.symmetric(
-                  horizontal: kSpacingM,
-                  vertical: kSpacingS,
-                )
-              : kReconSummaryPadding)
+                ? const EdgeInsets.symmetric(
+                    horizontal: kSpacingM,
+                    vertical: kSpacingS,
+                  )
+                : kReconSummaryPadding)
           : EdgeInsets.zero,
       decoration: showCardSurface
           ? BoxDecoration(
@@ -157,29 +168,17 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                       text: '${_formatNoTrailing(strengthValue)} $strengthUnit',
                       style: strengthStyle,
                     ),
-                    TextSpan(
-                      text: ' of ',
-                      style: ofStyle,
-                    ),
-                    TextSpan(
-                      text: medicationName,
-                      style: medicationNameStyle,
-                    ),
+                    TextSpan(text: ' of ', style: ofStyle),
+                    TextSpan(text: medicationName, style: medicationNameStyle),
                     if (reconFluidName != null &&
                         reconFluidName!.isNotEmpty &&
                         containerVolumeMl != null) ...[
-                      TextSpan(
-                        text: '\nwith ',
-                        style: metaStyle,
-                      ),
+                      TextSpan(text: '\nwith ', style: metaStyle),
                       TextSpan(
                         text: '${_formatNoTrailing(containerVolumeMl!)} mL',
                         style: metaPrimaryStyle,
                       ),
-                      TextSpan(
-                        text: ' of $reconFluidName',
-                        style: metaStyle,
-                      ),
+                      TextSpan(text: ' of $reconFluidName', style: metaStyle),
                     ],
                   ],
                 ),
@@ -241,6 +240,23 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               ),
             ),
           ],
+          if (hasDoseStrength) ...[
+            SizedBox(height: compact ? 8 : 14),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: baseStyle,
+                children: [
+                  const TextSpan(text: 'Dose Strength  '),
+                  TextSpan(
+                    text:
+                        '${_formatNoTrailing(doseStrengthValue!)} ${doseStrengthUnit!.trim()}',
+                    style: valueStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (hasVolumePerDose) ...[
             SizedBox(height: compact ? 8 : 14),
             // Volume per dose line
@@ -267,10 +283,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 style: baseStyle,
                 children: [
                   const TextSpan(text: 'Syringe Units  '),
-                  TextSpan(
-                    text: '${doseUnits.round()} U',
-                    style: valueStyle,
-                  ),
+                  TextSpan(text: '${doseUnits.round()} U', style: valueStyle),
                 ],
               ),
             ),

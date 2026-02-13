@@ -2475,6 +2475,15 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final savedRecon = SavedReconstitutionRepository().ownedForMedication(
       med.id,
     );
+    final actualDoseStrengthValue =
+        (savedRecon?.recommendedDose != null &&
+            savedRecon!.recommendedDose! > 0)
+        ? savedRecon.recommendedDose
+        : _inferDoseAmountFromSavedRecon(med);
+    final actualDoseStrengthUnit =
+        savedRecon?.doseUnit?.trim().isNotEmpty == true
+        ? savedRecon!.doseUnit!.trim()
+        : _unitLabel(med.strengthUnit);
     final syringeSizeMl = (savedRecon != null && savedRecon.syringeSizeMl > 0)
         ? savedRecon.syringeSizeMl
         : 3.0;
@@ -2552,6 +2561,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                   containerVolumeMl: med.containerVolumeMl,
                   perMlValue: med.perMlValue,
                   volumePerDose: med.volumePerDose,
+                  doseStrengthValue: actualDoseStrengthValue,
+                  doseStrengthUnit: actualDoseStrengthUnit,
                   reconFluidName: diluentName ?? 'Bacteriostatic Water',
                   syringeSizeMl: syringeSizeMl,
                   compact: true,
