@@ -275,10 +275,14 @@ class _HomePageState extends ConsumerState<HomePage> {
           clipBehavior: Clip.none,
           children: [
             Text(
-              DateTimeFormatter.formatInstructionalToday(
-                context,
-                DateTime.now(),
-              ),
+              'Welcome Back',
+              textAlign: TextAlign.center,
+              style: homeHeroTitleStyle(context),
+            ),
+            const SizedBox(height: kSpacingXS),
+            Text(
+              'Today is ${DateTimeFormatter.formatWeekdayName(DateTime.now())}, ${DateTimeFormatter.formatDateLong(DateTime.now())}',
+              textAlign: TextAlign.center,
               style: helperTextStyle(context),
             ),
             const SizedBox(height: kSpacingL),
