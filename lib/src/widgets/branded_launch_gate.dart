@@ -30,13 +30,16 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate>
     );
     _taglineOpacity = CurvedAnimation(
       parent: _taglineController,
-      curve: Curves.easeOut,
+      curve: const Interval(0.25, 1, curve: Curves.easeOut),
     );
     _taglineOffset = Tween<Offset>(
       begin: const Offset(0, 0.22),
       end: Offset.zero,
     ).animate(
-      CurvedAnimation(parent: _taglineController, curve: Curves.easeOutCubic),
+      CurvedAnimation(
+        parent: _taglineController,
+        curve: const Interval(0.25, 1, curve: Curves.easeOutCubic),
+      ),
     );
 
     _taglineController.forward();
@@ -96,7 +99,11 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate>
                             child: Text(
                               kPrimaryBrandTagline,
                               textAlign: TextAlign.center,
-                              style: splashTaglineTextStyle(context),
+                              style: splashTaglineTextStyle(
+                                context,
+                              )?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                             ),
                           ),
                         ),
