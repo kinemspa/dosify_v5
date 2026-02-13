@@ -51,7 +51,7 @@ void showAppSnackBar(
               alignment: Alignment.bottomCenter,
               child: Material(
                 color: kAppSnackBarBackgroundColor,
-                borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                borderRadius: kAppSnackBarBorderRadius,
                 child: Padding(
                   padding: kAppSnackBarInnerPadding,
                   child: Row(

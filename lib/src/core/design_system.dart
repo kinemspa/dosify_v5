@@ -603,10 +603,10 @@ const EdgeInsets kTightTextButtonPadding = EdgeInsets.symmetric(
 ///
 /// Used by [showAppSnackBar] to position the app snackbar within safe areas.
 const EdgeInsets kAppSnackBarOuterPadding = EdgeInsets.fromLTRB(
-  kSpacingM,
+  0,
   kSpacingS,
-  kSpacingM,
-  kSpacingM,
+  0,
+  kSpacingXS,
 );
 
 /// Content padding inside the app snackbar container.
@@ -614,6 +614,9 @@ const EdgeInsets kAppSnackBarInnerPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
   vertical: kSpacingS,
 );
+
+/// App snackbar shape.
+const BorderRadius kAppSnackBarBorderRadius = BorderRadius.zero;
 
 /// App snackbar colors.
 ///
