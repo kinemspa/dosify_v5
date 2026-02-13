@@ -183,6 +183,14 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       _backupVialsRequiresFridge = m.backupVialsRequiresRefrigeration;
       _backupVialsRequiresFreezer = m.backupVialsRequiresFreezer;
       _backupVialsProtectLight = m.backupVialsLightSensitive;
+    } else {
+      final now = DateTime.now();
+      _activeVialExpiry = now.add(
+        const Duration(days: kDefaultInjectionExpiryDays),
+      );
+      _backupVialsExpiry = now.add(
+        const Duration(days: kDefaultSealedVialExpiryDays),
+      );
     }
   }
 
@@ -986,7 +994,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     firstDate: now,
                     lastDate: DateTime(now.year + 2),
                     initialDate:
-                        _activeVialExpiry ?? now.add(const Duration(days: 30)),
+                        _activeVialExpiry ??
+                        now.add(
+                          const Duration(days: kDefaultInjectionExpiryDays),
+                        ),
                   );
                   if (picked != null) {
                     setState(() => _activeVialExpiry = picked);
@@ -1303,7 +1314,11 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       context,
                       firstDate: DateTime(now.year - 1),
                       lastDate: DateTime(now.year + 10),
-                      initialDate: _backupVialsExpiry ?? now,
+                      initialDate:
+                          _backupVialsExpiry ??
+                          now.add(
+                            const Duration(days: kDefaultSealedVialExpiryDays),
+                          ),
                     );
                     if (picked != null) {
                       setState(() => _backupVialsExpiry = picked);

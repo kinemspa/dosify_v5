@@ -339,10 +339,7 @@ class MoreContentIndicator extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (showLabel) ...[
-              Text(
-                label,
-                style: helperTextStyle(context)?.copyWith(color: fg),
-              ),
+              Text(label, style: helperTextStyle(context)?.copyWith(color: fg)),
               const SizedBox(width: kSpacingXS),
             ],
             Icon(icon, size: kIconSizeLarge, color: fg),
@@ -414,20 +411,14 @@ class DateButton36 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final btn = selected
-        ? FilledButton.icon(
-            onPressed: onPressed,
-            icon: const Icon(Icons.calendar_today, size: 18),
-            label: Text(label),
-          )
-        : OutlinedButton.icon(
-            onPressed: onPressed,
-            icon: const Icon(Icons.calendar_today, size: 18),
-            label: Text(label),
-            style: OutlinedButton.styleFrom(
-              minimumSize: Size(width ?? kSmallControlWidth, kFieldHeight),
-            ),
-          );
+    final btn = FilledButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.calendar_today, size: 18),
+      label: Text(label),
+      style: FilledButton.styleFrom(
+        minimumSize: Size(width ?? kSmallControlWidth, kFieldHeight),
+      ),
+    );
     // Use responsive width if no explicit width provided
     if (width == null) {
       return LayoutBuilder(

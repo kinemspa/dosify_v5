@@ -933,10 +933,15 @@ Color medicationDetailHeaderForegroundColor(BuildContext context) {
   return theme.colorScheme.onPrimary;
 }
 
-/// Default expiry offset for newly added medications.
+/// Default expiry offsets for newly added medications.
 ///
 /// Used when the user hasn't selected an expiry yet.
-const int kDefaultMedicationExpiryDays = 90;
+const int kDefaultTabletCapsuleExpiryDays = 365;
+const int kDefaultInjectionExpiryDays = 90;
+const int kDefaultSealedVialExpiryDays = 730;
+
+/// Legacy fallback used in generic contexts.
+const int kDefaultMedicationExpiryDays = kDefaultInjectionExpiryDays;
 
 /// Expiry status thresholds based on *percentage of shelf-life remaining*.
 ///
