@@ -120,7 +120,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   bool _editExpanded = false;
   DoseLog? _lastTakenLog;
 
-  DateTime _clampDate(DateTime value, {required DateTime first, required DateTime last}) {
+  DateTime _clampDate(
+    DateTime value, {
+    required DateTime first,
+    required DateTime last,
+  }) {
     if (value.isBefore(first)) return first;
     if (value.isAfter(last)) return last;
     return value;
@@ -479,39 +483,45 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           height: kStandardFieldHeight,
           child: OutlinedButton.icon(
             onPressed: () async {
-              final firstDate = DateUtils.dateOnly(DateTime(2000));
-              final lastDate = DateUtils.dateOnly(DateTime(2100));
-              final initialDate = _clampDate(
-                DateUtils.dateOnly(_selectedActionTime),
-                first: firstDate,
-                last: lastDate,
-              );
-              final pickedDate = await showDatePicker(
-                context: context,
-                initialDate: initialDate,
-                firstDate: firstDate,
-                lastDate: lastDate,
-              );
-              if (pickedDate == null) return;
-              if (!context.mounted) return;
-
-              final pickedTime = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.fromDateTime(_selectedActionTime),
-              );
-              if (pickedTime == null) return;
-              if (!context.mounted) return;
-
-              setState(() {
-                _selectedActionTime = DateTime(
-                  pickedDate.year,
-                  pickedDate.month,
-                  pickedDate.day,
-                  pickedTime.hour,
-                  pickedTime.minute,
+              try {
+                final firstDate = DateUtils.dateOnly(DateTime(2000));
+                final lastDate = DateUtils.dateOnly(DateTime(2100));
+                final initialDate = _clampDate(
+                  DateUtils.dateOnly(_selectedActionTime),
+                  first: firstDate,
+                  last: lastDate,
                 );
-                _hasChanged = true;
-              });
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: initialDate,
+                  firstDate: firstDate,
+                  lastDate: lastDate,
+                );
+                if (pickedDate == null) return;
+                if (!context.mounted) return;
+
+                final pickedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(_selectedActionTime),
+                );
+                if (pickedTime == null) return;
+                if (!context.mounted) return;
+
+                setState(() {
+                  _selectedActionTime = DateTime(
+                    pickedDate.year,
+                    pickedDate.month,
+                    pickedDate.day,
+                    pickedTime.hour,
+                    pickedTime.minute,
+                  );
+                  _hasChanged = true;
+                });
+              } catch (e) {
+                if (context.mounted) {
+                  showAppSnackBar(context, 'Unable to open time picker: $e');
+                }
+              }
             },
             icon: Icon(
               Icons.check_circle_rounded,
@@ -556,54 +566,60 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           height: kStandardFieldHeight,
           child: OutlinedButton.icon(
             onPressed: () async {
-              final now = DateTime.now();
-              final initial = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-              final max = _maxSnoozeUntil();
+              try {
+                final now = DateTime.now();
+                final initial = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
+                final max = _maxSnoozeUntil();
 
-              final firstDate = DateUtils.dateOnly(now);
-              final lastDate = DateUtils.dateOnly(DateTime(2100));
-              final initialDate = _clampDate(
-                DateUtils.dateOnly(initial),
-                first: firstDate,
-                last: lastDate,
-              );
+                final firstDate = DateUtils.dateOnly(now);
+                final lastDate = DateUtils.dateOnly(DateTime(2100));
+                final initialDate = _clampDate(
+                  DateUtils.dateOnly(initial),
+                  first: firstDate,
+                  last: lastDate,
+                );
 
-              final pickedDate = await showDatePicker(
-                context: context,
-                initialDate: initialDate,
-                firstDate: firstDate,
-                lastDate: lastDate,
-              );
-              if (pickedDate == null) return;
-              if (!context.mounted) return;
-
-              final pickedTime = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.fromDateTime(initial),
-              );
-              if (pickedTime == null) return;
-              if (!context.mounted) return;
-
-              var dt = DateTime(
-                pickedDate.year,
-                pickedDate.month,
-                pickedDate.day,
-                pickedTime.hour,
-                pickedTime.minute,
-              );
-
-              if (dt.isBefore(now)) dt = now;
-              if (max != null && dt.isAfter(max)) {
-                await _showSnoozePastNextDoseAlert(max);
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: initialDate,
+                  firstDate: firstDate,
+                  lastDate: lastDate,
+                );
+                if (pickedDate == null) return;
                 if (!context.mounted) return;
-                dt = max;
-              }
 
-              setState(() {
-                _selectedSnoozeUntil = dt;
-                _selectedActionTime = dt;
-                _hasChanged = true;
-              });
+                final pickedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(initial),
+                );
+                if (pickedTime == null) return;
+                if (!context.mounted) return;
+
+                var dt = DateTime(
+                  pickedDate.year,
+                  pickedDate.month,
+                  pickedDate.day,
+                  pickedTime.hour,
+                  pickedTime.minute,
+                );
+
+                if (dt.isBefore(now)) dt = now;
+                if (max != null && dt.isAfter(max)) {
+                  await _showSnoozePastNextDoseAlert(max);
+                  if (!context.mounted) return;
+                  dt = max;
+                }
+
+                setState(() {
+                  _selectedSnoozeUntil = dt;
+                  _selectedActionTime = dt;
+                  _hasChanged = true;
+                });
+              } catch (e) {
+                if (context.mounted) {
+                  showAppSnackBar(context, 'Unable to open snooze picker: $e');
+                }
+              }
             },
             icon: const Icon(Icons.snooze_rounded, size: kIconSizeSmall),
             label: Text(() {

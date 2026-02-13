@@ -1,9 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-// Package imports:
-import 'package:intl/intl.dart' as intl;
-
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -73,14 +70,6 @@ class DoseCard extends StatelessWidget {
 
     // Note: label/icon are rendered via the status chip/action button widgets.
 
-    final localTime = dose.scheduledTime.toLocal();
-    final localeTag = Localizations.localeOf(context).toLanguageTag();
-    final weekday = intl.DateFormat.E(localeTag).format(localTime);
-    final shortDate = MaterialLocalizations.of(context).formatCompactDate(
-      localTime,
-    );
-    final dateLabel = '$weekday $shortDate';
-
     final primaryTitleStyle = doseCardPrimaryTitleTextStyle(
       context,
       color: statusColor,
@@ -98,8 +87,9 @@ class DoseCard extends StatelessWidget {
         ? statusColor.withValues(alpha: kOpacityFull)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
 
-    final normalizedDetailLines =
-        (detailLines ?? const <Widget>[]).where((w) => w is! SizedBox).toList();
+    final normalizedDetailLines = (detailLines ?? const <Widget>[])
+        .where((w) => w is! SizedBox)
+        .toList();
     final hasDetails = normalizedDetailLines.isNotEmpty;
     final hasFooter = footer != null;
 
@@ -137,20 +127,8 @@ class DoseCard extends StatelessWidget {
                           showNextLabel: false,
                           showTodayIcon: true,
                         ),
-                        SizedBox(height: badgeToDateGap),
-                        Text(
-                          dateLabel,
-                          style: microHelperTextStyle(context)?.copyWith(
-                            color: cs.onSurfaceVariant.withValues(
-                              alpha: kOpacityMediumHigh,
-                            ),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
                         if (doseNumber != null) ...[
-                          const SizedBox(height: kSpacingXXS),
+                          SizedBox(height: badgeToDateGap),
                           Text(
                             'Dose $doseNumber',
                             style: doseCardDoseNumberTextStyle(
@@ -230,10 +208,7 @@ class DoseCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                if (hasFooter) ...[
-                  const SizedBox(height: kSpacingS),
-                  footer!,
-                ],
+                if (hasFooter) ...[const SizedBox(height: kSpacingS), footer!],
               ],
             ),
           ),

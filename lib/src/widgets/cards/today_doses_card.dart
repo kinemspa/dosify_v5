@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dosifi_v5/src/core/clock.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
@@ -269,18 +268,6 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
         .where((i) => i.dose.status == DoseStatus.skipped)
         .length;
 
-    DateTime? nextUpcomingTime;
-    for (final item in items) {
-      final status = item.dose.status;
-      if (status == DoseStatus.due || status == DoseStatus.pending) {
-        nextUpcomingTime = item.dose.scheduledTime;
-        break;
-      }
-    }
-    final nextUpcomingLabel = nextUpcomingTime == null
-        ? null
-        : DateTimeFormatter.formatTime(context, nextUpcomingTime);
-
     Widget buildDoseRow(
       BuildContext context,
       ({
@@ -350,14 +337,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
                   text: TextSpan(
                     children: _buildCountSpans(context, [
                       ('Scheduled', scheduledCount, null),
-                      if (upcomingCount > 0)
-                        (
-                          'Upcoming',
-                          upcomingCount,
-                          nextUpcomingLabel == null
-                              ? null
-                              : ' (next $nextUpcomingLabel)',
-                        ),
+                      if (upcomingCount > 0) ('Upcoming', upcomingCount, null),
                       if (missedCount > 0) ('Missed', missedCount, null),
                       if (snoozedCount > 0) ('Snoozed', snoozedCount, null),
                     ]),
