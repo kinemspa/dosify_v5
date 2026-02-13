@@ -1,5 +1,6 @@
 // Flutter imports:
 // Project imports:
+import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
@@ -270,6 +271,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Save'),
         content: Text(
@@ -290,7 +292,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed == false) return;
     final repo = ref.read(medicationRepositoryProvider);
     final initial = _effectiveInitial();
     final id = initial?.id ?? _newId();
@@ -431,18 +433,21 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           updatedAt: DateTime.now(),
         );
 
-        await _savedReconRepo.upsert(owned);
+        await _savedReconRepo.upsert(owned).timeout(const Duration(seconds: 2));
       } catch (e, stack) {
         debugPrint('AddMdvWizardPage: save owned recon failed: $e\n$stack');
       }
     }
 
     if (!mounted) return;
-    if (widget.isEditing) {
-      context.pop();
-    } else {
-      context.go('/medications');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.isEditing) {
+        context.pop();
+      } else {
+        goToMedications(context);
+      }
+    });
     showAppSnackBar(context, 'Medication saved');
   }
 
@@ -476,6 +481,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
   Widget _buildUnifiedHeader() {
     final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final headerFg = medicationDetailHeaderForegroundColor(context);
 
     return Container(
       width: double.infinity,
@@ -499,10 +505,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
+                    icon: Icon(Icons.arrow_back, color: headerFg),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   Expanded(
@@ -512,7 +515,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                           : 'Add Multi-Dose Vial',
                       style: wizardHeaderTitleTextStyle(
                         context,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: headerFg,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -548,9 +551,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: i < _currentStep
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onPrimary
-                                            .withValues(alpha: 0.25),
+                                      ? headerFg
+                                      : headerFg.withValues(alpha: 0.25),
                                   borderRadius: BorderRadius.circular(1),
                                 ),
                               ),
@@ -565,9 +567,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     child: Text(
                       _getStepLabel(_currentStep),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                        color: headerFg.withValues(alpha: 0.85),
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.3,
                       ),
@@ -578,9 +578,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   Divider(
                     height: 1,
                     thickness: 1,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onPrimary.withValues(alpha: 0.15),
+                    color: headerFg.withValues(alpha: 0.15),
                   ),
                   // Summary content
                   Container(
@@ -593,9 +591,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               secondChild: Divider(
                 height: 1,
                 thickness: 1,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onPrimary.withValues(alpha: 0.15),
+                color: headerFg.withValues(alpha: 0.15),
               ),
             ),
           ],
@@ -1637,7 +1633,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         : null;
     final headerTitle = name.isEmpty ? 'Multi-Dose Vial' : name;
     final theme = Theme.of(context);
-    final fg = theme.colorScheme.onPrimary;
+    final fg = medicationDetailHeaderForegroundColor(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1841,18 +1837,19 @@ class _StepCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final headerFg = medicationDetailHeaderForegroundColor(context);
     return Container(
       width: 22,
       height: 22,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: isCompleted || isActive
-            ? cs.onPrimary
-            : cs.onPrimary.withValues(alpha: 0.2),
+            ? headerFg
+            : headerFg.withValues(alpha: 0.2),
         border: Border.all(
           color: isCompleted || isActive
-              ? cs.onPrimary
-              : cs.onPrimary.withValues(alpha: 0.3),
+              ? headerFg
+              : headerFg.withValues(alpha: 0.3),
           width: isActive ? 1.5 : 1,
         ),
       ),
@@ -1865,7 +1862,7 @@ class _StepCircle extends StatelessWidget {
                   context,
                   color: isActive
                       ? cs.primary
-                      : cs.onPrimary.withValues(alpha: 0.6),
+                      : headerFg.withValues(alpha: 0.6),
                 )?.copyWith(fontWeight: kFontWeightExtraBold),
               ),
       ),

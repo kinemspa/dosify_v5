@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
@@ -175,7 +176,7 @@ class _AddSingleDoseVialWizardPageState
         : null;
     final headerTitle = name.isEmpty ? 'Single Dose Vial' : name;
     final theme = Theme.of(context);
-    final fg = theme.colorScheme.onPrimary;
+    final fg = medicationDetailHeaderForegroundColor(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -802,6 +803,7 @@ class _AddSingleDoseVialWizardPageState
 
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Save'),
         content: Text(
@@ -823,7 +825,7 @@ class _AddSingleDoseVialWizardPageState
     );
 
     print('DEBUG SDV: confirmed = $confirmed');
-    if (confirmed != true) return;
+    if (confirmed == false) return;
 
     try {
       final repo = ref.read(medicationRepositoryProvider);
@@ -889,11 +891,15 @@ class _AddSingleDoseVialWizardPageState
       print('DEBUG SDV: Save successful!');
 
       if (mounted) {
-        if (widget.initial != null) {
-          context.pop();
-        } else {
-          context.go('/medications');
-        }
+        showAppSnackBar(context, 'Medication saved');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          if (widget.initial != null) {
+            context.pop();
+          } else {
+            goToMedications(context);
+          }
+        });
       }
     } catch (e, stack) {
       print('DEBUG SDV: ERROR during save: $e');

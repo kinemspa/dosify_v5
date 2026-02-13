@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
@@ -167,7 +167,7 @@ class _AddTabletWizardPageState
         : null;
     final headerTitle = name.isEmpty ? 'Tablet' : name;
     final theme = Theme.of(context);
-    final fg = theme.colorScheme.onPrimary;
+    final fg = medicationDetailHeaderForegroundColor(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -739,6 +739,7 @@ class _AddTabletWizardPageState
   Future<void> saveMedication() async {
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Save'),
         content: Text(
@@ -759,7 +760,7 @@ class _AddTabletWizardPageState
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed == false) return;
 
     final repo = ref.read(medicationRepositoryProvider);
     final initial = _effectiveInitial();
@@ -814,7 +815,11 @@ class _AddTabletWizardPageState
     try {
       await repo.upsert(med);
       if (mounted) {
-        context.go('/medications');
+        showAppSnackBar(context, 'Medication saved');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          goToMedications(context);
+        });
       }
     } catch (e, stack) {
       debugPrint('AddTabletWizardPage: save failed: $e\n$stack');

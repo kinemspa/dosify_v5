@@ -936,10 +936,10 @@ const Color kMedicationDetailGradientEnd = Color(0xFF18537D);
 
 /// Foreground color for the Medication Details header.
 ///
-/// Always uses `onPrimary` to keep text/icons light and readable on the
+/// Always uses a light foreground to keep text/icons readable on the
 /// gradient primary header across themes.
 Color medicationDetailHeaderForegroundColor(BuildContext context) {
-  return Theme.of(context).colorScheme.onPrimary;
+  return Colors.white;
 }
 
 /// Default expiry offsets for newly added medications.
