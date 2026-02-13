@@ -422,6 +422,7 @@ class _AddSingleDoseVialWizardPageState
               label: 'Concentration *',
               field: StepperRow36(
                 controller: _concentrationValueCtrl,
+                onChanged: (_) => setState(() {}),
                 onDec: () {
                   final v =
                       int.tryParse(_concentrationValueCtrl.text.trim()) ?? 0;
@@ -482,6 +483,7 @@ class _AddSingleDoseVialWizardPageState
               label: 'Volume *',
               field: StepperRow36(
                 controller: _volumeValueCtrl,
+                onChanged: (_) => setState(() {}),
                 onDec: () {
                   final v = double.tryParse(_volumeValueCtrl.text.trim()) ?? 0;
                   setState(

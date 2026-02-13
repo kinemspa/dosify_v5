@@ -711,6 +711,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               label: 'Strength *',
               field: StepperRow36(
                 controller: _strengthValueCtrl,
+                onChanged: (_) => setState(() {}),
                 onDec: () {
                   final v = int.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
                   setState(
@@ -834,6 +835,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               label: 'Volume (mL) *',
               field: StepperRow36(
                 controller: _vialVolumeCtrl,
+                onChanged: (_) => setState(() {}),
                 onDec: () {
                   final v = double.tryParse(_vialVolumeCtrl.text.trim()) ?? 0;
                   setState(
