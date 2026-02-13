@@ -99,11 +99,15 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate>
                             child: Text(
                               kPrimaryBrandTagline,
                               textAlign: TextAlign.center,
-                              style: splashTaglineTextStyle(
-                                context,
-                              )?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                              style:
+                                  splashTaglineTextStyle(context)?.copyWith(
+                                    color: Colors.white,
+                                  ) ??
+                                  const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: kFontSizeLarge,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ),
                         ),

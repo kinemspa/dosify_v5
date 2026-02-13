@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -75,64 +76,101 @@ class _OnboardingCoachOverlay extends StatefulWidget {
 
 class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
   int _stepIndex = 0;
+  bool _queuedRouteSync = false;
 
   final List<_CoachStep> _steps = const [
     _CoachStep(
       title: 'Home screen',
       message:
           'This is your dashboard with an overall view of medications, schedules, and due doses.',
+      routePath: '/',
       targetAlignment: Alignment(0, -0.70),
     ),
     _CoachStep(
       title: 'Medications',
       message:
           'Add medications here and track stock, expiry, and core medication details.',
+      routePath: '/medications',
       targetAlignment: Alignment(-0.25, 0.92),
     ),
     _CoachStep(
       title: 'Schedules',
       message:
           'Create dose schedules here. You receive notifications from these schedules.',
+      routePath: '/schedules',
       targetAlignment: Alignment(0.25, 0.92),
     ),
     _CoachStep(
       title: 'Schedule links',
       message:
           'Each schedule is attached to a medication, and doses are attached to a schedule.',
+      routePath: '/schedules',
       targetAlignment: Alignment(0.25, 0.92),
     ),
     _CoachStep(
       title: 'Medication details',
       message:
-          'Medication details include an ad hoc dose action for doses taken outside a schedule.',
-      targetAlignment: Alignment(-0.25, 0.92),
+          'Open any medication details page. It has an ad hoc dose action for doses taken outside a schedule.',
+      routePath: '/medications/',
+      usesPrefixMatch: true,
+      waitForUserNavigation: true,
+      targetAlignment: Alignment(0, -0.18),
     ),
     _CoachStep(
       title: 'Reconstitution calculator',
       message:
           'Quickly calculate and save reconstitutions for later use when adding medications.',
+      routePath: '/medications/reconstitution',
       targetAlignment: Alignment(-0.25, 0.92),
     ),
     _CoachStep(
       title: 'Multi-dose vial support',
       message:
           'Multi-dose vials include a built-in reconstitution calculator in their add/edit flow.',
+      routePath: '/medications/add/injection/multi',
       targetAlignment: Alignment(-0.25, 0.92),
     ),
     _CoachStep(
       title: 'Analytics',
       message: 'Get reports and trend insights across your dose activity and history.',
+      routePath: '/analytics',
       targetAlignment: Alignment(0.68, -0.82),
     ),
     _CoachStep(
       title: 'Inventory',
       message:
           'See a quick overview of what remains in stock and what has been used over time.',
+      routePath: '/inventory',
       targetAlignment: Alignment(0.68, -0.82),
     ),
   ];
 
   bool get _isLastStep => _stepIndex == _steps.length - 1;
+
+  String _currentPath(BuildContext context) {
+    return GoRouterState.of(context).uri.path;
+  }
+
+  bool _isOnStepRoute(_CoachStep step, String currentPath) {
+    if (step.usesPrefixMatch) {
+      return currentPath.startsWith(step.routePath);
+    }
+    return currentPath == step.routePath;
+  }
+
+  void _syncRouteForStep(_CoachStep step, String currentPath) {
+    if (step.waitForUserNavigation || _isOnStepRoute(step, currentPath)) {
+      return;
+    }
+    if (_queuedRouteSync) return;
+
+    _queuedRouteSync = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _queuedRouteSync = false;
+      if (!mounted) return;
+      context.go(step.routePath);
+    });
+  }
 
   Alignment _bubbleAlignmentForTarget(Alignment target) {
     final isLowerHalf = target.y > 0.25;
@@ -142,6 +180,14 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
   }
 
   Future<void> _goNext() async {
+    final step = _steps[_stepIndex];
+    final currentPath = _currentPath(context);
+    final onExpectedRoute = _isOnStepRoute(step, currentPath);
+
+    if (step.waitForUserNavigation && !onExpectedRoute) {
+      return;
+    }
+
     if (_isLastStep) {
       await widget.onFinish();
       return;
@@ -149,11 +195,19 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
 
     if (!mounted) return;
     setState(() => _stepIndex += 1);
+
+    final next = _steps[_stepIndex];
+    if (!next.waitForUserNavigation) {
+      context.go(next.routePath);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final step = _steps[_stepIndex];
+    final currentPath = _currentPath(context);
+    _syncRouteForStep(step, currentPath);
+    final onExpectedRoute = _isOnStepRoute(step, currentPath);
     final cs = Theme.of(context).colorScheme;
     final bubbleAlignment = _bubbleAlignmentForTarget(step.targetAlignment);
 
@@ -279,10 +333,25 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                     fontWeight: kFontWeightSemiBold,
                                   ),
                                 ),
-                                child: Text(_isLastStep ? 'Done' : 'Next'),
+                                child: Text(
+                                  step.waitForUserNavigation && !onExpectedRoute
+                                      ? 'Open page'
+                                      : (_isLastStep ? 'Done' : 'Next'),
+                                ),
                               ),
                             ],
                           ),
+                          if (step.waitForUserNavigation && !onExpectedRoute)
+                            Padding(
+                              padding: const EdgeInsets.only(top: kSpacingXS),
+                              child: Text(
+                                'Navigate to the target page, then continue.',
+                                style: smallHelperTextStyle(
+                                  context,
+                                  color: cs.onPrimary,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -301,12 +370,18 @@ class _CoachStep {
   const _CoachStep({
     required this.title,
     required this.message,
+    required this.routePath,
     required this.targetAlignment,
+    this.usesPrefixMatch = false,
+    this.waitForUserNavigation = false,
   });
 
   final String title;
   final String message;
+  final String routePath;
   final Alignment targetAlignment;
+  final bool usesPrefixMatch;
+  final bool waitForUserNavigation;
 }
 
 class _CoachConnectorPainter extends CustomPainter {
