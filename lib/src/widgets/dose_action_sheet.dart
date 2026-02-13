@@ -1496,6 +1496,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             const SizedBox(height: kSpacingM),
             CollapsibleSectionFormCard(
               title: 'Advanced',
+              neutral: true,
               isExpanded: _editExpanded,
               onExpandedChanged: (v) => setState(() => _editExpanded = v),
               children: _buildEditSectionChildren(context),
