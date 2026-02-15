@@ -1,7 +1,6 @@
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 /// Full-screen calendar page.
 ///
@@ -40,10 +39,6 @@ class CalendarPage extends StatelessWidget {
   final String? scheduleId;
   final String? medicationId;
 
-  void _navigateToAddSchedule(BuildContext context) {
-    context.push('/schedules/add');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,11 +53,6 @@ class CalendarPage extends StatelessWidget {
           requireHourSelectionInDayView: false,
           // Use default bottom sheet handler (removed onDoseTap override)
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _navigateToAddSchedule(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Schedule'),
       ),
     );
   }
