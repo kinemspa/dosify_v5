@@ -337,17 +337,17 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
                   text: TextSpan(
                     children: _buildCountSpans(context, [
                       ('Scheduled', scheduledCount, null),
-                      if (upcomingCount > 0) ('Upcoming', upcomingCount, null),
-                      if (missedCount > 0) ('Missed', missedCount, null),
-                      if (snoozedCount > 0) ('Snoozed', snoozedCount, null),
+                      ('Upcoming', upcomingCount, null),
+                      ('Taken', takenCount, null),
                     ]),
                   ),
                 ),
-                if (takenCount > 0 || skippedCount > 0)
+                if (missedCount > 0 || snoozedCount > 0 || skippedCount > 0)
                   RichText(
                     text: TextSpan(
                       children: _buildCountSpans(context, [
-                        if (takenCount > 0) ('Taken', takenCount, null),
+                        if (missedCount > 0) ('Missed', missedCount, null),
+                        if (snoozedCount > 0) ('Snoozed', snoozedCount, null),
                         if (skippedCount > 0) ('Skipped', skippedCount, null),
                       ]),
                     ),
