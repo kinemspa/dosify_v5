@@ -1246,26 +1246,23 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return [
       Padding(
         padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: CollapsibleSectionFormCard(
-          neutral: true,
-          title: 'Schedule Details',
-          titleStyle: reviewCardTitleStyle(context),
-          isExpanded: _isScheduleDetailsExpanded,
-          onExpandedChanged: (expanded) {
-            if (!mounted) return;
-            setState(() => _isScheduleDetailsExpanded = expanded);
-          },
-          children: _buildScheduleDetailsCardChildren(context, s),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: kSpacingS),
         child: TodayDosesCard(
           scope: TodayDosesScope.schedule(s.id),
           isExpanded: _isTodayExpanded,
           onExpandedChanged: (expanded) {
             if (!mounted) return;
             setState(() => _isTodayExpanded = expanded);
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: kSpacingS),
+        child: CalendarCard(
+          scope: CalendarCardScope.schedule(s.id),
+          isExpanded: _isCalendarExpanded,
+          onExpandedChanged: (expanded) {
+            if (!mounted) return;
+            setState(() => _isCalendarExpanded = expanded);
           },
         ),
       ),
@@ -1301,13 +1298,16 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       ),
       Padding(
         padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: CalendarCard(
-          scope: CalendarCardScope.schedule(s.id),
-          isExpanded: _isCalendarExpanded,
+        child: CollapsibleSectionFormCard(
+          neutral: true,
+          title: 'Schedule Details',
+          titleStyle: reviewCardTitleStyle(context),
+          isExpanded: _isScheduleDetailsExpanded,
           onExpandedChanged: (expanded) {
             if (!mounted) return;
-            setState(() => _isCalendarExpanded = expanded);
+            setState(() => _isScheduleDetailsExpanded = expanded);
           },
+          children: _buildScheduleDetailsCardChildren(context, s),
         ),
       ),
     ];
