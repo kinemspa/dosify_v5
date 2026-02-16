@@ -62,8 +62,6 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
   @override
   Widget buildTitle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final statusColor = doseActionVisualSpec(context, log.action).color;
-
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
     final scheduleName = _effectiveScheduleName();
@@ -71,15 +69,27 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          medicationName,
+          style: bodyTextStyle(
+            context,
+          )?.copyWith(fontWeight: kFontWeightSemiBold),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: kSpacingXS / 2),
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: kSpacingXS,
           children: [
             Text(
               '${_formatAmount(displayValue)} $displayUnit',
-              style: bodyTextStyle(
+              style: smallHelperTextStyle(
                 context,
-              )?.copyWith(fontWeight: kFontWeightSemiBold, color: statusColor),
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
+                ),
+              ),
             ),
             Text(
               '•',
@@ -89,25 +99,17 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
               ),
             ),
             Text(
-              medicationName,
+              scheduleName,
               style: smallHelperTextStyle(
                 context,
-                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
+                ),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ],
-        ),
-        const SizedBox(height: kSpacingXS / 2),
-        Text(
-          scheduleName,
-          style: smallHelperTextStyle(
-            context,
-            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -128,7 +130,6 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
 
   @override
   Widget buildTitle(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final statusColor = inventoryChangeVisualSpec(
       context,
       log.changeType,
@@ -138,19 +139,19 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          log.description,
+          medicationName,
           style: bodyTextStyle(
             context,
-          )?.copyWith(fontWeight: kFontWeightSemiBold, color: statusColor),
+          )?.copyWith(fontWeight: kFontWeightSemiBold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: kSpacingXS / 2),
         Text(
-          medicationName,
+          log.description,
           style: smallHelperTextStyle(
             context,
-            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+            color: statusColor.withValues(alpha: kOpacityMediumHigh),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
