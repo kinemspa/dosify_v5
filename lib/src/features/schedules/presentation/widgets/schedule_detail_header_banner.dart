@@ -99,14 +99,21 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
 
       final strengthLabel =
           MedicationDisplayHelpers.strengthOrConcentrationLabel(med).trim();
+      final normalizedStrengthLabel = strengthLabel.replaceFirst(
+        RegExp(
+          r'^(med\s+strength|tablet\s+strength|strength)\s*[:\-]\s*',
+          caseSensitive: false,
+        ),
+        '',
+      );
 
       final lines = <String>[];
       if (metricsLine.isNotEmpty) lines.add(metricsLine);
-      if (strengthLabel.isNotEmpty) {
+      if (normalizedStrengthLabel.isNotEmpty) {
         final strengthPrefix = med.form == MedicationForm.tablet
-            ? 'Tablet strength'
-            : 'Med strength';
-        lines.add('$strengthPrefix - $strengthLabel');
+            ? 'Tablet Strength'
+            : 'Med Strength';
+        lines.add('$strengthPrefix - $normalizedStrengthLabel');
       }
       if (s.doseMassMcg != null) {
         lines.add(
