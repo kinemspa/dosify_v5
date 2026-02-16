@@ -702,10 +702,10 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       final sameDay =
           at.year == now.year && at.month == now.month && at.day == now.day;
       final time = DateTimeFormatter.formatTime(context, at);
-      if (sameDay) return 'Last: $amount • $time';
+      if (sameDay) return 'Last Dose: $amount • $time';
 
       final date = MaterialLocalizations.of(context).formatShortDate(at);
-      return 'Last: $amount • $date';
+      return 'Last Dose: $amount • $date';
     }
 
     final metaLines = buildDoseCardInventoryMetaLines(
@@ -1657,7 +1657,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           child: Text(
             _hasChanged
                 ? 'Tap Save & Close to apply changes.'
-                : 'Tap the colored status button to change status, then Save & Close.',
+                : 'Tap to toggle the Dose status.',
             style: helperTextStyle(context),
           ),
         ),
