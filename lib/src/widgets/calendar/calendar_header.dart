@@ -62,13 +62,18 @@ class CalendarHeader extends StatelessWidget {
 
           // Date display
           Expanded(
-            child: Center(
-              child: Text(
-                _formatTitle(),
-                style: calendarHeaderTitleTextStyle(context),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                textAlign: TextAlign.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: kSpacingS),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    _formatTitle(),
+                    style: calendarHeaderTitleTextStyle(context),
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
             ),
           ),
