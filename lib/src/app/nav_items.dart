@@ -24,12 +24,6 @@ const allNavItems = <NavItemConfig>[
     location: '/medications',
   ),
   NavItemConfig(
-    id: 'supplies',
-    label: 'Supplies',
-    icon: Icons.inventory_2,
-    location: '/supplies',
-  ),
-  NavItemConfig(
     id: 'schedules',
     label: 'Schedules',
     icon: Icons.alarm,

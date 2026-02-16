@@ -17,15 +17,31 @@ final bottomNavIdsProvider =
 class BottomNavIdsController extends StateNotifier<List<String>> {
   BottomNavIdsController() : super(const []);
   static const _prefsKey = 'bottom_nav_ids_v1';
+  static const _defaultIds = <String>[
+    'home',
+    'medications',
+    'schedules',
+    'calendar',
+  ];
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final ids = prefs.getStringList(_prefsKey);
-    if (ids == null || ids.length != 4) {
-      state = const ['home', 'medications', 'schedules', 'calendar'];
+    final allowedIds = allNavItems.map((e) => e.id).toSet();
+    final normalized = <String>[];
+    final seen = <String>{};
+    if (ids != null) {
+      for (final id in ids) {
+        if (!allowedIds.contains(id) || !seen.add(id)) continue;
+        normalized.add(id);
+      }
+    }
+
+    if (normalized.length != _defaultIds.length) {
+      state = _defaultIds;
       await prefs.setStringList(_prefsKey, state);
     } else {
-      state = ids;
+      state = normalized;
     }
   }
 }
