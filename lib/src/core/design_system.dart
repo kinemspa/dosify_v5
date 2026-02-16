@@ -333,9 +333,9 @@ const EdgeInsets kCalendarStageHourLabelPadding = EdgeInsets.only(
   bottom: kSpacingXS,
 );
 const EdgeInsets kCalendarStageHourRowPadding = EdgeInsets.fromLTRB(
-  kSpacingM,
+  kSpacingS,
   0,
-  kSpacingM,
+  kSpacingS,
   kSpacingS,
 );
 const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.only(
