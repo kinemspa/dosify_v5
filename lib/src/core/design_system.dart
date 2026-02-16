@@ -363,6 +363,10 @@ const double kCalendarStageScrollbarThickness = 3;
 const Radius kCalendarStageScrollbarThumbRadius = Radius.circular(
   kBorderRadiusChipTight,
 );
+const double kCalendarStageScrollHintIconSize = kIconSizeMedium;
+const EdgeInsets kCalendarStageScrollHintPadding = EdgeInsets.only(
+  bottom: kSpacingXS,
+);
 const EdgeInsets kCalendarSelectedDayHeaderPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
   vertical: kSpacingXS,

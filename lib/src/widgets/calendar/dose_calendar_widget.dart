@@ -109,6 +109,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   int? _selectedHour;
   List<CalculatedDose> _doses = [];
   bool _isLoading = false;
+  bool _showSelectedDayStageDownHint = false;
+  bool _showDayStageDownHint = false;
 
   final ScrollController _dayStageScrollController = ScrollController();
   final ScrollController _selectedDayScrollController = ScrollController();
@@ -214,6 +216,61 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       if (!mounted) return;
       _loadDoses();
     });
+  }
+
+  void _updateSelectedDayStageDownHint(ScrollMetrics metrics) {
+    final shouldShow = metrics.maxScrollExtent > (metrics.pixels + 0.5);
+    if (_showSelectedDayStageDownHint == shouldShow) return;
+    if (!mounted) return;
+    setState(() => _showSelectedDayStageDownHint = shouldShow);
+  }
+
+  void _updateDayStageDownHint(ScrollMetrics metrics) {
+    final shouldShow = metrics.maxScrollExtent > (metrics.pixels + 0.5);
+    if (_showDayStageDownHint == shouldShow) return;
+    if (!mounted) return;
+    setState(() => _showDayStageDownHint = shouldShow);
+  }
+
+  Widget _wrapWithCenteredDownScrollHint({
+    required Widget child,
+    required bool showHint,
+    required ValueChanged<ScrollMetrics> onMetrics,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return Stack(
+      children: [
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.axis == Axis.vertical) {
+              onMetrics(notification.metrics);
+            }
+            return false;
+          },
+          child: child,
+        ),
+        IgnorePointer(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: AnimatedOpacity(
+              opacity: showHint ? 1 : 0,
+              duration: kAnimationFast,
+              curve: kCurveSnappy,
+              child: Padding(
+                padding: kCalendarStageScrollHintPadding,
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: kCalendarStageScrollHintIconSize,
+                  color: cs.onSurfaceVariant.withValues(
+                    alpha: kOpacityMediumHigh,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _loadDoses() async {
@@ -1116,6 +1173,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     required bool includeHandle,
     required bool includeHeader,
   }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!scrollController.hasClients) return;
+      _updateSelectedDayStageDownHint(scrollController.position);
+    });
+
     final dayDoses = _doses.where((dose) {
       return dose.scheduledTime.year == selectedDate.year &&
           dose.scheduledTime.month == selectedDate.month &&
@@ -1172,44 +1235,51 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final topCount = (includeHandle || includeHeader) ? 1 : 0;
 
     if (dayDoses.isEmpty) {
-      return ListView(
-        controller: scrollController,
-        padding: calendarStageListPadding(listBottomPadding),
-        children: [
-          buildTop(context),
-          const SizedBox(height: kSpacingS),
-          const CalendarNoDosesState(showIcon: false, compact: true),
-        ],
+      return _wrapWithCenteredDownScrollHint(
+        showHint: _showSelectedDayStageDownHint,
+        onMetrics: _updateSelectedDayStageDownHint,
+        child: ListView(
+          controller: scrollController,
+          padding: calendarStageListPadding(listBottomPadding),
+          children: [
+            buildTop(context),
+            const SizedBox(height: kSpacingS),
+            const CalendarNoDosesState(showIcon: false, compact: true),
+          ],
+        ),
       );
     }
 
-    return ListView.builder(
-      controller: scrollController,
-      padding: calendarStageListPadding(listBottomPadding),
-      itemCount: hours.length + topCount,
-      itemBuilder: (context, index) {
-        if (topCount > 0 && index == 0) return buildTop(context);
+    return _wrapWithCenteredDownScrollHint(
+      showHint: _showSelectedDayStageDownHint,
+      onMetrics: _updateSelectedDayStageDownHint,
+      child: ListView.builder(
+        controller: scrollController,
+        padding: calendarStageListPadding(listBottomPadding),
+        itemCount: hours.length + topCount,
+        itemBuilder: (context, index) {
+          if (topCount > 0 && index == 0) return buildTop(context);
 
-        final hourIndex = index - topCount;
-        final hour = hours[hourIndex];
-        final hourDoses = dosesByHour[hour] ?? const [];
+          final hourIndex = index - topCount;
+          final hour = hours[hourIndex];
+          final hourDoses = dosesByHour[hour] ?? const [];
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (hourIndex == 0) const SizedBox(height: kSpacingS),
-            if (hourIndex != 0)
-              Divider(
-                height: kSpacingM,
-                thickness: kBorderWidthThin,
-                color: Theme.of(
-                  context,
-                ).colorScheme.outlineVariant.withValues(alpha: kOpacityVeryLow),
-              ),
-            _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
-          ],
-        );
-      },
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (hourIndex == 0) const SizedBox(height: kSpacingS),
+              if (hourIndex != 0)
+                Divider(
+                  height: kSpacingM,
+                  thickness: kBorderWidthThin,
+                  color: Theme.of(context).colorScheme.outlineVariant
+                      .withValues(alpha: kOpacityVeryLow),
+                ),
+              _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -1266,6 +1336,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   Widget _buildDayStageView() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_dayStageScrollController.hasClients) return;
+      _updateDayStageDownHint(_dayStageScrollController.position);
+    });
+
     final dayDoses = _doses.where((dose) {
       return dose.scheduledTime.year == _currentDate.year &&
           dose.scheduledTime.month == _currentDate.month &&
@@ -1299,28 +1375,32 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           }
         }
       },
-      child: ListView.builder(
-        controller: _dayStageScrollController,
-        padding: calendarStageListPadding(listBottomPadding),
-        itemCount: hours.length,
-        itemBuilder: (context, index) {
-          final hour = hours[index];
-          final hourDoses = dosesByHour[hour] ?? const [];
+      child: _wrapWithCenteredDownScrollHint(
+        showHint: _showDayStageDownHint,
+        onMetrics: _updateDayStageDownHint,
+        child: ListView.builder(
+          controller: _dayStageScrollController,
+          padding: calendarStageListPadding(listBottomPadding),
+          itemCount: hours.length,
+          itemBuilder: (context, index) {
+            final hour = hours[index];
+            final hourDoses = dosesByHour[hour] ?? const [];
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (index != 0)
-                Divider(
-                  height: kSpacingM,
-                  thickness: kBorderWidthThin,
-                  color: Theme.of(context).colorScheme.outlineVariant
-                      .withValues(alpha: kOpacityVeryLow),
-                ),
-              _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
-            ],
-          );
-        },
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (index != 0)
+                  Divider(
+                    height: kSpacingM,
+                    thickness: kBorderWidthThin,
+                    color: Theme.of(context).colorScheme.outlineVariant
+                        .withValues(alpha: kOpacityVeryLow),
+                  ),
+                _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
