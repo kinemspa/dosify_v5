@@ -458,10 +458,38 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   void _onDateChanged(DateTime date) {
+    final previousDate = _currentDate;
     setState(() {
+      if (_selectedDate != null) {
+        if (_currentView == CalendarView.month) {
+          final monthDelta =
+              (date.year - previousDate.year) * 12 +
+              (date.month - previousDate.month);
+          if (monthDelta != 0) {
+            _selectedDate = _shiftMonthKeepingDay(_selectedDate!, monthDelta);
+          }
+        } else if (_currentView == CalendarView.week) {
+          final previousDay = DateTime(
+            previousDate.year,
+            previousDate.month,
+            previousDate.day,
+          );
+          final targetDay = DateTime(date.year, date.month, date.day);
+          final dayDelta = targetDay.difference(previousDay).inDays;
+          if (dayDelta != 0) {
+            _selectedDate = _selectedDate!.add(Duration(days: dayDelta));
+          }
+        }
+      }
       _currentDate = date;
     });
     _loadDoses();
+
+    if (_selectedDate != null &&
+        _currentView != CalendarView.day &&
+        widget.variant == CalendarVariant.full) {
+      _snapSelectedDayStageToInitial();
+    }
   }
 
   void _onDayTap(DateTime date) {
