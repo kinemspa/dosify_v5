@@ -36,6 +36,7 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
   int _currentStep = 0;
   final _scrollController = ScrollController();
   final _stepFocusScope = FocusScopeNode();
+  bool _showDownScrollHint = false;
 
   int get currentStep => _currentStep;
   ScrollController get scrollController => _scrollController;
@@ -78,25 +79,69 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_scrollController.hasClients) return;
+      _updateDownScrollHint(_scrollController.position);
+    });
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
         children: [
           _buildUnifiedHeader(),
           Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              child: FocusScope(
-                node: _stepFocusScope,
-                child: buildStepContent(_currentStep),
-              ),
+            child: Stack(
+              children: [
+                NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification.metrics.axis == Axis.vertical) {
+                      _updateDownScrollHint(notification.metrics);
+                    }
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    child: FocusScope(
+                      node: _stepFocusScope,
+                      child: buildStepContent(_currentStep),
+                    ),
+                  ),
+                ),
+                IgnorePointer(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: AnimatedOpacity(
+                      opacity: _showDownScrollHint ? 1 : 0,
+                      duration: kAnimationFast,
+                      curve: kCurveSnappy,
+                      child: Padding(
+                        padding: kWizardScrollHintPadding,
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: kWizardScrollHintIconSize,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
+                              .withValues(alpha: kOpacityMediumHigh),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           _buildNavigationBar(),
         ],
       ),
     );
+  }
+
+  void _updateDownScrollHint(ScrollMetrics metrics) {
+    final shouldShow = metrics.maxScrollExtent > (metrics.pixels + 0.5);
+    if (_showDownScrollHint == shouldShow) return;
+    if (!mounted) return;
+    setState(() => _showDownScrollHint = shouldShow);
   }
 
   Widget _buildUnifiedHeader() {
@@ -154,7 +199,7 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Row(
                       children: [
-                        for (int i = 0; i < widget.stepCount; i++) ...{
+                        for (int i = 0; i < widget.stepCount; i++) ...[
                           _StepCircle(
                             number: i + 1,
                             isActive: i == _currentStep,
@@ -175,7 +220,7 @@ abstract class MedicationWizardState<T extends MedicationWizardBase>
                                 ),
                               ),
                             ),
-                        },
+                        ],
                       ],
                     ),
                   ),
