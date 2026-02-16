@@ -32,6 +32,7 @@ class CalendarHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isOnTodayContext = _isOnTodayContext();
 
     return Container(
       height: kCalendarHeaderHeight,
@@ -85,26 +86,52 @@ class CalendarHeader extends StatelessWidget {
           const SizedBox(width: kSpacingS),
 
           // Today button
-          FilledButton(
-            onPressed: onToday,
-            style: FilledButton.styleFrom(
-              foregroundColor: colorScheme.onPrimary,
-              padding: kCalendarTodayButtonPadding,
-              minimumSize: kCalendarTodayButtonMinSize,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  kCalendarTodayButtonBorderRadius,
+          if (isOnTodayContext)
+            OutlinedButton(
+              onPressed: onToday,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+                side: BorderSide(
+                  color: colorScheme.primary.withValues(alpha: kOpacityMedium),
+                  width: kBorderWidthThin,
+                ),
+                padding: kCalendarTodayButtonPadding,
+                minimumSize: kCalendarTodayButtonMinSize,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    kCalendarTodayButtonBorderRadius,
+                  ),
                 ),
               ),
+              child: Text(
+                'Today',
+                style: calendarDayOverflowTextStyle(
+                  context,
+                )?.copyWith(color: colorScheme.primary),
+              ),
+            )
+          else
+            FilledButton(
+              onPressed: onToday,
+              style: FilledButton.styleFrom(
+                foregroundColor: colorScheme.onPrimary,
+                padding: kCalendarTodayButtonPadding,
+                minimumSize: kCalendarTodayButtonMinSize,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    kCalendarTodayButtonBorderRadius,
+                  ),
+                ),
+              ),
+              child: Text(
+                'Today',
+                style: calendarDayOverflowTextStyle(
+                  context,
+                )?.copyWith(color: colorScheme.onPrimary),
+              ),
             ),
-            child: Text(
-              'Today',
-              style: calendarDayOverflowTextStyle(
-                context,
-              )?.copyWith(color: colorScheme.onPrimary),
-            ),
-          ),
 
           if (showViewToggle) ...[
             const SizedBox(width: kSpacingS),
@@ -143,6 +170,32 @@ class CalendarHeader extends StatelessWidget {
     final currentIndex = orderedViews.indexOf(currentView);
     final nextIndex = (currentIndex + 1) % orderedViews.length;
     onViewChanged(orderedViews[nextIndex]);
+  }
+
+  bool _isOnTodayContext() {
+    final today = DateTime.now();
+    switch (currentView) {
+      case CalendarView.day:
+        return currentDate.year == today.year &&
+            currentDate.month == today.month &&
+            currentDate.day == today.day;
+      case CalendarView.week:
+        final weekStart = currentDate.subtract(
+          Duration(days: currentDate.weekday - 1),
+        );
+        final weekEnd = weekStart.add(const Duration(days: 6));
+        final todayDate = DateTime(today.year, today.month, today.day);
+        final startDate = DateTime(
+          weekStart.year,
+          weekStart.month,
+          weekStart.day,
+        );
+        final endDate = DateTime(weekEnd.year, weekEnd.month, weekEnd.day);
+        return !todayDate.isBefore(startDate) && !todayDate.isAfter(endDate);
+      case CalendarView.month:
+        return currentDate.year == today.year &&
+            currentDate.month == today.month;
+    }
   }
 
   String _formatTitle() {
