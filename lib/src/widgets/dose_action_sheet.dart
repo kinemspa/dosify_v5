@@ -317,6 +317,14 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             final isMdv = med?.form == MedicationForm.multiDoseVial;
 
             if (!isMdv || med == null) {
+              const strengthUnits = <String>['mcg', 'mg', 'g'];
+              final normalizedUnit = (_doseOverrideUnit ?? widget.dose.doseUnit)
+                  .toLowerCase();
+              final selectedStrengthUnit =
+                  strengthUnits.contains(normalizedUnit)
+                  ? normalizedUnit
+                  : 'mg';
+
               return Row(
                 children: [
                   Expanded(
@@ -346,11 +354,26 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                     ),
                   ),
                   const SizedBox(width: kSpacingS),
-                  Text(
-                    _doseOverrideUnit ?? widget.dose.doseUnit,
-                    style: helperTextStyle(
-                      context,
-                    )?.copyWith(fontWeight: kFontWeightMedium),
+                  SizedBox(
+                    width: kCompactControlWidth,
+                    child: SmallDropdown36<String>(
+                      value: selectedStrengthUnit,
+                      items: strengthUnits
+                          .map(
+                            (unit) => DropdownMenuItem<String>(
+                              value: unit,
+                              child: Text(unit),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null || value == _doseOverrideUnit) return;
+                        setState(() {
+                          _doseOverrideUnit = value;
+                          _hasChanged = true;
+                        });
+                      },
+                    ),
                   ),
                 ],
               );
