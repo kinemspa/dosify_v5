@@ -398,6 +398,8 @@ const EdgeInsets kCalendarWeekColumnPadding = EdgeInsets.symmetric(
   vertical: kCardInnerSpacing,
 );
 const double kCalendarHeaderHeight = 56; // Calendar header with navigation
+const double kCalendarUpNextReservedHeight =
+    148; // Includes Up Next card and vertical outer padding in full view
 
 /// Bottom sheet sizing
 const double kBottomSheetHandleWidth = 40;

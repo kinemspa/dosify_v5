@@ -1419,9 +1419,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     final headerHeight = showHeader ? kCalendarHeaderHeight : 0.0;
 
-    // Up-next card height is content-dependent; keep stage ratio stable.
-    // (We still adapt to the calendar grid's variable week count.)
-    final upNextReservedHeight = showUpNextCard ? 0.0 : 0.0;
+    // Reserve height for Up Next card in full view so the selected-day stage
+    // starts from the true bottom of visible calendar content.
+    final upNextReservedHeight = showUpNextCard
+        ? kCalendarUpNextReservedHeight
+        : 0.0;
 
     final viewHeight = switch (_currentView) {
       CalendarView.week => kCalendarWeekHeaderHeight + kCalendarWeekGridHeight,
