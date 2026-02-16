@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
+import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 
 enum SyringeSizeMl { ml0_3, ml0_5, ml1, ml3, ml5 }
@@ -73,14 +77,74 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
 
 class _ReconstitutionCalculatorDialogState
     extends State<ReconstitutionCalculatorDialog> {
+  final SavedReconstitutionRepository _savedRepo =
+      SavedReconstitutionRepository();
+
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
+  String? _seedDiluentName;
+  double? _seedDoseValue;
+  String? _seedDoseUnit;
+  SyringeSizeMl? _seedSyringeSize;
+  double? _seedVialSize;
+  int _calculatorSeedVersion = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _seedDiluentName = widget.initialDiluentName;
+    _seedDoseValue = widget.initialDoseValue;
+    _seedDoseUnit = widget.initialDoseUnit;
+    _seedSyringeSize = widget.initialSyringeSize;
+    _seedVialSize = widget.initialVialSize;
+  }
 
   void _onCalculation(ReconstitutionResult result, bool isValid) {
     setState(() {
       _lastResult = result;
       _canSubmit = isValid;
     });
+  }
+
+  SyringeSizeMl _inferSyringeSize(double syringeSizeMl) {
+    if (syringeSizeMl <= 0.3) return SyringeSizeMl.ml0_3;
+    if (syringeSizeMl <= 0.5) return SyringeSizeMl.ml0_5;
+    if (syringeSizeMl <= 1.0) return SyringeSizeMl.ml1;
+    if (syringeSizeMl <= 3.0) return SyringeSizeMl.ml3;
+    return SyringeSizeMl.ml5;
+  }
+
+  void _applySavedSeed(SavedReconstitutionCalculation saved) {
+    setState(() {
+      _seedDiluentName = saved.diluentName;
+      _seedDoseValue = saved.recommendedDose;
+      _seedDoseUnit = saved.doseUnit;
+      _seedSyringeSize = _inferSyringeSize(saved.syringeSizeMl);
+      _seedVialSize = saved.solventVolumeMl;
+      _calculatorSeedVersion += 1;
+      _lastResult = null;
+      _canSubmit = false;
+    });
+  }
+
+  Future<void> _openLoadSavedSheet() async {
+    final selected = await showModalBottomSheet<SavedReconstitutionCalculation>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SavedReconstitutionSheet(
+          repo: _savedRepo,
+          includeMedicationOwned: true,
+          onSelect: (item) => Navigator.of(sheetContext).pop(item),
+        );
+      },
+    );
+
+    if (selected == null) return;
+    _applySavedSeed(selected);
+    if (!mounted) return;
+    showAppSnackBar(context, 'Loaded saved reconstitution');
   }
 
   @override
@@ -140,6 +204,31 @@ class _ReconstitutionCalculatorDialogState
               textAlign: TextAlign.center,
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, kSpacingS),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: _openLoadSavedSheet,
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: kSpacingXS,
+                    vertical: 0,
+                  ),
+                ),
+                child: Text(
+                  'Load saved',
+                  style: microHelperTextStyle(
+                    context,
+                    color: fg.withValues(alpha: kOpacityMediumHigh),
+                  ),
+                ),
+              ),
+            ),
+          ),
           Divider(
             color: theme.brightness == Brightness.dark
                 ? cs.outlineVariant.withValues(alpha: kOpacitySubtleLow)
@@ -151,13 +240,14 @@ class _ReconstitutionCalculatorDialogState
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: ReconstitutionCalculatorWidget(
+                key: ValueKey<int>(_calculatorSeedVersion),
                 initialStrengthValue: widget.initialStrengthValue,
                 unitLabel: widget.unitLabel,
-                initialDiluentName: widget.initialDiluentName,
-                initialDoseValue: widget.initialDoseValue,
-                initialDoseUnit: widget.initialDoseUnit,
-                initialSyringeSize: widget.initialSyringeSize,
-                initialVialSize: widget.initialVialSize,
+                initialDiluentName: _seedDiluentName,
+                initialDoseValue: _seedDoseValue,
+                initialDoseUnit: _seedDoseUnit,
+                initialSyringeSize: _seedSyringeSize,
+                initialVialSize: _seedVialSize,
                 onCalculate: _onCalculation,
               ),
             ),
