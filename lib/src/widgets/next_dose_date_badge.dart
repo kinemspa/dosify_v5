@@ -39,6 +39,9 @@ class NextDoseDateBadge extends StatelessWidget {
     final size = dense
         ? kNextDoseDateCircleSizeCompact
         : kNextDoseDateCircleSizeLarge;
+    final contentPadding = dense
+        ? kNextDoseDateCircleContentPaddingCompact
+        : kNextDoseDateCircleContentPaddingLarge;
 
     final accentColor = activeColor ?? cs.primary;
 
@@ -188,7 +191,7 @@ class NextDoseDateBadge extends StatelessWidget {
         color: circleBg,
         border: Border.all(width: kBorderWidthThin, color: circleBorder),
       ),
-      child: circleContent,
+      child: Padding(padding: contentPadding, child: circleContent),
     );
 
     final nextLabelPadding = nextLabelStyle == NextDoseBadgeLabelStyle.tall
