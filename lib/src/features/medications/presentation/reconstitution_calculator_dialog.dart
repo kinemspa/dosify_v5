@@ -79,9 +79,11 @@ class _ReconstitutionCalculatorDialogState
     extends State<ReconstitutionCalculatorDialog> {
   final SavedReconstitutionRepository _savedRepo =
       SavedReconstitutionRepository();
+  final ScrollController _contentScrollController = ScrollController();
 
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
+  bool _showDownScrollHint = false;
   String? _seedDiluentName;
   double? _seedDoseValue;
   String? _seedDoseUnit;
@@ -104,6 +106,19 @@ class _ReconstitutionCalculatorDialogState
       _lastResult = result;
       _canSubmit = isValid;
     });
+  }
+
+  @override
+  void dispose() {
+    _contentScrollController.dispose();
+    super.dispose();
+  }
+
+  void _updateDownScrollHint(ScrollMetrics metrics) {
+    final shouldShow = metrics.maxScrollExtent > (metrics.pixels + 0.5);
+    if (_showDownScrollHint == shouldShow) return;
+    if (!mounted) return;
+    setState(() => _showDownScrollHint = shouldShow);
   }
 
   SyringeSizeMl _inferSyringeSize(double syringeSizeMl) {
@@ -149,6 +164,12 @@ class _ReconstitutionCalculatorDialogState
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!_contentScrollController.hasClients) return;
+      _updateDownScrollHint(_contentScrollController.position);
+    });
+
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final fg = reconForegroundColor(context);
@@ -237,19 +258,50 @@ class _ReconstitutionCalculatorDialogState
           ),
           // Content
           Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: ReconstitutionCalculatorWidget(
-                key: ValueKey<int>(_calculatorSeedVersion),
-                initialStrengthValue: widget.initialStrengthValue,
-                unitLabel: widget.unitLabel,
-                initialDiluentName: _seedDiluentName,
-                initialDoseValue: _seedDoseValue,
-                initialDoseUnit: _seedDoseUnit,
-                initialSyringeSize: _seedSyringeSize,
-                initialVialSize: _seedVialSize,
-                onCalculate: _onCalculation,
-              ),
+            child: Stack(
+              children: [
+                NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification.metrics.axis == Axis.vertical) {
+                      _updateDownScrollHint(notification.metrics);
+                    }
+                    return false;
+                  },
+                  child: SingleChildScrollView(
+                    controller: _contentScrollController,
+                    padding: const EdgeInsets.all(20),
+                    child: ReconstitutionCalculatorWidget(
+                      key: ValueKey<int>(_calculatorSeedVersion),
+                      initialStrengthValue: widget.initialStrengthValue,
+                      unitLabel: widget.unitLabel,
+                      initialDiluentName: _seedDiluentName,
+                      initialDoseValue: _seedDoseValue,
+                      initialDoseUnit: _seedDoseUnit,
+                      initialSyringeSize: _seedSyringeSize,
+                      initialVialSize: _seedVialSize,
+                      onCalculate: _onCalculation,
+                    ),
+                  ),
+                ),
+                IgnorePointer(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: AnimatedOpacity(
+                      opacity: _showDownScrollHint ? 1 : 0,
+                      duration: kAnimationFast,
+                      curve: kCurveSnappy,
+                      child: Padding(
+                        padding: kReconstitutionDialogScrollHintPadding,
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: kReconstitutionDialogScrollHintIconSize,
+                          color: fg.withValues(alpha: kOpacityMediumHigh),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           // Actions

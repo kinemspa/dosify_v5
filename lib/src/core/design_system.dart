@@ -417,6 +417,10 @@ const double kDoseActionSheetScrollHintIconSize = kIconSizeMedium;
 const EdgeInsets kDoseActionSheetScrollHintPadding = EdgeInsets.only(
   bottom: kSpacingXS,
 );
+const double kReconstitutionDialogScrollHintIconSize = kIconSizeMedium;
+const EdgeInsets kReconstitutionDialogScrollHintPadding = EdgeInsets.only(
+  bottom: kSpacingXS,
+);
 
 /// Fixed width for the status cycle button in DoseActionSheet.
 ///
