@@ -778,6 +778,30 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     }
   }
 
+  Widget _buildSelectDayPrompt(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpacingM,
+        vertical: kSpacingS,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: kOpacityMinimal),
+          width: kBorderWidthThin,
+        ),
+        borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+      ),
+      child: Text(
+        'Select a day to view doses.',
+        textAlign: TextAlign.center,
+        style: helperTextStyle(context),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final showHeader = _showHeaderForCurrentVariant();
@@ -839,6 +863,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       final showSelectedDayStage =
           widget.showSelectedDayPanel &&
           _selectedDate != null &&
+          _currentView != CalendarView.day;
+      final showSelectDayPrompt =
+          widget.showSelectedDayPanel &&
+          _selectedDate == null &&
           _currentView != CalendarView.day;
 
       final stageInitialRatio = widget.variant == CalendarVariant.full
@@ -919,7 +947,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
       // Non-full variants: render the selected-day panel as an overlay so the
       // calendar grid doesn't get squashed to make room.
-      if (showSelectedDayStage && widget.variant != CalendarVariant.full) {
+      if ((showSelectedDayStage || showSelectDayPrompt) &&
+          widget.variant != CalendarVariant.full) {
         final ratio = switch (_currentView) {
           CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
           CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,
@@ -935,7 +964,20 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               right: 0,
               bottom: 0,
               height: overlayHeight,
-              child: _buildSelectedDayPanel(),
+              child: showSelectedDayStage
+                  ? _buildSelectedDayPanel()
+                  : Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        kSpacingS,
+                        0,
+                        kSpacingS,
+                        kSpacingS,
+                      ),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: _buildSelectDayPrompt(context),
+                      ),
+                    ),
             ),
           ],
         );
@@ -943,15 +985,24 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
       // Full variant: selected-day panel becomes a draggable stage that hugs
       // the bottom and can expand to full screen (covering header + calendar).
-      if (widget.variant == CalendarVariant.full && showSelectedDayStage) {
+      if (widget.variant == CalendarVariant.full &&
+          (showSelectedDayStage || showSelectDayPrompt)) {
         return Stack(
           children: [
             Positioned.fill(child: bodyColumn),
-            _buildSelectedDayStageSheet(
-              initialRatio:
-                  stageInitialRatio ??
-                  kCalendarSelectedDayPanelHeightRatioMonth,
-            ),
+            if (showSelectedDayStage)
+              _buildSelectedDayStageSheet(
+                initialRatio:
+                    stageInitialRatio ??
+                    kCalendarSelectedDayPanelHeightRatioMonth,
+              )
+            else
+              Positioned(
+                left: kSpacingM,
+                right: kSpacingM,
+                bottom: kSpacingM,
+                child: _buildSelectDayPrompt(context),
+              ),
           ],
         );
       }
