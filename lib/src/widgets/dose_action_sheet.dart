@@ -119,6 +119,60 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   bool _hasChanged = false;
   bool _editExpanded = false;
   DoseLog? _lastTakenLog;
+  bool _showDownScrollHint = false;
+
+  void _updateDownScrollHint(ScrollMetrics metrics) {
+    final shouldShow = metrics.maxScrollExtent > (metrics.pixels + 0.5);
+    if (_showDownScrollHint == shouldShow) return;
+    if (!mounted) return;
+    setState(() => _showDownScrollHint = shouldShow);
+  }
+
+  Widget _wrapWithDownScrollHint({
+    required Widget child,
+    required ScrollController controller,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!controller.hasClients) return;
+      _updateDownScrollHint(controller.position);
+    });
+
+    return Stack(
+      children: [
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.axis == Axis.vertical) {
+              _updateDownScrollHint(notification.metrics);
+            }
+            return false;
+          },
+          child: child,
+        ),
+        IgnorePointer(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: AnimatedOpacity(
+              opacity: _showDownScrollHint ? 1 : 0,
+              duration: kAnimationFast,
+              curve: kCurveSnappy,
+              child: Padding(
+                padding: kDoseActionSheetScrollHintPadding,
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: kDoseActionSheetScrollHintIconSize,
+                  color: cs.onSurfaceVariant.withValues(
+                    alpha: kOpacityMediumHigh,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   DateTime _clampDate(
     DateTime value, {
@@ -1491,11 +1545,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       ScrollController scrollController, {
       List<Widget> leading = const [],
     }) {
-      return Scrollbar(
+      return _wrapWithDownScrollHint(
         controller: scrollController,
-        thumbVisibility: true,
-        thickness: kDoseActionSheetScrollbarThickness,
-        radius: kDoseActionSheetScrollbarThumbRadius,
         child: ListView(
           controller: scrollController,
           padding: kDoseActionSheetContentPadding,

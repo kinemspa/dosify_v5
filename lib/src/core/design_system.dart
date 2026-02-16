@@ -413,6 +413,10 @@ const double kDoseActionSheetScrollbarThickness = 3;
 const Radius kDoseActionSheetScrollbarThumbRadius = Radius.circular(
   kBorderRadiusChipTight,
 );
+const double kDoseActionSheetScrollHintIconSize = kIconSizeMedium;
+const EdgeInsets kDoseActionSheetScrollHintPadding = EdgeInsets.only(
+  bottom: kSpacingXS,
+);
 
 /// Fixed width for the status cycle button in DoseActionSheet.
 ///
