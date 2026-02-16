@@ -59,6 +59,8 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     return value.toStringAsFixed(2);
   }
 
+  String _activityTypeLabel() => 'Dose';
+
   @override
   Widget buildTitle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -82,6 +84,22 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: kSpacingXS,
           children: [
+            Text(
+              _activityTypeLabel(),
+              style: smallHelperTextStyle(
+                context,
+                color: cs.onSurfaceVariant.withValues(
+                  alpha: kOpacityMediumHigh,
+                ),
+              )?.copyWith(fontWeight: kFontWeightSemiBold),
+            ),
+            Text(
+              '•',
+              style: smallHelperTextStyle(
+                context,
+                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
+              ),
+            ),
             Text(
               '${_formatAmount(displayValue)} $displayUnit',
               style: smallHelperTextStyle(
@@ -128,6 +146,19 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
     return (icon: spec.icon, color: spec.color);
   }
 
+  String _activityTypeLabel() {
+    return switch (log.changeType) {
+      InventoryChangeType.refillAdd ||
+      InventoryChangeType.refillToMax => 'Refill',
+      InventoryChangeType.vialRestocked => 'Restock',
+      InventoryChangeType.vialOpened => 'Vial Opened',
+      InventoryChangeType.manualAdjustment => 'Adjustment',
+      InventoryChangeType.expired => 'Expired',
+      InventoryChangeType.doseDeducted => 'Dose',
+      InventoryChangeType.adHocDose => 'Ad-hoc Dose',
+    };
+  }
+
   @override
   Widget buildTitle(BuildContext context) {
     final statusColor = inventoryChangeVisualSpec(
@@ -147,14 +178,34 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: kSpacingXS / 2),
-        Text(
-          log.description,
-          style: smallHelperTextStyle(
-            context,
-            color: statusColor.withValues(alpha: kOpacityMediumHigh),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: kSpacingXS,
+          children: [
+            Text(
+              _activityTypeLabel(),
+              style: smallHelperTextStyle(
+                context,
+                color: statusColor.withValues(alpha: kOpacityMediumHigh),
+              )?.copyWith(fontWeight: kFontWeightSemiBold),
+            ),
+            Text(
+              '•',
+              style: smallHelperTextStyle(
+                context,
+                color: statusColor.withValues(alpha: kOpacityMedium),
+              ),
+            ),
+            Text(
+              log.description,
+              style: smallHelperTextStyle(
+                context,
+                color: statusColor.withValues(alpha: kOpacityMediumHigh),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ],
     );
