@@ -78,6 +78,33 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
   bool _internalExpanded = true;
   bool _showAll = false;
 
+  Widget _buildPrimarySummaryCell(
+    BuildContext context, {
+    required String label,
+    required int count,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final baseStyle = helperTextStyle(context) ?? const TextStyle();
+    final numberStyle = baseStyle.copyWith(color: cs.primary);
+
+    return Expanded(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: RichText(
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          text: TextSpan(
+            children: [
+              TextSpan(text: '$label ', style: baseStyle),
+              TextSpan(text: '$count', style: numberStyle),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   List<InlineSpan> _buildCountSpans(
     BuildContext context,
     List<(String label, int count, String? suffix)> parts,
@@ -333,14 +360,26 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RichText(
-                  text: TextSpan(
-                    children: _buildCountSpans(context, [
-                      ('Scheduled', scheduledCount, null),
-                      ('Upcoming', upcomingCount, null),
-                      ('Taken', takenCount, null),
-                    ]),
-                  ),
+                Row(
+                  children: [
+                    _buildPrimarySummaryCell(
+                      context,
+                      label: 'Scheduled',
+                      count: scheduledCount,
+                    ),
+                    const SizedBox(width: kSpacingXS),
+                    _buildPrimarySummaryCell(
+                      context,
+                      label: 'Upcoming',
+                      count: upcomingCount,
+                    ),
+                    const SizedBox(width: kSpacingXS),
+                    _buildPrimarySummaryCell(
+                      context,
+                      label: 'Taken',
+                      count: takenCount,
+                    ),
+                  ],
                 ),
                 if (missedCount > 0 || snoozedCount > 0 || skippedCount > 0)
                   RichText(
