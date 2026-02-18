@@ -7,6 +7,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
+import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
 
 const String kProLifetimeProductId = 'dosifi_pro_lifetime';
 
@@ -92,6 +93,7 @@ class BillingService extends StateNotifier<BillingState> {
     }
 
     state = state.copyWith(isLoading: true, lastError: null);
+    await MonetizationMetricsService.trackPurchaseStarted();
     final param = PurchaseParam(productDetails: product);
     final started = await _iap.buyNonConsumable(purchaseParam: param);
     if (!started) {
@@ -152,8 +154,13 @@ class BillingService extends StateNotifier<BillingState> {
 
       switch (purchase.status) {
         case PurchaseStatus.purchased:
+          granted = true;
+          await MonetizationMetricsService.trackPurchaseSuccess();
+          await _ref.read(entitlementServiceProvider.notifier).setPro(true);
+          break;
         case PurchaseStatus.restored:
           granted = true;
+          await MonetizationMetricsService.trackRestoreSuccess();
           await _ref.read(entitlementServiceProvider.notifier).setPro(true);
           break;
         case PurchaseStatus.pending:

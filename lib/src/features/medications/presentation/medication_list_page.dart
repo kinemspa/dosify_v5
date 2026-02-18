@@ -1,5 +1,7 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
+import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -8,6 +10,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
+import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
@@ -126,9 +129,13 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }
 
   Future<void> _showFreeTierLimitDialog(BuildContext context) async {
+    await MonetizationMetricsService.trackLimitHit();
+    await MonetizationMetricsService.trackPaywallShown();
+
     await showDialog<void>(
       context: context,
       builder: (dialogContext) {
+        final billing = ref.read(billingServiceProvider);
         return AlertDialog(
           title: const Text('Medication limit reached'),
           content: Text(
@@ -149,11 +156,26 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               child: const Text('Close'),
             ),
             FilledButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                context.push('/settings');
+                final started = await ref
+                    .read(billingServiceProvider.notifier)
+                    .buyProLifetime();
+                if (!context.mounted) return;
+                if (started) {
+                  showAppSnackBar(
+                    context,
+                    'Purchase flow started. Complete checkout in Google Play.',
+                  );
+                } else {
+                  context.push('/settings');
+                }
               },
-              child: const Text('View Pro'),
+              child: Text(
+                billing.product != null
+                    ? 'Upgrade to Pro (${billing.product!.price})'
+                    : 'Upgrade to Pro',
+              ),
             ),
           ],
         );

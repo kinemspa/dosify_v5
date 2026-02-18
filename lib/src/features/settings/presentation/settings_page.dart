@@ -16,6 +16,7 @@ import 'package:dosifi_v5/src/core/backup/google_drive_backup_service.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
+import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
@@ -641,6 +642,49 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           if (!entitlement.isPro)
             ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Pro benefits'),
+              subtitle: const Text('Unlimited medications + no ads'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await MonetizationMetricsService.trackPaywallShown();
+                if (!context.mounted) return;
+                await showDialog<void>(
+                  context: context,
+                  builder: (dialogContext) {
+                    return AlertDialog(
+                      title: const Text('Go Pro'),
+                      content: Text(
+                        'Unlock unlimited medications and remove ads from safe screens. Purchases are linked to your Google Play account and can be restored on reinstall/new device.',
+                        style: bodyTextStyle(dialogContext),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          child: const Text('Not now'),
+                        ),
+                        FilledButton(
+                          onPressed: () async {
+                            Navigator.of(dialogContext).pop();
+                            final started = await ref
+                                .read(billingServiceProvider.notifier)
+                                .buyProLifetime();
+                            if (!context.mounted || !started) return;
+                            showAppSnackBar(
+                              context,
+                              'Purchase flow started. Complete checkout in Google Play.',
+                            );
+                          },
+                          child: const Text('Buy Pro'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          if (!entitlement.isPro)
+            ListTile(
               leading: const Icon(Icons.shopping_bag_outlined),
               title: const Text('Buy Pro (lifetime)'),
               subtitle: Text(
@@ -679,6 +723,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     : 'No Pro entitlement found for this device/account',
               );
             },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: kSpacingM,
+              vertical: kSpacingXS,
+            ),
+            child: Text(
+              'Billing FAQ: Pro unlock is tied to your Play account. Use Restore purchases after reinstall or device change.',
+              style: helperTextStyle(context),
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.manage_accounts_outlined),
