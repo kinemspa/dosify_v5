@@ -124,6 +124,15 @@ const EdgeInsets kFabExtendedPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
 );
 
+/// Anchored banner ad layout
+const double kAnchoredAdBannerHeight = 50;
+const EdgeInsets kAnchoredAdBannerPadding = EdgeInsets.fromLTRB(
+  kSpacingS,
+  kSpacingXS,
+  kSpacingS,
+  kSpacingXS,
+);
+
 /// Icon sizes
 const double kIconSizeXXSmall = 12;
 const double kIconSizeXSmall = 14;

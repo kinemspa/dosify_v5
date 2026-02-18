@@ -6,6 +6,7 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/large_card.dart';
@@ -396,6 +397,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         icon: const Icon(Icons.add),
         label: const Text('Add Medication'),
       ),
+      bottomNavigationBar: const AnchoredAdBanner(),
     );
   }
 
