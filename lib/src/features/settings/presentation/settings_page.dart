@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/backup/backup_models.dart';
 import 'package:dosifi_v5/src/core/backup/google_drive_backup_service.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
@@ -92,6 +93,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
     final entitlement = ref.watch(entitlementServiceProvider);
+    final billing = ref.watch(billingServiceProvider);
 
     Future<void> editPercentSetting({
       required String title,
@@ -632,15 +634,41 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             subtitle: Text(
               entitlement.isPro
                   ? 'Unlimited medications and no ads'
+                  : billing.product != null
+                  ? 'Up to $kFreeTierMedicationLimit medications + ads • Pro: ${billing.product!.price}'
                   : 'Up to $kFreeTierMedicationLimit medications + ads',
             ),
           ),
+          if (!entitlement.isPro)
+            ListTile(
+              leading: const Icon(Icons.shopping_bag_outlined),
+              title: const Text('Buy Pro (lifetime)'),
+              subtitle: Text(
+                billing.product?.price ?? 'Fetches product from Google Play',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: billing.isLoading
+                  ? null
+                  : () async {
+                      final started = await ref
+                          .read(billingServiceProvider.notifier)
+                          .buyProLifetime();
+                      if (!context.mounted || !started) return;
+                      showAppSnackBar(
+                        context,
+                        'Purchase flow started. Complete checkout in Google Play.',
+                      );
+                    },
+            ),
           ListTile(
             leading: const Icon(Icons.restore_rounded),
             title: const Text('Restore purchases'),
             subtitle: const Text('Refresh Pro entitlement on this device'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
+              await ref
+                  .read(billingServiceProvider.notifier)
+                  .restorePurchases();
               await ref.read(entitlementServiceProvider.notifier).restore();
               if (!context.mounted) return;
               final isProNow = ref.read(entitlementServiceProvider).isPro;
@@ -652,6 +680,28 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               );
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.manage_accounts_outlined),
+            title: const Text('Manage purchases'),
+            subtitle: const Text('Open Google Play purchases/subscriptions'),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () async {
+              await ref
+                  .read(billingServiceProvider.notifier)
+                  .openManagePurchases();
+            },
+          ),
+          if (billing.lastError != null && billing.lastError!.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingM,
+                vertical: kSpacingXS,
+              ),
+              child: Text(
+                billing.lastError!,
+                style: helperTextStyle(context, color: cs.error),
+              ),
+            ),
           const SizedBox(height: kSpacingL),
           Text(
             'Notifications',
