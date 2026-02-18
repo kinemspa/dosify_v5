@@ -1,6 +1,5 @@
 // Flutter imports:
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -74,7 +73,8 @@ class _OnboardingCoachOverlay extends StatefulWidget {
   final Future<void> Function() onFinish;
 
   @override
-  State<_OnboardingCoachOverlay> createState() => _OnboardingCoachOverlayState();
+  State<_OnboardingCoachOverlay> createState() =>
+      _OnboardingCoachOverlayState();
 }
 
 class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
@@ -136,7 +136,8 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
     ),
     _CoachStep(
       title: 'Analytics',
-      message: 'Get reports and trend insights across your dose activity and history.',
+      message:
+          'Get reports and trend insights across your dose activity and history.',
       routePath: '/analytics',
       targetAlignment: Alignment(0.68, -0.82),
     ),
@@ -265,6 +266,8 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
     final onExpectedRoute = _isOnStepRoute(step, currentPath);
     final cs = Theme.of(context).colorScheme;
     final bubbleAlignment = _bubbleAlignmentForTarget(step.targetAlignment);
+    final coachFg = kOnboardingCoachForegroundColor;
+    final bubbleIsBelowTarget = bubbleAlignment.y > step.targetAlignment.y;
 
     return Material(
       color: Colors.black.withValues(alpha: 0.50),
@@ -273,29 +276,6 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
           builder: (context, constraints) {
             return Stack(
               children: [
-                CustomPaint(
-                  size: Size(constraints.maxWidth, constraints.maxHeight),
-                  painter: _CoachConnectorPainter(
-                    bubbleAlignment: bubbleAlignment,
-                    targetAlignment: step.targetAlignment,
-                    color: cs.primary,
-                  ),
-                ),
-                Align(
-                  alignment: step.targetAlignment,
-                  child: Container(
-                    width: kOnboardingCoachTargetSize,
-                    height: kOnboardingCoachTargetSize,
-                    decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: kOpacityMedium),
-                      borderRadius: BorderRadius.circular(kBorderRadiusFull),
-                      border: Border.all(
-                        color: cs.onPrimary,
-                        width: kBorderWidthMedium,
-                      ),
-                    ),
-                  ),
-                ),
                 Align(
                   alignment: bubbleAlignment,
                   child: AnimatedSwitcher(
@@ -306,11 +286,10 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                       return FadeTransition(
                         opacity: animation,
                         child: SlideTransition(
-                          position:
-                              Tween<Offset>(
-                                begin: const Offset(0, 0.08),
-                                end: Offset.zero,
-                              ).animate(animation),
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.08),
+                            end: Offset.zero,
+                          ).animate(animation),
                           child: child,
                         ),
                       );
@@ -320,91 +299,128 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                       constraints: const BoxConstraints(
                         maxWidth: kOnboardingCoachBubbleMaxWidth,
                       ),
-                      padding: kOnboardingCoachBubblePadding,
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-                      ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            step.title,
-                            style:
-                                sectionTitleStyle(context)?.copyWith(
-                                  color: cs.onPrimary,
-                                ) ??
-                                TextStyle(
-                                  color: cs.onPrimary,
-                                  fontSize: kFontSizeLarge,
-                                  fontWeight: kFontWeightBold,
+                          if (bubbleIsBelowTarget)
+                            CustomPaint(
+                              size: const Size(
+                                kOnboardingCoachPointerSize * 2,
+                                kOnboardingCoachPointerSize,
+                              ),
+                              painter: _CoachBubblePointerPainter(
+                                color: cs.primary,
+                                pointUp: true,
+                              ),
+                            ),
+                          Container(
+                            width: double.infinity,
+                            padding: kOnboardingCoachBubblePadding,
+                            decoration: BoxDecoration(
+                              color: cs.primary,
+                              borderRadius: BorderRadius.circular(
+                                kBorderRadiusMedium,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  step.title,
+                                  style:
+                                      sectionTitleStyle(
+                                        context,
+                                      )?.copyWith(color: coachFg) ??
+                                      TextStyle(
+                                        color: coachFg,
+                                        fontSize: kFontSizeLarge,
+                                        fontWeight: kFontWeightBold,
+                                      ),
                                 ),
-                          ),
-                          const SizedBox(height: kSpacingXS),
-                          Text(
-                            step.message,
-                            style: helperTextStyle(
-                              context,
-                              color: cs.onPrimary,
+                                const SizedBox(height: kSpacingXS),
+                                Text(
+                                  step.message,
+                                  style: helperTextStyle(
+                                    context,
+                                    color: coachFg,
+                                  ),
+                                ),
+                                const SizedBox(height: kSpacingS),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${_stepIndex + 1}/${_steps.length}',
+                                      style: smallHelperTextStyle(
+                                        context,
+                                        color: coachFg,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    TextButton(
+                                      onPressed: widget.onFinish,
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: coachFg,
+                                        textStyle: TextStyle(
+                                          color: coachFg,
+                                          fontWeight: kFontWeightSemiBold,
+                                        ),
+                                      ),
+                                      child: const Text('Skip'),
+                                    ),
+                                    const SizedBox(width: kSpacingXS),
+                                    FilledButton(
+                                      onPressed: _goNext,
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: cs.primary.withValues(
+                                          alpha: kOpacityMedium,
+                                        ),
+                                        foregroundColor: coachFg,
+                                        side: BorderSide(
+                                          color: coachFg,
+                                          width: kBorderWidthThin,
+                                        ),
+                                        textStyle: TextStyle(
+                                          color: coachFg,
+                                          fontWeight: kFontWeightSemiBold,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        step.waitForUserNavigation &&
+                                                !onExpectedRoute
+                                            ? 'Open page'
+                                            : (_isLastStep ? 'Done' : 'Next'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                if (step.waitForUserNavigation &&
+                                    !onExpectedRoute)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: kSpacingXS,
+                                    ),
+                                    child: Text(
+                                      'Navigate to the target page, then continue.',
+                                      style: smallHelperTextStyle(
+                                        context,
+                                        color: coachFg,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: kSpacingS),
-                          Row(
-                            children: [
-                              Text(
-                                '${_stepIndex + 1}/${_steps.length}',
-                                style: smallHelperTextStyle(
-                                  context,
-                                  color: cs.onPrimary,
-                                ),
+                          if (!bubbleIsBelowTarget)
+                            CustomPaint(
+                              size: const Size(
+                                kOnboardingCoachPointerSize * 2,
+                                kOnboardingCoachPointerSize,
                               ),
-                              const Spacer(),
-                              TextButton(
-                                onPressed: widget.onFinish,
-                                style: TextButton.styleFrom(
-                                  foregroundColor: cs.onPrimary,
-                                  textStyle: TextStyle(
-                                    color: cs.onPrimary,
-                                    fontWeight: kFontWeightSemiBold,
-                                  ),
-                                ),
-                                child: const Text('Skip'),
-                              ),
-                              const SizedBox(width: kSpacingXS),
-                              FilledButton(
-                                onPressed: _goNext,
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: cs.primary.withValues(
-                                    alpha: kOpacityMedium,
-                                  ),
-                                  foregroundColor: cs.onPrimary,
-                                  side: BorderSide(
-                                    color: cs.onPrimary,
-                                    width: kBorderWidthThin,
-                                  ),
-                                  textStyle: TextStyle(
-                                    color: cs.onPrimary,
-                                    fontWeight: kFontWeightSemiBold,
-                                  ),
-                                ),
-                                child: Text(
-                                  step.waitForUserNavigation && !onExpectedRoute
-                                      ? 'Open page'
-                                      : (_isLastStep ? 'Done' : 'Next'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (step.waitForUserNavigation && !onExpectedRoute)
-                            Padding(
-                              padding: const EdgeInsets.only(top: kSpacingXS),
-                              child: Text(
-                                'Navigate to the target page, then continue.',
-                                style: smallHelperTextStyle(
-                                  context,
-                                  color: cs.onPrimary,
-                                ),
+                              painter: _CoachBubblePointerPainter(
+                                color: cs.primary,
+                                pointUp: false,
                               ),
                             ),
                         ],
@@ -441,48 +457,38 @@ class _CoachStep {
   final bool openMedicationDetailIfAvailable;
 }
 
-class _CoachConnectorPainter extends CustomPainter {
-  _CoachConnectorPainter({
-    required this.bubbleAlignment,
-    required this.targetAlignment,
-    required this.color,
-  });
+class _CoachBubblePointerPainter extends CustomPainter {
+  _CoachBubblePointerPainter({required this.color, required this.pointUp});
 
-  final Alignment bubbleAlignment;
-  final Alignment targetAlignment;
   final Color color;
-
-  Offset _alignmentToOffset(Size size, Alignment alignment) {
-    return Offset(
-      (alignment.x + 1) * 0.5 * size.width,
-      (alignment.y + 1) * 0.5 * size.height,
-    );
-  }
+  final bool pointUp;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final bubbleCenter = _alignmentToOffset(size, bubbleAlignment);
-    final targetCenter = _alignmentToOffset(size, targetAlignment);
+    final path = Path();
+    if (pointUp) {
+      path
+        ..moveTo(size.width / 2, 0)
+        ..lineTo(0, size.height)
+        ..lineTo(size.width, size.height)
+        ..close();
+    } else {
+      path
+        ..moveTo(0, 0)
+        ..lineTo(size.width, 0)
+        ..lineTo(size.width / 2, size.height)
+        ..close();
+    }
 
-    final direction = targetCenter - bubbleCenter;
-    final magnitude = math.max(direction.distance, 1.0).toDouble();
-    final unit = direction / magnitude;
-
-    final start = bubbleCenter + (unit * 34);
-    final end = targetCenter - (unit * 28);
-
-    final linePaint = Paint()
+    final paint = Paint()
       ..color = color.withValues(alpha: kOpacityHigh)
-      ..strokeWidth = kBorderWidthMedium
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.fill;
 
-    canvas.drawLine(start, end, linePaint);
+    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant _CoachConnectorPainter oldDelegate) {
-    return oldDelegate.bubbleAlignment != bubbleAlignment ||
-        oldDelegate.targetAlignment != targetAlignment ||
-        oldDelegate.color != color;
+  bool shouldRepaint(covariant _CoachBubblePointerPainter oldDelegate) {
+    return oldDelegate.color != color || oldDelegate.pointUp != pointUp;
   }
 }

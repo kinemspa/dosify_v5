@@ -61,6 +61,7 @@ const double kOnboardingCoachBubbleMaxWidth = 360;
 const double kOnboardingCoachTargetSize = 44;
 const double kOnboardingCoachPointerSize = 12;
 const EdgeInsets kOnboardingCoachBubblePadding = EdgeInsets.all(kSpacingM);
+const Color kOnboardingCoachForegroundColor = Colors.white;
 
 /// Logo sizing (in-app)
 const double kAppBarLogoHeight = 22;
