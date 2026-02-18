@@ -9,14 +9,11 @@ import 'package:dosifi_v5/src/core/backup/backup_zip_codec.dart';
 import 'package:dosifi_v5/src/core/backup/backup_models.dart';
 
 class GoogleDriveBackupService {
-  GoogleDriveBackupService({
-    BackupZipCodec? codec,
-    GoogleSignIn? googleSignIn,
-  })  : _codec = codec ?? const BackupZipCodec(),
-        _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              scopes: const [drive.DriveApi.driveAppdataScope],
-            );
+  GoogleDriveBackupService({BackupZipCodec? codec, GoogleSignIn? googleSignIn})
+    : _codec = codec ?? const BackupZipCodec(),
+      _googleSignIn =
+          googleSignIn ??
+          GoogleSignIn(scopes: const [drive.DriveApi.driveAppdataScope]);
 
   static const _fileNamePrefix = 'dosifi_backup_';
 
@@ -32,12 +29,12 @@ class GoogleDriveBackupService {
     final fileName =
         '$_fileNamePrefix${created.result.createdAtUtc.toIso8601String().replaceAll(':', '-')}.zip';
 
-    final file = drive.File(
-      name: fileName,
-      parents: const ['appDataFolder'],
-    );
+    final file = drive.File(name: fileName, parents: const ['appDataFolder']);
 
-    final media = drive.Media(Stream.value(created.zipBytes), created.zipBytes.length);
+    final media = drive.Media(
+      Stream.value(created.zipBytes),
+      created.zipBytes.length,
+    );
     await api.files.create(file, uploadMedia: media, $fields: 'id');
 
     // Best-effort cleanup: keep appDataFolder tidy.
@@ -75,12 +72,20 @@ class GoogleDriveBackupService {
   }
 
   Future<GoogleSignInAccount> _ensureSignedIn() async {
-    final existing = await _googleSignIn.signInSilently();
+    final existing = await _googleSignIn.signInSilently().timeout(
+      const Duration(seconds: 12),
+      onTimeout: () => null,
+    );
     if (existing != null) return existing;
 
-    final interactive = await _googleSignIn.signIn();
+    final interactive = await _googleSignIn.signIn().timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => null,
+    );
     if (interactive == null) {
-      throw const BackupFormatException('Sign-in cancelled');
+      throw const BackupFormatException(
+        'Google sign-in cancelled or timed out',
+      );
     }
 
     return interactive;

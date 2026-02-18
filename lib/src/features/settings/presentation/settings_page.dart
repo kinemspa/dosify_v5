@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -33,7 +35,7 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  static const _unlockTapTarget = 7;
+  static const _unlockTapTarget = 5;
 
   late final Future<PackageInfo> _packageInfo;
   late final GoogleDriveBackupService _backupService;
@@ -56,11 +58,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Future<void> _handleBuildTap(BuildContext context) async {
-    if (_devEnabled) {
-      showAppSnackBar(context, 'Developer options already enabled');
-      return;
-    }
-
     final now = DateTime.now();
     final resetWindowMs = 2000;
     if (_lastTapAt == null ||
@@ -70,24 +67,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     _lastTapAt = now;
     _tapCount += 1;
 
-    final remaining = (_unlockTapTarget - _tapCount).clamp(0, _unlockTapTarget);
-    if (remaining > 0) {
-      showAppSnackBar(
-        context,
-        'Tap $remaining more time${remaining == 1 ? '' : 's'} to enable developer options',
-      );
+    if (_tapCount < _unlockTapTarget) {
       return;
     }
 
-    await DeveloperOptions.setEnabled(true);
+    final nextEnabled = !_devEnabled;
+    await DeveloperOptions.setEnabled(nextEnabled);
 
     // Mirror to prefs directly to avoid any caching surprises.
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(DeveloperOptions.prefsKey, true);
+    await prefs.setBool(DeveloperOptions.prefsKey, nextEnabled);
 
     if (!mounted) return;
-    setState(() => _devEnabled = true);
-    showAppSnackBar(context, 'Developer options enabled');
+    setState(() => _devEnabled = nextEnabled);
+    showAppSnackBar(
+      context,
+      nextEnabled ? 'Developer options enabled' : 'Developer options disabled',
+    );
   }
 
   @override
@@ -475,37 +471,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/bottom-nav'),
           ),
-          const SizedBox(height: kSpacingL),
-          Text(
-            'UI Components',
-            style: cardTitleStyle(
-              context,
-            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
-          ),
-          const SizedBox(height: kSpacingS),
-          ValueListenableBuilder<ExperimentalUiConfig>(
-            valueListenable: ExperimentalUiSettings.value,
-            builder: (context, config, _) {
-              if (!config.showWideCardSamplesEntry) {
-                return const SizedBox.shrink();
-              }
-              return ListTile(
-                leading: const Icon(Icons.view_carousel_outlined),
-                title: const Text('Wide Card Samples'),
-                subtitle: const Text('Preview large medication card layouts'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () => context.push('/settings/wide-card-samples'),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.verified_outlined),
-            title: const Text('Final Card Decisions'),
-            subtitle: const Text('View locked-in card concepts for launch'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => context.push('/settings/final-card-decisions'),
-          ),
-          const SizedBox(height: kSpacingL),
           if (_devEnabled) ...[
             const SizedBox(height: kSpacingL),
             Text(
@@ -537,21 +502,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       secondary: const Icon(Icons.sell_outlined),
                       title: const Text('Medication list status badges'),
                       subtitle: const Text(
-                        'Show compact badges like Low stock, Expiring, Fridge, etc.',
+                        'Shows quick badges on medication cards (for example: Low stock, Expiring, Fridge/Freezer, and other status indicators).',
                       ),
                       value: config.showMedicationListStatusBadges,
                       onChanged: ExperimentalUiSettings
                           .setShowMedicationListStatusBadges,
-                    ),
-                    SwitchListTile(
-                      secondary: const Icon(Icons.view_carousel_outlined),
-                      title: const Text('Wide Card Samples entry'),
-                      subtitle: const Text(
-                        'Show the exploratory card mockups page in Settings',
-                      ),
-                      value: config.showWideCardSamplesEntry,
-                      onChanged:
-                          ExperimentalUiSettings.setShowWideCardSamplesEntry,
                     ),
                   ],
                 );
@@ -607,6 +562,59 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 );
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.notifications_active_outlined),
+              title: const Text('Show test dose reminder'),
+              subtitle: const Text('Preview the Upcoming Dose notification'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(NotificationService.showTest),
+            ),
+            ListTile(
+              leading: const Icon(Icons.stacked_bar_chart_outlined),
+              title: const Text('Show test grouped reminders'),
+              subtitle: const Text('Preview grouped upcoming doses'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(
+                NotificationService.showTestGroupedUpcomingDoseReminders,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.inventory_2_outlined),
+              title: const Text('Show test low stock'),
+              subtitle: const Text('Preview Refill/Restock actions'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(
+                NotificationService.showTestLowStockReminder,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.event_busy_outlined),
+              title: const Text('Show test expiry reminder'),
+              subtitle: const Text('Preview an Expiry notification'),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => runNotificationTest(
+                NotificationService.showTestExpiryReminder,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bug_report),
+              title: const Text('Debug & Diagnostics'),
+              subtitle: const Text(
+                'Notification testing and system diagnostics',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/debug'),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingM,
+                vertical: kSpacingS,
+              ),
+              child: Text(
+                'Developer tools can trigger test alerts and data mutations. Use only for testing.',
+                style: helperTextStyle(context),
+              ),
+            ),
           ],
           const SizedBox(height: kSpacingL),
           Text(
@@ -656,7 +664,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onTap: () => editPercentSetting(
                       title: 'Overdue reminder timing',
                       description:
-                          'Optional reminder after the scheduled time but before a dose is marked missed. Set to 0% to disable.',
+                          'Sends an overdue reminder between the scheduled time and the missed threshold. 0% disables this reminder. Example: 50% sends halfway through the due-to-missed window.',
                       currentValue: config.overdueReminderPercent,
                       onSave: (v) =>
                           DoseTimingSettings.setOverdueReminderPercent(v),
@@ -729,7 +737,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 onTap: () => editPercentSetting(
                   title: 'Snooze timing (default)',
                   description:
-                      'Sets the default snooze time as a percentage of the window until the next scheduled dose. Snooze will always clamp to before the next dose.',
+                      'Sets default snooze as a percentage of the remaining time until the next scheduled dose. Example: 25% means snooze for one-quarter of the remaining window, and it will never pass the next dose time.',
                   currentValue: pct,
                   onSave: (v) => SnoozeSettings.setDefaultSnoozePercent(v),
                   min: 0,
@@ -787,52 +795,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               );
             },
           ),
-          if (_devEnabled) ...[
-            ListTile(
-              leading: const Icon(Icons.notifications_active_outlined),
-              title: const Text('Show test dose reminder'),
-              subtitle: const Text('Preview the Upcoming Dose notification'),
-              trailing: const Icon(Icons.play_arrow_rounded),
-              onTap: () => runNotificationTest(NotificationService.showTest),
-            ),
-            ListTile(
-              leading: const Icon(Icons.stacked_bar_chart_outlined),
-              title: const Text('Show test grouped reminders'),
-              subtitle: const Text('Preview grouped upcoming doses'),
-              trailing: const Icon(Icons.play_arrow_rounded),
-              onTap: () => runNotificationTest(
-                NotificationService.showTestGroupedUpcomingDoseReminders,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.inventory_2_outlined),
-              title: const Text('Show test low stock'),
-              subtitle: const Text('Preview Refill/Restock actions'),
-              trailing: const Icon(Icons.play_arrow_rounded),
-              onTap: () => runNotificationTest(
-                NotificationService.showTestLowStockReminder,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.event_busy_outlined),
-              title: const Text('Show test expiry reminder'),
-              subtitle: const Text('Preview an Expiry notification'),
-              trailing: const Icon(Icons.play_arrow_rounded),
-              onTap: () => runNotificationTest(
-                NotificationService.showTestExpiryReminder,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.bug_report),
-              title: const Text('Debug & Diagnostics'),
-              subtitle: const Text(
-                'Notification testing and system diagnostics',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/settings/debug'),
-            ),
-          ],
-
           const SizedBox(height: kSpacingL),
           Text(
             'Backup & Restore',
@@ -850,12 +812,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               try {
                 final result = await runWithBusyDialog(
                   'Backing up…',
-                  _backupService.backupToDrive,
+                  () => _backupService.backupToDrive().timeout(
+                    const Duration(seconds: 45),
+                  ),
                 );
                 if (!context.mounted || result == null) return;
                 showAppSnackBar(
                   context,
                   'Backup complete (${result.hiveBoxesIncluded} boxes, ${result.sharedPrefsKeysIncluded} settings)',
+                );
+              } on TimeoutException {
+                if (!context.mounted) return;
+                showAppSnackBar(
+                  context,
+                  'Backup timed out while waiting for Google Drive. Please retry.',
                 );
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
@@ -899,7 +869,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               try {
                 final result = await runWithBusyDialog(
                   'Restoring…',
-                  _backupService.restoreLatestFromDrive,
+                  () => _backupService.restoreLatestFromDrive().timeout(
+                    const Duration(seconds: 45),
+                  ),
                 );
                 if (!context.mounted || result == null) return;
 
@@ -910,6 +882,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 showAppSnackBar(
                   context,
                   'Restore complete (${result.hiveBoxesRestored} boxes, ${result.sharedPrefsKeysRestored} settings). Restart app for full refresh.$missing',
+                );
+              } on TimeoutException {
+                if (!context.mounted) return;
+                showAppSnackBar(
+                  context,
+                  'Restore timed out while waiting for Google Drive. Please retry.',
                 );
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
@@ -941,7 +919,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
               final subtitle = _devEnabled
                   ? 'Developer options enabled'
-                  : 'Tap 7 times to enable developer options';
+                  : 'Version information';
 
               return ListTile(
                 leading: const Icon(Icons.info_outline),

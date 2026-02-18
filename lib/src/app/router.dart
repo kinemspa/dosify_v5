@@ -31,7 +31,6 @@ import 'package:dosifi_v5/src/features/schedules/presentation/select_medication_
 import 'package:dosifi_v5/src/features/settings/presentation/bottom_nav_settings_page.dart';
 import 'package:dosifi_v5/src/features/settings/presentation/debug_page.dart';
 import 'package:dosifi_v5/src/features/settings/presentation/settings_page.dart';
-import 'package:dosifi_v5/src/features/settings/presentation/wide_card_samples_page.dart';
 import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart';
 
 // Removed incorrect import
@@ -164,19 +163,9 @@ final router = GoRouter(
           builder: (context, state) => const BottomNavSettingsPage(),
         ),
         GoRoute(
-          path: '/settings/wide-card-samples',
-          name: 'wideCardSamples',
-          builder: (context, state) => const WideCardSamplesPage(),
-        ),
-        GoRoute(
           path: '/settings/debug',
           name: 'debug',
           builder: (context, state) => const DebugPage(),
-        ),
-        GoRoute(
-          path: '/settings/final-card-decisions',
-          name: 'finalCardDecisions',
-          builder: (context, state) => const FinalCardDecisionsPage(),
         ),
         // Nested under shell so bottom nav persists
         GoRoute(
