@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/app/shell_scaffold.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/features/analytics/presentation/analytics_page.dart';
 import 'package:dosifi_v5/src/features/inventory/presentation/inventory_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/calendar_page.dart';
@@ -24,6 +27,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/add_tablet_wizar
 import 'package:dosifi_v5/src/features/medications/presentation/add_capsule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_prefilled_syringe_wizard_page.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/add_single_dose_vial_wizard_page.dart';
+import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_detail_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedules_page.dart';
@@ -35,6 +39,16 @@ import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart'
 
 // Removed incorrect import
 final _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
+
+Future<String?> _guardMedicationAddRoutes() async {
+  final prefs = await SharedPreferences.getInstance();
+  final isPro = prefs.getBool(kEntitlementIsProPrefsKey) ?? false;
+  if (isPro) return null;
+
+  final medicationsBox = Hive.box<Medication>('medications');
+  if (medicationsBox.length < kFreeTierMedicationLimit) return null;
+  return '/medications';
+}
 
 final router = GoRouter(
   navigatorKey: rootNavigatorKey,
@@ -171,11 +185,13 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/select-type',
           name: 'selectMedicationType',
+          redirect: (context, state) => _guardMedicationAddRoutes(),
           builder: (context, state) => const SelectMedicationTypePage(),
         ),
         GoRoute(
           path: '/medications/add/template',
           name: 'addTemplatePreview',
+          redirect: (context, state) => _guardMedicationAddRoutes(),
           builder: (context, state) => const EditorTemplatePreviewPage(),
         ),
         GoRoute(
@@ -187,26 +203,31 @@ final router = GoRouter(
         GoRoute(
           path: '/medications/add/tablet',
           name: 'addTablet',
+          redirect: (context, state) => _guardMedicationAddRoutes(),
           builder: (context, state) => const AddTabletWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/capsule',
           name: 'addCapsule',
+          redirect: (context, state) => _guardMedicationAddRoutes(),
           builder: (context, state) => const AddCapsuleWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/pfs',
           name: 'addInjectionPfs',
+          redirect: (context, state) => _guardMedicationAddRoutes(),
           builder: (context, state) => const AddPrefilledSyringeWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/single',
           name: 'addInjectionSingle',
+          redirect: (context, state) => _guardMedicationAddRoutes(),
           builder: (context, state) => const AddSingleDoseVialWizardPage(),
         ),
         GoRoute(
           path: '/medications/add/injection/multi',
           name: 'addInjectionMulti',
+          redirect: (context, state) => _guardMedicationAddRoutes(),
           builder: (context, state) => const AddMdvWizardPage(),
         ),
         // Edit routes must come before the dynamic detail route so they don't get swallowed by '/medications/:id'
