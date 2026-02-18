@@ -101,7 +101,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
           MedicationDisplayHelpers.strengthOrConcentrationLabel(med).trim();
       final normalizedStrengthLabel = strengthLabel.replaceFirst(
         RegExp(
-          r'^(med\s+strength|tablet\s+strength|strength)\s*[:\-]\s*',
+          r'^(med\s+strength|tablet\s+strength|strength)\s*[:\-]?\s*',
           caseSensitive: false,
         ),
         '',
