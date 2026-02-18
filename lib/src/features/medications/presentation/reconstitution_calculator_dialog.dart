@@ -92,7 +92,6 @@ class _ReconstitutionCalculatorDialogState
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
   bool _showDownScrollHint = false;
-  bool _showLoadSaveOptions = false;
   late double _activeStrengthValue;
   late String _activeUnitLabel;
   String? _seedDiluentName;
@@ -360,6 +359,42 @@ class _ReconstitutionCalculatorDialogState
                     fontWeight: kFontWeightBold,
                   ),
                 ),
+                const Spacer(),
+                TextButton(
+                  onPressed: _openLoadSavedSheet,
+                  style: TextButton.styleFrom(
+                    foregroundColor: fg.withValues(alpha: kOpacityMediumHigh),
+                    padding: kNoPadding,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: Text(
+                    'Load saved',
+                    style: microHelperTextStyle(
+                      context,
+                      color: fg.withValues(alpha: kOpacityMediumHigh),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: kSpacingS),
+                TextButton(
+                  onPressed: _canSubmit ? _saveCurrentPreset : null,
+                  style: TextButton.styleFrom(
+                    foregroundColor: fg.withValues(alpha: kOpacityMediumHigh),
+                    padding: kNoPadding,
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: Text(
+                    'Save preset',
+                    style: microHelperTextStyle(
+                      context,
+                      color: fg.withValues(alpha: kOpacityMediumHigh),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -373,70 +408,6 @@ class _ReconstitutionCalculatorDialogState
                 fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, kSpacingS),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(kBorderRadiusLarge),
-                border: Border.all(
-                  color: fg.withValues(alpha: kOpacitySubtleLow),
-                  width: kBorderWidthThin,
-                ),
-              ),
-              child: ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(
-                  horizontal: kSpacingM,
-                  vertical: 0,
-                ),
-                childrenPadding: const EdgeInsets.fromLTRB(
-                  kSpacingM,
-                  0,
-                  kSpacingM,
-                  kSpacingM,
-                ),
-                shape: const RoundedRectangleBorder(side: BorderSide.none),
-                collapsedShape: const RoundedRectangleBorder(
-                  side: BorderSide.none,
-                ),
-                iconColor: fg.withValues(alpha: kOpacityMediumHigh),
-                collapsedIconColor: fg.withValues(alpha: kOpacityMediumHigh),
-                textColor: fg.withValues(alpha: kOpacityMediumHigh),
-                collapsedTextColor: fg.withValues(alpha: kOpacityMediumHigh),
-                title: Text(
-                  'Load & Save',
-                  style: microHelperTextStyle(
-                    context,
-                    color: fg.withValues(alpha: kOpacityMediumHigh),
-                  ),
-                ),
-                initiallyExpanded: _showLoadSaveOptions,
-                onExpansionChanged: (expanded) {
-                  setState(() => _showLoadSaveOptions = expanded);
-                },
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _openLoadSavedSheet,
-                          icon: const Icon(Icons.download_rounded),
-                          label: const Text('Load saved'),
-                        ),
-                      ),
-                      const SizedBox(width: kSpacingS),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: _canSubmit ? _saveCurrentPreset : null,
-                          icon: const Icon(Icons.save_outlined),
-                          label: const Text('Save preset'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
             ),
           ),
           Divider(
