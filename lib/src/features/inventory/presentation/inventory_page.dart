@@ -15,9 +15,6 @@ import 'package:dosifi_v5/src/features/medications/domain/services/medication_st
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/supplies/data/supply_repository.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
@@ -165,74 +162,6 @@ class _InventoryPageState extends State<InventoryPage> {
                               schedules: scheduleItems,
                             ),
                         ],
-                      ),
-                      ValueListenableBuilder<Box<Supply>>(
-                        valueListenable: Hive.box<Supply>(
-                          SupplyRepository.suppliesBoxName,
-                        ).listenable(),
-                        builder: (context, supplies, _) {
-                          if (supplies.values.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-
-                          return ValueListenableBuilder<Box<StockMovement>>(
-                            valueListenable: Hive.box<StockMovement>(
-                              SupplyRepository.movementsBoxName,
-                            ).listenable(),
-                            builder: (context, __, ____) {
-                              final supplyRepo = SupplyRepository();
-                              final supplyItems = supplyRepo.allSupplies();
-                              final supplyLow = supplyItems
-                                  .where(supplyRepo.isLowStock)
-                                  .length;
-                              final supplyExpiringSoon = supplyItems
-                                  .where(supplyRepo.isExpiringSoon)
-                                  .length;
-
-                              return Column(
-                                children: [
-                                  sectionSpacing,
-                                  SectionFormCard(
-                                    title: 'Supplies',
-                                    neutral: true,
-                                    children: [
-                                      buildDetailInfoRow(
-                                        context,
-                                        label: 'Total',
-                                        value: supplyItems.length.toString(),
-                                      ),
-                                      buildDetailInfoRow(
-                                        context,
-                                        label: 'Low stock',
-                                        value: supplyLow.toString(),
-                                        warning: supplyLow > 0,
-                                      ),
-                                      buildDetailInfoRow(
-                                        context,
-                                        label: 'Expiring soon',
-                                        value: supplyExpiringSoon.toString(),
-                                        warning: supplyExpiringSoon > 0,
-                                      ),
-                                      buildHelperText(
-                                        context,
-                                        'View supply stock movements and expiry tracking.',
-                                      ),
-                                      const SizedBox(height: kSpacingS),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: FilledButton(
-                                          onPressed: () =>
-                                              context.go('/supplies'),
-                                          child: const Text('View Supplies'),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
                       ),
                     ],
                   );
