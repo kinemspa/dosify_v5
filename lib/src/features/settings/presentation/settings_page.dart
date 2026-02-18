@@ -14,6 +14,7 @@ import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/backup/backup_models.dart';
 import 'package:dosifi_v5/src/core/backup/google_drive_backup_service.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
@@ -90,6 +91,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
+    final entitlement = ref.watch(entitlementServiceProvider);
 
     Future<void> editPercentSetting({
       required String title,
@@ -616,6 +618,40 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
           ],
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Purchases & Pro',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: const Icon(Icons.workspace_premium_outlined),
+            title: Text(entitlement.isPro ? 'Pro unlocked' : 'Free tier'),
+            subtitle: Text(
+              entitlement.isPro
+                  ? 'Unlimited medications and no ads'
+                  : 'Up to $kFreeTierMedicationLimit medications + ads',
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.restore_rounded),
+            title: const Text('Restore purchases'),
+            subtitle: const Text('Refresh Pro entitlement on this device'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              await ref.read(entitlementServiceProvider.notifier).restore();
+              if (!context.mounted) return;
+              final isProNow = ref.read(entitlementServiceProvider).isPro;
+              showAppSnackBar(
+                context,
+                isProNow
+                    ? 'Pro entitlement restored'
+                    : 'No Pro entitlement found for this device/account',
+              );
+            },
+          ),
           const SizedBox(height: kSpacingL),
           Text(
             'Notifications',

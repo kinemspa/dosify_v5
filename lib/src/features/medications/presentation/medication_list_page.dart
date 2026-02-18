@@ -1,4 +1,5 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -123,6 +124,54 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         (m.description ?? '').toLowerCase().contains(qLower);
   }
 
+  Future<void> _showFreeTierLimitDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Medication limit reached'),
+          content: Text(
+            'Free tier supports up to $kFreeTierMedicationLimit medications. Upgrade to Pro for unlimited medications and an ad-free experience.',
+            style: bodyTextStyle(dialogContext),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await ref.read(entitlementServiceProvider.notifier).restore();
+                if (!dialogContext.mounted) return;
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('Restore'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.push('/settings');
+              },
+              child: const Text('View Pro'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _onAddMedicationPressed(
+    BuildContext context,
+    int currentMedicationCount,
+  ) async {
+    final entitlement = ref.read(entitlementServiceProvider);
+    if (entitlement.canAddMedication(currentMedicationCount)) {
+      context.push('/medications/select-type');
+      return;
+    }
+    await _showFreeTierLimitDialog(context);
+  }
+
   bool _isRefrigerated(Medication m) {
     return m.requiresRefrigeration == true ||
         m.activeVialRequiresRefrigeration ||
@@ -227,6 +276,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   Widget build(BuildContext context) {
     ref.watch(medicationsBoxChangesProvider);
     ref.watch(schedulesBoxChangesProvider);
+    ref.watch(entitlementServiceProvider);
 
     final box = ref.watch(medicationsBoxProvider);
     final schedulesBox = ref.watch(schedulesBoxProvider);
@@ -251,7 +301,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                     const Text('Add a medication to begin tracking'),
                     const SizedBox(height: 12),
                     FilledButton(
-                      onPressed: () => context.push('/medications/select-type'),
+                      onPressed: () =>
+                          _onAddMedicationPressed(context, meds.length),
                       child: const Text('Add Medication'),
                     ),
                   ],
@@ -341,7 +392,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/medications/select-type'),
+        onPressed: () => _onAddMedicationPressed(context, box.length),
         icon: const Icon(Icons.add),
         label: const Text('Add Medication'),
       ),

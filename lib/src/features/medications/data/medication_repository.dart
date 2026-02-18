@@ -6,12 +6,14 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/hive/hive_box_safe_write.dart';
+import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Repository for medication data access
 /// Abstracts Hive database operations for better testability and maintainability
@@ -28,8 +30,31 @@ class MedicationRepository {
 
   /// Save or update a medication
   Future<void> upsert(Medication med) async {
-    // Use a web-safe write path to avoid "silent hangs" on IndexedDB.
-    await _box.putSafe(med.id, med);
+    final existing = _box.get(med.id);
+    if (existing == null) {
+      final prefs = await SharedPreferences.getInstance();
+      final isPro = prefs.getBool(kEntitlementIsProPrefsKey) ?? false;
+      if (!isPro && _box.length >= kFreeTierMedicationLimit) {
+        throw StateError(
+          'Free tier limit reached. Upgrade to Pro to add more than $kFreeTierMedicationLimit medications.',
+        );
+      }
+    }
+
+    if (kIsWeb) {
+      try {
+        await _box.put(med.id, med).timeout(const Duration(seconds: 6));
+      } on TimeoutException {
+        await _box.put(med.id, med).timeout(const Duration(seconds: 12));
+      }
+
+      final persisted = _box.get(med.id);
+      if (persisted == null) {
+        throw StateError('Web persistence verification failed for ${med.id}');
+      }
+    } else {
+      await _box.putSafe(med.id, med);
+    }
 
     // Best-effort: keep expiry notifications in sync with edits.
     try {
