@@ -305,7 +305,18 @@ const int kMedicationHeaderDescriptionMaxChars = 90;
 /// Reserved vertical space inside [MedicationHeaderWidget] so the
 /// SliverAppBar's animated name/form/manufacturer overlay never overlaps
 /// the header content on smaller screens.
-const double kMedicationDetailHeaderOverlayReservedHeight = 80;
+const double kMedicationDetailHeaderOverlayReservedHeight = 96;
+
+/// Medication details animated header identity layout.
+///
+/// Centralized values used by the SliverAppBar overlay for name/form/
+/// manufacturer so horizontal and vertical spacing remains consistent across
+/// screen sizes and text scales.
+const double kMedicationDetailHeaderIdentityExpandedTopOffset = 44;
+const double kMedicationDetailHeaderIdentityCollapsedVisualHeight = 26;
+const double kMedicationDetailHeaderIdentityRightReservedMinWidth = 152;
+const double kMedicationDetailHeaderIdentityRightReservedExpandedFraction =
+    0.46;
 
 /// Medication header description/notes spacing (inside [MedicationHeaderWidget]).
 const EdgeInsets kMedicationHeaderDescriptionPadding = EdgeInsets.only(

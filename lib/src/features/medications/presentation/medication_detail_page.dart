@@ -393,16 +393,23 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             // Animated Name & Manufacturer
                             Positioned(
                               top: lerpDouble(
-                                top + 48,
-                                top + (_kDetailHeaderCollapsedHeight - 26) / 2,
+                                top +
+                                    kMedicationDetailHeaderIdentityExpandedTopOffset,
+                                top +
+                                    (_kDetailHeaderCollapsedHeight -
+                                            kMedicationDetailHeaderIdentityCollapsedVisualHeight) /
+                                        2,
                                 t,
                               ),
                               left: kPageHorizontalPadding,
                               right: lerpDouble(
                                 // Reserve space for the right-side stock gauge/card when expanded.
-                                (constraints.maxWidth * 0.42) < 140
-                                    ? 140
-                                    : (constraints.maxWidth * 0.42),
+                                (constraints.maxWidth *
+                                            kMedicationDetailHeaderIdentityRightReservedExpandedFraction) <
+                                        kMedicationDetailHeaderIdentityRightReservedMinWidth
+                                    ? kMedicationDetailHeaderIdentityRightReservedMinWidth
+                                    : (constraints.maxWidth *
+                                          kMedicationDetailHeaderIdentityRightReservedExpandedFraction),
                                 0,
                                 t,
                               ),
