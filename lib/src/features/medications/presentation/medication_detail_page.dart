@@ -473,8 +473,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                               context.go('/');
                             case 'medications':
                               context.go('/medications');
-                            case 'inventory':
-                              context.go('/inventory');
                             case 'schedules':
                               context.go('/schedules');
                             case 'calendar':
@@ -492,10 +490,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                           PopupMenuItem(
                             value: 'medications',
                             child: Text('Medications'),
-                          ),
-                          PopupMenuItem(
-                            value: 'inventory',
-                            child: Text('Inventory'),
                           ),
                           PopupMenuItem(
                             value: 'schedules',
