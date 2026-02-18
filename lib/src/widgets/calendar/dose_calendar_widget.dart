@@ -386,8 +386,17 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           break;
         case CalendarView.month:
           if (_selectedDate != null) {
-            _selectedDate = _shiftMonthKeepingDay(_selectedDate!, -1);
-            _currentDate = _selectedDate!;
+            final targetMonth = DateTime(
+              _currentDate.year,
+              _currentDate.month - 1,
+              1,
+            );
+            _selectedDate = _shiftSelectedDateIntoTargetMonth(
+              _selectedDate!,
+              -1,
+              targetMonth,
+            );
+            _currentDate = _selectedDate ?? targetMonth;
           } else {
             _currentDate = DateTime(
               _currentDate.year,
@@ -416,8 +425,17 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           break;
         case CalendarView.month:
           if (_selectedDate != null) {
-            _selectedDate = _shiftMonthKeepingDay(_selectedDate!, 1);
-            _currentDate = _selectedDate!;
+            final targetMonth = DateTime(
+              _currentDate.year,
+              _currentDate.month + 1,
+              1,
+            );
+            _selectedDate = _shiftSelectedDateIntoTargetMonth(
+              _selectedDate!,
+              1,
+              targetMonth,
+            );
+            _currentDate = _selectedDate ?? targetMonth;
           } else {
             _currentDate = DateTime(
               _currentDate.year,
@@ -437,6 +455,18 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     final maxDay = DateUtils.getDaysInMonth(targetYear, targetMonth);
     final targetDay = source.day > maxDay ? maxDay : source.day;
     return DateTime(targetYear, targetMonth, targetDay);
+  }
+
+  DateTime? _shiftSelectedDateIntoTargetMonth(
+    DateTime selected,
+    int monthDelta,
+    DateTime targetMonthDate,
+  ) {
+    final shifted = _shiftMonthKeepingDay(selected, monthDelta);
+    final isInTargetMonth =
+        shifted.year == targetMonthDate.year &&
+        shifted.month == targetMonthDate.month;
+    return isInTargetMonth ? shifted : null;
   }
 
   void _onTodayPressed() {
@@ -466,7 +496,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
               (date.year - previousDate.year) * 12 +
               (date.month - previousDate.month);
           if (monthDelta != 0) {
-            _selectedDate = _shiftMonthKeepingDay(_selectedDate!, monthDelta);
+            _selectedDate = _shiftSelectedDateIntoTargetMonth(
+              _selectedDate!,
+              monthDelta,
+              date,
+            );
           }
         } else if (_currentView == CalendarView.week) {
           final previousDay = DateTime(
