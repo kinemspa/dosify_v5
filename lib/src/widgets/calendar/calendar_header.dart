@@ -63,7 +63,7 @@ class CalendarHeader extends StatelessWidget {
           // Date display
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: kSpacingS),
+              padding: const EdgeInsets.symmetric(horizontal: kSpacingXXS),
               child: Center(
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -88,7 +88,7 @@ class CalendarHeader extends StatelessWidget {
             constraints: kCalendarHeaderNavButtonConstraints,
           ),
 
-          const SizedBox(width: kSpacingS),
+          const SizedBox(width: kSpacingXXS),
 
           // Today button
           if (isOnTodayContext)
@@ -139,7 +139,7 @@ class CalendarHeader extends StatelessWidget {
             ),
 
           if (showViewToggle) ...[
-            const SizedBox(width: kSpacingS),
+            const SizedBox(width: kSpacingXXS),
             IconButton(
               icon: Icon(_getViewIcon()),
               onPressed: _cycleView,
@@ -229,22 +229,10 @@ class CalendarHeader extends StatelessWidget {
       'Nov',
       'Dec',
     ];
-    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
     final month = months[currentDate.month - 1];
     final day = currentDate.day;
     final year = currentDate.year;
-    final weekday = weekdays[currentDate.weekday - 1];
-
-    final now = DateTime.now();
-    final isToday =
-        currentDate.year == now.year &&
-        currentDate.month == now.month &&
-        currentDate.day == now.day;
-
-    return isToday
-        ? '$weekday, $month $day, $year (Today)'
-        : '$weekday, $month $day, $year';
+    return '$month $day, $year';
   }
 
   String _formatWeekTitle() {
@@ -274,11 +262,11 @@ class CalendarHeader extends StatelessWidget {
     final startDay = weekStart.day;
     final endDay = weekEnd.day;
 
+    final separator = '–';
     if (weekStart.month == weekEnd.month) {
-      return '$startMonth $startDay-$endDay, ${weekStart.year}';
-    } else {
-      return '$startMonth $startDay - $endMonth $endDay, ${weekStart.year}';
+      return '$startMonth $startDay$separator$endDay, ${weekStart.year}';
     }
+    return '$startMonth $startDay$separator$endMonth $endDay, ${weekStart.year}';
   }
 
   String _formatMonthTitle() {
