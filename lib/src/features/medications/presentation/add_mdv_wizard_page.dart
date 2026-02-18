@@ -808,6 +808,31 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       initialDiluentName: _reconResult?.diluentName,
                       initialDoseValue: _reconResult?.recommendedDose,
                       initialDoseUnit: _reconResult?.doseUnit,
+                      onStrengthAdjusted: (value, unit) {
+                        final normalized = unit.trim().toLowerCase();
+                        Unit mappedUnit;
+                        switch (normalized) {
+                          case 'mcg':
+                            mappedUnit = Unit.mcg;
+                            break;
+                          case 'g':
+                            mappedUnit = Unit.g;
+                            break;
+                          case 'units':
+                            mappedUnit = Unit.units;
+                            break;
+                          default:
+                            mappedUnit = Unit.mg;
+                        }
+
+                        setState(() {
+                          _strengthUnit = mappedUnit;
+                          _strengthValueCtrl.text =
+                              value == value.roundToDouble()
+                              ? value.toInt().toString()
+                              : value.toStringAsFixed(2);
+                        });
+                      },
                       initialSyringeSize: initialSyringe,
                       initialVialSize:
                           _reconResult?.solventVolumeMl ??
@@ -817,6 +842,26 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             );
             if (result != null) {
               setState(() {
+                final usedUnit = result.strengthUnitUsed?.trim().toLowerCase();
+                if (usedUnit != null && usedUnit.isNotEmpty) {
+                  if (usedUnit == 'mcg') {
+                    _strengthUnit = Unit.mcg;
+                  } else if (usedUnit == 'g') {
+                    _strengthUnit = Unit.g;
+                  } else if (usedUnit == 'units') {
+                    _strengthUnit = Unit.units;
+                  } else {
+                    _strengthUnit = Unit.mg;
+                  }
+                }
+                if (result.strengthValueUsed != null &&
+                    result.strengthValueUsed! > 0) {
+                  final usedStrength = result.strengthValueUsed!;
+                  _strengthValueCtrl.text =
+                      usedStrength == usedStrength.roundToDouble()
+                      ? usedStrength.toInt().toString()
+                      : usedStrength.toStringAsFixed(2);
+                }
                 _reconResult = result;
                 _vialVolumeCtrl.text = result.solventVolumeMl.toStringAsFixed(
                   2,

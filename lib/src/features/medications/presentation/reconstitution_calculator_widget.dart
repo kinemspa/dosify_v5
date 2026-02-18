@@ -71,7 +71,10 @@ class _ReconstitutionCalculatorWidgetState
   late Animation<double> _unitsAnimation;
   double _targetUnits = 50;
 
-  String _normalizeDoseUnit({required String? unit, required String unitLabel}) {
+  String _normalizeDoseUnit({
+    required String? unit,
+    required String unitLabel,
+  }) {
     if (unitLabel == 'units') return 'units';
     switch ((unit ?? '').trim().toLowerCase()) {
       case 'mcg':
@@ -417,6 +420,8 @@ class _ReconstitutionCalculatorWidgetState
       solventVolumeMl: currentV, // Use precise value not rounded
       recommendedUnits: _selectedUnits.roundToDouble(), // Round to whole units
       syringeSizeMl: _syringe.ml,
+      strengthValueUsed: widget.initialStrengthValue,
+      strengthUnitUsed: widget.unitLabel,
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
           ? _diluentNameCtrl.text.trim()
           : null,
@@ -506,7 +511,9 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
         ),
-        _helperText('Optional label for the mixing liquid (e.g., Sterile Water)'),
+        _helperText(
+          'Optional label for the mixing liquid (e.g., Sterile Water)',
+        ),
         _rowLabelField(
           context,
           label: 'Desired Dose',
@@ -566,7 +573,9 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Desired dose (D): amount per injection. Choose the unit that matches your dose.'),
+        _helperText(
+          'Desired dose (D): amount per injection. Choose the unit that matches your dose.',
+        ),
         _rowLabelField(
           context,
           label: 'Syringe Size',
@@ -591,7 +600,9 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context),
           ),
         ),
-        _helperText('Sets the syringe markings (100 units = 1.0 mL) and limits the maximum volume.'),
+        _helperText(
+          'Sets the syringe markings (100 units = 1.0 mL) and limits the maximum volume.',
+        ),
         _rowLabelField(
           context,
           label: 'Max Vial Size',
@@ -618,7 +629,9 @@ class _ReconstitutionCalculatorWidgetState
             decoration: _fieldDecoration(context, hint: 'mL'),
           ),
         ),
-        _helperText('Optional. If set, options requiring more than this vial capacity are disabled.'),
+        _helperText(
+          'Optional. If set, options requiring more than this vial capacity are disabled.',
+        ),
         _gradientDivider(context),
         if (sliderMax > 0 && !sliderMax.isNaN) ...[
           Padding(
@@ -968,9 +981,9 @@ class _ReconstitutionCalculatorWidgetState
                         fontWeight: kFontWeightExtraBold,
                       );
 
-                        final summaryMedicationName =
+                      final summaryMedicationName =
                           (widget.medicationName ?? '').trim();
-                        final hasMedicationName =
+                      final hasMedicationName =
                           summaryMedicationName.isNotEmpty;
 
                       return Column(
@@ -1049,8 +1062,7 @@ class _ReconstitutionCalculatorWidgetState
                               children: [
                                 const TextSpan(text: 'Draw '),
                                 TextSpan(
-                                  text:
-                                      '${_selectedUnits.round()} Units  ',
+                                  text: '${_selectedUnits.round()} Units  ',
                                   style: drawUnitsStyle,
                                 ),
                                 TextSpan(
@@ -1145,6 +1157,8 @@ class _ReconstitutionCalculatorWidgetState
                         recommendedUnits: _selectedUnits
                             .roundToDouble(), // Round to whole units
                         syringeSizeMl: _syringe.ml,
+                        strengthValueUsed: widget.initialStrengthValue,
+                        strengthUnitUsed: widget.unitLabel,
                         diluentName: _diluentNameCtrl.text.trim().isNotEmpty
                             ? _diluentNameCtrl.text.trim()
                             : null,

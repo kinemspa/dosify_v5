@@ -48,6 +48,7 @@ class _ReconstitutionCalculatorPageState
   ReconstitutionResult? _lastResult;
   bool _canSave = false;
   String? _loadedSavedId;
+  bool _showLoadSaveOptions = false;
 
   double? _initialDoseValue;
   String? _initialDoseUnit;
@@ -472,6 +473,132 @@ class _ReconstitutionCalculatorPageState
               const SizedBox(height: 12),
               Container(
                 decoration: panelDecoration(),
+                child: ValueListenableBuilder(
+                  valueListenable: _savedRepo.listenable(),
+                  builder: (context, box, _) {
+                    final saved = _savedRepo.allSorted(includeOwned: false);
+                    final hasSaved = saved.isNotEmpty;
+
+                    return ExpansionTile(
+                      tilePadding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingM,
+                        vertical: 0,
+                      ),
+                      childrenPadding: const EdgeInsets.fromLTRB(
+                        kSpacingM,
+                        0,
+                        kSpacingM,
+                        kSpacingM,
+                      ),
+                      shape: const RoundedRectangleBorder(
+                        side: BorderSide.none,
+                      ),
+                      collapsedShape: const RoundedRectangleBorder(
+                        side: BorderSide.none,
+                      ),
+                      iconColor: fg.withValues(alpha: kOpacityMediumHigh),
+                      collapsedIconColor: fg.withValues(
+                        alpha: kOpacityMediumHigh,
+                      ),
+                      textColor: fg.withValues(alpha: kOpacityMediumHigh),
+                      collapsedTextColor: fg.withValues(
+                        alpha: kOpacityMediumHigh,
+                      ),
+                      title: Text(
+                        'Load & Save',
+                        style: bodyTextStyle(
+                          context,
+                        )?.copyWith(color: fg.withValues(alpha: 0.9)),
+                      ),
+                      subtitle: Text(
+                        hasSaved
+                            ? 'Load a saved reconstitution or save current values.'
+                            : 'No saved reconstitutions yet.',
+                        style: helperTextStyle(context)?.copyWith(
+                          color: fg.withValues(alpha: kReconTextMutedOpacity),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      initiallyExpanded: _showLoadSaveOptions,
+                      onExpansionChanged: (expanded) {
+                        setState(() => _showLoadSaveOptions = expanded);
+                      },
+                      children: [
+                        LabelFieldRow(
+                          label: 'Load',
+                          lightText: true,
+                          field: SmallDropdown36<String>(
+                            value: _loadedSavedId ?? 'new',
+                            items: [
+                              const DropdownMenuItem(
+                                value: 'new',
+                                child: Center(child: Text('New')),
+                              ),
+                              ...saved.map(
+                                (item) => DropdownMenuItem(
+                                  value: item.id,
+                                  child: Center(
+                                    child: Text(
+                                      item.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value == null || value == 'new') {
+                                _startNewReconstitution();
+                                return;
+                              }
+                              final selected = saved.where(
+                                (s) => s.id == value,
+                              );
+                              if (selected.isEmpty) return;
+                              _loadSavedCalculation(selected.first);
+                            },
+                          ),
+                        ),
+                        if (_medNameCtrl.text.trim().isEmpty)
+                          helper(
+                            'Saving will prompt for medication name if blank.',
+                          ),
+                        const SizedBox(height: kSpacingS),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: hasSaved ? _openSavedSheet : null,
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: fg.withValues(alpha: 0.92),
+                                  side: BorderSide(
+                                    color: fg.withValues(alpha: 0.25),
+                                    width: kBorderWidthThin,
+                                  ),
+                                ),
+                                icon: const Icon(Icons.bookmarks_outlined),
+                                label: const Text('Manage saved'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: _canSave ? _saveCurrent : null,
+                                icon: const Icon(Icons.save),
+                                label: const Text('Save'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: panelDecoration(),
                 padding: const EdgeInsets.all(kSpacingL),
                 child: Column(
                   children: [
@@ -496,216 +623,68 @@ class _ReconstitutionCalculatorPageState
                       'Optional. Not used in calculations — only used when saving or searching.',
                     ),
                     const SizedBox(height: kSpacingS),
-                    Padding(
-                      padding: kReconInlineFieldLabelPadding,
-                      child: Text(
-                        'Strength',
-                        style: fieldLabelStyle(context)?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary
-                              .withValues(alpha: kReconTextHighOpacity),
-                        ),
+                    LabelFieldRow(
+                      label: 'Strength',
+                      lightText: true,
+                      field: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SmallDropdown36<String>(
+                            value: _selectedUnit,
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'mcg',
+                                child: Center(child: Text('mcg')),
+                              ),
+                              DropdownMenuItem(
+                                value: 'mg',
+                                child: Center(child: Text('mg')),
+                              ),
+                              DropdownMenuItem(
+                                value: 'g',
+                                child: Center(child: Text('g')),
+                              ),
+                              DropdownMenuItem(
+                                value: 'units',
+                                child: Center(child: Text('units')),
+                              ),
+                            ],
+                            onChanged: (v) =>
+                                setState(() => _selectedUnit = v ?? 'mg'),
+                          ),
+                          const SizedBox(height: kSpacingS),
+                          StepperRow36(
+                            controller: _strengthCtrl,
+                            onDec: () {
+                              final v =
+                                  double.tryParse(_strengthCtrl.text) ?? 0;
+                              final nv = (v - 1).clamp(0, 10000);
+                              setState(() {
+                                _strengthCtrl.text = nv == nv.roundToDouble()
+                                    ? nv.toInt().toString()
+                                    : nv.toStringAsFixed(2);
+                              });
+                            },
+                            onInc: () {
+                              final v =
+                                  double.tryParse(_strengthCtrl.text) ?? 0;
+                              final nv = (v + 1).clamp(0, 10000);
+                              setState(() {
+                                _strengthCtrl.text = nv == nv.roundToDouble()
+                                    ? nv.toInt().toString()
+                                    : nv.toStringAsFixed(2);
+                              });
+                            },
+                            decoration: buildCompactFieldDecoration(
+                              context: context,
+                              hint: '0',
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Padding(
-                                padding: kReconInlineFieldLabelPadding,
-                                child: Text(
-                                  'Unit',
-                                  style: fieldLabelStyle(context)?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary
-                                        .withValues(
-                                          alpha: kReconTextMediumOpacity,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                              SmallDropdown36<String>(
-                                value: _selectedUnit,
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: 'mcg',
-                                    child: Center(child: Text('mcg')),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'mg',
-                                    child: Center(child: Text('mg')),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'g',
-                                    child: Center(child: Text('g')),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'units',
-                                    child: Center(child: Text('units')),
-                                  ),
-                                ],
-                                onChanged: (v) =>
-                                    setState(() => _selectedUnit = v ?? 'mg'),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: kSpacingM),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Padding(
-                                padding: kReconInlineFieldLabelPadding,
-                                child: Text(
-                                  'Amount',
-                                  style: fieldLabelStyle(context)?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary
-                                        .withValues(
-                                          alpha: kReconTextMediumOpacity,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                              StepperRow36(
-                                controller: _strengthCtrl,
-                                onDec: () {
-                                  final v =
-                                      double.tryParse(_strengthCtrl.text) ?? 0;
-                                  final nv = (v - 1).clamp(0, 10000);
-                                  setState(() {
-                                    _strengthCtrl.text =
-                                        nv == nv.roundToDouble()
-                                        ? nv.toInt().toString()
-                                        : nv.toStringAsFixed(2);
-                                  });
-                                },
-                                onInc: () {
-                                  final v =
-                                      double.tryParse(_strengthCtrl.text) ?? 0;
-                                  final nv = (v + 1).clamp(0, 10000);
-                                  setState(() {
-                                    _strengthCtrl.text =
-                                        nv == nv.roundToDouble()
-                                        ? nv.toInt().toString()
-                                        : nv.toStringAsFixed(2);
-                                  });
-                                },
-                                decoration: buildCompactFieldDecoration(
-                                  context: context,
-                                  hint: '0',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
                     ),
                     helper(
                       'Required. Strength (S) is the total drug amount in the vial (before mixing). Use the unit from the vial label.',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                decoration: panelDecoration(),
-                padding: const EdgeInsets.all(kSpacingL),
-                child: Column(
-                  children: [
-                    ValueListenableBuilder(
-                      valueListenable: _savedRepo.listenable(),
-                      builder: (context, box, _) {
-                        final saved = _savedRepo.allSorted(includeOwned: false);
-                        final hasSaved = saved.isNotEmpty;
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            LabelFieldRow(
-                              label: 'Load',
-                              lightText: true,
-                              field: SmallDropdown36<String>(
-                                value: _loadedSavedId ?? 'new',
-                                items: [
-                                  const DropdownMenuItem(
-                                    value: 'new',
-                                    child: Center(child: Text('New')),
-                                  ),
-                                  ...saved.map(
-                                    (item) => DropdownMenuItem(
-                                      value: item.id,
-                                      child: Center(
-                                        child: Text(
-                                          item.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                                onChanged: (value) {
-                                  if (value == null || value == 'new') {
-                                    _startNewReconstitution();
-                                    return;
-                                  }
-                                  final selected = saved.where(
-                                    (s) => s.id == value,
-                                  );
-                                  if (selected.isEmpty) return;
-                                  _loadSavedCalculation(selected.first);
-                                },
-                              ),
-                            ),
-                            helper(
-                              hasSaved
-                                  ? 'Select a saved reconstitution or start a new one.'
-                                  : 'No saved reconstitutions yet.',
-                            ),
-                            if (_medNameCtrl.text.trim().isEmpty) ...[
-                              const SizedBox(height: kSpacingXS),
-                              helper(
-                                'Saving will prompt you for a medication name if left blank.',
-                              ),
-                            ],
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: hasSaved
-                                        ? _openSavedSheet
-                                        : null,
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: fg.withValues(
-                                        alpha: 0.92,
-                                      ),
-                                      side: BorderSide(
-                                        color: fg.withValues(alpha: 0.25),
-                                        width: kBorderWidthThin,
-                                      ),
-                                    ),
-                                    icon: const Icon(Icons.bookmarks_outlined),
-                                    label: const Text('Manage saved'),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                FilledButton.icon(
-                                  onPressed: _canSave ? _saveCurrent : null,
-                                  icon: const Icon(Icons.save),
-                                  label: const Text('Save'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
                     ),
                   ],
                 ),

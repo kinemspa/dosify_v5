@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
@@ -37,6 +38,8 @@ class ReconstitutionResult {
     this.recommendedDose,
     this.doseUnit,
     this.maxVialSizeMl,
+    this.strengthValueUsed,
+    this.strengthUnitUsed,
   });
 
   final double perMlConcentration; // same base unit as dose/strength (per mL)
@@ -48,6 +51,8 @@ class ReconstitutionResult {
   final String? doseUnit; // dose unit (mcg/mg/g) for reopening calculator
   final double?
   maxVialSizeMl; // max vial size constraint for reopening calculator
+  final double? strengthValueUsed;
+  final String? strengthUnitUsed;
 }
 
 class ReconstitutionCalculatorDialog extends StatefulWidget {
@@ -60,6 +65,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
     this.initialDoseUnit,
     this.initialSyringeSize,
     this.initialVialSize,
+    this.onStrengthAdjusted,
   });
 
   final double initialStrengthValue; // total quantity in the vial (S)
@@ -69,6 +75,8 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
   final String? initialDoseUnit; // 'mcg'|'mg'|'g'|'units'
   final SyringeSizeMl? initialSyringeSize;
   final double? initialVialSize; // mL
+  final void Function(double strengthValue, String strengthUnit)?
+  onStrengthAdjusted;
 
   @override
   State<ReconstitutionCalculatorDialog> createState() =>
@@ -84,6 +92,9 @@ class _ReconstitutionCalculatorDialogState
   ReconstitutionResult? _lastResult;
   bool _canSubmit = false;
   bool _showDownScrollHint = false;
+  bool _showLoadSaveOptions = false;
+  late double _activeStrengthValue;
+  late String _activeUnitLabel;
   String? _seedDiluentName;
   double? _seedDoseValue;
   String? _seedDoseUnit;
@@ -94,6 +105,8 @@ class _ReconstitutionCalculatorDialogState
   @override
   void initState() {
     super.initState();
+    _activeStrengthValue = widget.initialStrengthValue;
+    _activeUnitLabel = widget.unitLabel;
     _seedDiluentName = widget.initialDiluentName;
     _seedDoseValue = widget.initialDoseValue;
     _seedDoseUnit = widget.initialDoseUnit;
@@ -129,6 +142,14 @@ class _ReconstitutionCalculatorDialogState
     return SyringeSizeMl.ml5;
   }
 
+  String _formatNoTrailing(double value) {
+    final str = value.toStringAsFixed(2);
+    if (str.contains('.')) {
+      return str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return str;
+  }
+
   void _applySavedSeed(SavedReconstitutionCalculation saved) {
     setState(() {
       _seedDiluentName = saved.diluentName;
@@ -140,6 +161,92 @@ class _ReconstitutionCalculatorDialogState
       _lastResult = null;
       _canSubmit = false;
     });
+  }
+
+  bool _sameStrength(SavedReconstitutionCalculation saved) {
+    const epsilon = 1e-6;
+    final sameUnit =
+        saved.strengthUnit.toLowerCase() == _activeUnitLabel.toLowerCase();
+    final sameValue =
+        (saved.strengthValue - _activeStrengthValue).abs() <= epsilon;
+    return sameUnit && sameValue;
+  }
+
+  Future<String?> _promptForName(
+    BuildContext context, {
+    String? initial,
+  }) async {
+    final ctrl = TextEditingController(text: initial ?? '');
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save Reconstitution'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          textCapitalization: kTextCapitalizationDefault,
+          decoration: buildCompactFieldDecoration(
+            context: context,
+            hint: 'Name',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop<String>(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(ctrl.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    final trimmed = result?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
+  }
+
+  Future<void> _saveCurrentPreset() async {
+    final result = _lastResult;
+    if (!_canSubmit || result == null || _activeStrengthValue <= 0) return;
+
+    final dose = result.recommendedDose;
+    final doseUnit = result.doseUnit?.trim();
+    final defaultNameParts = <String>['Reconstitution'];
+    if (dose != null && dose > 0 && doseUnit != null && doseUnit.isNotEmpty) {
+      defaultNameParts.add('${_formatNoTrailing(dose)} $doseUnit');
+    }
+    defaultNameParts.add('${_formatNoTrailing(result.solventVolumeMl)} mL');
+
+    final name = await _promptForName(
+      context,
+      initial: defaultNameParts.join(' - '),
+    );
+    if (name == null) return;
+
+    final now = DateTime.now();
+    final item = SavedReconstitutionCalculation(
+      id: IdGen.newId(prefix: 'recon'),
+      name: name,
+      strengthValue: _activeStrengthValue,
+      strengthUnit: _activeUnitLabel,
+      solventVolumeMl: result.solventVolumeMl,
+      perMlConcentration: result.perMlConcentration,
+      recommendedUnits: result.recommendedUnits,
+      syringeSizeMl: result.syringeSizeMl,
+      diluentName: result.diluentName,
+      recommendedDose: result.recommendedDose,
+      doseUnit: result.doseUnit,
+      maxVialSizeMl: result.maxVialSizeMl,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await _savedRepo.upsert(item);
+    if (!mounted) return;
+    showAppSnackBar(context, 'Saved reconstitution');
   }
 
   Future<void> _openLoadSavedSheet() async {
@@ -157,6 +264,49 @@ class _ReconstitutionCalculatorDialogState
     );
 
     if (selected == null) return;
+
+    if (!_sameStrength(selected)) {
+      final decision = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Strength mismatch'),
+          content: Text(
+            'Saved reconstitution uses ${_formatNoTrailing(selected.strengthValue)} ${selected.strengthUnit}, '
+            'but this medication is set to ${_formatNoTrailing(_activeStrengthValue)} $_activeUnitLabel.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop<String>('cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop<String>('keep'),
+              child: const Text('Keep current'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop<String>('adjust'),
+              child: const Text('Use saved strength'),
+            ),
+          ],
+        ),
+      );
+
+      if (decision == null || decision == 'cancel') return;
+      if (decision == 'adjust') {
+        setState(() {
+          _activeStrengthValue = selected.strengthValue;
+          _activeUnitLabel = selected.strengthUnit;
+          _calculatorSeedVersion += 1;
+          _lastResult = null;
+          _canSubmit = false;
+        });
+        widget.onStrengthAdjusted?.call(
+          selected.strengthValue,
+          selected.strengthUnit,
+        );
+      }
+    }
+
     _applySavedSeed(selected);
     if (!mounted) return;
     showAppSnackBar(context, 'Loaded saved reconstitution');
@@ -227,26 +377,65 @@ class _ReconstitutionCalculatorDialogState
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, kSpacingS),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _openLoadSavedSheet,
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: kSpacingXS,
-                    vertical: 0,
-                  ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+                border: Border.all(
+                  color: fg.withValues(alpha: kOpacitySubtleLow),
+                  width: kBorderWidthThin,
                 ),
-                child: Text(
-                  'Load saved',
+              ),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(
+                  horizontal: kSpacingM,
+                  vertical: 0,
+                ),
+                childrenPadding: const EdgeInsets.fromLTRB(
+                  kSpacingM,
+                  0,
+                  kSpacingM,
+                  kSpacingM,
+                ),
+                shape: const RoundedRectangleBorder(side: BorderSide.none),
+                collapsedShape: const RoundedRectangleBorder(
+                  side: BorderSide.none,
+                ),
+                iconColor: fg.withValues(alpha: kOpacityMediumHigh),
+                collapsedIconColor: fg.withValues(alpha: kOpacityMediumHigh),
+                textColor: fg.withValues(alpha: kOpacityMediumHigh),
+                collapsedTextColor: fg.withValues(alpha: kOpacityMediumHigh),
+                title: Text(
+                  'Load & Save',
                   style: microHelperTextStyle(
                     context,
                     color: fg.withValues(alpha: kOpacityMediumHigh),
                   ),
                 ),
+                initiallyExpanded: _showLoadSaveOptions,
+                onExpansionChanged: (expanded) {
+                  setState(() => _showLoadSaveOptions = expanded);
+                },
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _openLoadSavedSheet,
+                          icon: const Icon(Icons.download_rounded),
+                          label: const Text('Load saved'),
+                        ),
+                      ),
+                      const SizedBox(width: kSpacingS),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: _canSubmit ? _saveCurrentPreset : null,
+                          icon: const Icon(Icons.save_outlined),
+                          label: const Text('Save preset'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -272,8 +461,8 @@ class _ReconstitutionCalculatorDialogState
                     padding: const EdgeInsets.all(20),
                     child: ReconstitutionCalculatorWidget(
                       key: ValueKey<int>(_calculatorSeedVersion),
-                      initialStrengthValue: widget.initialStrengthValue,
-                      unitLabel: widget.unitLabel,
+                      initialStrengthValue: _activeStrengthValue,
+                      unitLabel: _activeUnitLabel,
                       initialDiluentName: _seedDiluentName,
                       initialDoseValue: _seedDoseValue,
                       initialDoseUnit: _seedDoseUnit,
