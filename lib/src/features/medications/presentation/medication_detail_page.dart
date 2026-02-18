@@ -127,6 +127,7 @@ class MedicationDetailPage extends ConsumerStatefulWidget {
 
 class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   late ScrollController _scrollController;
+  bool _showDownScrollHint = false;
   bool _isDetailsExpanded = true; // Collapsible state for details card
   bool _isScheduleExpanded = true; // Collapsible state for schedule card
   bool _isReconstitutionExpanded = true; // Collapsible state for reconstitution
@@ -152,6 +153,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _scrollController.addListener(_updateDownScrollHint);
     _cardOrder = <String>[
       _kCardToday,
       _kCardCalendar,
@@ -161,6 +163,11 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       _kCardDetails,
     ];
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateDownScrollHint();
+    });
+
     final medId = widget.initial?.id ?? widget.medicationId;
     if (medId != null && medId.isNotEmpty) {
       unawaited(_restoreCardOrder(medId));
@@ -169,8 +176,21 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_updateDownScrollHint);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _updateDownScrollHint() {
+    if (!_scrollController.hasClients) return;
+    final metrics = _scrollController.position;
+    const epsilon = 1.0;
+    final shouldShow =
+        metrics.maxScrollExtent > epsilon &&
+        metrics.pixels < (metrics.maxScrollExtent - epsilon);
+    if (_showDownScrollHint == shouldShow) return;
+    if (!mounted) return;
+    setState(() => _showDownScrollHint = shouldShow);
   }
 
   String _prefsKeyCardOrder(String medicationId) {
@@ -529,6 +549,32 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                     ),
                   ),
                 ],
+              ),
+
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: AnimatedOpacity(
+                      duration: kAnimationFast,
+                      curve: Curves.easeOut,
+                      opacity: _showDownScrollHint ? 1 : 0,
+                      child: SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: kPageScrollHintPadding,
+                          child: Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: kPageScrollHintIconSize,
+                            color: colorScheme.onSurface.withValues(
+                              alpha: kOpacityMedium,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
 
               // Offstage measurement to make SliverAppBar height match content.
