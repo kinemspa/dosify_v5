@@ -195,11 +195,10 @@ const BoxConstraints kTightIconButtonConstraints = BoxConstraints.tightFor(
 );
 
 /// Next-dose date badge sizing (Schedules list)
-const double kNextDoseDateCircleSizeCompact = 38;
+const double kNextDoseDateCircleSizeCompact = 42;
 const double kNextDoseDateCircleSizeLarge = 48;
-const EdgeInsets kNextDoseDateCircleContentPaddingCompact = EdgeInsets.all(
-  kSpacingXXS,
-);
+const EdgeInsets kNextDoseDateCircleContentPaddingCompact =
+    EdgeInsets.symmetric(horizontal: kSpacingXS, vertical: kSpacingXXS);
 const EdgeInsets kNextDoseDateCircleContentPaddingLarge = EdgeInsets.symmetric(
   horizontal: kSpacingXXS,
   vertical: kSpacingXXS / 2,
@@ -1679,7 +1678,7 @@ EdgeInsets doseCardContentPadding({required bool compact}) {
 }
 
 double doseCardColumnGap({required bool compact}) {
-  return compact ? kSpacingS : kSpacingM;
+  return compact ? kSpacingS : (kSpacingM - kSpacingXXS);
 }
 
 // ============================================================================
