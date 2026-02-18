@@ -624,6 +624,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
           const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: const Icon(Icons.settings_applications_outlined),
+            title: const Text('Open OS notification permissions'),
+            subtitle: const Text(
+              'Check app notification access and exact alarm permissions in system settings',
+            ),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () async {
+              await NotificationService.openExactAlarmsSettings();
+              if (!context.mounted) return;
+              showAppSnackBar(context, 'Opened system notification settings');
+            },
+          ),
           ValueListenableBuilder<DoseTimingConfig>(
             valueListenable: DoseTimingSettings.value,
             builder: (context, config, _) {
