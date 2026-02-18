@@ -83,6 +83,16 @@ class BillingService extends StateNotifier<BillingState> {
       product: product,
       lastError: response.error?.message,
     );
+
+    unawaited(_silentRestoreOnStartup());
+  }
+
+  Future<void> _silentRestoreOnStartup() async {
+    try {
+      await _iap.restorePurchases();
+    } catch (_) {
+      // Best-effort startup restore; user can always use manual Restore.
+    }
   }
 
   Future<bool> buyProLifetime() async {
