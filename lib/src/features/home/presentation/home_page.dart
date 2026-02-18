@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
@@ -282,9 +281,9 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
             const SizedBox(height: kSpacingXS),
             Text(
-              'Today is ${DateTimeFormatter.formatWeekdayName(DateTime.now())}, ${DateTimeFormatter.formatDateLong(DateTime.now())}',
+              'Today',
               textAlign: TextAlign.center,
-              style: helperTextStyle(context),
+              style: homeHeroSubtitleStyle(context),
             ),
             const SizedBox(height: kSpacingL),
             _buildHomeCards(context),

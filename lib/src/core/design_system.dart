@@ -2334,6 +2334,17 @@ TextStyle? homeHeroTitleStyle(BuildContext context) {
   );
 }
 
+/// Home page hero subtitle style (used for centered "Today" line).
+TextStyle? homeHeroSubtitleStyle(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return Theme.of(context).textTheme.titleMedium?.copyWith(
+    fontSize: kFontSizeXLarge,
+    fontWeight: kFontWeightSemiBold,
+    letterSpacing: 0.4,
+    color: cs.onSurface.withValues(alpha: kOpacityMediumHigh),
+  );
+}
+
 /// Body text style (general content)
 TextStyle? bodyTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyMedium?.copyWith(
