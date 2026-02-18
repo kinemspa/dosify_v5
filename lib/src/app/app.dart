@@ -447,6 +447,7 @@ class DosifiApp extends ConsumerWidget {
       // Ensure desktop/web input devices can interact with scrollables.
       // This helps mouse/trackpad drag scrolling on web/desktop.
       scrollBehavior: const MaterialScrollBehavior().copyWith(
+        scrollbars: false,
         dragDevices: {
           PointerDeviceKind.touch,
           PointerDeviceKind.mouse,
