@@ -93,7 +93,7 @@ class CalendarHeader extends StatelessWidget {
           // Today button
           if (isOnTodayContext)
             OutlinedButton(
-              onPressed: onToday,
+              onPressed: null,
               style: OutlinedButton.styleFrom(
                 foregroundColor: colorScheme.primary,
                 side: BorderSide(
@@ -109,11 +109,22 @@ class CalendarHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              child: Text(
-                'Today',
-                style: calendarDayOverflowTextStyle(
-                  context,
-                )?.copyWith(color: colorScheme.primary),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check,
+                    size: kIconSizeSmall,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: kSpacingXXS),
+                  Text(
+                    'Today',
+                    style: calendarDayOverflowTextStyle(
+                      context,
+                    )?.copyWith(color: colorScheme.primary),
+                  ),
+                ],
               ),
             )
           else
