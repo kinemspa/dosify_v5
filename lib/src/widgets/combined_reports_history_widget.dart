@@ -75,7 +75,7 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
           medicationName,
           style: bodyTextStyle(
             context,
-          )?.copyWith(fontWeight: kFontWeightSemiBold),
+          )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -161,6 +161,7 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
 
   @override
   Widget buildTitle(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final statusColor = inventoryChangeVisualSpec(
       context,
       log.changeType,
@@ -173,7 +174,7 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
           medicationName,
           style: bodyTextStyle(
             context,
-          )?.copyWith(fontWeight: kFontWeightSemiBold),
+          )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
