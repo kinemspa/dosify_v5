@@ -204,7 +204,7 @@ class ScheduleCard extends StatelessWidget {
                     NextDoseRow(schedule: s, nextDose: next, dense: true),
                     if (!dense && last != null)
                       Text(
-                        'Last: ${_fmtWhen(context, last)}',
+                        'Last Dose: ${_fmtWhen(context, last)}',
                         style: helperTextStyle(
                           context,
                           color: cs.onSurfaceVariant.withValues(
