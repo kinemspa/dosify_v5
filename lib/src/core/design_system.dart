@@ -60,6 +60,11 @@ const double kOnboardingTipIconSize = kIconSizeLarge;
 const double kOnboardingCoachBubbleMaxWidth = 360;
 const double kOnboardingCoachTargetSize = 44;
 const double kOnboardingCoachPointerSize = 12;
+const double kOnboardingCoachPointerOverlap = 1;
+const double kOnboardingCoachPointerClamp = 0.88;
+const double kOnboardingCoachTitleFontSize = kFontSizeXLarge;
+const double kOnboardingCoachMessageFontSize = kFontSizeLarge;
+const double kOnboardingCoachMetaFontSize = kFontSizeMedium;
 const EdgeInsets kOnboardingCoachBubblePadding = EdgeInsets.all(kSpacingM);
 const Color kOnboardingCoachForegroundColor = Colors.white;
 

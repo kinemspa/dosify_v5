@@ -274,6 +274,14 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
       child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
+            final targetDeltaX = step.targetAlignment.x - bubbleAlignment.x;
+            final pointerAlignmentX = (targetDeltaX *
+                    (constraints.maxWidth / kOnboardingCoachBubbleMaxWidth))
+                .clamp(
+                  -kOnboardingCoachPointerClamp,
+                  kOnboardingCoachPointerClamp,
+                );
+
             return Stack(
               children: [
                 Align(
@@ -304,14 +312,23 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (bubbleIsBelowTarget)
-                            CustomPaint(
-                              size: const Size(
-                                kOnboardingCoachPointerSize * 2,
-                                kOnboardingCoachPointerSize,
-                              ),
-                              painter: _CoachBubblePointerPainter(
-                                color: cs.primary,
-                                pointUp: true,
+                            Align(
+                              alignment: Alignment(pointerAlignmentX, 0),
+                              child: Transform.translate(
+                                offset: const Offset(
+                                  0,
+                                  kOnboardingCoachPointerOverlap,
+                                ),
+                                child: CustomPaint(
+                                  size: const Size(
+                                    kOnboardingCoachPointerSize * 2,
+                                    kOnboardingCoachPointerSize,
+                                  ),
+                                  painter: _CoachBubblePointerPainter(
+                                    color: cs.primary,
+                                    pointUp: true,
+                                  ),
+                                ),
                               ),
                             ),
                           Container(
@@ -335,7 +352,7 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                       )?.copyWith(color: coachFg) ??
                                       TextStyle(
                                         color: coachFg,
-                                        fontSize: kFontSizeLarge,
+                                        fontSize: kOnboardingCoachTitleFontSize,
                                         fontWeight: kFontWeightBold,
                                       ),
                                 ),
@@ -345,6 +362,8 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                   style: helperTextStyle(
                                     context,
                                     color: coachFg,
+                                  )?.copyWith(
+                                    fontSize: kOnboardingCoachMessageFontSize,
                                   ),
                                 ),
                                 const SizedBox(height: kSpacingS),
@@ -355,6 +374,8 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                       style: smallHelperTextStyle(
                                         context,
                                         color: coachFg,
+                                      )?.copyWith(
+                                        fontSize: kOnboardingCoachMetaFontSize,
                                       ),
                                     ),
                                     const Spacer(),
@@ -406,6 +427,8 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                       style: smallHelperTextStyle(
                                         context,
                                         color: coachFg,
+                                      )?.copyWith(
+                                        fontSize: kOnboardingCoachMetaFontSize,
                                       ),
                                     ),
                                   ),
@@ -413,14 +436,23 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                             ),
                           ),
                           if (!bubbleIsBelowTarget)
-                            CustomPaint(
-                              size: const Size(
-                                kOnboardingCoachPointerSize * 2,
-                                kOnboardingCoachPointerSize,
-                              ),
-                              painter: _CoachBubblePointerPainter(
-                                color: cs.primary,
-                                pointUp: false,
+                            Align(
+                              alignment: Alignment(pointerAlignmentX, 0),
+                              child: Transform.translate(
+                                offset: const Offset(
+                                  0,
+                                  -kOnboardingCoachPointerOverlap,
+                                ),
+                                child: CustomPaint(
+                                  size: const Size(
+                                    kOnboardingCoachPointerSize * 2,
+                                    kOnboardingCoachPointerSize,
+                                  ),
+                                  painter: _CoachBubblePointerPainter(
+                                    color: cs.primary,
+                                    pointUp: false,
+                                  ),
+                                ),
                               ),
                             ),
                         ],
@@ -481,7 +513,7 @@ class _CoachBubblePointerPainter extends CustomPainter {
     }
 
     final paint = Paint()
-      ..color = color.withValues(alpha: kOpacityHigh)
+      ..color = color
       ..style = PaintingStyle.fill;
 
     canvas.drawPath(path, paint);
