@@ -36,6 +36,13 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- AdMob App ID (required by google_mobile_ads).
+             Replace with your real AdMob App ID from console.admob.google.com
+             before releasing to production. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
         <!-- Explicit receivers for flutter_local_notifications scheduled delivery on Android 12+ -->
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
