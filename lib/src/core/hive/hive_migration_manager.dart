@@ -40,7 +40,8 @@ class HiveMigrationManager {
     print('Running migration v1 → v2: Adding MDV tracking fields');
     
     try {
-      final box = await Hive.openBox<Medication>('medications');
+      // Box is already open from HiveBootstrap — use the sync accessor.
+      final box = Hive.box<Medication>('medications');
       final medications = box.values.toList();
       
       print('Migrating ${medications.length} medications');

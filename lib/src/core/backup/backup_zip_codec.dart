@@ -37,13 +37,19 @@ class BackupZipCodec {
     final hiveEntries = <BackupHiveBoxEntry>[];
 
     for (final boxName in kBackupHiveBoxNames) {
-      // Open with cipher in case box was closed (normally already open from bootstrap).
-      final box = await Hive.openBox<dynamic>(
-        boxName,
-        encryptionCipher: HiveEncryptionKeyService.cipher,
-      );
+      // Boxes are already open from HiveBootstrap. Get path without closing them
+      // (closing would disrupt live Riverpod box watchers across the app).
+      Box<dynamic> box;
+      if (Hive.isBoxOpen(boxName)) {
+        box = Hive.box<dynamic>(boxName);
+      } else {
+        // Shouldn't happen in normal runtime, but handle gracefully.
+        box = await Hive.openBox<dynamic>(
+          boxName,
+          encryptionCipher: HiveEncryptionKeyService.cipher,
+        );
+      }
       final boxPath = box.path;
-      await box.close();
 
       if (boxPath == null) {
         continue;
@@ -136,18 +142,22 @@ class BackupZipCodec {
       }
     }
 
-    // Resolve current on-device paths for each box before overwriting.
+    // Resolve current on-device paths from the already-open boxes.
     final boxPaths = <String, String>{};
     for (final boxName in kBackupHiveBoxNames) {
-      final box = await Hive.openBox<dynamic>(
-        boxName,
-        encryptionCipher: HiveEncryptionKeyService.cipher,
-      );
+      Box<dynamic> box;
+      if (Hive.isBoxOpen(boxName)) {
+        box = Hive.box<dynamic>(boxName);
+      } else {
+        box = await Hive.openBox<dynamic>(
+          boxName,
+          encryptionCipher: HiveEncryptionKeyService.cipher,
+        );
+      }
       final path = box.path;
       if (path != null) {
         boxPaths[boxName] = path;
       }
-      await box.close();
     }
 
     var restoredCount = 0;
@@ -176,6 +186,13 @@ class BackupZipCodec {
       final bytes = Uint8List.fromList(boxFileInZip.content as List<int>);
       await Isolate.run(() => File(targetPath).writeAsBytesSync(bytes, flush: true));
       restoredCount += 1;
+    }
+
+    // Close all open boxes before reopening so Hive re-reads from the restored files.
+    for (final boxName in kBackupHiveBoxNames) {
+      if (Hive.isBoxOpen(boxName)) {
+        await Hive.box<dynamic>(boxName).close();
+      }
     }
 
     // Reopen boxes so the app sees updated data.

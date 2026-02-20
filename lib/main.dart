@@ -52,7 +52,7 @@ Future<void> main() async {
       () async {
         try {
           print('Dosifi: Initializing NotificationService (background)...');
-          await NotificationService.init().timeout(const Duration(seconds: 4));
+          await NotificationService.init().timeout(const Duration(seconds: 30));
           print('Dosifi: NotificationService initialized');
 
           await DoseTimingSettings.load();
