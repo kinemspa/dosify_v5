@@ -27,9 +27,9 @@ Will use this document for the final steps that need to be performed on teh app 
 - Confirm works on another device. 
 
 # Monetization
-- 5 Medications on free version
+- 3 Medications on free version
 - Paid version to include
-    - More than 5 meds can be saved
+    - More than 3 meds can be saved
     - Supplies tracking
     - Schedule Protocols / Cycling. 
     - Colour theme changing
