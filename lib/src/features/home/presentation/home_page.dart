@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -281,7 +282,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
             const SizedBox(height: kSpacingXS),
             Text(
-              'Today',
+              DateFormat('EEEE, d MMMM y').format(DateTime.now()),
               textAlign: TextAlign.center,
               style: homeHeroSubtitleStyle(context),
             ),

@@ -47,13 +47,6 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     return (icon: spec.icon, color: spec.color);
   }
 
-  String _effectiveScheduleName() {
-    if (log.scheduleId == 'ad_hoc') return 'Unscheduled';
-    final trimmed = log.scheduleName.trim();
-    if (trimmed.isNotEmpty) return trimmed;
-    return 'Scheduled dose';
-  }
-
   String _formatAmount(double value) {
     if (value == value.roundToDouble()) return value.toStringAsFixed(0);
     return value.toStringAsFixed(2);
@@ -66,7 +59,6 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     final cs = Theme.of(context).colorScheme;
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
-    final scheduleName = _effectiveScheduleName();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,24 +100,6 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
                   alpha: kOpacityMediumHigh,
                 ),
               ),
-            ),
-            Text(
-              '•',
-              style: smallHelperTextStyle(
-                context,
-                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-              ),
-            ),
-            Text(
-              scheduleName,
-              style: smallHelperTextStyle(
-                context,
-                color: cs.onSurfaceVariant.withValues(
-                  alpha: kOpacityMediumHigh,
-                ),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

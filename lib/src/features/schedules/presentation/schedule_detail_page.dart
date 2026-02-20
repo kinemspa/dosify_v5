@@ -511,7 +511,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             return AlertDialog(
               titleTextStyle: dialogTitleTextStyle(dialogContext),
               contentTextStyle: dialogContentTextStyle(dialogContext),
-              title: const Text('Type'),
+              title: const Text('Frequency'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -1341,7 +1341,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       ),
       buildDetailInfoRow(
         context,
-        label: 'Type',
+        label: 'Frequency',
         value: _scheduleTypeText(s),
         onTap: () => _editScheduleType(context, s),
         maxLines: 2,
@@ -1943,7 +1943,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     }
 
     if (parts.isNotEmpty) {
-      return parts.join(' • ');
+      return parts.join(' × ');
     }
 
     // Fallback (legacy)

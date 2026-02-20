@@ -43,7 +43,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
       ),
       row2Left: DetailStatItem(
         icon: Icons.repeat,
-        label: 'Type',
+        label: 'Frequency',
         value: _scheduleTypeText(schedule),
         valueMaxLines: schedule.hasDaysOfMonth ? 3 : 1,
       ),
@@ -94,7 +94,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
         doseVolumeMicroliter: s.doseVolumeMicroliter?.toDouble(),
         syringeUnits: s.doseIU?.toDouble(),
         doseMassMcg: null,
-        separator: showSlash ? ' / ' : ' • ',
+        separator: showSlash ? ' / ' : ' × ',
       ).trim();
 
       final strengthLabel =

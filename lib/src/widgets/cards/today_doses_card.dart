@@ -358,9 +358,10 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
           DefaultTextStyle(
             style: helperTextStyle(context) ?? const TextStyle(),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildPrimarySummaryCell(
                       context,

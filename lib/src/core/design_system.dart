@@ -1252,6 +1252,9 @@ const double kFontSizeXLarge = 17;
 const double kFontSizeDetailCollapsedTitle = 16;
 const double kFontSizeDetailHeaderTitle = 24;
 
+/// Home page hero title font size (slightly smaller than detail headers).
+const double kFontSizeHomeHeroTitle = 20;
+
 /// Medication detail header typography
 const double kMedicationDetailHeaderNameExpandedFontSize = 22;
 const double kMedicationDetailHeaderNameCollapsedFontSize =
@@ -2333,7 +2336,7 @@ TextStyle? cardTitleStyle(BuildContext context) {
 TextStyle? homeHeroTitleStyle(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
   return Theme.of(context).textTheme.headlineSmall?.copyWith(
-    fontSize: kFontSizeDetailHeaderTitle,
+    fontSize: kFontSizeHomeHeroTitle,
     fontWeight: kFontWeightExtraBold,
     color: cs.onSurface.withValues(alpha: kOpacityMediumHigh),
   );
