@@ -1,7 +1,7 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 
-class WizardNavigationBar extends StatelessWidget {
+class WizardNavigationBar extends StatefulWidget {
   const WizardNavigationBar({
     required this.currentStep,
     required this.stepCount,
@@ -22,7 +22,7 @@ class WizardNavigationBar extends StatelessWidget {
   final bool canProceed;
   final VoidCallback? onBack;
   final VoidCallback onContinue;
-  final VoidCallback onSave;
+  final Future<void> Function() onSave;
   final String saveLabel;
   final FocusScopeNode? fieldFocusScope;
   final String continueLabel;
@@ -30,18 +30,62 @@ class WizardNavigationBar extends StatelessWidget {
   final String nextPageLabel;
 
   @override
-  Widget build(BuildContext context) {
-    final isLastStep = currentStep >= stepCount - 1;
+  State<WizardNavigationBar> createState() => _WizardNavigationBarState();
+}
 
-    final primaryLabel = isLastStep ? saveLabel : continueLabel;
-    final scope = fieldFocusScope ?? FocusScope.of(context);
+class _WizardNavigationBarState extends State<WizardNavigationBar> {
+  bool _isSaving = false;
+
+  Future<void> _handleSave() async {
+    if (_isSaving) return;
+
+    setState(() => _isSaving = true);
+    try {
+      await widget.onSave().timeout(const Duration(seconds: 20));
+    } catch (e) {
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Save did not complete'),
+          content: Text(
+            'The save action did not finish successfully.\n\nDetails: $e',
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isLastStep = widget.currentStep >= widget.stepCount - 1;
+
+    final primaryLabel = isLastStep
+        ? (_isSaving ? 'Saving...' : widget.saveLabel)
+        : widget.continueLabel;
+    final scope = widget.fieldFocusScope ?? FocusScope.of(context);
 
     final VoidCallback? primaryAction = isLastStep
-        ? (canProceed ? onSave : null)
-        : (canProceed
+        ? (widget.canProceed && !_isSaving
               ? () {
                   scope.unfocus();
-                  onContinue();
+                  _handleSave();
+                }
+              : null)
+        : (widget.canProceed && !_isSaving
+              ? () {
+                  scope.unfocus();
+                  widget.onContinue();
                 }
               : null);
 
@@ -58,14 +102,14 @@ class WizardNavigationBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (onBack != null)
+          if (widget.onBack != null)
             Expanded(
               child: OutlinedButton(
-                onPressed: onBack,
+                onPressed: _isSaving ? null : widget.onBack,
                 child: const Text('Back'),
               ),
             ),
-          if (onBack != null) const SizedBox(width: kSpacingM),
+          if (widget.onBack != null) const SizedBox(width: kSpacingM),
           Expanded(
             flex: 2,
             child: FilledButton(

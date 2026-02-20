@@ -1,5 +1,7 @@
 # Docs Index
 
+Tagline: Track Smarter Every Day
+
 This folder is the canonical home for project documentation.
 
 ## Start here

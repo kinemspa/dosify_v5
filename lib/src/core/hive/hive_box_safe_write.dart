@@ -3,10 +3,16 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
-const Duration kHiveWebWriteTimeout = Duration(seconds: 25);
-const Duration kHiveWebFlushTimeout = Duration(seconds: 25);
+const Duration kHiveWebWriteTimeout = Duration(seconds: 8);
+const Duration kHiveWebFlushTimeout = Duration(milliseconds: 300);
 
 Future<void> _maybeFlush(BoxBase<dynamic> box) async {
+  if (kIsWeb) {
+    // On web, IndexedDB commits are managed by Hive/browser. Explicit flush can
+    // be slow or stall, so skip it to keep UI writes responsive.
+    return;
+  }
+
   // `Box.flush()` exists in Hive on some platforms/versions, but to avoid
   // compile-time coupling we call it via `dynamic` and ignore if unavailable.
   try {

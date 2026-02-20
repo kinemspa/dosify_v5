@@ -2,10 +2,14 @@
 
 This folder contains 3 complete Google Play listing variants for store experiments.
 
+## Primary Brand Tagline
+Track Smarter Every Day
+
 ## Files
 - `variant-a-balanced.md` — balanced broad terms (medicine tracking + scheduling)
 - `variant-b-vials-peptides.md` — niche intent (reconstitution + vials + peptides)
 - `variant-c-reminders-adherence.md` — reminder/log intent (dose log + adherence + reminders)
+- `splash-branding.md` — primary splash copy/layout guidance (logo + tagline)
 
 ## Suggested Test Order
 1. Run Variant A as baseline (2-3 weeks)

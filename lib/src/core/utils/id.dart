@@ -5,11 +5,28 @@ import 'dart:math';
 /// Format: `<prefix_?> <microsecondsSinceEpoch>_<randomHex>`
 /// Example: `med_1738277123456789_1a2b3c4d`
 class IdGen {
-  static final Random _rng = Random.secure();
+  static Random? _rng;
+  static const int _webSafeRandMax = 0x3fffffff;
+
+  static Random _resolveRng() {
+    final existing = _rng;
+    if (existing != null) return existing;
+
+    try {
+      final secure = Random.secure();
+      _rng = secure;
+      return secure;
+    } catch (_) {
+      final fallback = Random();
+      _rng = fallback;
+      return fallback;
+    }
+  }
 
   static String newId({String prefix = ''}) {
     final micros = DateTime.now().microsecondsSinceEpoch;
-    final rand = _rng.nextInt(1 << 32).toRadixString(16).padLeft(8, '0');
+    final rand =
+        _resolveRng().nextInt(_webSafeRandMax).toRadixString(16).padLeft(8, '0');
 
     final trimmedPrefix = prefix.trim();
     if (trimmedPrefix.isEmpty) {

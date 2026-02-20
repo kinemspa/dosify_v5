@@ -38,6 +38,7 @@ dependencies:
   # Storage & Utilities
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_secure_storage: ^9.2.2
   shared_preferences: ^2.2.2
   freezed_annotation: ^2.4.1
   json_annotation: ^4.9.0

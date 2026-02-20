@@ -9,6 +9,9 @@ Dosifi: Med Tracker & Schedule
 ## Short Description (<=80 chars)
 Medicine tracking, scheduling, reconstitution, vials, and dose logs.
 
+## Primary Tagline
+Track Smarter Every Day
+
 ## Full Description
 Dosifi helps you manage daily medication routines with clear tracking, scheduling, and dose history.
 

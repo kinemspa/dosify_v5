@@ -9,6 +9,9 @@ Dosifi: Vial & Peptide Tracker
 ## Short Description (<=80 chars)
 Track reconstitution, vials, peptides, doses, and medicine schedules.
 
+## Primary Tagline
+Track Smarter Every Day
+
 ## Full Description
 Dosifi is built for people who manage vial-based medicines and peptides and need reliable daily tracking.
 

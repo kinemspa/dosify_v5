@@ -1,5 +1,7 @@
 # Dosifi v5
 
+Tagline: Track Smarter Every Day
+
 An Android Flutter app for medication tracking with a modern Material 3 UI. Android-only at present.
 
 Status: Actively developed. Notifications: Immediate notifications work; scheduled delivery is de‑prioritized pending OS/AlarmManager behavior investigation (see docs/NOTIFICATIONS.md).

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/hive/hive_box_safe_write.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 
 class SavedReconstitutionRepository {
@@ -70,16 +71,16 @@ class SavedReconstitutionRepository {
   }
 
   Future<void> upsert(SavedReconstitutionCalculation item) async {
-    await _box.put(item.id, item);
+    await _box.putSafe(item.id, item);
   }
 
   Future<void> delete(String id) async {
-    await _box.delete(id);
+    await _box.deleteSafe(id);
   }
 
   Future<void> deleteForMedication(String medicationId) async {
     final ownedId = ownedIdForMedication(medicationId);
-    await _box.delete(ownedId);
+    await _box.deleteSafe(ownedId);
 
     // Backward/edge-case cleanup: delete any rows explicitly marked as owned.
     final ownedKeys = _box.keys.where((key) {
@@ -88,7 +89,7 @@ class SavedReconstitutionRepository {
     }).toList(growable: false);
 
     for (final key in ownedKeys) {
-      await _box.delete(key);
+      await _box.deleteSafe(key);
     }
   }
 }

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:dosifi_v5/src/core/backup/backup_constants.dart';
 import 'package:dosifi_v5/src/core/backup/backup_models.dart';
+import 'package:dosifi_v5/src/core/hive/hive_encryption_key_service.dart';
 
 class BackupZipCodec {
   const BackupZipCodec();
@@ -36,7 +37,11 @@ class BackupZipCodec {
     final hiveEntries = <BackupHiveBoxEntry>[];
 
     for (final boxName in kBackupHiveBoxNames) {
-      final box = await Hive.openBox<dynamic>(boxName);
+      // Open with cipher in case box was closed (normally already open from bootstrap).
+      final box = await Hive.openBox<dynamic>(
+        boxName,
+        encryptionCipher: HiveEncryptionKeyService.cipher,
+      );
       final boxPath = box.path;
       await box.close();
 
@@ -134,7 +139,10 @@ class BackupZipCodec {
     // Resolve current on-device paths for each box before overwriting.
     final boxPaths = <String, String>{};
     for (final boxName in kBackupHiveBoxNames) {
-      final box = await Hive.openBox<dynamic>(boxName);
+      final box = await Hive.openBox<dynamic>(
+        boxName,
+        encryptionCipher: HiveEncryptionKeyService.cipher,
+      );
       final path = box.path;
       if (path != null) {
         boxPaths[boxName] = path;
@@ -171,8 +179,12 @@ class BackupZipCodec {
     }
 
     // Reopen boxes so the app sees updated data.
+    // Must use the encryption cipher — boxes on disk are now encrypted.
     for (final boxName in kBackupHiveBoxNames) {
-      await Hive.openBox<dynamic>(boxName);
+      await Hive.openBox<dynamic>(
+        boxName,
+        encryptionCipher: HiveEncryptionKeyService.cipher,
+      );
     }
 
     return RestoreResult(

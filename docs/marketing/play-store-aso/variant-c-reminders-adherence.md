@@ -9,6 +9,9 @@ Dosifi: Dose Log & Med Reminders
 ## Short Description (<=80 chars)
 Medication reminders, dose logs, scheduling, and inventory in one app.
 
+## Primary Tagline
+Track Smarter Every Day
+
 ## Full Description
 Dosifi helps you stay consistent with medicine routines through clear scheduling, reminders, and dose logging.
 
