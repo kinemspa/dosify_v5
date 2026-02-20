@@ -496,12 +496,12 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           if (medItems.isNotEmpty) ...[
                             sectionSpacing,
                             SectionFormCard(
-                              title: 'Reports',
+                              title: 'Activity by medication',
                               neutral: true,
                               children: [
                                 buildHelperText(
                                   context,
-                                  'This section reuses the same Reports widgets from Medication Details, grouped by medication.',
+                                  'Activity history grouped by medication.',
                                 ),
                               ],
                             ),
