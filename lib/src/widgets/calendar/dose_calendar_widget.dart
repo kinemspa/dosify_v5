@@ -333,12 +333,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         final localizations = MaterialLocalizations.of(context);
         final startOnMonday = localizations.firstDayOfWeekIndex == 1;
 
-        int weekday = firstDayOfMonth.weekday;
-        weekday = weekday == 7 ? 0 : weekday; // Sun=0
-
+        final weekday = firstDayOfMonth.weekday; // 1-7 (Mon-Sun)
         final daysToSubtract = startOnMonday
-            ? weekday
-            : (weekday == 0 ? 0 : weekday);
+            ? (weekday + 6) % 7
+            : weekday % 7;
         final start = firstDayOfMonth.subtract(Duration(days: daysToSubtract));
 
         final end = start.add(const Duration(days: 42));

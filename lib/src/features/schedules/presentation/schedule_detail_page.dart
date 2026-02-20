@@ -1282,6 +1282,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             return ActivityCard(
               medications: meds,
               includedMedicationIds: included,
+              includedScheduleIds: {s.id},
               rangePreset: _activityRangePreset,
               onRangePresetChanged: (next) {
                 if (!mounted) return;

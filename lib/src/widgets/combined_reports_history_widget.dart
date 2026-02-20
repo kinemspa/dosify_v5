@@ -216,6 +216,7 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
 class CombinedReportsHistoryWidget extends StatefulWidget {
   const CombinedReportsHistoryWidget({
     required this.includedMedicationIds,
+    this.includedScheduleIds,
     this.embedInParentCard = false,
     this.initialMaxItems = 25,
     this.rangePreset = ReportTimeRangePreset.allTime,
@@ -223,6 +224,7 @@ class CombinedReportsHistoryWidget extends StatefulWidget {
   });
 
   final Set<String> includedMedicationIds;
+  final Set<String>? includedScheduleIds;
   final bool embedInParentCard;
   final int initialMaxItems;
   final ReportTimeRangePreset rangePreset;
@@ -247,7 +249,8 @@ class _CombinedReportsHistoryWidgetState
   @override
   void didUpdateWidget(covariant CombinedReportsHistoryWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.includedMedicationIds != widget.includedMedicationIds) {
+    if (oldWidget.includedMedicationIds != widget.includedMedicationIds ||
+        oldWidget.includedScheduleIds != widget.includedScheduleIds) {
       _pageIndex = 0;
     }
   }
@@ -612,9 +615,16 @@ class _CombinedReportsHistoryWidgetState
           valueListenable: inventoryLogBox.listenable(),
           builder: (context, ___, ____) {
             final included = widget.includedMedicationIds;
+            final includedSchedules = widget.includedScheduleIds;
+            final hasScheduleFilter =
+              includedSchedules != null && includedSchedules.isNotEmpty;
 
             final doseLogs = doseLogBox.values
                 .where((l) => included.contains(l.medicationId))
+              .where(
+                (l) =>
+                  !hasScheduleFilter || includedSchedules.contains(l.scheduleId),
+              )
                 .where((l) => range == null || range.contains(l.actionTime))
                 .toList(growable: false);
 
@@ -623,6 +633,7 @@ class _CombinedReportsHistoryWidgetState
             final inventoryLogs = inventoryLogBox.values
                 .where((l) => included.contains(l.medicationId))
                 .where((l) => range == null || range.contains(l.timestamp))
+              .where((l) => !hasScheduleFilter || doseLogIds.contains(l.id))
                 // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
                 // Prefer the DoseLog entry since it supports edits.
                 .where(

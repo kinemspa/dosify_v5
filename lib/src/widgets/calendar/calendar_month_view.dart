@@ -35,19 +35,13 @@ class CalendarMonthView extends StatelessWidget {
   /// Get the first date to display (may be in previous month)
   DateTime get _firstDateToDisplay {
     final firstDayOfMonth = DateTime(month.year, month.month, 1);
-    int weekday = firstDayOfMonth.weekday;
+    final weekday = firstDayOfMonth.weekday; // 1-7 (Mon-Sun)
 
-    // Adjust weekday if starting on Monday
-    if (startWeekOnMonday) {
-      weekday = weekday == 7 ? 0 : weekday; // Sunday becomes 0
-    } else {
-      weekday = weekday == 7 ? 0 : weekday; // Sunday becomes 0
-    }
-
-    // Calculate days to go back to start of week
+    // For Monday-first weeks: Mon -> 0, Tue -> 1, ... Sun -> 6.
+    // For Sunday-first weeks: Sun -> 0, Mon -> 1, ... Sat -> 6.
     final daysToSubtract = startWeekOnMonday
-        ? weekday
-        : (weekday == 0 ? 0 : weekday);
+        ? (weekday + 6) % 7
+        : weekday % 7;
     return firstDayOfMonth.subtract(Duration(days: daysToSubtract));
   }
 

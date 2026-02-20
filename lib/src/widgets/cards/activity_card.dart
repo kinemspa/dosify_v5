@@ -13,6 +13,7 @@ class ActivityCard extends StatefulWidget {
     this.title = 'Activity',
     required this.medications,
     required this.includedMedicationIds,
+    this.includedScheduleIds,
     this.onIncludedMedicationIdsChanged,
     required this.rangePreset,
     required this.onRangePresetChanged,
@@ -26,6 +27,7 @@ class ActivityCard extends StatefulWidget {
   final String title;
   final List<Medication> medications;
   final Set<String> includedMedicationIds;
+  final Set<String>? includedScheduleIds;
 
   /// When null, the card displays a non-interactive included-meds label.
   final ValueChanged<Set<String>>? onIncludedMedicationIdsChanged;
@@ -132,6 +134,7 @@ class _ActivityCardState extends State<ActivityCard> {
           else
             CombinedReportsHistoryWidget(
               includedMedicationIds: widget.includedMedicationIds,
+              includedScheduleIds: widget.includedScheduleIds,
               embedInParentCard: true,
               rangePreset: widget.rangePreset,
             ),
