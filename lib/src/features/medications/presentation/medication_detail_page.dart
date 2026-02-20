@@ -37,7 +37,6 @@ import 'package:dosifi_v5/src/features/medications/presentation/widgets/medicati
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
@@ -659,7 +658,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       _kCardSchedule: _buildScheduleCard(
         context,
         med,
-        _nextDoseForMedication(med.id),
       ),
       _kCardDetails: _buildUnifiedDetailsCard(context, med),
     };
@@ -1426,119 +1424,39 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-  Widget _buildScheduleCard(
-    BuildContext context,
-    Medication med,
-    ScheduledDose? nextDose,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
+  Widget _buildScheduleCard(BuildContext context, Medication med) {
     final scheduleBox = Hive.box<Schedule>('schedules');
     final hasSchedules = scheduleBox.values.any(
       (s) => s.medicationId == med.id,
     );
 
-    if (!hasSchedules) {
-      return GlassCardSurface(
-        useGradient: false,
-        padding: EdgeInsets.zero,
-        child: Padding(
-          padding: kDetailCardCollapsedHeaderPadding,
-          child: Row(
-            children: [
-              const SizedBox(width: kDetailCardReorderHandleGutterWidth),
-              Icon(
-                Icons.calendar_month_rounded,
-                size: kIconSizeMedium,
-                color: colorScheme.primary,
-              ),
-              const SizedBox(width: kSpacingS),
-              Text(
-                'Schedule',
-                style: cardTitleStyle(
-                  context,
-                )?.copyWith(color: colorScheme.primary),
-              ),
-              const Spacer(),
-              Text(
-                'No schedules',
-                style: helperTextStyle(
-                  context,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return GlassCardSurface(
-      useGradient: false,
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () =>
-                setState(() => _isScheduleExpanded = !_isScheduleExpanded),
-            child: Padding(
-              padding: kDetailCardCollapsedHeaderPadding,
-              child: Row(
-                children: [
-                  if (!_isScheduleExpanded)
-                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
-                  Icon(
-                    Icons.calendar_month_rounded,
-                    size: kIconSizeMedium,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: kSpacingS),
-                  Text(
-                    'Schedule',
-                    style: cardTitleStyle(
-                      context,
-                    )?.copyWith(color: colorScheme.primary),
-                  ),
-                  const Spacer(),
-                  AnimatedRotation(
-                    turns: _isScheduleExpanded ? 0 : -0.25,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      Icons.keyboard_arrow_down,
-                      size: kIconSizeLarge,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 200),
-            crossFadeState: _isScheduleExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                kCardPadding,
-                0,
-                kCardPadding,
-                kCardPadding,
-              ),
-              child: Container(
-                decoration: buildInsetSectionDecoration(
-                  context: context,
-                  showBorder: false,
-                ),
-                padding: kInsetSectionPadding,
-                child: MedicationSchedulesSection(medication: med),
-              ),
-            ),
-          ),
-        ],
+    return CollapsibleSectionFormCard(
+      neutral: true,
+      title: 'Schedules',
+      leading: Icon(
+        Icons.calendar_month_rounded,
+        size: kIconSizeMedium,
+        color: Theme.of(context).colorScheme.primary,
       ),
+      reserveReorderHandleGutterWhenCollapsed: true,
+      isExpanded: _isScheduleExpanded,
+      onExpandedChanged: (expanded) {
+        if (!mounted) return;
+        setState(() => _isScheduleExpanded = expanded);
+      },
+      children: [
+        if (!hasSchedules)
+          buildHelperText(context, 'No schedules')
+        else
+          Container(
+            decoration: buildInsetSectionDecoration(
+              context: context,
+              showBorder: false,
+            ),
+            padding: kInsetSectionPadding,
+            child: MedicationSchedulesSection(medication: med),
+          ),
+      ],
     );
   }
 
@@ -2881,12 +2799,6 @@ class _AdherenceBarPainter extends CustomPainter {
   }
 }
 
-class ScheduledDose {
-  final DateTime dateTime;
-  final Schedule? schedule;
-  ScheduledDose(this.dateTime, {this.schedule});
-}
-
 class _HeaderInfoTile extends StatelessWidget {
   final String label;
   final String value;
@@ -3008,92 +2920,6 @@ bool _isIntegerStock(StockUnit unit) {
       unit == StockUnit.preFilledSyringes ||
       unit == StockUnit.singleDoseVials ||
       unit == StockUnit.multiDoseVials;
-}
-
-ScheduledDose? _nextDoseForMedication(String medId) {
-  final schedulesBox = Hive.box<Schedule>('schedules');
-  final doseLogBox = Hive.box<DoseLog>('dose_logs');
-  final schedules = schedulesBox.values
-      .where((s) => s.medicationId == medId && s.active)
-      .toList();
-
-  if (schedules.isEmpty) return null;
-
-  final now = DateTime.now();
-  DateTime? nextTime;
-  Schedule? nextSchedule;
-
-  for (final schedule in schedules) {
-    final times = schedule.hasMultipleTimes
-        ? schedule.timesOfDay!
-        : [schedule.minutesOfDay];
-
-    for (final minutes in times) {
-      final hour = minutes ~/ 60;
-      final minute = minutes % 60;
-
-      // Start checking from today
-      var candidate = DateTime(now.year, now.month, now.day, hour, minute);
-
-      // If the time has already passed for today, start checking from tomorrow
-      // UNLESS it's today and we haven't taken it yet?
-      // Actually, if it's in the past, it's either missed or taken.
-      // "Next Dose" usually implies future or "due now".
-      // If it's 5 mins ago and not taken, is it "Next Dose"? Yes, it's overdue.
-      // But the original logic skipped past times.
-      // Let's stick to "future" or "very recent past" logic, but for now,
-      // let's just find the next *valid* slot that isn't taken.
-
-      // We'll check up to 14 days
-      for (int i = 0; i < 14; i++) {
-        // Check if this candidate is in the past (with a small buffer, e.g. 1 hour ago is still "next" if missed?)
-        // For simplicity, let's say "Next Dose" is strictly in the future OR today.
-        // If it's in the past, we skip it unless we want to show overdue.
-        // The user said "I marked that dose as taken and it should refresh as taken, or show the next dose."
-        // This implies if I take the 9am dose at 9am, it should show the 1pm dose.
-
-        if (candidate.isBefore(now.subtract(const Duration(minutes: 15)))) {
-          // If it's more than 15 mins in the past, assume we missed it or it's done, move to next day/time
-          // But wait, we need to check if it was taken.
-          // If it wasn't taken, it's overdue.
-          // For this specific "Next Dose" card, let's just show the next *future* one for now to satisfy "refresh as taken".
-          // If we want to show overdue, we need more complex logic.
-          // Let's stick to the original "isBefore(now)" check but add the log check.
-        }
-
-        if (candidate.isBefore(now)) {
-          candidate = candidate.add(const Duration(days: 1));
-          continue; // This specific time slot is past, try tomorrow (or next loop iteration will handle it)
-          // Actually, the inner loop iterates days.
-          // Wait, the original logic:
-          // if (candidate.isBefore(now)) candidate = candidate.add(Duration(days: 1));
-          // This only added 1 day. It didn't loop.
-          // The loop below `for (int i = 0; i < 8; i++)` adds days.
-        }
-
-        // Check if this specific slot is taken
-        final logId = DoseLogIds.occurrenceId(
-          scheduleId: schedule.id,
-          scheduledTime: candidate,
-        );
-        final isTaken = doseLogBox.containsKey(logId);
-
-        if (schedule.daysOfWeek.contains(candidate.weekday) && !isTaken) {
-          // Found a valid, untaken slot
-          if (nextTime == null || candidate.isBefore(nextTime)) {
-            nextTime = candidate;
-            nextSchedule = schedule;
-          }
-          break; // Found the next slot for this specific time-of-day rule
-        }
-        candidate = candidate.add(const Duration(days: 1));
-      }
-    }
-  }
-
-  return nextTime != null
-      ? ScheduledDose(nextTime, schedule: nextSchedule)
-      : null;
 }
 
 void _showRefillDialog(BuildContext context, Medication med) async {
