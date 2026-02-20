@@ -327,20 +327,21 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           _currentDate.month,
           1,
         );
-        final lastDayOfMonth = DateTime(
-          _currentDate.year,
-          _currentDate.month + 1,
-          0,
-        );
 
-        // Extend to include visible dates from other months
-        final firstWeekday = firstDayOfMonth.weekday;
-        final daysToSubtract = firstWeekday == 7 ? 0 : firstWeekday;
+        // Match CalendarMonthView: 6-week (42 day) grid, respecting locale
+        // first-day-of-week preference.
+        final localizations = MaterialLocalizations.of(context);
+        final startOnMonday = localizations.firstDayOfWeekIndex == 1;
+
+        int weekday = firstDayOfMonth.weekday;
+        weekday = weekday == 7 ? 0 : weekday; // Sun=0
+
+        final daysToSubtract = startOnMonday
+            ? weekday
+            : (weekday == 0 ? 0 : weekday);
         final start = firstDayOfMonth.subtract(Duration(days: daysToSubtract));
 
-        final lastWeekday = lastDayOfMonth.weekday;
-        final daysToAdd = lastWeekday == 7 ? 0 : 7 - lastWeekday;
-        final end = lastDayOfMonth.add(Duration(days: daysToAdd + 1));
+        final end = start.add(const Duration(days: 42));
 
         return (start, end);
     }
@@ -1508,33 +1509,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   }
 
   double _monthViewIntrinsicHeight() {
-    // Matches CalendarMonthView's layout: day headers + week rows * day height.
-    final localizations = MaterialLocalizations.of(context);
-    final startOnMonday = localizations.firstDayOfWeekIndex == 1;
-
-    final firstDayOfMonth = DateTime(_currentDate.year, _currentDate.month, 1);
-    int weekday = firstDayOfMonth.weekday;
-    weekday = weekday == 7 ? 0 : weekday; // Sun=0
-
-    final daysToSubtract = startOnMonday
-        ? weekday
-        : (weekday == 0 ? 0 : weekday);
-    final first = firstDayOfMonth.subtract(Duration(days: daysToSubtract));
-
-    final lastDayOfMonth = DateTime(
-      _currentDate.year,
-      _currentDate.month + 1,
-      0,
-    );
-    final lastWeekday = lastDayOfMonth.weekday; // 1-7 (Mon-Sun)
-    final normalized = lastWeekday == 7 ? 0 : lastWeekday; // Sun=0
-    final daysToAdd = startOnMonday ? (7 - lastWeekday) % 7 : (6 - normalized);
-
-    final last = lastDayOfMonth.add(Duration(days: daysToAdd));
-    final totalDays = last.difference(first).inDays + 1;
-    final rowCount = (totalDays / 7).ceil();
-
-    return kCalendarMonthDayHeaderHeight + (rowCount * kCalendarDayHeight);
+    // Matches CalendarMonthView's fixed 6-week layout.
+    return kCalendarMonthDayHeaderHeight + (6 * kCalendarDayHeight);
   }
 
   Widget _buildSelectedHourPanel() {

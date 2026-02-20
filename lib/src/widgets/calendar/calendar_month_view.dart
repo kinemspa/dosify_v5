@@ -54,25 +54,9 @@ class CalendarMonthView extends StatelessWidget {
   /// Get all dates to display (6 weeks = 42 days)
   List<DateTime> get _datesToDisplay {
     final first = _firstDateToDisplay;
-    final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
-
-    // Calculate the final displayed day so we only show the required number of
-    // week rows for this month (instead of always forcing 6 weeks).
-    final lastWeekday = lastDayOfMonth.weekday; // 1-7 (Mon-Sun)
-    final normalized = lastWeekday == 7 ? 0 : lastWeekday; // Sun=0
-    final daysToAdd = startWeekOnMonday
-        // Week ends on Sunday
-        ? (7 - lastWeekday) % 7
-        // Week ends on Saturday
-        : (6 - normalized);
-
-    final last = lastDayOfMonth.add(Duration(days: daysToAdd));
-    final totalDays = last.difference(first).inDays + 1;
-    final rowCount = (totalDays / 7).ceil();
-
     final dates = <DateTime>[];
     DateTime current = first;
-    for (int i = 0; i < rowCount * 7; i++) {
+    for (int i = 0; i < 42; i++) {
       dates.add(current);
       current = current.add(const Duration(days: 1));
     }
@@ -101,7 +85,7 @@ class CalendarMonthView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final datesToDisplay = _datesToDisplay;
-    final rowCount = (datesToDisplay.length / 7).ceil();
+    const rowCount = 6;
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
