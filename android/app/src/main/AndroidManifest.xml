@@ -41,7 +41,7 @@
              before releasing to production. -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-6918524565682993~3970479955" />
 
         <!-- Explicit receivers for flutter_local_notifications scheduled delivery on Android 12+ -->
         <receiver
