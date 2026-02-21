@@ -119,12 +119,9 @@ class MedicationHeaderWidget extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Space for the animated Name + form chip (rendered above in the SliverAppBar)
-                  SizedBox(
-                    height: MediaQuery.textScalerOf(context).scale(
-                      kMedicationDetailHeaderOverlayReservedHeight,
-                    ),
-                  ),
+                  // Space for the animated Name + form chip (rendered above in the SliverAppBar).
+                  // Do NOT text-scale this SizedBox — the overlay is positioned in absolute dp.
+                  const SizedBox(height: kMedicationDetailHeaderOverlayReservedHeight),
 
                   // Description & Notes
                   if (descriptionTruncated.isNotEmpty)

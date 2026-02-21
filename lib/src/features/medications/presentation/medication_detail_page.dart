@@ -649,6 +649,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         scope: CalendarCardScope.medication(med.id),
         showOpenCalendarAction: false,
         showSelectedDayPanel: false,
+        // Use compact height since there is no dose-stage panel on detail pages
+        // (saves ~20dp of dead space the mini height left below the calendar grid).
+        height: kDetailCompactCalendarHeight,
         isExpanded: _isCalendarExpanded,
         reserveReorderHandleGutterWhenCollapsed: true,
         onExpandedChanged: (expanded) {
