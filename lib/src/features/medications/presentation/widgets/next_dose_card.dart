@@ -394,7 +394,7 @@ class _NextDoseCardState extends State<NextDoseCard>
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: borderColor),
             boxShadow: [
-              if (total > 1)
+              if (total > 1 && Theme.of(context).brightness != Brightness.dark)
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
                   offset: const Offset(0, 2),

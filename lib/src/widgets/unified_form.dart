@@ -114,7 +114,7 @@ class SectionFormCard extends StatelessWidget {
                 : theme.colorScheme.primary.withValues(
                     alpha: isDark ? kOpacityFaint : 0.03,
                   )),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         border: neutral
             ? Border.all(
                 color: theme.colorScheme.outlineVariant.withValues(
@@ -128,17 +128,21 @@ class SectionFormCard extends StatelessWidget {
                 ),
                 width: kOutlineWidth,
               ),
-        boxShadow: neutral
+        // Shadows provide depth cue in light mode; omit in dark mode (M3
+        // dark elevation is conveyed via surface-tinted backgrounds).
+        boxShadow: isDark
+            ? null
+            : neutral
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ]
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -320,17 +324,19 @@ class CollapsibleSectionFormCard extends StatelessWidget {
                 ),
                 width: kOutlineWidth,
               ),
-        boxShadow: neutral
+        boxShadow: isDark
+            ? null
+            : neutral
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ]
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

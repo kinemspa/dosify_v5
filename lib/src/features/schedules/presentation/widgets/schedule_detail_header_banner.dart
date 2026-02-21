@@ -180,13 +180,32 @@ class _HeaderPauseResumeAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final badge = ScheduleStatusChip(schedule: schedule, solid: true);
     if (schedule.isCompleted) return badge;
+
+    // Hint icon beside the badge shows the action available (pause vs resume).
+    // Always use onPrimary because the banner renders over the gradient header.
+    final isActive = schedule.status == ScheduleStatus.active;
+    final hintIcon = isActive
+        ? Icons.pause_circle_outline_rounded
+        : Icons.play_circle_outline_rounded;
 
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
-      child: badge,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          badge,
+          const SizedBox(width: kSpacingXXS),
+          Icon(
+            hintIcon,
+            size: kIconSizeXSmall,
+            color: cs.onPrimary.withValues(alpha: 0.7),
+          ),
+        ],
+      ),
     );
   }
 }

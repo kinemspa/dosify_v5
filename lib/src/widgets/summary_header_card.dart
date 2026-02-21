@@ -157,6 +157,7 @@ class SummaryHeaderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final lowStockActive =
         lowStockEnabled &&
         stockCurrent != null &&
@@ -186,10 +187,10 @@ class SummaryHeaderCard extends StatelessWidget {
                 width: 0.75,
               )
             : null,
-        boxShadow: neutral
+        boxShadow: (neutral && !isDark)
             ? [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
