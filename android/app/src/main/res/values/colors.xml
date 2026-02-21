@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#09A8BD</color>
+    <!-- Brand color used as notification accent / icon tint -->
+    <color name="notification_color">#FF09A8BD</color>
 </resources>

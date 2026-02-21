@@ -218,10 +218,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       String title,
       Future<T> Function() action,
     ) async {
+      // Capture the dialog's own BuildContext so we can dismiss it reliably
+      // even if the outer `context` becomes unmounted (e.g. after Google Sign-In
+      // platform activity returns and Flutter briefly pauses the widget tree).
+      BuildContext? dialogContext;
       showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (context) {
+        builder: (ctx) {
+          dialogContext = ctx;
           return AlertDialog(
             title: Text(title),
             content: const Row(
@@ -235,12 +240,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         },
       );
 
+      void dismiss() {
+        final ctx = dialogContext;
+        if (ctx != null && ctx.mounted) {
+          Navigator.of(ctx).pop();
+        } else if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+      }
+
       try {
         final result = await action();
-        if (context.mounted) Navigator.of(context).pop();
+        dismiss();
         return result;
       } catch (_) {
-        if (context.mounted) Navigator.of(context).pop();
+        dismiss();
         rethrow;
       }
     }

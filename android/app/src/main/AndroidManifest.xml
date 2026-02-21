@@ -36,6 +36,11 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- Brand notification accent colour (applied to notification icon circle tint) -->
+        <meta-data
+            android:name="android.app.default_notification_color"
+            android:resource="@color/notification_color" />
+
         <!-- AdMob App ID (required by google_mobile_ads).
              Replace with your real AdMob App ID from console.admob.google.com
              before releasing to production. -->

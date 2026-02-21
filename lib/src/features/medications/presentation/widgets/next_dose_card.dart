@@ -362,8 +362,8 @@ class _NextDoseCardState extends State<NextDoseCard>
     Color borderColor = colorScheme.outlineVariant;
 
     if (isTaken) {
-      cardColor = Colors.green.withValues(alpha: 0.1);
-      borderColor = Colors.green.withValues(alpha: 0.5);
+      cardColor = kDoseStatusTakenGreenAdaptive(context).withValues(alpha: 0.1);
+      borderColor = kDoseStatusTakenGreenAdaptive(context).withValues(alpha: 0.5);
     } else if (isOverdue) {
       cardColor = colorScheme.errorContainer.withValues(alpha: 0.2);
       borderColor = colorScheme.error.withValues(alpha: 0.5);
@@ -415,7 +415,7 @@ class _NextDoseCardState extends State<NextDoseCard>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isTaken
-                      ? Colors.green.withValues(alpha: 0.2)
+                      ? kDoseStatusTakenGreenAdaptive(context).withValues(alpha: 0.2)
                       : (isOverdue
                             ? colorScheme.errorContainer
                             : colorScheme.primaryContainer),
@@ -424,7 +424,7 @@ class _NextDoseCardState extends State<NextDoseCard>
                   statusIcon,
                   size: 18,
                   color: isTaken
-                      ? Colors.green
+                      ? kDoseStatusTakenGreenAdaptive(context)
                       : (isOverdue ? colorScheme.error : colorScheme.primary),
                 ),
               ),

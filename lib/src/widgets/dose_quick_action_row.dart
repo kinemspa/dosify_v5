@@ -11,6 +11,8 @@ class DoseQuickActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final takenColor =
+      doseStatusVisual(context, DoseStatus.taken, disabled: false).color;
     final snoozedColor =
       doseStatusVisual(context, DoseStatus.snoozed, disabled: false).color;
     final skippedColor =
@@ -21,8 +23,8 @@ class DoseQuickActionRow extends StatelessWidget {
       children: [
         _QuickTextButton(
           label: 'Take',
-          backgroundColor: kDoseStatusTakenGreen,
-          foregroundColor: statusColorOnPrimary(context, kDoseStatusTakenGreen),
+          backgroundColor: takenColor,
+          foregroundColor: statusColorOnPrimary(context, takenColor),
           onPressed: () => onAction(DoseStatus.taken),
         ),
         const SizedBox(width: kSpacingXS),

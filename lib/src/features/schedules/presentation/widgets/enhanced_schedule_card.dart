@@ -928,9 +928,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   }
 
   Color _getAdherenceColor(double rate) {
-    if (rate >= 90) return Colors.green;
-    if (rate >= 70) return Colors.orange;
-    return Colors.red;
+    if (rate >= 90) return kAdherenceGoodColor(context);
+    if (rate >= 70) return kAdherenceWarningColor(context);
+    return kAdherencePoorColor(context);
   }
 
   IconData _getActionIcon(DoseAction action) {
@@ -945,14 +945,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   }
 
   Color _getActionColor(DoseAction action) {
-    switch (action) {
-      case DoseAction.taken:
-        return Colors.green;
-      case DoseAction.skipped:
-        return Theme.of(context).colorScheme.primary;
-      case DoseAction.snoozed:
-        return Colors.orange;
-    }
+    return doseActionVisualSpec(context, action).color;
   }
 
   String _getActionLabel(DoseAction action) {

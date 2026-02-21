@@ -142,7 +142,7 @@ class NotificationService {
 
   static Future<void> init() async {
     _log('Initializing NotificationService...');
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('ic_stat_notification');
     const initSettings = InitializationSettings(android: androidInit);
 
     _log('Initializing FlutterLocalNotificationsPlugin...');

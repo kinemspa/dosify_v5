@@ -782,14 +782,49 @@ const double kDetailHeaderExpandedHeight = 280;
 const double kDetailHeaderExpandedHeightCompact = 220;
 const double kDetailHeaderCollapsedHeight = 48;
 
-/// Semantic status colors
+/// Semantic status colors — light-mode base values (use adaptive helpers in widgets).
 ///
-/// Use these instead of hardcoding colors in widgets.
-const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);
-const Color kDoseStatusSkippedRed = Color(0xFFD32F2F);
-const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);
-const Color kDoseStatusOverdueAmber = Color(0xFFF9A825);
-const Color kDoseStatusMissedDarkRed = Color(0xFFB71C1C);
+/// Prefer the adaptive helper functions (e.g. [kDoseStatusTakenGreenAdaptive])
+/// when you have a [BuildContext], so colors remain legible in dark mode.
+const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);        // Green 800 (light mode)
+const Color kDoseStatusTakenGreenDark = Color(0xFF81C784);    // Green 300 (dark mode)
+const Color kDoseStatusSkippedRed = Color(0xFFD32F2F);        // Red 700 (light mode)
+const Color kDoseStatusSkippedRedDark = Color(0xFFEF9A9A);    // Red 200 (dark mode)
+const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);     // Orange 700 (light mode)
+const Color kDoseStatusSnoozedOrangeDark = Color(0xFFFFB74D); // Orange 300 (dark mode)
+const Color kDoseStatusOverdueAmber = Color(0xFFF9A825);      // Amber (both modes)
+const Color kDoseStatusMissedDarkRed = Color(0xFFB71C1C);     // Red 900 (light mode)
+const Color kDoseStatusMissedDarkRedDark = Color(0xFFEF9A9A); // Red 200 (dark mode)
+
+/// Adaptive dose status color helpers — always use these in widgets.
+/// Returns a lighter shade in dark mode for sufficient contrast.
+Color kDoseStatusTakenGreenAdaptive(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return isDark ? kDoseStatusTakenGreenDark : kDoseStatusTakenGreen;
+}
+
+Color kDoseStatusSkippedRedAdaptive(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return isDark ? kDoseStatusSkippedRedDark : kDoseStatusSkippedRed;
+}
+
+Color kDoseStatusSnoozedOrangeAdaptive(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return isDark ? kDoseStatusSnoozedOrangeDark : kDoseStatusSnoozedOrange;
+}
+
+Color kDoseStatusMissedDarkRedAdaptive(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return isDark ? kDoseStatusMissedDarkRedDark : kDoseStatusMissedDarkRed;
+}
+
+/// Adherence rate colors — adaptive for dark mode.
+Color kAdherenceGoodColor(BuildContext context) =>
+    kDoseStatusTakenGreenAdaptive(context);
+Color kAdherenceWarningColor(BuildContext context) =>
+    kDoseStatusSnoozedOrangeAdaptive(context);
+Color kAdherencePoorColor(BuildContext context) =>
+    kDoseStatusSkippedRedAdaptive(context);
 
 /// Single source of truth for dose status labels.
 String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
@@ -822,15 +857,15 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
 
   return switch (status) {
     DoseStatus.taken => (
-      color: kDoseStatusTakenGreen,
+      color: kDoseStatusTakenGreenAdaptive(context),
       icon: Icons.check_rounded,
     ),
     DoseStatus.skipped => (
-      color: kDoseStatusSkippedRed,
+      color: kDoseStatusSkippedRedAdaptive(context),
       icon: Icons.block_rounded,
     ),
     DoseStatus.snoozed => (
-      color: kDoseStatusSnoozedOrange,
+      color: kDoseStatusSnoozedOrangeAdaptive(context),
       icon: Icons.snooze_rounded,
     ),
     DoseStatus.due => (
@@ -838,7 +873,7 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
       icon: Icons.schedule_rounded,
     ),
     DoseStatus.overdue => (
-      color: kDoseStatusMissedDarkRed,
+      color: kDoseStatusMissedDarkRedAdaptive(context),
       icon: Icons.warning_rounded,
     ),
     DoseStatus.pending => (
@@ -855,15 +890,15 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
 ) {
   return switch (action) {
     DoseAction.taken => (
-      color: kDoseStatusTakenGreen,
+      color: kDoseStatusTakenGreenAdaptive(context),
       icon: Icons.check_rounded,
     ),
     DoseAction.skipped => (
-      color: kDoseStatusSkippedRed,
+      color: kDoseStatusSkippedRedAdaptive(context),
       icon: Icons.block_rounded,
     ),
     DoseAction.snoozed => (
-      color: kDoseStatusSnoozedOrange,
+      color: kDoseStatusSnoozedOrangeAdaptive(context),
       icon: Icons.snooze_rounded,
     ),
   };
@@ -878,19 +913,19 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
 
   return switch (changeType) {
     InventoryChangeType.refillAdd => (
-      color: kDoseStatusTakenGreen,
+      color: kDoseStatusTakenGreenAdaptive(context),
       icon: Icons.add_circle_rounded,
     ),
     InventoryChangeType.refillToMax => (
-      color: kDoseStatusTakenGreen,
+      color: kDoseStatusTakenGreenAdaptive(context),
       icon: Icons.trending_up_rounded,
     ),
     InventoryChangeType.doseDeducted => (
-      color: kDoseStatusSnoozedOrange,
+      color: kDoseStatusSnoozedOrangeAdaptive(context),
       icon: Icons.remove_circle_rounded,
     ),
     InventoryChangeType.adHocDose => (
-      color: kDoseStatusSnoozedOrange,
+      color: kDoseStatusSnoozedOrangeAdaptive(context),
       icon: Icons.remove_circle_outline_rounded,
     ),
     InventoryChangeType.manualAdjustment => (
@@ -902,11 +937,11 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
       icon: Icons.science_rounded,
     ),
     InventoryChangeType.vialRestocked => (
-      color: kDoseStatusTakenGreen,
+      color: kDoseStatusTakenGreenAdaptive(context),
       icon: Icons.inventory_2_rounded,
     ),
     InventoryChangeType.expired => (
-      color: kDoseStatusSkippedRed,
+      color: kDoseStatusSkippedRedAdaptive(context),
       icon: Icons.delete_forever_rounded,
     ),
   };
