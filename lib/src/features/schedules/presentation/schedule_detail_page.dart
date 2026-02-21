@@ -26,7 +26,6 @@ import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_d
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
@@ -47,7 +46,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   bool _isScheduleDetailsExpanded = true;
   bool _isTodayExpanded = true;
   bool _isActivityExpanded = true;
-  bool _isCalendarExpanded = true;
 
   ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
 
@@ -1252,17 +1250,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           onExpandedChanged: (expanded) {
             if (!mounted) return;
             setState(() => _isTodayExpanded = expanded);
-          },
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: CalendarCard(
-          scope: CalendarCardScope.schedule(s.id),
-          isExpanded: _isCalendarExpanded,
-          onExpandedChanged: (expanded) {
-            if (!mounted) return;
-            setState(() => _isCalendarExpanded = expanded);
           },
         ),
       ),

@@ -401,7 +401,26 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           // Status on the right
                           if (!_isExpanded) ...[
                             ScheduleStatusChip(schedule: widget.schedule),
-                            const SizedBox(width: kSpacingS),
+                            const SizedBox(width: kSpacingXS),
+                            GestureDetector(
+                              onTap: _showPauseOptions,
+                              behavior: HitTestBehavior.opaque,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: kSpacingXS,
+                                ),
+                                child: Icon(
+                                  widget.schedule.isActive
+                                      ? Icons.pause_circle_outline_rounded
+                                      : Icons.play_circle_outline_rounded,
+                                  size: kIconSizeMedium,
+                                  color: colorScheme.onSurfaceVariant.withValues(
+                                    alpha: kOpacityMedium,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: kSpacingXS),
                           ],
                           // Expand/collapse control
                           Padding(
@@ -545,8 +564,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       ),
       decoration: BoxDecoration(
         color: isPrimary
-            ? colorScheme.primaryContainer.withValues(alpha: kOpacityMediumLow)
-            : colorScheme.surfaceContainerHighest,
+            ? colorScheme.primary.withValues(alpha: kOpacitySubtle)
+            : colorScheme.onSurface.withValues(alpha: kOpacitySubtleLow),
         borderRadius: BorderRadius.circular(kBorderRadiusSmall),
       ),
       child: Row(

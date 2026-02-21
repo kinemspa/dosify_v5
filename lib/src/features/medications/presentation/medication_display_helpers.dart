@@ -121,7 +121,7 @@ class MedicationDisplayHelpers {
     double? doseMassMcg,
     double? doseVolumeMicroliter,
     double? syringeUnits,
-    String separator = ' • ',
+    String separator = ' × ',
   }) {
     String formatTabletCountFromQuarters(int quarters) {
       if (quarters == 1) return '1/4';
