@@ -175,7 +175,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       _hasBackupVials = m.stockValue > 0;
       _backupVialsQtyCtrl.text = m.stockValue.toString();
       _backupVialsLowStockEnabled = m.lowStockEnabled;
-      _backupVialsLowStockCtrl.text = m.lowStockThreshold?.toString() ?? '0';
+      _backupVialsLowStockCtrl.text = (m.lowStockThreshold?.toInt().clamp(1, 1000000) ?? 1).toString();
       _backupVialsExpiry = m.backupVialsExpiry ?? m.expiry;
       _backupVialsBatchCtrl.text =
           m.backupVialsBatchNumber ?? m.batchNumber ?? '';

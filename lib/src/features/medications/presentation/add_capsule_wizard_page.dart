@@ -98,7 +98,7 @@ class _AddCapsuleWizardPageState
       _strengthUnit = m.strengthUnit;
       _stockValueCtrl.text = m.stockValue.toString();
       _lowStockEnabled = m.lowStockEnabled;
-      _lowStockThresholdCtrl.text = m.lowStockThreshold?.toString() ?? '0';
+      _lowStockThresholdCtrl.text = (m.lowStockThreshold?.toInt().clamp(1, 1000000) ?? 1).toString();
       _expiry = m.expiry;
       _batchCtrl.text = m.batchNumber ?? '';
       _storageLocationCtrl.text = m.storageLocation ?? '';

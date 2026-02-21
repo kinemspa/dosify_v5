@@ -90,7 +90,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
     return Expanded(
       child: FittedBox(
         fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.center,
         child: RichText(
           maxLines: 1,
           overflow: TextOverflow.visible,
