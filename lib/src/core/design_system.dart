@@ -702,6 +702,20 @@ const BorderRadius kAppSnackBarBorderRadius = BorderRadius.zero;
 ///
 /// Intentionally light background with dark text for legibility.
 const Color kAppSnackBarBackgroundColor = Colors.white;
+
+/// Theme-aware snackbar background: white in light mode, elevated dark surface in dark.
+Color snackBarBackgroundColor(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  if (Theme.of(context).brightness == Brightness.dark) {
+    return cs.surfaceContainerHigh;
+  }
+  return Colors.white;
+}
+
+/// Theme-aware snackbar foreground: dark in light mode, light in dark.
+Color snackBarForegroundColor(BuildContext context) {
+  return Theme.of(context).colorScheme.onSurface;
+}
 const Color kAppSnackBarForegroundColor = Colors.black87;
 
 // ============================================================================
@@ -759,6 +773,15 @@ const double kHelperTextOpacity = kOpacityMediumLow;
 const double kDisabledOpacity = kOpacityLow;
 const double kCardBorderOpacity = kOpacityLow;
 const double kHintTextOpacity = kOpacityLow;
+
+/// Frameless card border: slightly more visible than plain-transparent. Adds
+/// a whisper-level border so adjacent cards are distinguishable on the page.
+const double kFramelessCardBorderOpacityLight = kOpacitySubtleLow; // 0.10
+const double kFramelessCardBorderOpacityDark = 0.20;
+/// Frameless card shadow (light mode only — dark mode uses surface tinting).
+const double kFramelessCardShadowOpacity = 0.04;
+const double kFramelessCardShadowBlur = 6.0;
+const Offset kFramelessCardShadowOffset = Offset(0, 2);
 
 /// Reconstitution calculator opacity (white text on dark background)
 const double kReconTextHighOpacity = 0.90; // Selected option details
@@ -2417,7 +2440,7 @@ TextStyle? splashTaglineTextStyle(BuildContext context) {
 /// App snackbar text style (used for app snackbars).
 TextStyle? appSnackBarTextStyle(BuildContext context) {
   return bodyTextStyle(context)?.copyWith(
-    color: kAppSnackBarForegroundColor,
+    color: snackBarForegroundColor(context),
     fontWeight: kFontWeightSemiBold,
   );
 }

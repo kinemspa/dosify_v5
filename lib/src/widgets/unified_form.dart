@@ -89,10 +89,23 @@ class SectionFormCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           border: Border.all(
             color: theme.colorScheme.outlineVariant.withValues(
-              alpha: isDark ? 0.12 : kOpacityFaint,
+              alpha: isDark
+                  ? kFramelessCardBorderOpacityDark
+                  : kFramelessCardBorderOpacityLight,
             ),
             width: kBorderWidthThin,
           ),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: kFramelessCardShadowOpacity,
+                    ),
+                    blurRadius: kFramelessCardShadowBlur,
+                    offset: kFramelessCardShadowOffset,
+                  ),
+                ],
         ),
         child: content,
       );
@@ -289,10 +302,23 @@ class CollapsibleSectionFormCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           border: Border.all(
             color: cs.outlineVariant.withValues(
-              alpha: isDark ? 0.12 : kOpacityFaint,
+              alpha: isDark
+                  ? kFramelessCardBorderOpacityDark
+                  : kFramelessCardBorderOpacityLight,
             ),
             width: kBorderWidthThin,
           ),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: kFramelessCardShadowOpacity,
+                    ),
+                    blurRadius: kFramelessCardShadowBlur,
+                    offset: kFramelessCardShadowOffset,
+                  ),
+                ],
         ),
         child: content,
       );

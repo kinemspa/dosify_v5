@@ -28,7 +28,7 @@ void showAppSnackBar(
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message, style: appSnackBarTextStyle(context)),
-        backgroundColor: kAppSnackBarBackgroundColor,
+        backgroundColor: snackBarBackgroundColor(context),
         behavior: SnackBarBehavior.fixed,
       ),
     );
@@ -52,7 +52,7 @@ void showAppSnackBar(
           child: Align(
             alignment: Alignment.topCenter,
             child: Material(
-              color: kAppSnackBarBackgroundColor,
+              color: snackBarBackgroundColor(context),
               borderRadius: kAppSnackBarBorderRadius,
               child: Padding(
                 padding: kAppSnackBarInnerPadding,
@@ -69,7 +69,7 @@ void showAppSnackBar(
                       TextButton(
                         style: TextButton.styleFrom(
                           padding: kTightTextButtonPadding,
-                          foregroundColor: kAppSnackBarForegroundColor,
+                          foregroundColor: snackBarForegroundColor(context),
                         ),
                         onPressed: () {
                           clearAppSnackBars();
