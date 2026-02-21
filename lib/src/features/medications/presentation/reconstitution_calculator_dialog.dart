@@ -60,6 +60,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
     super.key,
     required this.initialStrengthValue,
     required this.unitLabel, // e.g., mg, mcg, g, units
+    this.medicationName,
     this.initialDiluentName,
     this.initialDoseValue,
     this.initialDoseUnit,
@@ -70,6 +71,7 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
 
   final double initialStrengthValue; // total quantity in the vial (S)
   final String unitLabel;
+  final String? medicationName;
   final String? initialDiluentName;
   final double? initialDoseValue;
   final String? initialDoseUnit; // 'mcg'|'mg'|'g'|'units'
@@ -243,9 +245,14 @@ class _ReconstitutionCalculatorDialogState
       updatedAt: now,
     );
 
-    await _savedRepo.upsert(item);
-    if (!mounted) return;
-    showAppSnackBar(context, 'Saved reconstitution');
+    try {
+      await _savedRepo.upsert(item);
+      if (!mounted) return;
+      showAppSnackBar(context, 'Saved reconstitution');
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnackBar(context, 'Failed to save reconstitution');
+    }
   }
 
   Future<void> _openLoadSavedSheet() async {
@@ -352,11 +359,14 @@ class _ReconstitutionCalculatorDialogState
                   size: 24,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Reconstitution Calculator',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: fg,
-                    fontWeight: kFontWeightBold,
+                Flexible(
+                  child: Text(
+                    'Reconstitution Calculator',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: fg,
+                      fontWeight: kFontWeightBold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const Spacer(),
@@ -434,6 +444,7 @@ class _ReconstitutionCalculatorDialogState
                       key: ValueKey<int>(_calculatorSeedVersion),
                       initialStrengthValue: _activeStrengthValue,
                       unitLabel: _activeUnitLabel,
+                      medicationName: widget.medicationName,
                       initialDiluentName: _seedDiluentName,
                       initialDoseValue: _seedDoseValue,
                       initialDoseUnit: _seedDoseUnit,

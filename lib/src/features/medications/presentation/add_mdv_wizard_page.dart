@@ -805,6 +805,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     ReconstitutionCalculatorDialog(
                       initialStrengthValue: strength,
                       unitLabel: _strengthUnit.name,
+                      medicationName: _nameCtrl.text.trim(),
                       initialDiluentName: _reconResult?.diluentName,
                       initialDoseValue: _reconResult?.recommendedDose,
                       initialDoseUnit: _reconResult?.doseUnit,

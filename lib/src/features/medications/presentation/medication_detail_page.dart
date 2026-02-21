@@ -1432,6 +1432,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     return CollapsibleSectionFormCard(
       neutral: true,
+      frameless: true,
       title: 'Schedules',
       leading: Icon(
         Icons.calendar_month_rounded,
@@ -1448,14 +1449,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         if (!hasSchedules)
           buildHelperText(context, 'No schedules')
         else
-          Container(
-            decoration: buildInsetSectionDecoration(
-              context: context,
-              showBorder: false,
-            ),
-            padding: kInsetSectionPadding,
-            child: MedicationSchedulesSection(medication: med),
-          ),
+          MedicationSchedulesSection(medication: med),
       ],
     );
   }
@@ -1530,6 +1524,32 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           isPlaceholder: med.manufacturer == null,
           onTap: () => _editManufacturer(context, med),
         ),
+
+        // DESCRIPTION & NOTES (immediately after Manufacturer)
+        if (med.description != null && med.description!.isNotEmpty) ...[
+          Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+          ),
+          _buildDetailTile(
+            context,
+            'Description',
+            med.description!,
+            maxLines: null,
+            showEllipsis: false,
+            onTap: () => _editDescription(context, med),
+          ),
+        ],
+        if (med.notes != null && med.notes!.isNotEmpty)
+          _buildDetailTile(
+            context,
+            'Notes',
+            med.notes!,
+            isItalic: true,
+            onTap: () => _editNotes(context, med),
+          ),
 
         const SizedBox(height: kSpacingS), // Section spacing (divider removed)
         // ACTIVE VIAL (MDV only) - merged into this card since it's the tracked medicine for dosing
@@ -1655,31 +1675,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           _buildConditionsRow(context, med),
         ],
 
-        // NOTES (optional)
-        if (med.description != null && med.description!.isNotEmpty) ...[
-          Divider(
-            height: 1,
-            indent: 16,
-            endIndent: 16,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-          ),
-          _buildDetailTile(
-            context,
-            'Description',
-            med.description!,
-            maxLines: null,
-            showEllipsis: false,
-            onTap: () => _editDescription(context, med),
-          ),
-        ],
-        if (med.notes != null && med.notes!.isNotEmpty)
-          _buildDetailTile(
-            context,
-            'Notes',
-            med.notes!,
-            isItalic: true,
-            onTap: () => _editNotes(context, med),
-          ),
       ],
     );
   }
