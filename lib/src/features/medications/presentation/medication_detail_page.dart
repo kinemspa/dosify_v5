@@ -4365,11 +4365,12 @@ Future<void> _editDate(
   Medication med,
   String title,
   DateTime? initialDate,
-  void Function(DateTime) onSave,
-) async {
+  void Function(DateTime) onSave, {
+  int defaultOffsetDays = kDefaultMedicationExpiryDays,
+}) async {
   final picked = await SmartExpiryPicker.show(
     context,
-    initialDate: initialDate ?? DateTime.now(),
+    initialDate: initialDate ?? DateTime.now().add(Duration(days: defaultOffsetDays)),
     firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
     lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
   );
@@ -4582,10 +4583,17 @@ void _editBatchNumber(BuildContext context, Medication med) {
 }
 
 void _editExpiry(BuildContext context, Medication med) {
+  final defaultDays = switch (med.form) {
+    MedicationForm.tablet || MedicationForm.capsule => kDefaultTabletCapsuleExpiryDays,
+    MedicationForm.multiDoseVial ||
+    MedicationForm.singleDoseVial ||
+    MedicationForm.prefilledSyringe =>
+      kDefaultInjectionExpiryDays,
+  };
   _editDate(context, med, 'Expiry Date', med.expiry, (val) {
     final box = Hive.box<Medication>('medications');
     box.put(med.id, med.copyWith(expiry: val));
-  });
+  }, defaultOffsetDays: defaultDays);
 }
 
 void _editStorageLocation(BuildContext context, Medication med) {
