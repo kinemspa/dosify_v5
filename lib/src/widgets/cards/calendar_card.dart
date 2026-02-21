@@ -36,6 +36,7 @@ class CalendarCard extends ConsumerStatefulWidget {
     this.reserveReorderHandleGutterWhenCollapsed = false,
     this.neutral = true,
     this.frameless = true,
+    this.showSelectedDayPanel = true,
     this.height,
   });
 
@@ -52,6 +53,9 @@ class CalendarCard extends ConsumerStatefulWidget {
   final bool reserveReorderHandleGutterWhenCollapsed;
   final bool neutral;
   final bool frameless;
+
+  /// When false, hides the selected day dose list panel below the calendar grid.
+  final bool showSelectedDayPanel;
 
   /// Overrides the default mini calendar height.
   final double? height;
@@ -114,7 +118,7 @@ class _CalendarCardState extends ConsumerState<CalendarCard> {
             defaultView: CalendarView.month,
             scheduleId: scheduleId,
             medicationId: medicationId,
-            showSelectedDayPanel: true,
+            showSelectedDayPanel: widget.showSelectedDayPanel,
             showHeaderOverride: true,
             showViewToggleOverride: true,
             embedInParentCard: true,

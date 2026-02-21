@@ -158,10 +158,9 @@ class NotificationService {
             },
             onDidReceiveBackgroundNotificationResponse:
                 dosifiNotificationTapBackground,
-          )
-          .timeout(const Duration(seconds: 3));
+          );
     } catch (e) {
-      _log('FlutterLocalNotificationsPlugin.initialize failed/timeout: $e');
+      _log('FlutterLocalNotificationsPlugin.initialize failed: $e');
       // Do not block app startup if the notifications plugin is unavailable.
       return;
     }

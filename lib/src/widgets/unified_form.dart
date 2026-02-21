@@ -83,7 +83,20 @@ class SectionFormCard extends StatelessWidget {
       ),
     );
 
-    if (frameless) return content;
+    if (frameless) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(
+              alpha: isDark ? 0.12 : kOpacityFaint,
+            ),
+            width: kBorderWidthThin,
+          ),
+        ),
+        child: content,
+      );
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -264,7 +277,22 @@ class CollapsibleSectionFormCard extends StatelessWidget {
       ],
     );
 
-    if (frameless) return content;
+    if (frameless) {
+      // Frameless cards still get a very subtle border so adjacent cards are
+      // visually distinguishable without adding a background fill.
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          border: Border.all(
+            color: cs.outlineVariant.withValues(
+              alpha: isDark ? 0.12 : kOpacityFaint,
+            ),
+            width: kBorderWidthThin,
+          ),
+        ),
+        child: content,
+      );
+    }
 
     return Container(
       decoration: BoxDecoration(

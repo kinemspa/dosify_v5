@@ -156,18 +156,10 @@ class DetailPageScaffold extends StatelessWidget {
                 ],
               ),
             ],
-            flexibleSpace: LayoutBuilder(
-              builder: (context, constraints) {
-                final expanded = expandedHeight ?? kDetailHeaderExpandedHeight;
-                final collapsed =
-                    collapsedHeight ?? kDetailHeaderCollapsedHeight;
-                final scrollProgress =
-                    ((expanded - constraints.maxHeight) /
-                            (expanded - collapsed))
-                        .clamp(0.0, 1.0);
-
-                // Match Medication Details: title is only visible when near-collapsed.
-                final titleOpacity = (3 * scrollProgress - 2).clamp(0.0, 1.0);
+            flexibleSpace: Builder(
+              builder: (context) {
+                // Title is always visible in the toolbar so users see the page name on open.
+                const titleOpacity = 1.0;
 
                 final top = MediaQuery.of(context).padding.top;
                 final barHeight = toolbarHeight ?? kDetailHeaderCollapsedHeight;

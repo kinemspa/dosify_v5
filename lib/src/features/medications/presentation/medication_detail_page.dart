@@ -648,6 +648,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       _kCardCalendar: CalendarCard(
         scope: CalendarCardScope.medication(med.id),
         showOpenCalendarAction: false,
+        showSelectedDayPanel: false,
         isExpanded: _isCalendarExpanded,
         reserveReorderHandleGutterWhenCollapsed: true,
         onExpandedChanged: (expanded) {
@@ -1449,7 +1450,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         if (!hasSchedules)
           buildHelperText(context, 'No schedules')
         else
-          MedicationSchedulesSection(medication: med),
+          MedicationSchedulesSection(medication: med, showNextDoseCard: false),
       ],
     );
   }
