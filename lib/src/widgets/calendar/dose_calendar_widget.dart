@@ -154,7 +154,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     super.didChangeDependencies();
     if (!_didInitialLoad) {
       _didInitialLoad = true;
-      _loadDoses();
+      // Defer to post-frame so MaterialLocalizations is fully available and
+      // the widget has had its first build before any setState calls.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loadDoses();
+      });
     }
   }
 
