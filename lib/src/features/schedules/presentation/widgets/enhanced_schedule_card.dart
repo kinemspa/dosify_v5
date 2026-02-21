@@ -309,7 +309,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
               ? EdgeInsets.zero
               : EdgeInsets.all(_isExpanded ? kCardPadding : kSpacingM),
           decoration: BoxDecoration(
-            color: _isExpanded ? colorScheme.surface : Colors.transparent,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
             border: _isExpanded
                 ? Border.all(

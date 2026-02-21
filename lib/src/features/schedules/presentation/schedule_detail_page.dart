@@ -1129,7 +1129,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               : medsBox.get(medId);
 
           return DetailPageScaffold(
-            title: 'Schedule Details',
+            title: mergedTitle,
             expandedHeight: kDetailHeaderExpandedHeightCompact,
             onEdit: () => _openEditScheduleDialog(s),
             onDelete: () => _confirmDelete(context, s),

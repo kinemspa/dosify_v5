@@ -413,9 +413,13 @@ class LabelFieldRow extends StatelessWidget {
               label,
               style: lightText
                   ? fieldLabelStyle(context)?.copyWith(
-                      color: cs.onPrimary.withValues(
-                        alpha: kReconTextMediumOpacity,
-                      ),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? cs.onSurface.withValues(
+                              alpha: kReconTextMediumOpacity,
+                            )
+                          : cs.onPrimary.withValues(
+                              alpha: kReconTextMediumOpacity,
+                            ),
                     )
                   : fieldLabelStyle(context),
             ),

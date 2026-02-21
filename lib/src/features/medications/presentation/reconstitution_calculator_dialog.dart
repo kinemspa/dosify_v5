@@ -359,7 +359,7 @@ class _ReconstitutionCalculatorDialogState
                   size: 24,
                 ),
                 const SizedBox(width: 12),
-                Flexible(
+                Expanded(
                   child: Text(
                     'Reconstitution Calculator',
                     style: theme.textTheme.titleLarge?.copyWith(
@@ -369,7 +369,7 @@ class _ReconstitutionCalculatorDialogState
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: _openLoadSavedSheet,
                   style: TextButton.styleFrom(
