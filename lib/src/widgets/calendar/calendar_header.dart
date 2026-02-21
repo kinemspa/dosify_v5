@@ -93,7 +93,7 @@ class CalendarHeader extends StatelessWidget {
           // Today button
           if (isOnTodayContext)
             OutlinedButton(
-              onPressed: null,
+              onPressed: onToday,
               style: OutlinedButton.styleFrom(
                 foregroundColor: colorScheme.primary,
                 side: BorderSide(

@@ -1291,68 +1291,67 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       );
     }
 
-    Widget buildTop(BuildContext context) {
-      if (!includeHandle && !includeHeader) return const SizedBox.shrink();
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (includeHandle) buildHandle(context),
-          if (includeHeader) buildHeader(context),
-        ],
-      );
-    }
+    // Scrollable dose list — the handle/header are rendered OUTSIDE this widget
+    // so they stay fixed (pinned) while the doses scroll underneath.
+    Widget buildDoseList() {
+      if (dayDoses.isEmpty) {
+        return _wrapWithCenteredDownScrollHint(
+          showHint: _showSelectedDayStageDownHint,
+          onMetrics: _updateSelectedDayStageDownHint,
+          child: ListView(
+            controller: scrollController,
+            padding: calendarStageListPadding(listBottomPadding),
+            children: [
+              const SizedBox(height: kSpacingS),
+              const CalendarNoDosesState(showIcon: false, compact: true),
+            ],
+          ),
+        );
+      }
 
-    // The handle + header are rendered together as a *single* top widget.
-    // Treat it as one list item so hour indexing stays valid.
-    final topCount = (includeHandle || includeHeader) ? 1 : 0;
-
-    if (dayDoses.isEmpty) {
       return _wrapWithCenteredDownScrollHint(
         showHint: _showSelectedDayStageDownHint,
         onMetrics: _updateSelectedDayStageDownHint,
-        child: ListView(
+        child: ListView.builder(
           controller: scrollController,
           padding: calendarStageListPadding(listBottomPadding),
-          children: [
-            buildTop(context),
-            const SizedBox(height: kSpacingS),
-            const CalendarNoDosesState(showIcon: false, compact: true),
-          ],
+          itemCount: hours.length,
+          itemBuilder: (context, index) {
+            final hour = hours[index];
+            final hourDoses = dosesByHour[hour] ?? const [];
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (index == 0) const SizedBox(height: kSpacingS),
+                if (index != 0)
+                  Divider(
+                    height: kSpacingM,
+                    thickness: kBorderWidthThin,
+                    color: Theme.of(context).colorScheme.outlineVariant
+                        .withValues(alpha: kOpacityVeryLow),
+                  ),
+                _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
+              ],
+            );
+          },
         ),
       );
     }
 
-    return _wrapWithCenteredDownScrollHint(
-      showHint: _showSelectedDayStageDownHint,
-      onMetrics: _updateSelectedDayStageDownHint,
-      child: ListView.builder(
-        controller: scrollController,
-        padding: calendarStageListPadding(listBottomPadding),
-        itemCount: hours.length + topCount,
-        itemBuilder: (context, index) {
-          if (topCount > 0 && index == 0) return buildTop(context);
+    // Compose: fixed (pinned) handle + header above the scrollable dose list.
+    // Using Column + Expanded ensures the header never scrolls away.
+    if (includeHandle || includeHeader) {
+      return Column(
+        children: [
+          if (includeHandle) buildHandle(context),
+          if (includeHeader) buildHeader(context),
+          Expanded(child: buildDoseList()),
+        ],
+      );
+    }
 
-          final hourIndex = index - topCount;
-          final hour = hours[hourIndex];
-          final hourDoses = dosesByHour[hour] ?? const [];
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (hourIndex == 0) const SizedBox(height: kSpacingS),
-              if (hourIndex != 0)
-                Divider(
-                  height: kSpacingM,
-                  thickness: kBorderWidthThin,
-                  color: Theme.of(context).colorScheme.outlineVariant
-                      .withValues(alpha: kOpacityVeryLow),
-                ),
-              _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
-            ],
-          );
-        },
-      ),
-    );
+    return buildDoseList();
   }
 
   Widget _buildCurrentView() {
