@@ -117,6 +117,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   final DraggableScrollableController _selectedDayStageController =
       DraggableScrollableController();
 
+  /// Cached from the LayoutBuilder so _snapSelectedDayStageToInitial uses
+  /// the exact same geometry as the DraggableScrollableSheet's initialChildSize.
+  double? _cachedStageInitialRatio;
+
   ValueListenable<Box<DoseLog>>? _doseLogsListenable;
   ValueListenable<Box<Schedule>>? _schedulesListenable;
   Timer? _reloadDebounce;
@@ -206,13 +210,18 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (!_selectedDayStageController.isAttached) return;
-      final initial = widget.variant == CalendarVariant.full
-          ? _selectedDayStageInitialRatioForFullHeight(
-              _currentEffectiveHeightForStage(),
-              showHeader: _showHeaderForCurrentVariant(),
-              showUpNextCard: widget.showUpNextCard,
-            )
-          : _selectedDayStageInitialRatio();
+      // Use the cached ratio from LayoutBuilder to guarantee the same geometry
+      // as DraggableScrollableSheet's initialChildSize. Fall back to a fresh
+      // computation only when the cache is not yet available.
+      final initial =
+          _cachedStageInitialRatio ??
+          (widget.variant == CalendarVariant.full
+              ? _selectedDayStageInitialRatioForFullHeight(
+                  _currentEffectiveHeightForStage(),
+                  showHeader: _showHeaderForCurrentVariant(),
+                  showUpNextCard: widget.showUpNextCard,
+                )
+              : _selectedDayStageInitialRatio());
       _selectedDayStageController.animateTo(
         initial,
         duration: kAnimationNormal,
@@ -1007,6 +1016,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                   widget.showUpNextCard,
             )
           : null;
+
+      // Keep the cached ratio in sync so _snapSelectedDayStageToInitial uses
+      // the same geometry as initialChildSize (no double-calculation drift).
+      if (stageInitialRatio != null && stageInitialRatio != _cachedStageInitialRatio) {
+        // Schedule as post-frame to avoid setState during build.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _cachedStageInitialRatio = stageInitialRatio;
+        });
+      }
 
       Widget buildCalendarArea() {
         if (_isLoading) {

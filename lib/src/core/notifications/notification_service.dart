@@ -370,7 +370,7 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: 'ic_stat_notification',
-        largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
+        largeIcon: DrawableResourceAndroidBitmap('syringe'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -434,7 +434,7 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: 'ic_stat_notification',
-        largeIcon: DrawableResourceAndroidBitmap('ic_notification_large'),
+        largeIcon: DrawableResourceAndroidBitmap('syringe'),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
