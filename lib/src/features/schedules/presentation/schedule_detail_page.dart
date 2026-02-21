@@ -1283,6 +1283,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               medications: meds,
               includedMedicationIds: included,
               includedScheduleIds: {s.id},
+              showMedFilter: false,
               rangePreset: _activityRangePreset,
               onRangePresetChanged: (next) {
                 if (!mounted) return;

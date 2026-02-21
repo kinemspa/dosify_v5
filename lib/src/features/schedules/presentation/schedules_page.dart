@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
@@ -179,6 +180,7 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
                   label: const Text('Add Schedule'),
                 )
               : const SizedBox.shrink(),
+      bottomNavigationBar: const AnchoredAdBanner(),
     );
   }
 

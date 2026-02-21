@@ -71,7 +71,7 @@ class _AddTabletWizardPageState
   // Step 3: Inventory
   final _stockValueCtrl = TextEditingController(text: '0');
   bool _lowStockEnabled = false;
-  final _lowStockThresholdCtrl = TextEditingController(text: '0');
+  final _lowStockThresholdCtrl = TextEditingController(text: '1');
 
   // Step 4: Storage
   DateTime? _expiry;
@@ -541,7 +541,7 @@ class _AddTabletWizardPageState
                         int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
                     setState(
                       () => _lowStockThresholdCtrl.text = (v - 1)
-                          .clamp(0, 1000000)
+                          .clamp(1, 1000000)
                           .toString(),
                     );
                   },
@@ -550,7 +550,7 @@ class _AddTabletWizardPageState
                         int.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 0;
                     final stock =
                         int.tryParse(_stockValueCtrl.text.trim()) ?? 1000000;
-                    final newVal = (v + 1).clamp(0, stock);
+                    final newVal = (v + 1).clamp(1, stock);
                     setState(
                       () => _lowStockThresholdCtrl.text = newVal.toString(),
                     );
@@ -564,7 +564,7 @@ class _AddTabletWizardPageState
                   },
                   decoration: buildCompactFieldDecoration(
                     context: context,
-                    hint: '0',
+                    hint: '1',
                   ),
                   compact: true,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],

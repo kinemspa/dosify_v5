@@ -120,6 +120,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   ValueListenable<Box<DoseLog>>? _doseLogsListenable;
   ValueListenable<Box<Schedule>>? _schedulesListenable;
   Timer? _reloadDebounce;
+  bool _didInitialLoad = false;
 
   @override
   void initState() {
@@ -132,7 +133,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     } else if (widget.requireHourSelectionInDayView) {
       _selectedHour = DateTime.now().hour;
     }
-    _loadDoses();
+    // NOTE: _loadDoses() is deferred to didChangeDependencies so that
+    // MaterialLocalizations.of(context) (used by _getDateRange) is safe to call.
 
     // Auto-refresh calendar when schedules or dose logs change.
     // This keeps the calendar up-to-date when a dose is marked taken/skipped/etc.
@@ -141,6 +143,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     _schedulesListenable = Hive.box<Schedule>('schedules').listenable();
     _schedulesListenable!.addListener(_scheduleReload);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didInitialLoad) {
+      _didInitialLoad = true;
+      _loadDoses();
+    }
   }
 
   @override
@@ -1762,9 +1773,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         _selectedDate!.month == now.month &&
         _selectedDate!.day == now.day;
 
-    final formatted = MaterialLocalizations.of(
-      context,
-    ).formatFullDate(_selectedDate!);
+    final formatted = DateTimeFormatter.formatFullDate(context, _selectedDate!);
 
     return isToday ? 'Today — $formatted' : formatted;
   }

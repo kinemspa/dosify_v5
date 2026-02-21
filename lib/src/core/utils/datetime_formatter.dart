@@ -148,6 +148,31 @@ class DateTimeFormatter {
     return '${formatDate(dateTime)} ${formatTime(context, dateTime)}';
   }
 
+  /// Format a DateTime as a verbose full date for display headings.
+  ///
+  /// Respects the user's date format preference:
+  ///   dmy  → "Saturday, 21 February 2026"
+  ///   mdy  → "Saturday, February 21, 2026"
+  ///   ymd  → "Saturday, 2026 February 21"
+  ///   system → uses device locale (e.g., en_AU → dmy order)
+  static String formatFullDate(BuildContext context, DateTime dateTime) {
+    final config = DateTimeFormatSettings.value.value;
+
+    switch (config.dateFormat) {
+      case DateFormat.dmy:
+        return intl.DateFormat('EEEE, d MMMM y').format(dateTime);
+      case DateFormat.mdy:
+        return intl.DateFormat('EEEE, MMMM d, y').format(dateTime);
+      case DateFormat.ymd:
+        return intl.DateFormat('EEEE, y MMMM d').format(dateTime);
+      case DateFormat.system:
+        // Honour the device locale so en_AU → "Saturday, 21 February 2026"
+        // and en_US → "Saturday, February 21, 2026".
+        final locale = Localizations.localeOf(context).toString();
+        return intl.DateFormat.yMMMMEEEEd(locale).format(dateTime);
+    }
+  }
+
   /// Format day number (e.g., "31" or "5").
   ///
   /// Used in calendar badges and date displays.

@@ -22,6 +22,7 @@ class ActivityCard extends StatefulWidget {
     this.reserveReorderHandleGutterWhenCollapsed = false,
     this.neutral = true,
     this.frameless = true,
+    this.showMedFilter = true,
   });
 
   final String title;
@@ -42,6 +43,11 @@ class ActivityCard extends StatefulWidget {
   final bool reserveReorderHandleGutterWhenCollapsed;
   final bool neutral;
   final bool frameless;
+
+  /// Whether to show the medication filter control.
+  /// Set to false when the card is scoped to a single schedule/medication
+  /// and the filter is not meaningful.
+  final bool showMedFilter;
 
   @override
   State<ActivityCard> createState() => _ActivityCardState();
@@ -79,35 +85,36 @@ class _ActivityCardState extends State<ActivityCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              SizedBox(
-                width: kCompactControlWidth,
-                child: widget.onIncludedMedicationIdsChanged == null
-                    ? Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '${widget.includedMedicationIds.length}/${meds.length} meds',
-                          style: helperTextStyle(context),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      )
-                    : MultiSelectDropdown36<String>(
-                        items: meds
-                            .map(
-                              (m) => MultiSelectItem<String>(
-                                value: m.id,
-                                label: m.name,
-                              ),
-                            )
-                            .toList(growable: false),
-                        selectedValues: widget.includedMedicationIds,
-                        onChanged: widget.onIncludedMedicationIdsChanged!,
-                        buttonLabel:
+              if (widget.showMedFilter)
+                SizedBox(
+                  width: kCompactControlWidth,
+                  child: widget.onIncludedMedicationIdsChanged == null
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
                             '${widget.includedMedicationIds.length}/${meds.length} meds',
-                        primaryFill: false,
-                      ),
-              ),
-              const SizedBox(width: kSpacingXXS),
+                            style: helperTextStyle(context),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
+                      : MultiSelectDropdown36<String>(
+                          items: meds
+                              .map(
+                                (m) => MultiSelectItem<String>(
+                                  value: m.id,
+                                  label: m.name,
+                                ),
+                              )
+                              .toList(growable: false),
+                          selectedValues: widget.includedMedicationIds,
+                          onChanged: widget.onIncludedMedicationIdsChanged!,
+                          buttonLabel:
+                              '${widget.includedMedicationIds.length}/${meds.length} meds',
+                          primaryFill: false,
+                        ),
+                ),
+              if (widget.showMedFilter) const SizedBox(width: kSpacingXXS),
               SizedBox(
                 width: kCompactControlWidth,
                 child: SmallDropdown36<ReportTimeRangePreset>(
