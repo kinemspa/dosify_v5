@@ -529,10 +529,10 @@ class ScheduleCard extends StatelessWidget {
           ScheduleScheduler.doseNotificationIdFor(s.id, next),
           snoozeUntil,
           title: s.medicationName,
-          body: '${s.name} • Snoozed',
+          body: 'Snoozed',
           payload: 'dose:${s.id}:${next.millisecondsSinceEpoch}',
           actions: NotificationService.upcomingDoseActions,
-          expandedLines: <String>[s.name, 'Snoozed'],
+          expandedLines: <String>['Snoozed'],
         );
       } catch (e) {
         // ignore scheduling failure - best effort

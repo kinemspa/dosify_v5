@@ -703,11 +703,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           ),
           when,
           title: dose.medicationName,
-          body: '${dose.scheduleName} • Snoozed until $time',
+          body: 'Snoozed until $time',
           payload:
               'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
           actions: NotificationService.upcomingDoseActions,
-          expandedLines: <String>[dose.scheduleName, 'Snoozed until $time'],
+          expandedLines: <String>['Snoozed until $time'],
         );
       }
 

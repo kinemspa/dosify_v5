@@ -1,5 +1,6 @@
 // Dart imports:
 import 'dart:io' show Platform;
+import 'dart:ui' show Color;
 
 // Flutter imports:
 import 'package:flutter/foundation.dart';
@@ -363,7 +364,7 @@ class NotificationService {
     _log('showTest() called');
 
     const title = 'Test Medication';
-    const body = 'Morning Dose • 5 mg • 8:00 AM';
+    const body = '5 mg | 8:00 AM';
 
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
@@ -459,14 +460,14 @@ class NotificationService {
     await _fln.show(
       item1,
       'Medication A',
-      'Morning Dose • 5 mg • 8:00 AM',
+      '5 mg | 8:00 AM',
       itemDetails,
       payload: 'dose:test_group_a:${DateTime.now().millisecondsSinceEpoch}',
     );
     await _fln.show(
       item2,
       'Medication B',
-      'Evening Dose • 10 mg • 8:00 PM',
+      '10 mg | 8:00 PM',
       itemDetails,
       payload: 'dose:test_group_b:${DateTime.now().millisecondsSinceEpoch}',
     );
@@ -956,6 +957,7 @@ class NotificationService {
         largeIcon: shouldShowSyringeIcon
             ? const DrawableResourceAndroidBitmap('syringe')
             : null,
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,

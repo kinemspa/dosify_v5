@@ -198,8 +198,8 @@ class ScheduleScheduler {
       final title = s.medicationName;
       final metrics = ScheduleDoseMetrics.format(s);
       final dueAt = formatHm(when);
-      final body = '${s.name} • $metrics • $dueAt';
-      final expandedLines = <String>[s.name, metrics, 'Due $dueAt'];
+      final body = '$metrics | $dueAt';
+      final expandedLines = <String>[metrics, 'Due $dueAt'];
 
       final missedAt = DoseTimingSettings.missedAt(
         schedule: s,
@@ -246,11 +246,11 @@ class ScheduleScheduler {
           reminderId,
           reminderAt,
           title: 'Overdue: ${s.medicationName}',
-          body: '${s.name} • $metrics • due $dueAt',
+          body: '$metrics | due $dueAt',
           groupKey: groupKey,
           payload: payload,
           actions: NotificationService.upcomingDoseActions,
-          expandedLines: <String>[s.name, metrics, 'Due $dueAt'],
+          expandedLines: <String>[metrics, 'Due $dueAt'],
           timeoutAfterMs: reminderTimeoutMs,
         );
       }

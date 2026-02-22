@@ -130,7 +130,7 @@ Future<void> showDoseActionSheetFromModels(
       if (when.isAfter(DateTime.now())) {
         final metrics = ScheduleDoseMetrics.format(schedule);
         final time = DateTimeFormatter.formatTime(context, when);
-        final body = '${schedule.name} • $metrics • Snoozed until $time';
+        final body = '$metrics | Snoozed until $time';
         await NotificationService.scheduleAtAlarmClock(
           ScheduleScheduler.doseNotificationIdFor(
             dose.scheduleId,
@@ -142,7 +142,7 @@ Future<void> showDoseActionSheetFromModels(
           payload:
               'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
           actions: NotificationService.upcomingDoseActions,
-          expandedLines: <String>[schedule.name, metrics, 'Snoozed until $time'],
+          expandedLines: <String>[metrics, 'Snoozed until $time'],
         );
       }
 
