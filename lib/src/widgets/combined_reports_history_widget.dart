@@ -52,8 +52,6 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     return value.toStringAsFixed(2);
   }
 
-  String _activityTypeLabel() => 'Dose';
-
   @override
   Widget buildTitle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -63,8 +61,9 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Primary: dose amount (what the user cares about at a glance)
         Text(
-          medicationName,
+          '${_formatAmount(displayValue)} $displayUnit',
           style: bodyTextStyle(
             context,
           )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
@@ -72,36 +71,15 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: kSpacingXS / 2),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: kSpacingXS,
-          children: [
-            Text(
-              _activityTypeLabel(),
-              style: smallHelperTextStyle(
-                context,
-                color: cs.onSurfaceVariant.withValues(
-                  alpha: kOpacityMediumHigh,
-                ),
-              )?.copyWith(fontWeight: kFontWeightSemiBold),
-            ),
-            Text(
-              '•',
-              style: smallHelperTextStyle(
-                context,
-                color: cs.onSurfaceVariant.withValues(alpha: kOpacityMedium),
-              ),
-            ),
-            Text(
-              '${_formatAmount(displayValue)} $displayUnit',
-              style: smallHelperTextStyle(
-                context,
-                color: cs.onSurfaceVariant.withValues(
-                  alpha: kOpacityMediumHigh,
-                ),
-              ),
-            ),
-          ],
+        // Secondary: medication name (context when multiple meds shown)
+        Text(
+          medicationName,
+          style: smallHelperTextStyle(
+            context,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

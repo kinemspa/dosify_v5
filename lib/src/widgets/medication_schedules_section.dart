@@ -35,8 +35,6 @@ class MedicationSchedulesSection extends StatelessWidget {
           NextDoseCard(medication: medication, schedules: schedules),
           const SizedBox(height: kSpacingM),
         ],
-        Text('Saved Schedules', style: sectionTitleStyle(context)),
-        const SizedBox(height: kSpacingS),
         ...schedules.map(
           (schedule) => EnhancedScheduleCard(
             schedule: schedule,
