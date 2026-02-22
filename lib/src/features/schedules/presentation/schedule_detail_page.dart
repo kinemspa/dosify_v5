@@ -1290,7 +1290,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         padding: const EdgeInsets.only(bottom: kSpacingS),
         child: CollapsibleSectionFormCard(
           neutral: true,
-          frameless: true,
           title: 'Schedule Details',
           titleStyle: reviewCardTitleStyle(context),
           isExpanded: _isScheduleDetailsExpanded,
@@ -1425,6 +1424,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       padding: const EdgeInsets.only(bottom: kSpacingS),
       child: SectionFormCard(
         neutral: true,
+        frameless: false,
         title: 'Next Dose',
         children: [
           buildDetailInfoRow(

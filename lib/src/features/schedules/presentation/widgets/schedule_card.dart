@@ -189,7 +189,7 @@ class ScheduleCard extends StatelessWidget {
           ),
           const SizedBox(height: kFieldSpacing),
           Text(
-            '${_doseLine(s)} · ${_timesLine(context, s)}',
+            '${_doseLine(s)} × ${_timesLine(context, s)}',
             style: helperTextStyle(context),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

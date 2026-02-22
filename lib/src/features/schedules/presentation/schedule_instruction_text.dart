@@ -19,7 +19,7 @@ String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
 String scheduleDoseSummaryLabel(Schedule schedule) {
   final dose = _doseLabel(schedule);
   final type = _scheduleTypeLabel(schedule);
-  return '$dose · $type';
+  return '$dose × $type';
 }
 
 String _doseLabel(Schedule s) {

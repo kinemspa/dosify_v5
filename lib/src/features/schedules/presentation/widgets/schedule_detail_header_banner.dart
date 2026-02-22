@@ -194,17 +194,30 @@ class _HeaderPauseResumeAction extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          badge,
-          const SizedBox(width: kSpacingXXS),
-          Icon(
-            hintIcon,
-            size: kIconSizeXSmall,
-            color: cs.onPrimary.withValues(alpha: 0.7),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingS,
+          vertical: kSpacingXXS,
+        ),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: cs.onPrimary.withValues(alpha: 0.35),
+            width: kBorderWidthThin,
           ),
-        ],
+          borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            badge,
+            const SizedBox(width: kSpacingXXS),
+            Icon(
+              hintIcon,
+              size: kIconSizeXSmall,
+              color: cs.onPrimary.withValues(alpha: 0.7),
+            ),
+          ],
+        ),
       ),
     );
   }
