@@ -1124,6 +1124,48 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       // calendar grid doesn't get squashed to make room.
       if ((showSelectedDayStage || showSelectDayPrompt) &&
           widget.variant != CalendarVariant.full) {
+        // Anchor the panel top exactly to the bottom of the calendar grid so
+        // day / week cells are never obscured (day view never reaches this path
+        // since showSelectedDayStage is false in day view).
+        if (_currentView != CalendarView.day) {
+          final gridTop = showHeader ? kCalendarHeaderHeight : 0.0;
+          final calendarContentHeight = gridTop +
+              switch (_currentView) {
+                CalendarView.month =>
+                  kCalendarMonthDayHeaderHeight + 6 * kCalendarDayHeight,
+                CalendarView.week =>
+                  kCalendarWeekHeaderHeight + kCalendarWeekGridHeight,
+                CalendarView.day => 0.0,
+              };
+
+          return Stack(
+            children: [
+              Positioned.fill(child: bodyColumn),
+              Positioned(
+                left: 0,
+                right: 0,
+                top: calendarContentHeight,
+                bottom: 0,
+                child: showSelectedDayStage
+                    ? _buildSelectedDayPanel()
+                    : Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          kSpacingS,
+                          0,
+                          kSpacingS,
+                          kSpacingS,
+                        ),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: _buildSelectDayPrompt(context),
+                        ),
+                      ),
+              ),
+            ],
+          );
+        }
+
+        // Week / day: ratio-based overlay.
         final ratio = switch (_currentView) {
           CalendarView.day => kCalendarSelectedDayPanelHeightRatioDay,
           CalendarView.week => kCalendarSelectedDayPanelHeightRatioWeek,

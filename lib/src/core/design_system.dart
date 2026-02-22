@@ -157,8 +157,11 @@ const double kCardMaxWidth = 800;
 
 /// Home page - mini calendar height.
 ///
-/// Used for the embedded [DoseCalendarWidget] when shown on Home.
-const double kHomeMiniCalendarHeight = 420;
+/// Sized to fit the 6-row month grid (CalendarHeader 56 + day-names 28 +
+/// 6 × kCalendarDayHeight 52 = 396) PLUS a dose-stage panel below it
+/// (~184 dp) so the panel never overlaps calendar day cells.
+/// 396 + 184 = 580.
+const double kHomeMiniCalendarHeight = 580;
 
 /// Home page - Today (Up Next) preview.
 ///
