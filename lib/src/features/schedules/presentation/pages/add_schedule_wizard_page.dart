@@ -1862,6 +1862,10 @@ class _AddScheduleWizardPageState
 
     if (!mounted) return;
     showAppSnackBar(context, 'Schedule "${schedule.name}" saved');
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
     context.go('/schedules');
   }
 

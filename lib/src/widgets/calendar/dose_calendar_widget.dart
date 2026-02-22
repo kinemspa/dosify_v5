@@ -652,12 +652,12 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           dose.scheduledTime,
         ),
       );
-      await NotificationService.cancel(
-        ScheduleScheduler.overdueNotificationIdFor(
-          dose.scheduleId,
-          dose.scheduledTime,
-        ),
-      );
+      for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
+        dose.scheduleId,
+        dose.scheduledTime,
+      )) {
+        await NotificationService.cancel(overdueId);
+      }
     } catch (e) {
       debugPrint('[DoseCalendar] Failed to cancel notification: $e');
     }

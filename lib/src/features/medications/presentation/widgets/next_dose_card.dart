@@ -721,12 +721,12 @@ class _NextDoseCardState extends State<NextDoseCard>
             dose.scheduledTime,
           ),
         );
-        await NotificationService.cancel(
-          ScheduleScheduler.overdueNotificationIdFor(
-            dose.scheduleId,
-            dose.scheduledTime,
-          ),
-        );
+        for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
+          dose.scheduleId,
+          dose.scheduledTime,
+        )) {
+          await NotificationService.cancel(overdueId);
+        }
       } catch (_) {
         // Best-effort cancellation only.
       }

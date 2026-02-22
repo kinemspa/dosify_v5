@@ -31,6 +31,42 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   final _csv = const CsvExportService();
   ReportTimeRangePreset _rangePreset = ReportTimeRangePreset.allTime;
 
+  Widget _buildMetricBar(
+    BuildContext context, {
+    required String label,
+    required int value,
+    required int maxValue,
+    required Color color,
+  }) {
+    final ratio = maxValue <= 0 ? 0.0 : (value / maxValue).clamp(0.0, 1.0);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: kSpacingS),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(label, style: bodyTextStyle(context))),
+              Text(value.toString(), style: helperTextStyle(context)),
+            ],
+          ),
+          const SizedBox(height: kSpacingXS),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            child: LinearProgressIndicator(
+              minHeight: kBorderWidthMedium * 6,
+              value: ratio,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _copyExport(String text, String successMessage) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
@@ -155,6 +191,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       }
                       final topActivity = activityByMedication.entries.toList()
                         ..sort((a, b) => b.value.compareTo(a.value));
+                      final maxDoseStatus = [taken, skipped, snoozed].fold<int>(
+                        0,
+                        (max, v) => v > max ? v : max,
+                      );
+                      final maxTopActivity = topActivity.fold<int>(
+                        0,
+                        (max, e) => e.value > max ? e.value : max,
+                      );
 
                       final summaryCsv = [
                         'report,value',
@@ -222,6 +266,57 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 label: 'Snoozed',
                                 value: snoozed.toString(),
                               ),
+                            ],
+                          ),
+                          sectionSpacing,
+                          SectionFormCard(
+                            title: 'Visual Summary',
+                            neutral: true,
+                            children: [
+                              _buildMetricBar(
+                                context,
+                                label: 'Adherence',
+                                value: adherencePercent,
+                                maxValue: 100,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              buildHelperText(
+                                context,
+                                '$taken of $totalDoseActions dose actions were taken.',
+                              ),
+                              const SizedBox(height: kSpacingS),
+                              _buildMetricBar(
+                                context,
+                                label: 'Taken',
+                                value: taken,
+                                maxValue: maxDoseStatus,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              _buildMetricBar(
+                                context,
+                                label: 'Skipped',
+                                value: skipped,
+                                maxValue: maxDoseStatus,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              _buildMetricBar(
+                                context,
+                                label: 'Snoozed',
+                                value: snoozed,
+                                maxValue: maxDoseStatus,
+                                color: Theme.of(context).colorScheme.tertiary,
+                              ),
+                              if (topActivity.isNotEmpty) ...[
+                                const SizedBox(height: kSpacingS),
+                                for (final entry in topActivity.take(5))
+                                  _buildMetricBar(
+                                    context,
+                                    label: entry.key,
+                                    value: entry.value,
+                                    maxValue: maxTopActivity,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                              ],
                             ],
                           ),
                           sectionSpacing,

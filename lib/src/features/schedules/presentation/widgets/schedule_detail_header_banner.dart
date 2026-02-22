@@ -151,7 +151,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
     return times
         .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
         .map((t) => t.format(context))
-        .join('\n');
+      .join(', ');
   }
 
   String _timeUntil(DateTime dt) {

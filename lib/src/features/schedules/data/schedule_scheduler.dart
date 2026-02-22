@@ -84,10 +84,30 @@ class ScheduleScheduler {
     );
   }
 
-  static int overdueNotificationIdFor(String scheduleId, DateTime scheduledTime) {
+  static const int _maxOverdueReminderSlots = 10;
+
+  static int overdueNotificationIdFor(
+    String scheduleId,
+    DateTime scheduledTime, {
+    int reminderIndex = 1,
+  }) {
+    final normalizedIndex = reminderIndex.clamp(1, _maxOverdueReminderSlots);
     return _stableHash31(
-      'dose_overdue|$scheduleId|${scheduledTime.millisecondsSinceEpoch}',
+      'dose_overdue|$scheduleId|${scheduledTime.millisecondsSinceEpoch}|r:$normalizedIndex',
     );
+  }
+
+  static Iterable<int> overdueNotificationIdsFor(
+    String scheduleId,
+    DateTime scheduledTime,
+  ) sync* {
+    for (var i = 1; i <= _maxOverdueReminderSlots; i++) {
+      yield overdueNotificationIdFor(
+        scheduleId,
+        scheduledTime,
+        reminderIndex: i,
+      );
+    }
   }
 
   /// Public API: legacy id for day-based notification cancellation (safe within 32-bit)
@@ -212,13 +232,18 @@ class ScheduleScheduler {
         final reminderAt = reminders[i];
         if (!reminderAt.isAfter(DateTime.now())) continue;
 
-        // Use the same notification ID so each reminder replaces the previous one
+        final reminderId = overdueNotificationIdFor(
+          s.id,
+          when,
+          reminderIndex: i + 1,
+        );
+
         final reminderTimeoutMs = missedAt.isAfter(reminderAt)
             ? missedAt.difference(reminderAt).inMilliseconds
             : null;
 
         await NotificationService.scheduleAtAlarmClock(
-          id,
+          reminderId,
           reminderAt,
           title: 'Overdue: ${s.medicationName}',
           body: '${s.name} • $metrics • due $dueAt',
@@ -391,9 +416,9 @@ class ScheduleScheduler {
             await NotificationService.cancel(
               doseNotificationIdFor(existing.id, dt),
             );
-            await NotificationService.cancel(
-              overdueNotificationIdFor(existing.id, dt),
-            );
+            for (final overdueId in overdueNotificationIdsFor(existing.id, dt)) {
+              await NotificationService.cancel(overdueId);
+            }
 
             // Legacy scheme (migration cleanup)
             final legacyId = slotIdFor(
@@ -440,9 +465,12 @@ class ScheduleScheduler {
                 await NotificationService.cancel(
                   doseNotificationIdFor(existing.id, dtLocal),
                 );
-                await NotificationService.cancel(
-                  overdueNotificationIdFor(existing.id, dtLocal),
-                );
+                for (final overdueId in overdueNotificationIdsFor(
+                  existing.id,
+                  dtLocal,
+                )) {
+                  await NotificationService.cancel(overdueId);
+                }
 
                 // Legacy scheme (migration cleanup)
                 final legacyId = slotIdFor(
@@ -474,9 +502,12 @@ class ScheduleScheduler {
                 await NotificationService.cancel(
                   doseNotificationIdFor(existing.id, dt),
                 );
-                await NotificationService.cancel(
-                  overdueNotificationIdFor(existing.id, dt),
-                );
+                for (final overdueId in overdueNotificationIdsFor(
+                  existing.id,
+                  dt,
+                )) {
+                  await NotificationService.cancel(overdueId);
+                }
 
                 // Legacy scheme (migration cleanup)
                 final legacyId = slotIdFor(

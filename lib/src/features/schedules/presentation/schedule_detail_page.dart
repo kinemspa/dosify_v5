@@ -1340,7 +1340,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         label: 'Times',
         value: _timesText(context, s),
         onTap: () => _editScheduleTimes(context, s),
-        maxLines: 2,
+        maxLines: 4,
       ),
       buildDetailInfoRow(
         context,
@@ -2001,7 +2001,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             DateTime(0, 1, 1, m ~/ 60, m % 60),
           ),
         )
-        .join('\n');
+        .join(', ');
   }
 
   DateTime? _nextOccurrence(Schedule s) {

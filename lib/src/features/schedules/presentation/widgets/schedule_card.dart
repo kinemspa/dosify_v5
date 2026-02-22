@@ -443,9 +443,12 @@ class ScheduleCard extends StatelessWidget {
         await NotificationService.cancel(
           ScheduleScheduler.doseNotificationIdFor(s.id, next),
         );
-        await NotificationService.cancel(
-          ScheduleScheduler.overdueNotificationIdFor(s.id, next),
-        );
+        for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
+          s.id,
+          next,
+        )) {
+          await NotificationService.cancel(overdueId);
+        }
 
         // Best-effort cleanup for legacy slot-based IDs.
         final minutes = next.hour * 60 + next.minute;
@@ -502,9 +505,12 @@ class ScheduleCard extends StatelessWidget {
         await NotificationService.cancel(
           ScheduleScheduler.doseNotificationIdFor(s.id, next),
         );
-        await NotificationService.cancel(
-          ScheduleScheduler.overdueNotificationIdFor(s.id, next),
-        );
+        for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
+          s.id,
+          next,
+        )) {
+          await NotificationService.cancel(overdueId);
+        }
 
         final minutes = next.hour * 60 + next.minute;
         final occurrence = occ?.occurrence ?? 0;
@@ -586,9 +592,12 @@ class ScheduleCard extends StatelessWidget {
         await NotificationService.cancel(
           ScheduleScheduler.doseNotificationIdFor(s.id, next),
         );
-        await NotificationService.cancel(
-          ScheduleScheduler.overdueNotificationIdFor(s.id, next),
-        );
+        for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
+          s.id,
+          next,
+        )) {
+          await NotificationService.cancel(overdueId);
+        }
 
         // Best-effort cleanup for legacy slot-based IDs.
         final minutes = next.hour * 60 + next.minute;
