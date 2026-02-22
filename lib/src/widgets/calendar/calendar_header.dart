@@ -11,6 +11,7 @@ enum CalendarView { month, week, day }
 class CalendarHeader extends StatelessWidget {
   final DateTime currentDate;
   final CalendarView currentView;
+  final DateTime? selectedDate;
   final VoidCallback onPreviousMonth;
   final VoidCallback onNextMonth;
   final VoidCallback onToday;
@@ -21,6 +22,7 @@ class CalendarHeader extends StatelessWidget {
     super.key,
     required this.currentDate,
     required this.currentView,
+    this.selectedDate,
     required this.onPreviousMonth,
     required this.onNextMonth,
     required this.onToday,
@@ -209,6 +211,14 @@ class CalendarHeader extends StatelessWidget {
         final endDate = DateTime(weekEnd.year, weekEnd.month, weekEnd.day);
         return !todayDate.isBefore(startDate) && !todayDate.isAfter(endDate);
       case CalendarView.month:
+        // If a day is selected, show the filled 'Today' button unless the
+        // selected day itself is today. Falls back to month-level check when
+        // no day is selected (e.g. compact variant).
+        if (selectedDate != null) {
+          return selectedDate!.year == today.year &&
+              selectedDate!.month == today.month &&
+              selectedDate!.day == today.day;
+        }
         return currentDate.year == today.year &&
             currentDate.month == today.month;
     }

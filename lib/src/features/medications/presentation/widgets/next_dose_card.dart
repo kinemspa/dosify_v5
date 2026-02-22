@@ -260,12 +260,12 @@ class _NextDoseCardState extends State<NextDoseCard>
           ),
         ),
 
-        // Day and Date centered below dose card (compact)
+        // Day and Date centered below dose card (compact) — locale-aware
         Padding(
           padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
           child: Center(
             child: Text(
-              DateFormat('EEEE, MMMM d').format(_selectedDate),
+              DateTimeFormatter.formatFullDate(context, _selectedDate),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 letterSpacing: 0.5,

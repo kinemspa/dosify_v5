@@ -1043,6 +1043,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             CalendarHeader(
               currentDate: _currentDate,
               currentView: _currentView,
+              selectedDate: _selectedDate,
               onPreviousMonth: _onPreviousPressed,
               onNextMonth: _onNextPressed,
               onToday: _onTodayPressed,

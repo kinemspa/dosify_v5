@@ -312,9 +312,9 @@ const int kMedicationHeaderDescriptionMaxChars = 90;
 /// the header content on smaller screens.
 ///
 /// Calculated as: identity top offset (44dp) + identity height with
-/// manufacturer (~68dp) + 4dp SafeArea-Padding offset correction + 4dp buffer.
+/// manufacturer (~46dp) = 90dp.
 /// NOT text-scaled — the overlay is positioned in absolute dp.
-const double kMedicationDetailHeaderOverlayReservedHeight = 112;
+const double kMedicationDetailHeaderOverlayReservedHeight = 90;
 
 /// Medication details animated header identity layout.
 ///
@@ -575,7 +575,7 @@ const EdgeInsets kScheduleWizardSummaryPatternPadding = EdgeInsets.only(
 /// Detail pages - padding for the sections list under the header.
 const EdgeInsets kDetailPageSectionsPadding = EdgeInsets.fromLTRB(
   kPageHorizontalPadding,
-  kSpacingS,
+  kSpacingXXS,
   kPageHorizontalPadding,
   kPageBottomPadding,
 );

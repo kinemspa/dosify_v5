@@ -988,8 +988,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       _lastTakenLog = best;
     }
 
-    // Auto-expand Advanced section for ad-hoc entries
-    _editExpanded = _isAdHoc;
+    // Always expand Advanced section so users can see it immediately
+    _editExpanded = true;
   }
 
   String _mdvStrengthUnitFor(Medication med) {
