@@ -184,14 +184,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       _backupVialsRequiresFridge = m.backupVialsRequiresRefrigeration;
       _backupVialsRequiresFreezer = m.backupVialsRequiresFreezer;
       _backupVialsProtectLight = m.backupVialsLightSensitive;
-    } else {
-      final now = DateTime.now();
-      _activeVialExpiry = now.add(
-        const Duration(days: kDefaultInjectionExpiryDays),
-      );
-      _backupVialsExpiry = now.add(
-        const Duration(days: kDefaultSealedVialExpiryDays),
-      );
     }
   }
 

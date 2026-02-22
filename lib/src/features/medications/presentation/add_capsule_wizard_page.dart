@@ -107,10 +107,6 @@ class _AddCapsuleWizardPageState
       final si = (m.storageInstructions ?? '').toLowerCase();
       _requiresFreezer = si.contains('freez');
       _protectLight = si.contains('light');
-    } else {
-      _expiry = DateTime.now().add(
-        const Duration(days: kDefaultTabletCapsuleExpiryDays),
-      );
     }
   }
 
