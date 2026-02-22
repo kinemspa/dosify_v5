@@ -121,6 +121,9 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   /// the exact same geometry as the DraggableScrollableSheet's initialChildSize.
   double? _cachedStageInitialRatio;
 
+  /// Cached locale first-day-of-week preference, updated each build.
+  bool _cachedStartWeekOnMonday = false;
+
   ValueListenable<Box<DoseLog>>? _doseLogsListenable;
   ValueListenable<Box<Schedule>>? _schedulesListenable;
   Timer? _reloadDebounce;
@@ -942,6 +945,10 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Cache locale first-day-of-week for helper methods that run outside build.
+    _cachedStartWeekOnMonday =
+        MaterialLocalizations.of(context).firstDayOfWeekIndex == 1;
+
     final showHeader = _showHeaderForCurrentVariant();
     final showViewToggle =
         widget.showViewToggleOverride ??
@@ -1128,7 +1135,8 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           final calendarContentHeight = gridTop +
               switch (_currentView) {
                 CalendarView.month =>
-                  kCalendarMonthDayHeaderHeight + 6 * kCalendarDayHeight,
+                  kCalendarMonthDayHeaderHeight +
+                      _computeMonthRowCount() * kCalendarDayHeight,
                 CalendarView.week =>
                   kCalendarWeekHeaderHeight + kCalendarWeekGridHeight,
                 CalendarView.day => 0.0,
@@ -1607,9 +1615,34 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         : fallback;
   }
 
+  /// Computes the actual number of week rows needed for the current month.
+  /// Mirrors the logic in CalendarMonthView._datesToDisplay.
+  int _computeMonthRowCount() {
+    final month = _currentDate;
+    final firstDayOfMonth = DateTime(month.year, month.month, 1);
+    final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
+    final swm = _cachedStartWeekOnMonday;
+
+    final lastDayColumnIndex = swm
+        ? (lastDayOfMonth.weekday + 6) % 7 // Mon=0 … Sun=6
+        : lastDayOfMonth.weekday % 7; // Sun=0, Mon=1 … Sat=6
+    final paddingAfter =
+        lastDayColumnIndex == 6 ? 0 : (6 - lastDayColumnIndex);
+    final last = lastDayOfMonth.add(Duration(days: paddingAfter));
+
+    final weekday = firstDayOfMonth.weekday;
+    final daysToSubtract = swm ? (weekday + 6) % 7 : weekday % 7;
+    final first = firstDayOfMonth.subtract(Duration(days: daysToSubtract));
+
+    final totalDays = last.difference(first).inDays + 1;
+    return totalDays ~/ 7;
+  }
+
   double _monthViewIntrinsicHeight() {
-    // Matches CalendarMonthView's fixed 6-week layout.
-    return kCalendarMonthDayHeaderHeight + (6 * kCalendarDayHeight);
+    // Uses the dynamically-computed row count so Feb (4 rows) is shorter
+    // than July (6 rows), etc.
+    return kCalendarMonthDayHeaderHeight +
+        (_computeMonthRowCount() * kCalendarDayHeight);
   }
 
   Widget _buildSelectedHourPanel() {

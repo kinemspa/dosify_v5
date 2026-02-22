@@ -57,9 +57,9 @@ final warnUnit = validTabletCount == 1.0 ? 'tablet' : 'tablets';
         doseMassMcg: validTabletCount * strengthPerTabletMcg,
         doseTabletQuarters: quarters,
         displayText:
-            '${formatMass(validTabletCount * strengthPerTabletMcg)} (${_formatTabletCount(validTabletCount)} tablets)',
+            '${formatMass(validTabletCount * strengthPerTabletMcg)} (${_formatTabletCount(validTabletCount)} ${validTabletCount == 1.0 ? 'tablet' : 'tablets'})',
         warning:
-            '⚠️ Dose requires ${_formatTabletCount(exactTabletCount)} tablets (rounded to ${_formatTabletCount(validTabletCount)})',
+            '⚠️ Dose requires ${_formatTabletCount(exactTabletCount)} ${exactTabletCount == 1.0 ? 'tablet' : 'tablets'} (rounded to ${_formatTabletCount(validTabletCount)})',
       );
     }
 
