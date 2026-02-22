@@ -124,7 +124,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   ValueListenable<Box<DoseLog>>? _doseLogsListenable;
   ValueListenable<Box<Schedule>>? _schedulesListenable;
   Timer? _reloadDebounce;
-  bool _didInitialLoad = false;
 
   @override
   void initState() {
@@ -152,14 +151,11 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_didInitialLoad) {
-      _didInitialLoad = true;
-      // Defer to post-frame so MaterialLocalizations is fully available and
-      // the widget has had its first build before any setState calls.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _loadDoses();
-      });
-    }
+    // Always schedule a reload on dependency changes (including first build and
+    // re-navigation). The 120 ms debounce prevents excessive rebuilds from rapid
+    // MediaQuery/Theme change notifications. At 120 ms the widget has already
+    // completed its first frame so MaterialLocalizations.of(context) is safe.
+    _scheduleReload();
   }
 
   @override

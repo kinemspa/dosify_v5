@@ -1131,6 +1131,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           return DetailPageScaffold(
             title: mergedTitle,
             expandedHeight: kDetailHeaderExpandedHeightCompact,
+            startCollapsed: true,
             onEdit: () => _openEditScheduleDialog(s),
             onDelete: () => _confirmDelete(context, s),
             showEditInMenu: false,

@@ -9,7 +9,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 
 /// Centralized detail page scaffold used by ALL detail pages (medications, schedules, etc.)
 /// This ensures 100% consistent styling across all detail views
-class DetailPageScaffold extends StatelessWidget {
+class DetailPageScaffold extends StatefulWidget {
   const DetailPageScaffold({
     required this.title,
     required this.statsBannerContent,
@@ -25,6 +25,7 @@ class DetailPageScaffold extends StatelessWidget {
     this.toolbarHeight,
     this.showEditInMenu = true,
     this.showDeleteInMenu = true,
+    this.startCollapsed = false,
     super.key,
   });
 
@@ -43,13 +44,64 @@ class DetailPageScaffold extends StatelessWidget {
   final bool showEditInMenu;
   final bool showDeleteInMenu;
 
+  /// When true, the page opens with the SliverAppBar already collapsed so content
+  /// is immediately visible. The header can still be revealed by scrolling up.
+  final bool startCollapsed;
+
+  @override
+  State<DetailPageScaffold> createState() => _DetailPageScaffoldState();
+}
+
+class _DetailPageScaffoldState extends State<DetailPageScaffold> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    if (widget.startCollapsed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scrollController.hasClients) return;
+        final expandedH = widget.expandedHeight ?? kDetailHeaderExpandedHeight;
+        final collapsedH = widget.collapsedHeight ?? kDetailHeaderCollapsedHeight;
+        final offset = (expandedH - collapsedH).clamp(
+          0.0,
+          _scrollController.position.maxScrollExtent,
+        );
+        if (offset > 0) _scrollController.jumpTo(offset);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final headerForeground = cs.onPrimary;
 
+    // Alias widget fields for easy access in build
+    final title = widget.title;
+    final statsBannerContent = widget.statsBannerContent;
+    final sections = widget.sections;
+    final onEdit = widget.onEdit;
+    final onDelete = widget.onDelete;
+    final showBackButton = widget.showBackButton;
+    final onBack = widget.onBack;
+    final topRightAction = widget.topRightAction;
+    final expandedHeight = widget.expandedHeight;
+    final collapsedHeight = widget.collapsedHeight;
+    final toolbarHeight = widget.toolbarHeight;
+    final showEditInMenu = widget.showEditInMenu;
+    final showDeleteInMenu = widget.showDeleteInMenu;
+
     return Scaffold(
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // Combined AppBar and Stats Banner
           SliverAppBar(

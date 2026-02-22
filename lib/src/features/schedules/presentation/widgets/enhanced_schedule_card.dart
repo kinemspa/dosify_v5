@@ -372,8 +372,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                 )
               else
                 // COLLAPSED STATE - Ultra Clean Single Row
+                // In list mode (showDoseCardWhenPossible: false): tap navigates to detail,
+                // no expand chevron. In normal mode: tap toggles expand.
                 InkWell(
-                  onTap: () => setState(() => _isExpanded = !_isExpanded),
+                  onTap: widget.showDoseCardWhenPossible
+                      ? () => setState(() => _isExpanded = !_isExpanded)
+                      : () => context.push(
+                          '/schedules/detail/${widget.schedule.id}',
+                        ),
                   borderRadius: BorderRadius.circular(kBorderRadiusMedium),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,8 +404,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                             style: mutedTextStyle(context),
                           ),
                           const SizedBox(width: kSpacingS),
-                          // Status on the right
-                          if (!_isExpanded) ...[
+                          // Status on the right – always shown in list mode; in expand mode only when collapsed
+                          if (!_isExpanded || !widget.showDoseCardWhenPossible) ...[
                             ScheduleStatusChip(schedule: widget.schedule),
                             const SizedBox(width: kSpacingXS),
                             GestureDetector(
@@ -422,21 +428,22 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                             ),
                             const SizedBox(width: kSpacingXS),
                           ],
-                          // Expand/collapse control
-                          Padding(
-                            padding: const EdgeInsets.all(kSpacingXS),
-                            child: AnimatedRotation(
-                              turns: _isExpanded ? 0.5 : 0,
-                              duration: kAnimationFast,
-                              child: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                size: kIconSizeMedium,
-                                color: colorScheme.onSurfaceVariant.withValues(
-                                  alpha: kOpacityMedium,
+                          // Expand/collapse chevron – only shown in standalone mode (not list mode)
+                          if (widget.showDoseCardWhenPossible)
+                            Padding(
+                              padding: const EdgeInsets.all(kSpacingXS),
+                              child: AnimatedRotation(
+                                turns: _isExpanded ? 0.5 : 0,
+                                duration: kAnimationFast,
+                                child: Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  size: kIconSizeMedium,
+                                  color: colorScheme.onSurfaceVariant.withValues(
+                                    alpha: kOpacityMedium,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: kSpacingXS),
@@ -449,8 +456,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                   ),
                 ),
 
-              // EXPANDED STATE - Premium Details
-              AnimatedCrossFade(
+              // EXPANDED STATE – only in standalone mode (not list mode)
+              if (widget.showDoseCardWhenPossible)
+                AnimatedCrossFade(
                 duration: kAnimationNormal,
                 crossFadeState: _isExpanded
                     ? CrossFadeState.showSecond
@@ -475,7 +483,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                         children: [
                           _buildDetailRow(
                             context,
-                            'Type',
+                            'Frequency',
                             _getScheduleTypeText(),
                           ),
                           _buildDetailRow(
