@@ -15,7 +15,8 @@ import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/domain/unit_converters.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
 import 'package:dosifi_v5/src/widgets/missing_required_fields_card.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
@@ -87,19 +88,6 @@ class _AddSingleDoseVialWizardPageState
   void initState() {
     super.initState();
     _loadInitialData();
-  }
-
-  static double _convertMassUnit(Unit from, Unit to, double value) {
-    double toMcg(Unit u) => switch (u) {
-      Unit.mcg || Unit.mcgPerMl => 1.0,
-      Unit.mg || Unit.mgPerMl => 1000.0,
-      Unit.g || Unit.gPerMl => 1_000_000.0,
-      _ => 0.0,
-    };
-    final f = toMcg(from);
-    final t = toMcg(to);
-    if (f == 0.0 || t == 0.0) return value;
-    return value * f / t;
   }
 
   void _loadInitialData() {
@@ -490,7 +478,7 @@ class _AddSingleDoseVialWizardPageState
                   final raw = double.tryParse(_concentrationValueCtrl.text);
                   setState(() => _concentrationUnit = v);
                   if (raw != null && raw > 0) {
-                    final converted = _convertMassUnit(oldUnit, v, raw);
+                    final converted = convertMassUnit(oldUnit, v, raw);
                     _concentrationValueCtrl.text = converted % 1 == 0
                         ? converted.toInt().toString()
                         : converted.toStringAsFixed(4).replaceAll(RegExp(r'0+$'), '');

@@ -8,7 +8,8 @@ import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_rep
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/domain/unit_converters.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_providers.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/missing_required_fields_card.dart';
@@ -129,19 +130,6 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   }
 
   // Saved reconstitution selection happens inside the calculator UI.
-
-  static double _convertMassUnit(Unit from, Unit to, double value) {
-    double toMcg(Unit u) => switch (u) {
-      Unit.mcg || Unit.mcgPerMl => 1.0,
-      Unit.mg || Unit.mgPerMl => 1000.0,
-      Unit.g || Unit.gPerMl => 1_000_000.0,
-      _ => 0.0,
-    };
-    final f = toMcg(from);
-    final t = toMcg(to);
-    if (f == 0.0 || t == 0.0) return value;
-    return value * f / t;
-  }
 
   void _loadInitialData() {
     final m = _effectiveInitial();
@@ -769,7 +757,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   final raw = double.tryParse(_strengthValueCtrl.text);
                   setState(() => _strengthUnit = v);
                   if (raw != null && raw > 0) {
-                    final converted = _convertMassUnit(oldUnit, v, raw);
+                    final converted = convertMassUnit(oldUnit, v, raw);
                     _strengthValueCtrl.text = converted % 1 == 0
                         ? converted.toInt().toString()
                         : converted.toStringAsFixed(4).replaceAll(RegExp(r'0+$'), '');

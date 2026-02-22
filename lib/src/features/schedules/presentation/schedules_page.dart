@@ -14,7 +14,7 @@ import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_providers.dart';
 
 enum _SchedView { list, compact, large }
 

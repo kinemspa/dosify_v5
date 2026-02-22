@@ -19,3 +19,13 @@ String fmt3(num value) {
   }
   return s;
 }
+
+/// Formats [v] as an integer string when it is a whole number (e.g. 2.0 → "2"),
+/// or with [decimals] fixed decimal places otherwise (e.g. 0.5 → "0.50").
+///
+/// Drop-in replacement for the inline `v == v.roundToDouble() ? ... : ...` pattern
+/// scattered across the codebase. Use this instead of duplicating the check.
+String fmtInt(double v, {int decimals = 2}) =>
+    (v - v.roundToDouble()).abs() < 1e-9
+        ? v.toInt().toString()
+        : v.toStringAsFixed(decimals);

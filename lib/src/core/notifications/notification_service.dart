@@ -370,7 +370,7 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: 'ic_stat_notification',
-        largeIcon: DrawableResourceAndroidBitmap('syringe'),
+        color: Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -378,7 +378,7 @@ class NotificationService {
         styleInformation: BigTextStyleInformation(
           body,
           contentTitle: title,
-          summaryText: 'Take • Snooze • Skip',
+          summaryText: 'Take  Snooze  Skip',
         ),
       ),
     );
@@ -434,7 +434,7 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: 'ic_stat_notification',
-        largeIcon: DrawableResourceAndroidBitmap('syringe'),
+        color: Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -921,30 +921,29 @@ class NotificationService {
       tzTime = now.add(const Duration(seconds: 5));
       _log('Adjusted (alarm clock) time to future: $tzTime');
     }
-    final shouldShowSyringeIcon =
+    final shouldUseExpandedStyle =
         Platform.isAndroid &&
         channelId == _upcomingDose.id &&
         !setAsGroupSummary;
-    final shouldUseExpandedStyle = shouldShowSyringeIcon;
 
     final StyleInformation? styleInformation = shouldUseExpandedStyle
         ? (bigPicture != null
               ? BigPictureStyleInformation(
                   bigPicture,
                   contentTitle: title,
-                  summaryText: 'Take • Snooze • Skip',
+                  summaryText: 'Take  Snooze  Skip',
                   hideExpandedLargeIcon: true,
                 )
               : (expandedLines != null && expandedLines.isNotEmpty
                     ? InboxStyleInformation(
                         expandedLines,
                         contentTitle: title,
-                        summaryText: 'Take • Snooze • Skip',
+                        summaryText: 'Take  Snooze  Skip',
                       )
                     : BigTextStyleInformation(
                         body,
                         contentTitle: title,
-                        summaryText: 'Take • Snooze • Skip',
+                        summaryText: 'Take  Snooze  Skip',
                       )))
         : null;
 
@@ -953,9 +952,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
-        largeIcon: shouldShowSyringeIcon
-            ? const DrawableResourceAndroidBitmap('syringe')
-            : null,
+        largeIcon: null,
         color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use

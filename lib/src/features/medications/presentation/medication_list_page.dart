@@ -21,8 +21,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:dosifi_v5/src/features/medications/presentation/providers.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_providers.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_providers.dart';
 
 enum _MedView { list, compact, large }
 

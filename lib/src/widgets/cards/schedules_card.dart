@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/providers.dart';
+import 'package:dosifi_v5/src/features/schedules/presentation/schedule_providers.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
