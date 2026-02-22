@@ -7,8 +7,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_reports_widget.dart';
 import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
@@ -72,6 +75,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     if (!mounted) return;
     showAppSnackBar(context, successMessage);
   }
+
+  static String _formLabel(MedicationForm form) => switch (form) {
+    MedicationForm.tablet => 'Tablets',
+    MedicationForm.capsule => 'Capsules',
+    MedicationForm.prefilledSyringe => 'Pre-filled Syringes',
+    MedicationForm.singleDoseVial => 'Single-dose Vials',
+    MedicationForm.multiDoseVial => 'Multi-dose Vials',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +211,44 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                         (max, e) => e.value > max ? e.value : max,
                       );
 
+                      // Medication type breakdown
+                      final typeBreakdown = <MedicationForm, int>{};
+                      for (final m in medItems) {
+                        typeBreakdown.update(
+                          m.form,
+                          (v) => v + 1,
+                          ifAbsent: () => 1,
+                        );
+                      }
+
+                      // Inventory health
+                      final now = DateTime.now().toUtc();
+                      final in30Days = now.add(const Duration(days: 30));
+                      final lowStockCount = medItems.where((m) {
+                        if (!m.lowStockEnabled) return false;
+                        return m.stockValue <=
+                            (m.lowStockThreshold ??
+                                m.lowStockVialsThresholdCount ??
+                                0);
+                      }).length;
+                      final expiringCount = medItems.where((m) {
+                        final dates = [
+                          m.expiry,
+                          m.backupVialsExpiry,
+                          m.reconstitutedVialExpiry,
+                        ];
+                        return dates.any(
+                          (d) =>
+                              d != null &&
+                              !d.isBefore(now) &&
+                              d.isBefore(in30Days),
+                        );
+                      }).length;
+                      final savedReconCount =
+                          Hive.box<SavedReconstitutionCalculation>(
+                        SavedReconstitutionRepository.boxName,
+                      ).length;
+
                       final summaryCsv = [
                         'report,value',
                         'Medications,${medItems.length}',
@@ -265,6 +314,41 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 context,
                                 label: 'Snoozed',
                                 value: snoozed.toString(),
+                              ),
+                              if (typeBreakdown.isNotEmpty) ...[
+                                const SizedBox(height: kSpacingS),
+                                buildHelperText(
+                                  context,
+                                  'Medications by type',
+                                ),
+                                for (final form in MedicationForm.values)
+                                  if ((typeBreakdown[form] ?? 0) > 0)
+                                    buildDetailInfoRow(
+                                      context,
+                                      label: _formLabel(form),
+                                      value: typeBreakdown[form].toString(),
+                                    ),
+                              ],
+                              const SizedBox(height: kSpacingS),
+                              buildHelperText(context, 'Inventory health'),
+                              buildDetailInfoRow(
+                                context,
+                                label: 'Low stock',
+                                value: lowStockCount == 0
+                                    ? '0'
+                                    : '$lowStockCount medication${lowStockCount == 1 ? '' : 's'}',
+                              ),
+                              buildDetailInfoRow(
+                                context,
+                                label: 'Expiring ≤30 days',
+                                value: expiringCount == 0
+                                    ? '0'
+                                    : '$expiringCount medication${expiringCount == 1 ? '' : 's'}',
+                              ),
+                              buildDetailInfoRow(
+                                context,
+                                label: 'Saved reconstitutions',
+                                value: savedReconCount.toString(),
                               ),
                             ],
                           ),

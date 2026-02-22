@@ -93,6 +93,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
   void initState() {
     super.initState();
     _loadInitialData();
+    // Rebuild recon info card live as user types the medication name
+    _nameCtrl.addListener(() => setState(() {}));
     // Listen to vial volume changes to update saved reconstitution
     _vialVolumeCtrl.addListener(_onVialVolumeChanged);
   }
