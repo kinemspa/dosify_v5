@@ -781,10 +781,10 @@ const double kHintTextOpacity = kOpacityLow;
 /// a whisper-level border so adjacent cards are distinguishable on the page.
 const double kFramelessCardBorderOpacityLight = kOpacitySubtleLow; // 0.10
 const double kFramelessCardBorderOpacityDark = 0.20;
-/// Frameless card shadow (light mode only — dark mode uses surface tinting).
-const double kFramelessCardShadowOpacity = 0.04;
-const double kFramelessCardShadowBlur = 6.0;
-const Offset kFramelessCardShadowOffset = Offset(0, 2);
+/// Frameless card shadow — zeroed; border provides the separation instead.
+const double kFramelessCardShadowOpacity = 0.0;
+const double kFramelessCardShadowBlur = 0.0;
+const Offset kFramelessCardShadowOffset = Offset(0, 0);
 
 /// Reconstitution calculator opacity (white text on dark background)
 const double kReconTextHighOpacity = 0.90; // Selected option details
@@ -1171,16 +1171,14 @@ Color stockStatusColorFromPercentage(
 // CARD STYLING (Centralized)
 // ============================================================================
 
-/// Standard card shadow for all cards on light backgrounds
-const double kCardShadowOpacity = 0.08;
-const double kCardShadowBlurRadius = 24.0;
-const Offset kCardShadowOffset = Offset(0, 8);
+/// Shadow constants — kept at zero; card separation is done via a faint border.
+const double kCardShadowOpacity = 0.0;
+const double kCardShadowBlurRadius = 0.0;
+const Offset kCardShadowOffset = Offset(0, 0);
 
-/// Slightly tighter shadow for [DoseCard] so it doesn't get clipped inside
-/// animated/overflowing containers (e.g. collapsible cards).
-const double kDoseCardShadowOpacity = 0.07;
-const double kDoseCardShadowBlurRadius = 16.0;
-const Offset kDoseCardShadowOffset = Offset(0, 6);
+const double kDoseCardShadowOpacity = 0.0;
+const double kDoseCardShadowBlurRadius = 0.0;
+const Offset kDoseCardShadowOffset = Offset(0, 0);
 
 /// Builds a standard card decoration with consistent styling across the app.
 /// Use this for all cards displayed on light backgrounds.
@@ -1206,17 +1204,10 @@ BoxDecoration buildStandardCardDecoration({
         : null,
     border: showBorder
         ? Border.all(
-            color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+            color: cs.outlineVariant.withValues(alpha: 0.08),
             width: kBorderWidthThin,
           )
         : null,
-    boxShadow: [
-      BoxShadow(
-        color: cs.shadow.withValues(alpha: kCardShadowOpacity),
-        blurRadius: kCardShadowBlurRadius,
-        offset: kCardShadowOffset,
-      ),
-    ],
   );
 }
 
