@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dosifi notification status-bar icon.
+  Bold lowercase "d" — white on transparent.
+  Android applies notification_color (#09A8BD) as the badge background.
+  Compatible with API 21+.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Vertical stem: 4 dp wide, full height -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M14.5,2 L18.5,2 L18.5,22 L14.5,22 Z" />
+
+    <!-- Bowl: filled circle centred at (9, 14), radius 6.5 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9,7.5 C5.41,7.5 2.5,10.41 2.5,14 C2.5,17.59 5.41,20.5 9,20.5 C12.59,20.5 15.5,17.59 15.5,14 C15.5,10.41 12.59,7.5 9,7.5 Z" />
+
+</vector>

@@ -400,6 +400,7 @@ class NotificationService {
         'expiry',
         'Expiry',
         icon: 'ic_stat_notification',
+        color: Color(0xFF09A8BD),
         // ignore: deprecated_member_use
         priority: Priority.high,
       ),
@@ -448,6 +449,7 @@ class NotificationService {
         'upcoming_dose',
         'Upcoming Dose',
         icon: 'ic_stat_notification',
+        color: Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -493,6 +495,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -512,6 +515,7 @@ class NotificationService {
         'low_stock',
         'Low Stock',
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         // ignore: deprecated_member_use
         priority: Priority.high,
         actions: const [
@@ -575,6 +579,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -603,6 +608,7 @@ class NotificationService {
           channelId,
           channelId,
           icon: 'ic_stat_notification',
+          color: const Color(0xFF09A8BD),
           category: AndroidNotificationCategory.alarm,
         ),
       );
@@ -665,6 +671,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // Try to be as precise as allowed by the platform
         // ignore: deprecated_member_use
@@ -693,6 +700,7 @@ class NotificationService {
           channelId,
           channelId,
           icon: 'ic_stat_notification',
+          color: const Color(0xFF09A8BD),
           category: AndroidNotificationCategory.alarm,
         ),
       );
@@ -843,6 +851,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -871,6 +880,7 @@ class NotificationService {
           channelId,
           channelId,
           icon: 'ic_stat_notification',
+          color: const Color(0xFF09A8BD),
           category: AndroidNotificationCategory.alarm,
         ),
       );
@@ -1035,6 +1045,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -1107,6 +1118,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
@@ -1147,6 +1159,7 @@ class NotificationService {
         channelId,
         channelId,
         icon: 'ic_stat_notification',
+        color: const Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
