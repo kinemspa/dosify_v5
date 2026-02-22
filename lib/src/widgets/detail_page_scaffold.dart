@@ -204,13 +204,29 @@ class _DetailPageScaffoldState extends State<DetailPageScaffold> {
                 ],
               ),
             ],
-            flexibleSpace: Builder(
-              builder: (context) {
-                // Title is always visible in the toolbar so users see the page name on open.
-                const titleOpacity = 1.0;
-
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
                 final top = MediaQuery.of(context).padding.top;
                 final barHeight = toolbarHeight ?? kDetailHeaderCollapsedHeight;
+                final expandedH = expandedHeight ?? kDetailHeaderExpandedHeight;
+                final collapsedH =
+                    (collapsedHeight ?? kDetailHeaderCollapsedHeight) + top;
+
+                // t: 0.0 = fully expanded, 1.0 = fully collapsed
+                final t = widget.expandedTitle != null
+                    ? ((expandedH - constraints.maxHeight) /
+                            (expandedH - collapsedH))
+                        .clamp(0.0, 1.0)
+                    : 1.0;
+
+                // expandedTitle (e.g. "Schedule Details") fades out over first half
+                final expandedTitleOpacity = widget.expandedTitle != null
+                    ? (1.0 - t * 2.0).clamp(0.0, 1.0)
+                    : 0.0;
+                // title (schedule name) fades in over second half + slides up
+                final collapsedTitleOpacity = widget.expandedTitle != null
+                    ? (t * 2.0 - 1.0).clamp(0.0, 1.0)
+                    : 1.0;
 
                 return Container(
                   decoration: const BoxDecoration(
@@ -218,26 +234,54 @@ class _DetailPageScaffoldState extends State<DetailPageScaffold> {
                   ),
                   child: Stack(
                     children: [
-                      // Collapsed title in the top bar (matches Medication Details)
+                      // expandedTitle ("Schedule Details") in toolbar —
+                      // fades out as the user scrolls down
+                      if (widget.expandedTitle != null &&
+                          expandedTitleOpacity > 0)
+                        Positioned(
+                          top: top,
+                          left: kDetailHeaderCollapsedHeight + kSpacingS,
+                          right: kDetailHeaderCollapsedHeight + kSpacingS,
+                          height: barHeight,
+                          child: IgnorePointer(
+                            child: Opacity(
+                              opacity: expandedTitleOpacity,
+                              child: Center(
+                                child: Text(
+                                  widget.expandedTitle!,
+                                  style: detailCollapsedTitleTextStyle(context),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // title (schedule/med name) — fades in + slides up as
+                      // the header collapses
                       Positioned(
                         top: top,
-                        left:
-                            kDetailHeaderCollapsedHeight +
-                            kSpacingS, // Account for back button (48px) + spacing
-                        right:
-                            kDetailHeaderCollapsedHeight +
-                            kSpacingS, // Account for menu button symmetrically
+                        left: kDetailHeaderCollapsedHeight + kSpacingS,
+                        right: kDetailHeaderCollapsedHeight + kSpacingS,
                         height: barHeight,
                         child: IgnorePointer(
                           child: Opacity(
-                            opacity: titleOpacity,
-                            child: Center(
-                              child: Text(
-                                title,
-                                style: detailCollapsedTitleTextStyle(context),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
+                            opacity: collapsedTitleOpacity,
+                            child: Transform.translate(
+                              offset: Offset(
+                                0,
+                                (1.0 - collapsedTitleOpacity) * barHeight * 0.3,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  title,
+                                  style: detailCollapsedTitleTextStyle(context),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
                           ),

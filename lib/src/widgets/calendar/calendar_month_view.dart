@@ -45,12 +45,27 @@ class CalendarMonthView extends StatelessWidget {
     return firstDayOfMonth.subtract(Duration(days: daysToSubtract));
   }
 
-  /// Get all dates to display (6 weeks = 42 days)
+  /// Get all dates to display — only enough rows to cover the whole month.
+  /// For months where the last day falls on the final column (e.g. Feb 2026
+  /// with Sun-first weeks ends on Saturday), this yields exactly 4 rows instead
+  /// of always returning 6 (42 days).
   List<DateTime> get _datesToDisplay {
     final first = _firstDateToDisplay;
+    final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
+
+    // Column index (0-based) of the last day of the month
+    final lastDayColumnIndex = startWeekOnMonday
+        ? (lastDayOfMonth.weekday + 6) % 7 // Mon=0 … Sun=6
+        : lastDayOfMonth.weekday % 7; // Sun=0, Mon=1 … Sat=6
+
+    // Pad to end of that week row (0 padding when already at the last column)
+    final paddingAfter = lastDayColumnIndex == 6 ? 0 : (6 - lastDayColumnIndex);
+    final last = lastDayOfMonth.add(Duration(days: paddingAfter));
+    final totalDays = last.difference(first).inDays + 1;
+
     final dates = <DateTime>[];
     DateTime current = first;
-    for (int i = 0; i < 42; i++) {
+    for (int i = 0; i < totalDays; i++) {
       dates.add(current);
       current = current.add(const Duration(days: 1));
     }
@@ -79,7 +94,7 @@ class CalendarMonthView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final datesToDisplay = _datesToDisplay;
-    const rowCount = 6;
+    final rowCount = datesToDisplay.length ~/ 7;
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {

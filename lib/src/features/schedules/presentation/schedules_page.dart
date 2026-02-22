@@ -30,6 +30,7 @@ class SchedulesPage extends ConsumerStatefulWidget {
 
 class _SchedulesPageState extends ConsumerState<SchedulesPage> {
   static const _prefsKeyView = 'schedules.view';
+  static const _prefsTipKey = 'screen_tip_schedules_seen';
 
   _SchedView _view = _SchedView.compact;
   _SchedSort _sort = _SchedSort.next;
@@ -41,6 +42,33 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
   void initState() {
     super.initState();
     _loadPrefs();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowScreenTip());
+  }
+
+  Future<void> _maybeShowScreenTip() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_prefsTipKey) == true) return;
+    await prefs.setBool(_prefsTipKey, true);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        titleTextStyle: dialogTitleTextStyle(ctx),
+        contentTextStyle: dialogContentTextStyle(ctx),
+        title: const Text('Schedules'),
+        content: const Text(
+          'This is where your schedules are created and managed.\n\n'
+          'A schedule defines when and how often doses of a medication are taken. '
+          'Each schedule must be attached to a medication.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _loadPrefs() async {

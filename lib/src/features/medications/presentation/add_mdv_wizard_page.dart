@@ -128,6 +128,19 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
 
   // Saved reconstitution selection happens inside the calculator UI.
 
+  static double _convertMassUnit(Unit from, Unit to, double value) {
+    double toMcg(Unit u) => switch (u) {
+      Unit.mcg || Unit.mcgPerMl => 1.0,
+      Unit.mg || Unit.mgPerMl => 1000.0,
+      Unit.g || Unit.gPerMl => 1_000_000.0,
+      _ => 0.0,
+    };
+    final f = toMcg(from);
+    final t = toMcg(to);
+    if (f == 0.0 || t == 0.0) return value;
+    return value * f / t;
+  }
+
   void _loadInitialData() {
     final m = _effectiveInitial();
     if (m != null) {
@@ -322,7 +335,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           _hasBackupVials &&
               _backupVialsLowStockEnabled &&
               _backupVialsLowStockCtrl.text.isNotEmpty
-          ? double.tryParse(_backupVialsLowStockCtrl.text.trim())
+          ? (double.tryParse(_backupVialsLowStockCtrl.text.trim()) ?? 1.0).clamp(1.0, 1000000.0)
           : null,
       expiry: _backupVialsExpiry,
       batchNumber:
@@ -748,7 +761,18 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                     child: Center(child: Text('units')),
                   ),
                 ],
-                onChanged: (v) => setState(() => _strengthUnit = v ?? Unit.mg),
+                onChanged: (v) {
+                  if (v == null) return;
+                  final oldUnit = _strengthUnit;
+                  final raw = double.tryParse(_strengthValueCtrl.text);
+                  setState(() => _strengthUnit = v);
+                  if (raw != null && raw > 0) {
+                    final converted = _convertMassUnit(oldUnit, v, raw);
+                    _strengthValueCtrl.text = converted % 1 == 0
+                        ? converted.toInt().toString()
+                        : converted.toStringAsFixed(4).replaceAll(RegExp(r'0+$'), '');
+                  }
+                },
               ),
             ),
             buildHelperText(

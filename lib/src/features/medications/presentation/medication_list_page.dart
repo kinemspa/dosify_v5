@@ -69,6 +69,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   static const _kPrefsViewKey = 'medication_list_view';
   static const _kPrefsSortByKey = 'medication_list_sort_by';
   static const _kPrefsSortAscKey = 'medication_list_sort_asc';
+  static const _kPrefsTipKey = 'screen_tip_medications_seen';
 
   IconData _viewIcon(_MedView v) => switch (v) {
     _MedView.list => Icons.view_list,
@@ -228,6 +229,34 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   void initState() {
     super.initState();
     _loadSavedViewAndSort();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowScreenTip());
+  }
+
+  Future<void> _maybeShowScreenTip() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_kPrefsTipKey) == true) return;
+    await prefs.setBool(_kPrefsTipKey, true);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        titleTextStyle: dialogTitleTextStyle(ctx),
+        contentTextStyle: dialogContentTextStyle(ctx),
+        title: const Text('Medications'),
+        content: const Text(
+          'This is where your medications are saved and tracked.\n\n'
+          'A medication is the core data point — doses are scheduled against a medication. '
+          'Multiple schedules can be assigned to a single medication.\n\n'
+          'Deleting a medication will remove all linked schedules and any future doses assigned to it.',
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _loadSavedViewAndSort() async {

@@ -18,23 +18,26 @@ class DoseCalculator {
     final validTabletCount = quarters / 4;
 
     if ((tabletCount * 4) % 1 != 0) {
-      return DoseCalculationResult.warning(
-        doseMassMcg: validTabletCount * strengthPerTabletMcg,
-        doseTabletQuarters: quarters,
-        displayText:
-            '${_formatTabletCount(validTabletCount)} tablets (${formatMass(validTabletCount * strengthPerTabletMcg)})',
-        warning:
-            '⚠️ Dose requires ${_formatTabletCount(tabletCount)} tablets (rounded to ${_formatTabletCount(validTabletCount)})',
+final warnUnit = validTabletCount == 1.0 ? 'tablet' : 'tablets';
+    final reqUnit = tabletCount == 1.0 ? 'tablet' : 'tablets';
+    return DoseCalculationResult.warning(
+      doseMassMcg: validTabletCount * strengthPerTabletMcg,
+      doseTabletQuarters: quarters,
+      displayText:
+          '${_formatTabletCount(validTabletCount)} $warnUnit (${formatMass(validTabletCount * strengthPerTabletMcg)})',
+      warning:
+          '⚠️ Dose requires ${_formatTabletCount(tabletCount)} $reqUnit (rounded to ${_formatTabletCount(validTabletCount)})',
       );
     }
 
     final totalMcg = tabletCount * strengthPerTabletMcg;
 
+    final tabletUnit = tabletCount == 1.0 ? 'tablet' : 'tablets';
     return DoseCalculationResult.success(
       doseMassMcg: totalMcg,
       doseTabletQuarters: quarters,
       displayText:
-          '${_formatTabletCount(tabletCount)} tablets × ${formatMass(strengthPerTabletMcg)} = ${formatMass(totalMcg)} total',
+          '${_formatTabletCount(tabletCount)} $tabletUnit × ${formatMass(strengthPerTabletMcg)} = ${formatMass(totalMcg)} total',
     );
   }
 

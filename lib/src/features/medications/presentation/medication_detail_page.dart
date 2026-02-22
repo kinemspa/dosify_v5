@@ -51,7 +51,6 @@ import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 
 /// Modern, revolutionized medication detail screen with:
@@ -132,7 +131,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   bool _isReconstitutionExpanded = true; // Collapsible state for reconstitution
   bool _isTodayExpanded = true; // Collapsible state for today card
   bool _isActivityExpanded = true; // Collapsible state for activity card
-  bool _isCalendarExpanded = true; // Collapsible state for calendar card
 
   ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
 
@@ -143,7 +141,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
   static const String _kCardReconstitution = 'reconstitution';
   static const String _kCardToday = 'today';
   static const String _kCardActivity = 'activity';
-  static const String _kCardCalendar = 'calendar';
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
@@ -155,7 +152,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     _scrollController.addListener(_updateDownScrollHint);
     _cardOrder = <String>[
       _kCardToday,
-      _kCardCalendar,
       _kCardActivity,
       _kCardReconstitution,
       _kCardSchedule,
@@ -645,20 +641,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           setState(() => _isActivityExpanded = expanded);
         },
       ),
-      _kCardCalendar: CalendarCard(
-        scope: CalendarCardScope.medication(med.id),
-        showOpenCalendarAction: false,
-        showSelectedDayPanel: false,
-        // Use compact height since there is no dose-stage panel on detail pages
-        // (saves ~20dp of dead space the mini height left below the calendar grid).
-        height: kDetailCompactCalendarHeight,
-        isExpanded: _isCalendarExpanded,
-        reserveReorderHandleGutterWhenCollapsed: true,
-        onExpandedChanged: (expanded) {
-          if (!mounted) return;
-          setState(() => _isCalendarExpanded = expanded);
-        },
-      ),
       _kCardSchedule: _buildScheduleCard(
         context,
         med,
@@ -671,7 +653,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final allCardsCollapsed =
         !_isTodayExpanded &&
         !_isActivityExpanded &&
-        !_isCalendarExpanded &&
         !_isScheduleExpanded &&
         !_isDetailsExpanded &&
         (!hasReconstitutionCard || !_isReconstitutionExpanded);
@@ -682,8 +663,6 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           return _isTodayExpanded;
         case _kCardActivity:
           return _isActivityExpanded;
-        case _kCardCalendar:
-          return _isCalendarExpanded;
         case _kCardSchedule:
           return _isScheduleExpanded;
         case _kCardDetails:
@@ -887,7 +866,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Space for the animated Name (which is positioned absolutely)
-                const SizedBox(height: 60),
+                const SizedBox(height: 48),
 
                 // Description & Notes
                 if (med.description != null && med.description!.isNotEmpty)

@@ -58,30 +58,13 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Primary: dose amount (what the user cares about at a glance)
-        Text(
-          '${_formatAmount(displayValue)} $displayUnit',
-          style: bodyTextStyle(
-            context,
-          )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: kSpacingXS / 2),
-        // Secondary: medication name (context when multiple meds shown)
-        Text(
-          medicationName,
-          style: smallHelperTextStyle(
-            context,
-            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+    return Text(
+      '${_formatAmount(displayValue)} $displayUnit',
+      style: bodyTextStyle(
+        context,
+      )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
@@ -143,7 +126,7 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
               )?.copyWith(fontWeight: kFontWeightSemiBold),
             ),
             Text(
-              '•',
+              '—',
               style: smallHelperTextStyle(
                 context,
                 color: statusColor.withValues(alpha: kOpacityMedium),

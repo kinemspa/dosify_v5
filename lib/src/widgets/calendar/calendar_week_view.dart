@@ -120,6 +120,7 @@ class CalendarWeekView extends StatelessWidget {
           _WeekHeader(
             startDate: startDate,
             selectedDate: selectedDate,
+            doses: doses,
             onDayTap: onDayTap,
           ),
           // Week grid
@@ -155,13 +156,24 @@ class CalendarWeekView extends StatelessWidget {
 class _WeekHeader extends StatelessWidget {
   const _WeekHeader({
     required this.startDate,
+    required this.doses,
     this.selectedDate,
     this.onDayTap,
   });
 
   final DateTime startDate;
+  final List<CalculatedDose> doses;
   final DateTime? selectedDate;
   final void Function(DateTime date)? onDayTap;
+
+  bool _hasDosesOnDay(DateTime date) {
+    return doses.any(
+      (d) =>
+          d.scheduledTime.year == date.year &&
+          d.scheduledTime.month == date.month &&
+          d.scheduledTime.day == date.day,
+    );
+  }
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
@@ -200,6 +212,8 @@ class _WeekHeader extends StatelessWidget {
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
 
+          final hasDoses = _hasDosesOnDay(day);
+
           return Expanded(
             child: InkWell(
               onTap: onDayTap != null ? () => onDayTap!(day) : null,
@@ -207,11 +221,11 @@ class _WeekHeader extends StatelessWidget {
                 margin: kCalendarWeekHeaderCellMargin,
                 decoration: (isToday || isSelected)
                     ? BoxDecoration(
-                        color: isSelected
-                            ? colorScheme.primary.withValues(
-                                alpha: kOpacityFaint,
-                              )
-                            : null,
+                        // Use a clearly visible fill so selected tiles stand out
+                        // in both light and dark themes.
+                        color: isToday
+                            ? colorScheme.primary.withValues(alpha: kOpacitySubtle)
+                            : colorScheme.primary.withValues(alpha: kOpacitySubtleLow),
                         border: Border.all(
                           color: colorScheme.primary,
                           width: kBorderWidthThin,
@@ -224,6 +238,45 @@ class _WeekHeader extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Date number + optional dose dot at the TOP of the tile
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (hasDoses) ...
+                          [
+                            Container(
+                              width: 5,
+                              height: 5,
+                              decoration: BoxDecoration(
+                                color: isToday || isSelected
+                                    ? colorScheme.primary
+                                    : colorScheme.primary
+                                        .withValues(alpha: kOpacityMediumHigh),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                          ],
+                        Text(
+                          day.day.toString(),
+                          style: calendarWeekHeaderDayNumberTextStyle(context)
+                              ?.copyWith(
+                                color: isToday
+                                    ? colorScheme.primary
+                                    : isSelected
+                                    ? colorScheme.primary
+                                    : colorScheme.onSurface.withValues(
+                                        alpha: kOpacityHigh,
+                                      ),
+                                fontWeight: (isToday || isSelected)
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: kCalendarWeekHeaderLabelGap),
+                    // Day name label BELOW the number
                     Text(
                       DateFormat.E().format(day),
                       style: calendarWeekHeaderDayLabelTextStyle(context)
@@ -234,23 +287,6 @@ class _WeekHeader extends StatelessWidget {
                                 ? colorScheme.primary
                                 : colorScheme.onSurface.withAlpha(
                                     (0.6 * 255).round(),
-                                  ),
-                            fontWeight: (isToday || isSelected)
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                    ),
-                    const SizedBox(height: kCalendarWeekHeaderLabelGap),
-                    Text(
-                      day.day.toString(),
-                      style: calendarWeekHeaderDayNumberTextStyle(context)
-                          ?.copyWith(
-                            color: isToday
-                                ? colorScheme.primary
-                                : isSelected
-                                ? colorScheme.primary
-                                : colorScheme.onSurface.withValues(
-                                    alpha: kOpacityHigh,
                                   ),
                             fontWeight: (isToday || isSelected)
                                 ? FontWeight.bold
@@ -293,12 +329,16 @@ class _DayColumn extends StatelessWidget {
       colorScheme.primary.withValues(alpha: kOpacityFaint),
       colorScheme.surface,
     );
+    final selectedFill = Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: kOpacitySubtleLow),
+      colorScheme.surface,
+    );
 
     return InkWell(
       onTap: onDayTap != null ? () => onDayTap!(date) : null,
       child: Container(
         decoration: BoxDecoration(
-          color: isToday ? todayFill : null,
+          color: isToday ? todayFill : isSelected ? selectedFill : null,
           border: Border(
             right: BorderSide(
               color: colorScheme.outline.withAlpha(

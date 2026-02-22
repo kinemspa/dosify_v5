@@ -739,7 +739,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             timesOfDayUtc: timesUtc,
             daysOfWeekUtc: daysUtc,
           ),
-          successMessage: 'Type updated',
+          successMessage: 'Frequency updated',
         );
         return;
       case _ScheduleEditMode.cycle:
@@ -755,7 +755,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             daysOfMonth: null,
             monthlyMissingDayBehaviorCode: null,
           ),
-          successMessage: 'Type updated',
+          successMessage: 'Frequency updated',
         );
         return;
       case _ScheduleEditMode.daysOfMonth:
@@ -767,7 +767,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             cycleEveryNDays: null,
             cycleAnchorDate: null,
           ),
-          successMessage: 'Type updated',
+          successMessage: 'Frequency updated',
         );
         return;
     }
@@ -1130,8 +1130,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
           return DetailPageScaffold(
             title: mergedTitle,
+            expandedTitle: 'Schedule Details',
             expandedHeight: kDetailHeaderExpandedHeightCompact,
-            startCollapsed: true,
             onEdit: () => _openEditScheduleDialog(s),
             onDelete: () => _confirmDelete(context, s),
             showEditInMenu: false,
@@ -1234,7 +1234,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   String _formatDateTime(BuildContext context, DateTime dt) {
-    return '${DateFormat('EEE, MMM d, y').format(dt)} • ${DateTimeFormatter.formatTime(context, dt)}';
+    return '${DateFormat('EEE, MMM d, y').format(dt)}, ${DateTimeFormatter.formatTime(context, dt)}';
   }
 
   List<Widget> _buildSections(
@@ -1290,6 +1290,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         padding: const EdgeInsets.only(bottom: kSpacingS),
         child: CollapsibleSectionFormCard(
           neutral: true,
+          frameless: true,
           title: 'Schedule Details',
           titleStyle: reviewCardTitleStyle(context),
           isExpanded: _isScheduleDetailsExpanded,

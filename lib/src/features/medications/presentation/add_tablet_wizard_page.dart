@@ -87,6 +87,21 @@ class _AddTabletWizardPageState
     _loadInitialData();
   }
 
+  /// Convert [value] from [from] unit to [to] unit for mass-based units.
+  /// Returns [value] unchanged if the units are incompatible (e.g. 'units').
+  static double _convertMassUnit(Unit from, Unit to, double value) {
+    double toMcg(Unit u) => switch (u) {
+      Unit.mcg || Unit.mcgPerMl => 1.0,
+      Unit.mg || Unit.mgPerMl => 1000.0,
+      Unit.g || Unit.gPerMl => 1_000_000.0,
+      _ => 0.0, // units / unitsPerMl — incompatible
+    };
+    final f = toMcg(from);
+    final t = toMcg(to);
+    if (f == 0.0 || t == 0.0) return value;
+    return value * f / t;
+  }
+
   void _loadInitialData() {
     final m = _effectiveInitial();
     if (m != null) {
@@ -448,7 +463,19 @@ class _AddTabletWizardPageState
                     child: Center(child: Text('units')),
                   ),
                 ],
-                onChanged: (v) => setState(() => _strengthUnit = v ?? Unit.mg),
+                onChanged: (v) {
+                  if (v == null) return;
+                  final oldValue =
+                      double.tryParse(_strengthValueCtrl.text.trim()) ?? 0;
+                  final converted =
+                      _convertMassUnit(_strengthUnit, v, oldValue);
+                  setState(() {
+                    _strengthUnit = v;
+                    if ((converted - oldValue).abs() > 0.000001) {
+                      _strengthValueCtrl.text = fmt2(converted);
+                    }
+                  });
+                },
               ),
             ),
             buildHelperText(
@@ -793,7 +820,7 @@ class _AddTabletWizardPageState
       initialStockValue: initialStock,
       lowStockEnabled: _lowStockEnabled,
       lowStockThreshold: _lowStockEnabled
-          ? double.tryParse(_lowStockThresholdCtrl.text.trim())
+          ? (double.tryParse(_lowStockThresholdCtrl.text.trim()) ?? 1.0).clamp(1.0, 1000000.0)
           : null,
       expiry: _expiry,
       batchNumber: _batchCtrl.text.trim().isEmpty
