@@ -1037,7 +1037,24 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         return _buildCurrentView();
       }
 
+      // Whether the layout requires bounded vertical space:
+      // - full variant always uses Expanded children.
+      // - day view with hour-selection panel needs Expanded for the panel.
+      // For mini/compact month and week views the child widgets are already
+      // intrinsically sized (mainAxisSize.min + fixed SizedBox grids), so a
+      // min-size Column lets the card shrink-wrap instead of wasting space.
+      final needsBoundedLayout =
+          widget.variant == CalendarVariant.full ||
+          (widget.requireHourSelectionInDayView &&
+              _currentView == CalendarView.day);
+
+      // Pre-compute day-view height for the non-Expanded path.
+      final dayViewHeight =
+          effectiveHeight - (showHeader ? kCalendarHeaderHeight : 0.0);
+
       final bodyColumn = Column(
+        mainAxisSize:
+            needsBoundedLayout ? MainAxisSize.max : MainAxisSize.min,
         children: [
           if (showHeader)
             CalendarHeader(
@@ -1085,9 +1102,15 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           if (widget.variant == CalendarVariant.full)
             Expanded(child: buildCalendarArea())
           else if (_currentView == CalendarView.day)
-            Expanded(child: buildCalendarArea())
+            // requireHourSelectionInDayView uses Expanded; otherwise use a
+            // fixed-height SizedBox so the Column can stay mainAxisSize.min.
+            if (widget.requireHourSelectionInDayView)
+              Expanded(child: buildCalendarArea())
+            else
+              SizedBox(height: dayViewHeight, child: buildCalendarArea())
           else
-            Flexible(fit: FlexFit.loose, child: buildCalendarArea()),
+            // Month / week views are intrinsically sized — no flex wrapper.
+            buildCalendarArea(),
           if (widget.requireHourSelectionInDayView &&
               _currentView == CalendarView.day)
             if (widget.variant == CalendarVariant.full && panelHeight != null)
@@ -1192,6 +1215,13 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         );
 
         if (widget.embedInParentCard) {
+          // When there is no dose-stage panel the body is already
+          // intrinsically sized via mainAxisSize.min — don't force it into a
+          // fixed-height SizedBox or the card will reserve unused space.
+          if (!widget.showSelectedDayPanel &&
+              widget.variant != CalendarVariant.full) {
+            return body;
+          }
           return SizedBox(height: effectiveHeight, child: body);
         }
 

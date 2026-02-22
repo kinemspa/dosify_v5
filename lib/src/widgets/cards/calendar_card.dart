@@ -111,19 +111,37 @@ class _CalendarCardState extends ConsumerState<CalendarCard> {
           widget.reserveReorderHandleGutterWhenCollapsed,
       onExpandedChanged: _setExpanded,
       children: [
-        SizedBox(
-          height: widget.height ?? kHomeMiniCalendarHeight,
-          child: DoseCalendarWidget(
+        // When a dose-stage panel overlay is needed the widget must live inside
+        // a bounded SizedBox so the Stack overlay can be positioned correctly.
+        // When no panel is shown, let the widget size itself intrinsically so
+        // the card doesn't reserve unused vertical space.
+        if (widget.showSelectedDayPanel)
+          SizedBox(
+            height: widget.height ?? kHomeMiniCalendarHeight,
+            child: DoseCalendarWidget(
+              variant: CalendarVariant.mini,
+              defaultView: CalendarView.month,
+              scheduleId: scheduleId,
+              medicationId: medicationId,
+              showSelectedDayPanel: true,
+              showHeaderOverride: true,
+              showViewToggleOverride: true,
+              embedInParentCard: true,
+            ),
+          )
+        else
+          DoseCalendarWidget(
             variant: CalendarVariant.mini,
             defaultView: CalendarView.month,
             scheduleId: scheduleId,
             medicationId: medicationId,
-            showSelectedDayPanel: widget.showSelectedDayPanel,
+            // Pass height so day-view SizedBox and ratio calculations stay sane.
+            height: widget.height ?? kHomeMiniCalendarHeight,
+            showSelectedDayPanel: false,
             showHeaderOverride: true,
             showViewToggleOverride: true,
             embedInParentCard: true,
           ),
-        ),
       ],
     );
   }
