@@ -239,23 +239,30 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     if (!mounted) return;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        titleTextStyle: dialogTitleTextStyle(ctx),
-        contentTextStyle: dialogContentTextStyle(ctx),
-        title: const Text('Medications'),
-        content: const Text(
-          'This is where your medications are saved and tracked.\n\n'
-          'A medication is the core data point — doses are scheduled against a medication. '
-          'Multiple schedules can be assigned to a single medication.\n\n'
-          'Deleting a medication will remove all linked schedules and any future doses assigned to it.',
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Got it'),
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        final onPrimary = cs.onPrimary;
+        return AlertDialog(
+          backgroundColor: cs.primary,
+          titleTextStyle: dialogTitleTextStyle(ctx)?.copyWith(color: onPrimary),
+          contentTextStyle:
+              dialogContentTextStyle(ctx)?.copyWith(color: onPrimary),
+          title: const Text('Medications'),
+          content: const Text(
+            'This is where your medications are saved and tracked.\n\n'
+            'A medication is the core data point — doses are scheduled against a medication. '
+            'Multiple schedules can be assigned to a single medication.\n\n'
+            'Deleting a medication will remove all linked schedules and any future doses assigned to it.',
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: TextButton.styleFrom(foregroundColor: onPrimary),
+              child: const Text('Got it'),
+            ),
+          ],
+        );
+      },
     );
   }
 

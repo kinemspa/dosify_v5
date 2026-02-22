@@ -52,22 +52,29 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
     if (!mounted) return;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        titleTextStyle: dialogTitleTextStyle(ctx),
-        contentTextStyle: dialogContentTextStyle(ctx),
-        title: const Text('Schedules'),
-        content: const Text(
-          'This is where your schedules are created and managed.\n\n'
-          'A schedule defines when and how often doses of a medication are taken. '
-          'Each schedule must be attached to a medication.',
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Got it'),
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        final onPrimary = cs.onPrimary;
+        return AlertDialog(
+          backgroundColor: cs.primary,
+          titleTextStyle: dialogTitleTextStyle(ctx)?.copyWith(color: onPrimary),
+          contentTextStyle:
+              dialogContentTextStyle(ctx)?.copyWith(color: onPrimary),
+          title: const Text('Schedules'),
+          content: const Text(
+            'This is where your schedules are created and managed.\n\n'
+            'A schedule defines when and how often doses of a medication are taken. '
+            'Each schedule must be attached to a medication.',
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: TextButton.styleFrom(foregroundColor: onPrimary),
+              child: const Text('Got it'),
+            ),
+          ],
+        );
+      },
     );
   }
 
