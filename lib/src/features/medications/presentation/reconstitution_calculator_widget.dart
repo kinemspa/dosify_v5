@@ -707,7 +707,9 @@ class _ReconstitutionCalculatorWidgetState
             'Target Dose',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,
-              color: Theme.of(context).colorScheme.primary,
+              color: reconForegroundColor(context).withValues(
+                alpha: kReconTextHighOpacity,
+              ),
             ),
           ),
         ),

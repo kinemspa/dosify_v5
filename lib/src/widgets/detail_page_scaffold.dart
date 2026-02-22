@@ -58,19 +58,15 @@ class _DetailPageScaffoldState extends State<DetailPageScaffold> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    // If startCollapsed, set the initial offset directly on creation so there
+    // is zero visible flash of the expanded header before collapsing.
+    double initialOffset = 0.0;
     if (widget.startCollapsed) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !_scrollController.hasClients) return;
-        final expandedH = widget.expandedHeight ?? kDetailHeaderExpandedHeight;
-        final collapsedH = widget.collapsedHeight ?? kDetailHeaderCollapsedHeight;
-        final offset = (expandedH - collapsedH).clamp(
-          0.0,
-          _scrollController.position.maxScrollExtent,
-        );
-        if (offset > 0) _scrollController.jumpTo(offset);
-      });
+      final expandedH = widget.expandedHeight ?? kDetailHeaderExpandedHeight;
+      final collapsedH = widget.collapsedHeight ?? kDetailHeaderCollapsedHeight;
+      initialOffset = (expandedH - collapsedH).clamp(0.0, double.infinity);
     }
+    _scrollController = ScrollController(initialScrollOffset: initialOffset);
   }
 
   @override
