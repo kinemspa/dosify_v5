@@ -49,6 +49,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
   ReportTimeRangePreset _activityRangePreset = ReportTimeRangePreset.allTime;
 
+  // Auto-sizes the expanded header so banner content is never clipped.
+  double _measuredExpandedHeaderHeight = kDetailHeaderExpandedHeight;
+  final GlobalKey _headerMeasureKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -1092,6 +1096,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    _scheduleHeaderHeightMeasurement(context);
     final box = Hive.box<Schedule>('schedules');
     final schedule = box.get(widget.scheduleId);
 
@@ -1128,22 +1133,51 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               ? null
               : medsBox.get(medId);
 
-          return DetailPageScaffold(
-            title: mergedTitle,
-            expandedTitle: 'Schedule Details',
-            expandedHeight: kDetailHeaderExpandedHeightCompact,
-            onEdit: () => _openEditScheduleDialog(s),
-            onDelete: () => _confirmDelete(context, s),
-            showEditInMenu: false,
-            showDeleteInMenu: false,
-            statsBannerContent: ScheduleDetailHeaderBanner(
-              schedule: s,
-              nextDose: nextDose,
-              title: mergedTitle,
-              medication: med,
-              onPauseResumePressed: () => _promptPauseFromHeader(context, s),
-            ),
-            sections: _buildSections(context, s, nextDose),
+          return Stack(
+            children: [
+              SizedBox.expand(
+                child: DetailPageScaffold(
+                  title: mergedTitle,
+                  expandedTitle: 'Schedule Details',
+                  expandedHeight: _measuredExpandedHeaderHeight,
+                  onEdit: () => _openEditScheduleDialog(s),
+                  onDelete: () => _confirmDelete(context, s),
+                  showEditInMenu: false,
+                  showDeleteInMenu: false,
+                  statsBannerContent: ScheduleDetailHeaderBanner(
+                    schedule: s,
+                    nextDose: nextDose,
+                    title: mergedTitle,
+                    medication: med,
+                    onPauseResumePressed: () =>
+                        _promptPauseFromHeader(context, s),
+                  ),
+                  sections: _buildSections(context, s, nextDose),
+                ),
+              ),
+              Offstage(
+                offstage: true,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      key: _headerMeasureKey,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kPageHorizontalPadding,
+                      ),
+                      child: ScheduleDetailHeaderBanner(
+                        schedule: s,
+                        nextDose: nextDose,
+                        title: mergedTitle,
+                        medication: med,
+                        onPauseResumePressed: () {},
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           );
         } catch (e) {
           return Scaffold(
@@ -1179,6 +1213,26 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         }
       },
     );
+  }
+
+  void _scheduleHeaderHeightMeasurement(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ro = _headerMeasureKey.currentContext?.findRenderObject();
+      if (ro is! RenderBox || !ro.hasSize) return;
+      final topInset = MediaQuery.of(context).padding.top;
+      const innerTop = 56.0;
+      const innerBottom = kPageHorizontalPadding;
+      final desired =
+          topInset + innerTop + ro.size.height + innerBottom + kSpacingS;
+      final clamped = desired.clamp(
+        kDetailHeaderExpandedHeight.toDouble(),
+        kDetailHeaderExpandedHeight * 2.0,
+      );
+      if ((clamped - _measuredExpandedHeaderHeight).abs() > 1.0) {
+        setState(() => _measuredExpandedHeaderHeight = clamped);
+      }
+    });
   }
 
   Future<void> _promptPauseFromHeader(BuildContext context, Schedule s) async {

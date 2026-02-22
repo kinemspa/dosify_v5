@@ -325,14 +325,19 @@ class _DayColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final todayFill = Color.alphaBlend(
       colorScheme.primary.withValues(alpha: kOpacityFaint),
       colorScheme.surface,
     );
-    final selectedFill = Color.alphaBlend(
-      colorScheme.primary.withValues(alpha: kOpacitySubtleLow),
-      colorScheme.surface,
-    );
+    // In dark mode a 28% primary fill is clearly visible; in light mode blend
+    // into the surface so it stays subtle.
+    final selectedFill = isDark
+        ? colorScheme.primary.withValues(alpha: 0.28)
+        : Color.alphaBlend(
+            colorScheme.primary.withValues(alpha: kOpacitySubtleLow),
+            colorScheme.surface,
+          );
 
     return InkWell(
       onTap: onDayTap != null ? () => onDayTap!(date) : null,

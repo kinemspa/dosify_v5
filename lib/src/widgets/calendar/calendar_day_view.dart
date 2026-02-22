@@ -1,5 +1,6 @@
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:intl/intl.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_dose_block.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
 import 'package:flutter/material.dart';
@@ -106,11 +107,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
     final currentTimePosition = _getCurrentTimePosition();
     final hasDoses = widget.doses.isNotEmpty;
 
-    if (!hasDoses) {
-      return CalendarNoDosesState(date: widget.date, showDate: true);
-    }
-
-    return GestureDetector(
+    final hourGrid = GestureDetector(
       onHorizontalDragEnd: (details) {
         if (widget.onDateChanged == null) return;
 
@@ -154,6 +151,17 @@ class _CalendarDayViewState extends State<CalendarDayView> {
             ),
         ],
       ),
+    );
+
+    return Column(
+      children: [
+        _DayDateBanner(date: widget.date),
+        Expanded(
+          child: hasDoses
+              ? hourGrid
+              : CalendarNoDosesState(date: widget.date, showDate: false),
+        ),
+      ],
     );
   }
 }
@@ -270,6 +278,55 @@ class _CurrentTimeIndicator extends StatelessWidget {
         ),
         const SizedBox(width: kCardInnerSpacing),
       ],
+    );
+  }
+}
+
+/// Shows the current day's full date (e.g. "Saturday, 22 February") at the
+/// top of the [CalendarDayView] so the user can confirm which day they are on.
+class _DayDateBanner extends StatelessWidget {
+  const _DayDateBanner({required this.date});
+
+  final DateTime date;
+
+  bool get _isToday {
+    final now = DateTime.now();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isToday = _isToday;
+    final label = DateFormat.MMMMEEEEd().format(date);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: kPageHorizontalPadding,
+        vertical: kSpacingS,
+      ),
+      decoration: BoxDecoration(
+        color: isToday
+            ? colorScheme.primary.withValues(alpha: kOpacityFaint)
+            : colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: colorScheme.outline.withValues(alpha: kOpacityMinimal),
+          ),
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: isToday
+              ? colorScheme.primary
+              : colorScheme.onSurface.withValues(alpha: kOpacityHigh),
+          fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+        ),
+      ),
     );
   }
 }
