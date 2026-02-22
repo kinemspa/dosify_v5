@@ -1,6 +1,5 @@
 // Dart imports:
 import 'dart:io' show Platform;
-import 'dart:ui' show Color;
 
 // Flutter imports:
 import 'package:flutter/foundation.dart';
