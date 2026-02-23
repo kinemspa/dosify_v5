@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/legal/disclaimer_strings.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
@@ -418,6 +419,45 @@ class _ReconstitutionCalculatorDialogState
                 fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,
+            ),
+          ),
+          // Reconstitution disclaimer banner
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: cs.errorContainer.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+                border: Border.all(
+                  color: cs.error.withValues(alpha: 0.45),
+                  width: kBorderWidthThin,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: cs.onErrorContainer,
+                    size: kIconSizeSmall,
+                  ),
+                  const SizedBox(width: kSpacingXS),
+                  Expanded(
+                    child: Text(
+                      DisclaimerStrings.reconstitution,
+                      style: microHelperTextStyle(
+                        context,
+                        color: cs.onErrorContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Divider(

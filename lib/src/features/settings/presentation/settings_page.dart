@@ -14,6 +14,8 @@ import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/backup/backup_models.dart';
 import 'package:dosifi_v5/src/core/backup/google_drive_backup_service.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/core/legal/disclaimer_settings.dart';
+import 'package:dosifi_v5/src/core/legal/disclaimer_strings.dart';
 import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
@@ -1104,6 +1106,53 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             },
           ),
 
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Legal',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingS),
+          ListTile(
+            leading: const Icon(Icons.gavel_outlined),
+            title: const Text('Disclaimer'),
+            subtitle: const Text('View full in-app legal disclaimer'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showDialog<void>(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                title: const Text('Disclaimer'),
+                content: SingleChildScrollView(
+                  child: Text(
+                    DisclaimerStrings.full,
+                    style: bodyTextStyle(dialogContext),
+                  ),
+                ),
+                actions: [
+                  FilledButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text('Close'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.replay_outlined),
+            title: const Text('Re-show disclaimer'),
+            subtitle: const Text(
+              'Reset acceptance so the disclaimer appears on next launch',
+            ),
+            onTap: () async {
+              await DisclaimerSettings.reset();
+              if (!context.mounted) return;
+              showAppSnackBar(
+                context,
+                'Disclaimer reset — will appear on next app launch',
+              );
+            },
+          ),
           const SizedBox(height: kSpacingL),
           Text(
             'About',
