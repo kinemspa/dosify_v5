@@ -1,4 +1,4 @@
-// Package imports:
+﻿// Package imports:
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -46,7 +46,7 @@ class SavedReconstitutionRepository {
     required double strengthValue,
     required String strengthUnit,
     required double solventVolumeMl,
-    double? recommendedDose,
+    double? calculatedDose,
     String? doseUnit,
   }) {
     String fmtNoTrailing(double v) {
@@ -59,11 +59,11 @@ class SavedReconstitutionRepository {
       '${fmtNoTrailing(strengthValue)} $strengthUnit',
     ];
 
-    if (recommendedDose != null &&
-        recommendedDose > 0 &&
+    if (calculatedDose != null &&
+        calculatedDose > 0 &&
         doseUnit != null &&
         doseUnit.trim().isNotEmpty) {
-      parts.add('${fmtNoTrailing(recommendedDose)} ${doseUnit.trim()}');
+      parts.add('${fmtNoTrailing(calculatedDose)} ${doseUnit.trim()}');
     }
 
     parts.add('${fmtNoTrailing(solventVolumeMl)} mL');

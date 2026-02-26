@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 // Project imports:
 import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -115,10 +115,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           _reconResult = ReconstitutionResult(
             perMlConcentration: newConcentration,
             solventVolumeMl: newVolume,
-            recommendedUnits: _reconResult!.recommendedUnits,
+            calculatedUnits: _reconResult!.calculatedUnits,
             syringeSizeMl: _reconResult!.syringeSizeMl,
             diluentName: _reconResult!.diluentName,
-            recommendedDose: _reconResult!.recommendedDose,
+            calculatedDose: _reconResult!.calculatedDose,
             doseUnit: _reconResult!.doseUnit,
             maxVialSizeMl: _reconResult!.maxVialSizeMl,
           );
@@ -150,10 +150,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           _reconResult = ReconstitutionResult(
             perMlConcentration: owned.perMlConcentration,
             solventVolumeMl: owned.solventVolumeMl,
-            recommendedUnits: owned.recommendedUnits,
+            calculatedUnits: owned.calculatedUnits,
             syringeSizeMl: owned.syringeSizeMl,
             diluentName: owned.diluentName,
-            recommendedDose: owned.recommendedDose,
+            calculatedDose: owned.calculatedDose,
             doseUnit: owned.doseUnit,
             maxVialSizeMl: owned.maxVialSizeMl,
           );
@@ -405,7 +405,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           strengthValue: med.strengthValue,
           strengthUnit: med.strengthUnit.name,
           solventVolumeMl: _reconResult!.solventVolumeMl,
-          recommendedDose: _reconResult!.recommendedDose,
+          calculatedDose: _reconResult!.calculatedDose,
           doseUnit: _reconResult!.doseUnit,
         );
 
@@ -418,10 +418,10 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           strengthUnit: med.strengthUnit.name,
           solventVolumeMl: _reconResult!.solventVolumeMl,
           perMlConcentration: _reconResult!.perMlConcentration,
-          recommendedUnits: _reconResult!.recommendedUnits,
+          calculatedUnits: _reconResult!.calculatedUnits,
           syringeSizeMl: _reconResult!.syringeSizeMl,
           diluentName: _reconResult!.diluentName,
-          recommendedDose: _reconResult!.recommendedDose,
+          calculatedDose: _reconResult!.calculatedDose,
           doseUnit: _reconResult!.doseUnit,
           maxVialSizeMl: _reconResult!.maxVialSizeMl,
           createdAt: existing?.createdAt,
@@ -648,7 +648,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               label: 'Name',
               field: WizardTextField36(
                 controller: _nameCtrl,
-                hint: 'e.g., Peptide',
+                hint: 'e.g., Compound A',
                 onChanged: (_) => setState(() {}),
               ),
             ),
@@ -698,7 +698,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         Text('Strength & Reconstitution', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'Multi-dose vials require reconstitution (mixing with liquid). Enter the strength and use our calculator to find the right mix.',
+          'Multi-dose vials require reconstitution (mixing with liquid). Enter the strength and use our calculator to reference the reconstitution ratio.',
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
@@ -813,7 +813,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       unitLabel: _strengthUnit.name,
                       medicationName: _nameCtrl.text.trim(),
                       initialDiluentName: _reconResult?.diluentName,
-                      initialDoseValue: _reconResult?.recommendedDose,
+                      initialDoseValue: _reconResult?.calculatedDose,
                       initialDoseUnit: _reconResult?.doseUnit,
                       onStrengthAdjusted: (value, unit) {
                         final normalized = unit.trim().toLowerCase();
@@ -919,7 +919,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             ),
             buildHelperText(
               context,
-              'If you know the total volume, enter it here. Otherwise, use the calculator above to determine the correct reconstitution.',
+              'If you know the total volume, enter it here. Otherwise, use the calculator above to calculate the reconstitution volume for reference.',
               fullWidth: true,
             ),
           ],

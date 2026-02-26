@@ -8,6 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/app_navigator.dart';
+import 'package:dosifi_v5/src/features/disclaimer/data/disclaimer_preferences.dart';
+import 'package:dosifi_v5/src/features/disclaimer/presentation/disclaimer_page.dart';
+import 'package:dosifi_v5/src/features/settings/presentation/legal_page.dart';
 import 'package:dosifi_v5/src/app/shell_scaffold.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
@@ -40,6 +43,10 @@ import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart'
 // Removed incorrect import
 final _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
+/// Singleton notifier driving the first-run disclaimer gate.
+/// Initialised via [initDisclaimerNotifier] in main.dart before runApp.
+final disclaimerNotifier = DisclaimerNotifier();
+
 Future<String?> _guardMedicationAddRoutes() async {
   final prefs = await SharedPreferences.getInstance();
   final isPro = prefs.getBool(kEntitlementIsProPrefsKey) ?? false;
@@ -54,6 +61,15 @@ final router = GoRouter(
   navigatorKey: rootNavigatorKey,
   // Start at home by default
   initialLocation: '/',
+  refreshListenable: disclaimerNotifier,
+  redirect: (context, state) {
+    if (!disclaimerNotifier.isAccepted &&
+        state.matchedLocation != '/disclaimer' &&
+        state.matchedLocation != '/legal') {
+      return '/disclaimer';
+    }
+    return null;
+  },
   routes: [
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
@@ -303,6 +319,28 @@ final router = GoRouter(
       path: '/analytics',
       name: 'analytics',
       builder: (context, state) => const AnalyticsPage(),
+    ),
+    // Disclaimer gate — full-screen, outside ShellRoute (no bottom nav)
+    // Pass `extra: true` when navigating from Settings (read-only mode).
+    GoRoute(
+      path: '/disclaimer',
+      name: 'disclaimer',
+      builder: (context, state) {
+        final readOnly = state.extra as bool? ?? false;
+        return DisclaimerPage(
+          notifier: disclaimerNotifier,
+          readOnly: readOnly,
+          onAcknowledged: readOnly ? null : () => context.go('/'),
+          onClose: readOnly ? () => context.pop() : null,
+          onNavigateToLegal: () => context.push('/legal'),
+        );
+      },
+    ),
+    // Legal page — full-screen, outside ShellRoute (no bottom nav)
+    GoRoute(
+      path: '/legal',
+      name: 'legal',
+      builder: (context, state) => const LegalPage(),
     ),
   ],
 );

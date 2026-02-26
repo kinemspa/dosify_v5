@@ -16,7 +16,8 @@ class DisclaimerStrings {
 
   // ─── Full / Legal ────────────────────────────────────────────────────────
 
-  static const String full = '''Dosifi is a medication organization and tracking tool. It is not a medical device and does not provide medical advice, diagnosis, treatment, clinical decision support, or recommendations/decisions about the treatment of any disease, condition, ailment, or defect.
+  static const String full = '''
+Dosifi is a medication organization and tracking tool. It is not a medical device and does not provide medical advice, diagnosis, treatment, clinical decision support, or recommendations/decisions about the treatment of any disease, condition, ailment, or defect.
 
 Dosifi is not a doctor, pharmacist, nurse, or healthcare provider.
 

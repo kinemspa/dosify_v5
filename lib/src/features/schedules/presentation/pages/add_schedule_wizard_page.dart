@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -663,7 +663,7 @@ class _AddScheduleWizardPageState
           );
 
           if (_doseValue.text.trim().isEmpty) {
-            final dose = savedRecon?.recommendedDose;
+            final dose = savedRecon?.calculatedDose;
             final unit = savedRecon?.doseUnit;
             if (dose != null &&
                 dose > 0 &&

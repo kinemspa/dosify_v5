@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -65,9 +65,9 @@ class _ReconstitutionCalculatorPageState
 
     return sameDouble(a.perMlConcentration, b.perMlConcentration) &&
         sameDouble(a.solventVolumeMl, b.solventVolumeMl) &&
-        sameDouble(a.recommendedUnits, b.recommendedUnits) &&
+        sameDouble(a.calculatedUnits, b.calculatedUnits) &&
         sameDouble(a.syringeSizeMl, b.syringeSizeMl) &&
-        sameDouble(a.recommendedDose, b.recommendedDose) &&
+        sameDouble(a.calculatedDose, b.calculatedDose) &&
         sameDouble(a.maxVialSizeMl, b.maxVialSizeMl) &&
         a.diluentName == b.diluentName &&
         a.doseUnit == b.doseUnit;
@@ -84,7 +84,7 @@ class _ReconstitutionCalculatorPageState
       _lastResult = result;
       _canSave = isValid;
 
-      _initialDoseValue = result.recommendedDose;
+      _initialDoseValue = result.calculatedDose;
       _initialDoseUnit = result.doseUnit;
       _initialSyringeSize = _syringeFromMl(result.syringeSizeMl);
       _initialVialSize = result.solventVolumeMl;
@@ -143,7 +143,7 @@ class _ReconstitutionCalculatorPageState
           ? item.strengthValue.toInt().toString()
           : item.strengthValue.toStringAsFixed(2);
 
-      _initialDoseValue = item.recommendedDose;
+      _initialDoseValue = item.calculatedDose;
       _initialDoseUnit = item.doseUnit;
       _initialSyringeSize = _syringeFromMl(item.syringeSizeMl);
       _initialVialSize = item.solventVolumeMl;
@@ -152,10 +152,10 @@ class _ReconstitutionCalculatorPageState
       _lastResult = ReconstitutionResult(
         perMlConcentration: item.perMlConcentration,
         solventVolumeMl: item.solventVolumeMl,
-        recommendedUnits: item.recommendedUnits,
+        calculatedUnits: item.calculatedUnits,
         syringeSizeMl: item.syringeSizeMl,
         diluentName: item.diluentName,
-        recommendedDose: item.recommendedDose,
+        calculatedDose: item.calculatedDose,
         doseUnit: item.doseUnit,
         maxVialSizeMl: item.maxVialSizeMl,
       );
@@ -283,7 +283,7 @@ class _ReconstitutionCalculatorPageState
         : 'Reconstitution';
 
     final parts = <String>[baseName];
-    final dose = _lastResult!.recommendedDose;
+    final dose = _lastResult!.calculatedDose;
     final doseUnit = _lastResult!.doseUnit;
     if (dose != null &&
         dose > 0 &&
@@ -311,10 +311,10 @@ class _ReconstitutionCalculatorPageState
       strengthUnit: _selectedUnit,
       solventVolumeMl: _lastResult!.solventVolumeMl,
       perMlConcentration: _lastResult!.perMlConcentration,
-      recommendedUnits: _lastResult!.recommendedUnits,
+      calculatedUnits: _lastResult!.calculatedUnits,
       syringeSizeMl: _lastResult!.syringeSizeMl,
       diluentName: _lastResult!.diluentName,
-      recommendedDose: _lastResult!.recommendedDose,
+      calculatedDose: _lastResult!.calculatedDose,
       doseUnit: _lastResult!.doseUnit,
       maxVialSizeMl: _lastResult!.maxVialSizeMl,
       createdAt: _loadedSavedId == null ? now : null,
@@ -445,7 +445,7 @@ class _ReconstitutionCalculatorPageState
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Reconstitution Calculator',
+                        'Reconstitution Reference Calculator',
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: fg,
                           fontWeight: kFontWeightBold,
@@ -684,7 +684,7 @@ class _ReconstitutionCalculatorPageState
                       ),
                     ),
                     helper(
-                      'Required. Strength (S) is the total drug amount in the vial (before mixing). Use the unit from the vial label.',
+                      'Required. Strength (S) is the total compound amount in the vial (before mixing). Use the unit from the vial label.',
                     ),
                   ],
                 ),

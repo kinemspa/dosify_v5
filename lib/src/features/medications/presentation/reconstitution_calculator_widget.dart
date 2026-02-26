@@ -1,4 +1,4 @@
-// Dart imports:
+﻿// Dart imports:
 import 'dart:async';
 import 'dart:math';
 
@@ -418,14 +418,14 @@ class _ReconstitutionCalculatorWidgetState
     final result = ReconstitutionResult(
       perMlConcentration: currentC,
       solventVolumeMl: currentV, // Use precise value not rounded
-      recommendedUnits: _selectedUnits.roundToDouble(), // Round to whole units
+      calculatedUnits: _selectedUnits.roundToDouble(), // Round to whole units
       syringeSizeMl: _syringe.ml,
       strengthValueUsed: widget.initialStrengthValue,
       strengthUnitUsed: widget.unitLabel,
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
           ? _diluentNameCtrl.text.trim()
           : null,
-      recommendedDose: Draw,
+      calculatedDose: Draw,
       doseUnit: _doseUnit,
       maxVialSizeMl: vialMax,
     );
@@ -1136,6 +1136,15 @@ class _ReconstitutionCalculatorWidgetState
             ),
           ),
           const SizedBox(height: 16),
+          // Reference disclaimer caption — regulatory safe-harbor
+          Text(
+            'Reference calculation only. Verify with your healthcare professional before use.',
+            textAlign: TextAlign.center,
+            style: helperTextStyle(context)?.copyWith(
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: 8),
         ],
         if (!fitsVial)
           Padding(
@@ -1156,7 +1165,7 @@ class _ReconstitutionCalculatorWidgetState
                       final result = ReconstitutionResult(
                         perMlConcentration: currentC,
                         solventVolumeMl: currentV, // Use precise value
-                        recommendedUnits: _selectedUnits
+                        calculatedUnits: _selectedUnits
                             .roundToDouble(), // Round to whole units
                         syringeSizeMl: _syringe.ml,
                         strengthValueUsed: widget.initialStrengthValue,
@@ -1164,7 +1173,7 @@ class _ReconstitutionCalculatorWidgetState
                         diluentName: _diluentNameCtrl.text.trim().isNotEmpty
                             ? _diluentNameCtrl.text.trim()
                             : null,
-                        recommendedDose: Draw,
+                        calculatedDose: Draw,
                         doseUnit: _doseUnit,
                         maxVialSizeMl: vialMax,
                       );

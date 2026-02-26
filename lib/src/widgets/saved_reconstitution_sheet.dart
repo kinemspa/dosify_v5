@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -99,7 +99,7 @@ class SavedReconstitutionSheet extends StatelessWidget {
                         '${item.solventVolumeMl.toStringAsFixed(2)} mL',
                       );
                       subtitleParts.add(
-                        '${item.recommendedUnits.toStringAsFixed(0)} units',
+                        '${item.calculatedUnits.toStringAsFixed(0)} units',
                       );
                       subtitleParts.add(
                         '${item.syringeSizeMl.toStringAsFixed(1)} mL (${(item.syringeSizeMl * 100).round()} U) syringe',

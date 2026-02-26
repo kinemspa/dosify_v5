@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:dosifi_v5/src/app/app.dart';
 import 'package:dosifi_v5/src/app/notification_deep_link_handler.dart';
+import 'package:dosifi_v5/src/app/router.dart' show disclaimerNotifier;
 import 'package:dosifi_v5/src/core/hive/hive_bootstrap.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
@@ -40,6 +41,7 @@ Future<void> main() async {
       print('Dosifi: MCPToolkit initialized');
 
       print('Dosifi: Running App...');
+      await disclaimerNotifier.load();
       runApp(const ProviderScope(child: DosifiApp()));
 
       NotificationService.setNotificationResponseHandler(

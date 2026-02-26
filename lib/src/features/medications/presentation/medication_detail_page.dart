@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_null_comparison, unused_element, unused_element_parameter, unused_local_variable
+﻿// ignore_for_file: unnecessary_null_comparison, unused_element, unused_element_parameter, unused_local_variable
 
 // Dart imports:
 
@@ -84,12 +84,12 @@ double? _inferDoseAmountFromSavedRecon(Medication med) {
 
 double? _inferDoseAmountFromReconCalc(SavedReconstitutionCalculation recon) {
   if (recon.perMlConcentration <= 0) return null;
-  if (recon.recommendedUnits <= 0) return null;
+  if (recon.calculatedUnits <= 0) return null;
 
   final unitsPerMl = SyringeType.ml_1_0.unitsPerMl;
   if (unitsPerMl <= 0) return null;
 
-  final doseVolumeMl = recon.recommendedUnits / unitsPerMl;
+  final doseVolumeMl = recon.calculatedUnits / unitsPerMl;
   if (doseVolumeMl <= 0) return null;
 
   return recon.perMlConcentration * doseVolumeMl;
@@ -97,7 +97,7 @@ double? _inferDoseAmountFromReconCalc(SavedReconstitutionCalculation recon) {
 
 double? _inferInitialDesiredDoseAmount(Medication med) {
   final savedRecon = SavedReconstitutionRepository().ownedForMedication(med.id);
-  final savedDose = savedRecon?.recommendedDose;
+  final savedDose = savedRecon?.calculatedDose;
   if (savedDose != null && savedDose > 0) return savedDose;
 
   final inferredFromSaved = savedRecon != null
@@ -2398,9 +2398,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       med.id,
     );
     final actualDoseStrengthValue =
-        (savedRecon?.recommendedDose != null &&
-            savedRecon!.recommendedDose! > 0)
-        ? savedRecon.recommendedDose
+        (savedRecon?.calculatedDose != null &&
+            savedRecon!.calculatedDose! > 0)
+        ? savedRecon.calculatedDose
         : _inferDoseAmountFromSavedRecon(med);
     final actualDoseStrengthUnit =
         savedRecon?.doseUnit?.trim().isNotEmpty == true
@@ -2555,7 +2555,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       latest.copyWith(
         perMlValue: result.perMlConcentration,
         containerVolumeMl: result.solventVolumeMl,
-        volumePerDose: result.recommendedUnits / SyringeType.ml_1_0.unitsPerMl,
+        volumePerDose: result.calculatedUnits / SyringeType.ml_1_0.unitsPerMl,
         diluentName: result.diluentName ?? latest.diluentName,
         activeVialVolume: result.solventVolumeMl,
         reconstitutedAt: DateTime.now(),
@@ -2574,7 +2574,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         strengthValue: latest.strengthValue,
         strengthUnit: latest.strengthUnit.name,
         solventVolumeMl: result.solventVolumeMl,
-        recommendedDose: result.recommendedDose,
+        calculatedDose: result.calculatedDose,
         doseUnit: result.doseUnit,
       );
 
@@ -2588,10 +2588,10 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           strengthUnit: latest.strengthUnit.name,
           solventVolumeMl: result.solventVolumeMl,
           perMlConcentration: result.perMlConcentration,
-          recommendedUnits: result.recommendedUnits,
+          calculatedUnits: result.calculatedUnits,
           syringeSizeMl: result.syringeSizeMl,
           diluentName: result.diluentName,
-          recommendedDose: result.recommendedDose,
+          calculatedDose: result.calculatedDose,
           doseUnit: result.doseUnit,
           maxVialSizeMl: result.maxVialSizeMl,
           createdAt: existing?.createdAt,
@@ -2943,7 +2943,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
             children: [
               // Helper text
               Text(
-                'Add stock after receiving a new prescription or restocking. "Add" will increase the stock by a specific amount (and update your maximum if it exceeds the current max). "Fill to Max" restores stock to your original maximum level.',
+                'Add stock when you receive a new supply. "Add" will increase the stock by a specific amount (and update your maximum if it exceeds the current max). "Fill to Max" restores stock to your original maximum level.',
                 style: helperTextStyle(stateContext),
               ),
               const SizedBox(height: kSpacingL),
@@ -3218,7 +3218,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       ? 'From previous reconstitution'
       : null;
 
-  double? selectedRecommendedUnits;
+  double? selectedcalculatedUnits;
   String? selectedReconLabel;
 
   final topUpVolumeCtrl = TextEditingController(text: fmt2(vialSize));
@@ -3234,7 +3234,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   if (reconChoice == 'sameRecon' && savedRecon != null) {
     selectedPerMl = savedRecon.perMlConcentration;
     selectedDiluentName = savedRecon.diluentName;
-    selectedRecommendedUnits = savedRecon.recommendedUnits;
+    selectedcalculatedUnits = savedRecon.calculatedUnits;
     replaceVolumeCtrl.text = fmt2(savedRecon.solventVolumeMl);
     replaceVolumeSetBy = 'From saved reconstitution';
 
@@ -3286,7 +3286,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
 
     selectedPerMl = result.perMlConcentration;
     selectedDiluentName = result.diluentName;
-    selectedRecommendedUnits = result.recommendedUnits;
+    selectedcalculatedUnits = result.calculatedUnits;
     replaceVolumeCtrl.text = fmt2(result.solventVolumeMl);
     replaceVolumeSetBy = 'From new reconstitution';
 
@@ -3311,12 +3311,12 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       required double perMl,
       required double volumeMl,
       String? diluentName,
-      double? recommendedUnits,
+      double? calculatedUnits,
       required String label,
     }) async {
       selectedPerMl = perMl;
       selectedDiluentName = diluentName;
-      selectedRecommendedUnits = recommendedUnits;
+      selectedcalculatedUnits = calculatedUnits;
       selectedReconLabel = label;
 
       replaceVolumeCtrl.text = fmt2(volumeMl);
@@ -3356,7 +3356,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       perMl: result.perMlConcentration,
       volumeMl: result.solventVolumeMl,
       diluentName: result.diluentName,
-      recommendedUnits: result.recommendedUnits,
+      calculatedUnits: result.calculatedUnits,
       label: label,
     );
   }
@@ -3817,7 +3817,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
                             (double.tryParse(replaceVolumeCtrl.text) ?? 0),
                         'perMl': selectedPerMl,
                         'diluentName': selectedDiluentName,
-                        'recommendedUnits': selectedRecommendedUnits,
+                        'calculatedUnits': selectedcalculatedUnits,
                         'reconLabel': selectedReconLabel,
                         'topUpVolume':
                             (double.tryParse(topUpVolumeCtrl.text) ?? 0),
@@ -3920,15 +3920,15 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
 
     final diluentName = result['diluentName'] as String?;
     final reconLabel = result['reconLabel'] as String?;
-    final recommendedUnits = result['recommendedUnits'] as double?;
+    final calculatedUnits = result['calculatedUnits'] as double?;
 
     box.put(
       med.id,
       med.copyWith(
         containerVolumeMl: reconVolume,
         perMlValue: perMl,
-        volumePerDose: recommendedUnits != null && recommendedUnits > 0
-            ? (recommendedUnits / SyringeType.ml_1_0.unitsPerMl)
+        volumePerDose: calculatedUnits != null && calculatedUnits > 0
+            ? (calculatedUnits / SyringeType.ml_1_0.unitsPerMl)
             : med.volumePerDose,
         diluentName: diluentName,
         activeVialVolume: reconVolume,

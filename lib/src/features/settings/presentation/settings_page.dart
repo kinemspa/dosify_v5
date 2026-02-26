@@ -15,7 +15,6 @@ import 'package:dosifi_v5/src/core/backup/backup_models.dart';
 import 'package:dosifi_v5/src/core/backup/google_drive_backup_service.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/legal/disclaimer_settings.dart';
-import 'package:dosifi_v5/src/core/legal/disclaimer_strings.dart';
 import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
@@ -865,13 +864,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.notifications_none_outlined),
-                    title: const Text('Overdue reminder timing'),
+                    title: const Text('Missed log reminder timing'),
                     subtitle: Text(overdueSubtitle),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => editPercentSetting(
-                      title: 'Overdue reminder timing',
+                      title: 'Missed log reminder timing',
                       description:
-                          'Sends an overdue reminder between the scheduled time and the missed threshold. 0% disables this reminder. Example: 50% sends halfway through the due-to-missed window.',
+                          'Sends a reminder between the scheduled time and the missed threshold to prompt logging. For logging purposes only — not a clinical alert. 0% disables this reminder. Example: 50% sends halfway through the due-to-missed window.',
                       currentValue: config.overdueReminderPercent,
                       onSave: (v) =>
                           DoseTimingSettings.setOverdueReminderPercent(v),
@@ -881,6 +880,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     leading: const Icon(Icons.repeat_outlined),
                     title: const Text('Follow-up reminders'),
                     subtitle: Text(followUpSubtitle),
+                    // Clarifies this is a logging prompt, not a clinical alert
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
                       final count = await showModalBottomSheet<int>(
@@ -1115,32 +1115,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const SizedBox(height: kSpacingS),
           ListTile(
-            leading: const Icon(Icons.gavel_outlined),
-            title: const Text('Disclaimer'),
-            subtitle: const Text('View full in-app legal disclaimer'),
+            leading: const Icon(Icons.fact_check_outlined),
+            title: const Text('Research Disclaimer'),
+            subtitle: const Text('For research and informational purposes only'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => showDialog<void>(
-              context: context,
-              builder: (dialogContext) => AlertDialog(
-                title: const Text('Disclaimer'),
-                content: SingleChildScrollView(
-                  child: Text(
-                    DisclaimerStrings.full,
-                    style: bodyTextStyle(dialogContext),
-                  ),
-                ),
-                actions: [
-                  FilledButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: const Text('Close'),
-                  ),
-                ],
-              ),
-            ),
+            onTap: () => context.push('/disclaimer', extra: true),
+          ),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Privacy Policy'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/legal'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.gavel_outlined),
+            title: const Text('Terms of Use'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/legal'),
           ),
           ListTile(
             leading: const Icon(Icons.replay_outlined),
-            title: const Text('Re-show disclaimer'),
+            title: const Text('Reset disclaimer'),
             subtitle: const Text(
               'Reset acceptance so the disclaimer appears on next launch',
             ),
@@ -1149,7 +1144,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               if (!context.mounted) return;
               showAppSnackBar(
                 context,
-                'Disclaimer reset — will appear on next app launch',
+                'Disclaimer will appear on next app launch',
               );
             },
           ),

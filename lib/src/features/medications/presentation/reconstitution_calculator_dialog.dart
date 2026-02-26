@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -33,10 +33,10 @@ class ReconstitutionResult {
   const ReconstitutionResult({
     required this.perMlConcentration,
     required this.solventVolumeMl,
-    required this.recommendedUnits,
+    required this.calculatedUnits,
     required this.syringeSizeMl,
     this.diluentName,
-    this.recommendedDose,
+    this.calculatedDose,
     this.doseUnit,
     this.maxVialSizeMl,
     this.strengthValueUsed,
@@ -45,10 +45,10 @@ class ReconstitutionResult {
 
   final double perMlConcentration; // same base unit as dose/strength (per mL)
   final double solventVolumeMl; // mL to add to vial
-  final double recommendedUnits; // syringe units fill for the dose
+  final double calculatedUnits; // syringe units fill for the dose
   final double syringeSizeMl; // chosen syringe size mL
   final String? diluentName; // name of diluent fluid (e.g., 'Sterile Water')
-  final double? recommendedDose; // desired dose value for reopening calculator
+  final double? calculatedDose; // desired dose value for reopening calculator
   final String? doseUnit; // dose unit (mcg/mg/g) for reopening calculator
   final double?
   maxVialSizeMl; // max vial size constraint for reopening calculator
@@ -155,7 +155,7 @@ class _ReconstitutionCalculatorDialogState
   void _applySavedSeed(SavedReconstitutionCalculation saved) {
     setState(() {
       _seedDiluentName = saved.diluentName;
-      _seedDoseValue = saved.recommendedDose;
+      _seedDoseValue = saved.calculatedDose;
       _seedDoseUnit = saved.doseUnit;
       _seedSyringeSize = _inferSyringeSize(saved.syringeSizeMl);
       _seedVialSize = saved.solventVolumeMl;
@@ -214,7 +214,7 @@ class _ReconstitutionCalculatorDialogState
     final result = _lastResult;
     if (!_canSubmit || result == null || _activeStrengthValue <= 0) return;
 
-    final dose = result.recommendedDose;
+    final dose = result.calculatedDose;
     final doseUnit = result.doseUnit?.trim();
     final defaultNameParts = <String>['Reconstitution'];
     if (dose != null && dose > 0 && doseUnit != null && doseUnit.isNotEmpty) {
@@ -236,10 +236,10 @@ class _ReconstitutionCalculatorDialogState
       strengthUnit: _activeUnitLabel,
       solventVolumeMl: result.solventVolumeMl,
       perMlConcentration: result.perMlConcentration,
-      recommendedUnits: result.recommendedUnits,
+      calculatedUnits: result.calculatedUnits,
       syringeSizeMl: result.syringeSizeMl,
       diluentName: result.diluentName,
-      recommendedDose: result.recommendedDose,
+      calculatedDose: result.calculatedDose,
       doseUnit: result.doseUnit,
       maxVialSizeMl: result.maxVialSizeMl,
       createdAt: now,

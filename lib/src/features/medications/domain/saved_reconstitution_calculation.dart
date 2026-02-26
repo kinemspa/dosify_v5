@@ -1,4 +1,4 @@
-// Package imports:
+﻿// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 @HiveType(typeId: 60)
@@ -10,14 +10,14 @@ class SavedReconstitutionCalculation {
     required this.strengthUnit,
     required this.solventVolumeMl,
     required this.perMlConcentration,
-    required this.recommendedUnits,
+    required this.calculatedUnits,
     required this.syringeSizeMl,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.ownerMedicationId,
     this.medicationName,
     this.diluentName,
-    this.recommendedDose,
+    this.calculatedDose,
     this.doseUnit,
     this.maxVialSizeMl,
   }) : createdAt = createdAt ?? DateTime.now(),
@@ -58,7 +58,7 @@ class SavedReconstitutionCalculation {
 
   /// Syringe units (0-100 per mL mapping) recommended for the dose
   @HiveField(7)
-  final double recommendedUnits;
+  final double calculatedUnits;
 
   /// Selected syringe size in mL (e.g. 0.3, 0.5, 1.0, 3.0, 5.0)
   @HiveField(8)
@@ -69,7 +69,7 @@ class SavedReconstitutionCalculation {
 
   /// Desired dose value (for reopening calculator)
   @HiveField(10)
-  final double? recommendedDose;
+  final double? calculatedDose;
 
   /// Dose unit (mcg/mg/g/units) for reopening calculator
   @HiveField(11)
@@ -94,10 +94,10 @@ class SavedReconstitutionCalculation {
     String? strengthUnit,
     double? solventVolumeMl,
     double? perMlConcentration,
-    double? recommendedUnits,
+    double? calculatedUnits,
     double? syringeSizeMl,
     String? diluentName,
-    double? recommendedDose,
+    double? calculatedDose,
     String? doseUnit,
     double? maxVialSizeMl,
     DateTime? createdAt,
@@ -112,10 +112,10 @@ class SavedReconstitutionCalculation {
       strengthUnit: strengthUnit ?? this.strengthUnit,
       solventVolumeMl: solventVolumeMl ?? this.solventVolumeMl,
       perMlConcentration: perMlConcentration ?? this.perMlConcentration,
-      recommendedUnits: recommendedUnits ?? this.recommendedUnits,
+      calculatedUnits: calculatedUnits ?? this.calculatedUnits,
       syringeSizeMl: syringeSizeMl ?? this.syringeSizeMl,
       diluentName: diluentName ?? this.diluentName,
-      recommendedDose: recommendedDose ?? this.recommendedDose,
+      calculatedDose: calculatedDose ?? this.calculatedDose,
       doseUnit: doseUnit ?? this.doseUnit,
       maxVialSizeMl: maxVialSizeMl ?? this.maxVialSizeMl,
       createdAt: createdAt ?? this.createdAt,
@@ -146,10 +146,10 @@ class SavedReconstitutionCalculationAdapter
       strengthUnit: fields[4] as String,
       solventVolumeMl: fields[5] as double,
       perMlConcentration: fields[6] as double,
-      recommendedUnits: fields[7] as double,
+      calculatedUnits: fields[7] as double,
       syringeSizeMl: fields[8] as double,
       diluentName: fields[9] as String?,
-      recommendedDose: fields[10] as double?,
+      calculatedDose: fields[10] as double?,
       doseUnit: fields[11] as String?,
       maxVialSizeMl: fields[12] as double?,
       createdAt: fields[13] as DateTime?,
@@ -176,13 +176,13 @@ class SavedReconstitutionCalculationAdapter
       ..writeByte(6)
       ..write(obj.perMlConcentration)
       ..writeByte(7)
-      ..write(obj.recommendedUnits)
+      ..write(obj.calculatedUnits)
       ..writeByte(8)
       ..write(obj.syringeSizeMl)
       ..writeByte(9)
       ..write(obj.diluentName)
       ..writeByte(10)
-      ..write(obj.recommendedDose)
+      ..write(obj.calculatedDose)
       ..writeByte(11)
       ..write(obj.doseUnit)
       ..writeByte(12)
