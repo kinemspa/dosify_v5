@@ -186,16 +186,7 @@ class DoseDialogDosePreview extends StatelessWidget {
 
     if (fallback.isNotEmpty) return fallback.take(3).toList();
 
-    final metrics = MedicationDisplayHelpers.doseMetricsSummary(
-      med,
-      doseTabletQuarters: schedule.doseTabletQuarters,
-      doseCapsules: schedule.doseCapsules,
-      doseSyringes: schedule.doseSyringes,
-      doseVials: schedule.doseVials,
-      doseMassMcg: schedule.doseMassMcg?.toDouble(),
-      doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-      syringeUnits: schedule.doseIU?.toDouble(),
-    );
+    final metrics = schedule.displayMetrics(med);
 
     return [
       if (metrics.trim().isNotEmpty)

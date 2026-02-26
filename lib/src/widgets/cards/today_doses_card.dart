@@ -192,16 +192,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
 
       final strengthLabel =
           MedicationDisplayHelpers.strengthOrConcentrationLabel(med);
-      final metrics = MedicationDisplayHelpers.doseMetricsSummary(
-        med,
-        doseTabletQuarters: schedule.doseTabletQuarters,
-        doseCapsules: schedule.doseCapsules,
-        doseSyringes: schedule.doseSyringes,
-        doseVials: schedule.doseVials,
-        doseMassMcg: schedule.doseMassMcg?.toDouble(),
-        doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-        syringeUnits: schedule.doseIU?.toDouble(),
-      );
+      final metrics = schedule.displayMetrics(med);
 
       for (final dt in times) {
         final baseId = DoseLogIds.occurrenceId(

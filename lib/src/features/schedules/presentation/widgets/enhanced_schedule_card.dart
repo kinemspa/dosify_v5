@@ -278,16 +278,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
       widget.medication,
     );
-    final metrics = MedicationDisplayHelpers.doseMetricsSummary(
-      widget.medication,
-      doseTabletQuarters: widget.schedule.doseTabletQuarters,
-      doseCapsules: widget.schedule.doseCapsules,
-      doseSyringes: widget.schedule.doseSyringes,
-      doseVials: widget.schedule.doseVials,
-      doseMassMcg: widget.schedule.doseMassMcg?.toDouble(),
-      doseVolumeMicroliter: widget.schedule.doseVolumeMicroliter?.toDouble(),
-      syringeUnits: widget.schedule.doseIU?.toDouble(),
-    );
+    final metrics = widget.schedule.displayMetrics(widget.medication);
 
     final canShowDoseCard =
         nextDose != null &&

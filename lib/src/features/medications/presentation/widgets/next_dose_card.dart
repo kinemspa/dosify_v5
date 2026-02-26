@@ -320,16 +320,7 @@ class _NextDoseCardState extends State<NextDoseCard>
   }
 
   String _doseMetricsLabel(Schedule schedule) {
-    final summary = MedicationDisplayHelpers.doseMetricsSummary(
-      widget.medication,
-      doseTabletQuarters: schedule.doseTabletQuarters,
-      doseCapsules: schedule.doseCapsules,
-      doseSyringes: schedule.doseSyringes,
-      doseVials: schedule.doseVials,
-      doseMassMcg: schedule.doseMassMcg?.toDouble(),
-      doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-      syringeUnits: schedule.doseIU?.toDouble(),
-    );
+    final summary = schedule.displayMetrics(widget.medication);
     if (summary.isNotEmpty) return summary;
     return '${_formatNumber(schedule.doseValue)} ${schedule.doseUnit}';
   }

@@ -755,16 +755,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     );
     final metrics = schedule == null
         ? '${DoseValueFormatter.format(widget.dose.doseValue, widget.dose.doseUnit)} ${widget.dose.doseUnit}'
-        : MedicationDisplayHelpers.doseMetricsSummary(
-            med,
-            doseTabletQuarters: schedule.doseTabletQuarters,
-            doseCapsules: schedule.doseCapsules,
-            doseSyringes: schedule.doseSyringes,
-            doseVials: schedule.doseVials,
-            doseMassMcg: schedule.doseMassMcg?.toDouble(),
-            doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-            syringeUnits: schedule.doseIU?.toDouble(),
-          );
+        : schedule.displayMetrics(med);
 
     String? lastDoseLine() {
       final log = _lastTakenLog;

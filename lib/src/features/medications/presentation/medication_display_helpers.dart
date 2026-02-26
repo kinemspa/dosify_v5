@@ -558,3 +558,35 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
       return null;
   }
 }
+
+/// Extension on [Schedule] that eliminates the 7-argument boilerplate when
+/// calling [MedicationDisplayHelpers.doseMetricsSummary].
+///
+/// Replaces the repeated:
+/// ```dart
+/// MedicationDisplayHelpers.doseMetricsSummary(
+///   med,
+///   doseTabletQuarters: schedule.doseTabletQuarters,
+///   doseCapsules:       schedule.doseCapsules,
+///   doseSyringes:       schedule.doseSyringes,
+///   doseVials:          schedule.doseVials,
+///   doseMassMcg:        schedule.doseMassMcg?.toDouble(),
+///   doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
+///   syringeUnits:       schedule.doseIU?.toDouble(),
+/// )
+/// ```
+/// with the single-expression form `schedule.displayMetrics(med)`.
+extension ScheduleMetricsX on Schedule {
+  String displayMetrics(Medication med, {String separator = ' × '}) =>
+      MedicationDisplayHelpers.doseMetricsSummary(
+        med,
+        doseTabletQuarters: doseTabletQuarters,
+        doseCapsules: doseCapsules,
+        doseSyringes: doseSyringes,
+        doseVials: doseVials,
+        doseMassMcg: doseMassMcg?.toDouble(),
+        doseVolumeMicroliter: doseVolumeMicroliter?.toDouble(),
+        syringeUnits: doseIU?.toDouble(),
+        separator: separator,
+      );
+}

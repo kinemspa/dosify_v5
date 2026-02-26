@@ -991,16 +991,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       if (med != null && schedule != null) {
         upNextStrengthLabel =
             MedicationDisplayHelpers.strengthOrConcentrationLabel(med);
-        upNextDoseMetrics = MedicationDisplayHelpers.doseMetricsSummary(
-          med,
-          doseTabletQuarters: schedule.doseTabletQuarters,
-          doseCapsules: schedule.doseCapsules,
-          doseSyringes: schedule.doseSyringes,
-          doseVials: schedule.doseVials,
-          doseMassMcg: schedule.doseMassMcg?.toDouble(),
-          doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-          syringeUnits: schedule.doseIU?.toDouble(),
-        );
+        upNextDoseMetrics = schedule.displayMetrics(med);
       }
     }
 
@@ -1717,19 +1708,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
                                 med,
                               );
 
-                          final metrics =
-                              MedicationDisplayHelpers.doseMetricsSummary(
-                                med,
-                                doseTabletQuarters: schedule.doseTabletQuarters,
-                                doseCapsules: schedule.doseCapsules,
-                                doseSyringes: schedule.doseSyringes,
-                                doseVials: schedule.doseVials,
-                                doseMassMcg: schedule.doseMassMcg?.toDouble(),
-                                doseVolumeMicroliter: schedule
-                                    .doseVolumeMicroliter
-                                    ?.toDouble(),
-                                syringeUnits: schedule.doseIU?.toDouble(),
-                              );
+                          final metrics = schedule.displayMetrics(med);
 
                           if (strengthLabel.trim().isNotEmpty &&
                               metrics.trim().isNotEmpty) {
@@ -1788,16 +1767,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         : '';
 
     final metrics = med != null && schedule != null
-        ? MedicationDisplayHelpers.doseMetricsSummary(
-            med,
-            doseTabletQuarters: schedule.doseTabletQuarters,
-            doseCapsules: schedule.doseCapsules,
-            doseSyringes: schedule.doseSyringes,
-            doseVials: schedule.doseVials,
-            doseMassMcg: schedule.doseMassMcg?.toDouble(),
-            doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-            syringeUnits: schedule.doseIU?.toDouble(),
-          )
+        ? schedule.displayMetrics(med)
         : '${dose.doseValue} ${dose.doseUnit}';
 
     return DoseCard(
