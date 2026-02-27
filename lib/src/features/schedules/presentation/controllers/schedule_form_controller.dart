@@ -89,11 +89,9 @@ class ScheduleFormController
         cycleAnchor: initial.cycleAnchorDate ?? DateTime.now(),
         nameAuto: false, // Existing schedule name considered manual
         startDate: initial.startAt ?? DateTime.now(),
-        // selectedMed: null, // We need to fetch this? Or pass it in?
-        // For now, we might not have the full Medication object unless we fetch it.
-        // The original code didn't load the medication object in initState,
-        // it just set the name/id. But _selectedMed is needed for logic.
-        // We might need to load it asynchronously.
+        selectedMed: initial.medicationId != null
+            ? Hive.box<Medication>('medications').get(initial.medicationId)
+            : null,
       );
     }
 
