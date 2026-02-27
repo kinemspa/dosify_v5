@@ -93,7 +93,7 @@ class SectionFormCard extends StatelessWidget {
                   ? kFramelessCardBorderOpacityDark
                   : kFramelessCardBorderOpacityLight,
             ),
-            width: kBorderWidthThin,
+            width: kBorderWidthMedium,
           ),
           boxShadow: isDark
               ? null
@@ -306,7 +306,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
                   ? kFramelessCardBorderOpacityDark
                   : kFramelessCardBorderOpacityLight,
             ),
-            width: kBorderWidthThin,
+            width: kBorderWidthMedium,
           ),
           boxShadow: isDark
               ? null

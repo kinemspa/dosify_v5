@@ -540,15 +540,20 @@ const double kCalendarSelectedDayPanelHeightRatioMonth = 0.42;
 
 /// Page-level spacing
 const double kPageBottomPadding = 100;
+const double kPageHorizontalPadding = 12;
 const EdgeInsets kPagePadding = EdgeInsets.fromLTRB(
+  kPageHorizontalPadding,
   16,
-  16,
-  16,
+  kPageHorizontalPadding,
   kPageBottomPadding,
 );
-const EdgeInsets kPagePaddingNoBottom = EdgeInsets.fromLTRB(16, 16, 16, 16);
+const EdgeInsets kPagePaddingNoBottom = EdgeInsets.fromLTRB(
+  kPageHorizontalPadding,
+  16,
+  kPageHorizontalPadding,
+  16,
+);
 const EdgeInsets kNoPadding = EdgeInsets.zero;
-const double kPageHorizontalPadding = 16;
 const double kPageVerticalPadding = 16;
 
 /// Standard padding for bottom sheets that should respect the on-screen
@@ -775,16 +780,16 @@ const double kOpacityEmphasis = 0.90;
 const double kHelperTextOpacity = kOpacityMediumLow;
 const double kDisabledOpacity = kOpacityLow;
 const double kCardBorderOpacity = kOpacityLow;
+const double kStandardCardBorderOpacity = 0.22; // Inner/section card border (visible but not heavy)
 const double kHintTextOpacity = kOpacityLow;
 
-/// Frameless card border: slightly more visible than plain-transparent. Adds
-/// a whisper-level border so adjacent cards are distinguishable on the page.
-const double kFramelessCardBorderOpacityLight = kOpacitySubtleLow; // 0.10
-const double kFramelessCardBorderOpacityDark = 0.20;
-/// Frameless card shadow — zeroed; border provides the separation instead.
-const double kFramelessCardShadowOpacity = 0.0;
-const double kFramelessCardShadowBlur = 0.0;
-const Offset kFramelessCardShadowOffset = Offset(0, 0);
+/// Frameless card border: noticeably separates cards from the page background.
+const double kFramelessCardBorderOpacityLight = 0.25; // Visible in light mode
+const double kFramelessCardBorderOpacityDark = 0.35; // Visible in dark mode
+/// Frameless card shadow — subtle lift to help cards pop from background.
+const double kFramelessCardShadowOpacity = 0.07;
+const double kFramelessCardShadowBlur = 10.0;
+const Offset kFramelessCardShadowOffset = Offset(0, 3);
 
 /// Reconstitution calculator opacity (white text on dark background)
 const double kReconTextHighOpacity = 0.90; // Selected option details
@@ -1172,13 +1177,13 @@ Color stockStatusColorFromPercentage(
 // ============================================================================
 
 /// Shadow constants — kept at zero; card separation is done via a faint border.
-const double kCardShadowOpacity = 0.0;
-const double kCardShadowBlurRadius = 0.0;
-const Offset kCardShadowOffset = Offset(0, 0);
+const double kCardShadowOpacity = 0.04; // Subtle shadow for standard/section cards
+const double kCardShadowBlurRadius = 6.0;
+const Offset kCardShadowOffset = Offset(0, 2);
 
-const double kDoseCardShadowOpacity = 0.0;
-const double kDoseCardShadowBlurRadius = 0.0;
-const Offset kDoseCardShadowOffset = Offset(0, 0);
+const double kDoseCardShadowOpacity = 0.06; // Dose item card shadow
+const double kDoseCardShadowBlurRadius = 6.0;
+const Offset kDoseCardShadowOffset = Offset(0, 2);
 
 /// Builds a standard card decoration with consistent styling across the app.
 /// Use this for all cards displayed on light backgrounds.
@@ -1204,10 +1209,17 @@ BoxDecoration buildStandardCardDecoration({
         : null,
     border: showBorder
         ? Border.all(
-            color: cs.outlineVariant.withValues(alpha: 0.08),
-            width: kBorderWidthThin,
+            color: cs.outlineVariant.withValues(alpha: kStandardCardBorderOpacity),
+            width: kBorderWidthMedium,
           )
         : null,
+    boxShadow: [
+      BoxShadow(
+        color: cs.shadow.withValues(alpha: kCardShadowOpacity),
+        blurRadius: kCardShadowBlurRadius,
+        offset: kCardShadowOffset,
+      ),
+    ],
   );
 }
 
