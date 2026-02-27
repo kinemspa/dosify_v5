@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:dosifi_v5/src/core/notifications/supply_low_stock_notifier.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/id.dart';
 import 'package:dosifi_v5/src/features/supplies/data/supply_repository.dart';
@@ -913,6 +914,8 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
     final val = double.tryParse(_amount.text.trim()) ?? 0;
     if (val == 0) return;
     final delta = (_reason == MovementReason.used) ? -val : val;
+    final repo = SupplyRepository();
+    final stockBefore = repo.currentStock(widget.supply.id);
     final m = StockMovement(
       id: IdGen.newId(prefix: 'supmv'),
       supplyId: widget.supply.id,
@@ -920,7 +923,13 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
       reason: _reason,
       note: _note.text.trim().isEmpty ? null : _note.text.trim(),
     );
-    await SupplyRepository().addMovement(m);
+    await repo.addMovement(m);
+    final stockAfter = repo.currentStock(widget.supply.id);
+    await SupplyLowStockNotifier.handleStockChange(
+      supply: widget.supply,
+      stockBefore: stockBefore,
+      stockAfter: stockAfter,
+    );
     if (!mounted) return;
     Navigator.of(context).pop();
   }

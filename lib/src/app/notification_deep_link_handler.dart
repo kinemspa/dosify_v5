@@ -63,6 +63,13 @@ class NotificationDeepLinkHandler {
       return;
     }
 
+    if (payload.startsWith('supply_low_stock:')) {
+      // Navigate to the Supplies page so the user can see and act on
+      // the low-stock supply.
+      context.go('/supplies');
+      return;
+    }
+
     if (payload.startsWith('dose:')) {
       final rest = payload.substring('dose:'.length);
       final parts = rest.split(':');
