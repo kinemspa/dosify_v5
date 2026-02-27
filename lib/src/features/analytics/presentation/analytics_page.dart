@@ -12,6 +12,8 @@ import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_rep
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
+import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
@@ -453,6 +455,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final schedulesBox = Hive.box<Schedule>('schedules');
     final doseLogsBox = Hive.box<DoseLog>('dose_logs');
     final inventoryLogsBox = Hive.box<InventoryLog>('inventory_logs');
+    final suppliesBox = Hive.box<Supply>('supplies');
+    final stockMovementsBox = Hive.box<StockMovement>('stock_movements');
 
     final range = ReportTimeRange(_rangePreset).toUtcTimeRange();
     // For daily trend chart: how many days to show
@@ -606,6 +610,29 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           Hive.box<SavedReconstitutionCalculation>(
                         SavedReconstitutionRepository.boxName,
                       ).length;
+
+                      // Supply health
+                      final allSupplies =
+                          suppliesBox.values.toList(growable: false);
+                      final allMovements =
+                          stockMovementsBox.values.toList(growable: false);
+                      int lowSuppliesCount = 0;
+                      int expiringSuppliesCount = 0;
+                      for (final supply in allSupplies) {
+                        if (supply.reorderThreshold != null) {
+                          final currentStock = allMovements
+                              .where((m) => m.supplyId == supply.id)
+                              .fold<double>(0.0, (sum, m) => sum + m.delta);
+                          if (currentStock <= supply.reorderThreshold!) {
+                            lowSuppliesCount++;
+                          }
+                        }
+                        if (supply.expiry != null &&
+                            !supply.expiry!.isBefore(now) &&
+                            supply.expiry!.isBefore(in30Days)) {
+                          expiringSuppliesCount++;
+                        }
+                      }
 
                       // CSV strings (for export only)
                       final summaryCsv = [
@@ -826,6 +853,31 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 label: 'Saved reconstitutions',
                                 value: savedReconCount.toString(),
                               ),
+                              if (allSupplies.isNotEmpty) ...[                                const SizedBox(height: kSpacingS),
+                                const Divider(height: 1),
+                                const SizedBox(height: kSpacingS),
+                                buildDetailInfoRow(
+                                  context,
+                                  label: 'Supplies tracked',
+                                  value: allSupplies.length.toString(),
+                                ),
+                                buildDetailInfoRow(
+                                  context,
+                                  label: 'Low-stock supplies',
+                                  value: lowSuppliesCount == 0
+                                      ? '—'
+                                      : lowSuppliesCount.toString(),
+                                  warning: lowSuppliesCount > 0,
+                                ),
+                                buildDetailInfoRow(
+                                  context,
+                                  label: 'Supplies expiring ≤30d',
+                                  value: expiringSuppliesCount == 0
+                                      ? '—'
+                                      : expiringSuppliesCount.toString(),
+                                  highlighted: expiringSuppliesCount > 0,
+                                ),
+                              ],
                             ],
                           ),
                           sectionSpacing,
