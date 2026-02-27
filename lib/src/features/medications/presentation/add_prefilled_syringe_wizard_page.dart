@@ -806,8 +806,6 @@ class _AddPrefilledSyringeWizardPageState
 
   @override
   Future<void> saveMedication() async {
-    print('DEBUG PFS: saveMedication called');
-
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -831,7 +829,6 @@ class _AddPrefilledSyringeWizardPageState
       ),
     );
 
-    print('DEBUG PFS: confirmed = $confirmed');
     if (confirmed == false) return;
 
     try {
@@ -854,10 +851,6 @@ class _AddPrefilledSyringeWizardPageState
         if (_requiresFreezer) 'Keep frozen',
         if (_protectLight) 'Protect from light',
       ].join('. ');
-
-      print(
-        'DEBUG PFS: Creating medication - name: ${_nameCtrl.text.trim()}, concentration: $concentration, volume: $volume',
-      );
 
       final med = Medication(
         id: id,
@@ -893,9 +886,7 @@ class _AddPrefilledSyringeWizardPageState
             : storageInstructions,
       );
 
-      print('DEBUG PFS: Saving medication...');
       await repo.upsert(med);
-      print('DEBUG PFS: Save successful!');
 
       if (mounted) {
         showAppSnackBar(context, 'Medication saved');
@@ -909,8 +900,7 @@ class _AddPrefilledSyringeWizardPageState
         });
       }
     } catch (e, stack) {
-      print('DEBUG PFS: ERROR during save: $e');
-      print('DEBUG PFS: Stack: $stack');
+      debugPrint('AddPrefilledSyringeWizardPage: save failed: $e\n$stack');
       if (mounted) {
         showAppSnackBar(context, 'Error saving: $e');
       }

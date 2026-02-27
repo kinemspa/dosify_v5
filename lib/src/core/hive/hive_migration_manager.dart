@@ -1,3 +1,6 @@
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,7 +20,7 @@ class HiveMigrationManager {
     final storedVersion = prefs.getInt(_versionKey) ?? 1;
 
     if (storedVersion < _currentVersion) {
-      print('Migrating Hive schema from v$storedVersion to v$_currentVersion');
+      debugPrint('Migrating Hive schema from v$storedVersion to v$_currentVersion');
       
       // Run migrations in sequence
       if (storedVersion < 2) {
@@ -31,20 +34,20 @@ class HiveMigrationManager {
 
       // Update stored version
       await prefs.setInt(_versionKey, _currentVersion);
-      print('Migration completed successfully');
+      debugPrint('Migration completed successfully');
     }
   }
 
   /// Migration from v1 to v2: Add MDV active vial and backup stock fields
   static Future<void> _migrateV1ToV2() async {
-    print('Running migration v1 → v2: Adding MDV tracking fields');
+    debugPrint('Running migration v1 → v2: Adding MDV tracking fields');
     
     try {
       // Box is already open from HiveBootstrap — use the sync accessor.
       final box = Hive.box<Medication>('medications');
       final medications = box.values.toList();
       
-      print('Migrating ${medications.length} medications');
+      debugPrint('Migrating ${medications.length} medications');
       
       // Iterate through all medications and update them
       // Since the new fields have default values (false for bools, null for others),
@@ -67,9 +70,9 @@ class HiveMigrationManager {
         await box.putAt(i, updatedMed);
       }
       
-      print('Successfully migrated ${medications.length} medications');
+      debugPrint('Successfully migrated ${medications.length} medications');
     } catch (e) {
-      print('Error during v1→v2 migration: $e');
+      debugPrint('Error during v1→v2 migration: $e');
       // Log error but don't throw - allow app to continue
       // The new TypeAdapter should handle missing fields gracefully
     }
@@ -80,17 +83,17 @@ class HiveMigrationManager {
     try {
       final box = Hive.box<Medication>('medications');
       final count = box.length;
-      print('Validation: Found $count medications in database');
+      debugPrint('Validation: Found $count medications in database');
       
       // Try to read first medication to ensure deserialization works
       if (count > 0) {
         final firstMed = box.getAt(0);
-        print('Validation: Successfully read first medication: ${firstMed?.name}');
+        debugPrint('Validation: Successfully read first medication: ${firstMed?.name}');
       }
       
       return true;
     } catch (e) {
-      print('Validation failed: $e');
+      debugPrint('Validation failed: $e');
       return false;
     }
   }

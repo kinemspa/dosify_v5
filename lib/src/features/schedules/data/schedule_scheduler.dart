@@ -1,5 +1,6 @@
 // Package imports:
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -148,7 +149,7 @@ class ScheduleScheduler {
 
     if (totalNeeded > _maxGlobalAlarms) {
       // Critical: Can't even schedule minimum. Return minimum anyway and warn.
-      print(
+      debugPrint(
         '[ScheduleScheduler] WARNING: Too many schedules! Exceeding alarm budget.',
       );
       return _minDaysPerSchedule;

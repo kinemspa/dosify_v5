@@ -806,8 +806,6 @@ class _AddSingleDoseVialWizardPageState
 
   @override
   Future<void> saveMedication() async {
-    print('DEBUG SDV: saveMedication called');
-
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -831,7 +829,6 @@ class _AddSingleDoseVialWizardPageState
       ),
     );
 
-    print('DEBUG SDV: confirmed = $confirmed');
     if (confirmed == false) return;
 
     try {
@@ -854,10 +851,6 @@ class _AddSingleDoseVialWizardPageState
         if (_requiresFreezer) 'Keep frozen',
         if (_protectLight) 'Protect from light',
       ].join('. ');
-
-      print(
-        'DEBUG SDV: Creating medication - name: ${_nameCtrl.text.trim()}, concentration: $concentration, volume: $volume',
-      );
 
       final med = Medication(
         id: id,
@@ -893,9 +886,7 @@ class _AddSingleDoseVialWizardPageState
             : storageInstructions,
       );
 
-      print('DEBUG SDV: Saving medication...');
       await repo.upsert(med);
-      print('DEBUG SDV: Save successful!');
 
       if (mounted) {
         showAppSnackBar(context, 'Medication saved');
@@ -909,8 +900,7 @@ class _AddSingleDoseVialWizardPageState
         });
       }
     } catch (e, stack) {
-      print('DEBUG SDV: ERROR during save: $e');
-      print('DEBUG SDV: Stack: $stack');
+      debugPrint('AddSingleDoseVialWizardPage: save failed: $e\n$stack');
       if (mounted) {
         showAppSnackBar(context, 'Error saving: $e');
       }

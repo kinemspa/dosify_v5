@@ -1,3 +1,6 @@
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +32,7 @@ class HiveBootstrap {
   ];
 
   static Future<void> init() async {
-    print('HiveBootstrap: initFlutter...');
+    debugPrint('HiveBootstrap: initFlutter...');
     await Hive.initFlutter();
 
     // Register every adapter upfront so the encryption migration can read
@@ -37,7 +40,7 @@ class HiveBootstrap {
     _registerAdapters();
 
     // Obtain (or generate) the AES-256 key from Android Keystore.
-    print('HiveBootstrap: Loading encryption key...');
+    debugPrint('HiveBootstrap: Loading encryption key...');
     final cipher = await HiveEncryptionKeyService.initialize();
 
     // One-time migration: convert pre-existing unencrypted boxes → encrypted.
@@ -47,13 +50,13 @@ class HiveBootstrap {
     await _openBoxWithRetry<Medication>('medications', cipher: cipher);
 
     // Run schema migrations if needed.
-    print('HiveBootstrap: Running migrations...');
+    debugPrint('HiveBootstrap: Running migrations...');
     await HiveMigrationManager.migrate();
 
     // Validate migration was successful.
     final isValid = await HiveMigrationManager.validateMigration();
     if (!isValid) {
-      print('WARNING: Hive migration validation failed');
+      debugPrint('WARNING: Hive migration validation failed');
     }
 
     await _openBoxWithRetry<Schedule>('schedules', cipher: cipher);
@@ -70,7 +73,7 @@ class HiveBootstrap {
       cipher: cipher,
     );
 
-    print('HiveBootstrap: Initialization complete');
+    debugPrint('HiveBootstrap: Initialization complete');
   }
 
   /// One-time migration: reads every box unencrypted, deletes it from disk,
@@ -82,7 +85,7 @@ class HiveBootstrap {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool('hive_encryption_migrated_v1') == true) return;
 
-    print('HiveBootstrap: Migrating boxes to encrypted storage...');
+    debugPrint('HiveBootstrap: Migrating boxes to encrypted storage...');
 
     for (final boxName in _allBoxNames) {
       try {
@@ -102,16 +105,16 @@ class HiveBootstrap {
         }
         await encrypted.close();
 
-        print('HiveBootstrap: Encrypted "$boxName" (${data.length} entries)');
+        debugPrint('HiveBootstrap: Encrypted "$boxName" (${data.length} entries)');
       } catch (e) {
-        print(
+        debugPrint(
           'HiveBootstrap: WARN: Could not encrypt box "$boxName": $e. Skipping.',
         );
       }
     }
 
     await prefs.setBool('hive_encryption_migrated_v1', true);
-    print('HiveBootstrap: Encryption migration complete');
+    debugPrint('HiveBootstrap: Encryption migration complete');
   }
 
   static Future<Box<T>> _openBoxWithRetry<T>(
@@ -119,38 +122,38 @@ class HiveBootstrap {
     required HiveAesCipher cipher,
   }) async {
     try {
-      print('HiveBootstrap: Opening box "$name"...');
+      debugPrint('HiveBootstrap: Opening box "$name"...');
       return await Hive.openBox<T>(name, encryptionCipher: cipher).timeout(
         const Duration(seconds: 15),
       );
     } catch (e) {
-      print('HiveBootstrap: Failed to open box "$name" (Error: $e).');
+      debugPrint('HiveBootstrap: Failed to open box "$name" (Error: $e).');
 
       // Only delete and recreate on actual corruption errors (HiveError).
       // Do NOT delete on timeouts or other transient errors — that causes data loss!
       if (e is HiveError) {
-        print(
+        debugPrint(
           'HiveBootstrap: Detected HiveError (corruption). Attempting recovery by deleting box...',
         );
         try {
           await Hive.deleteBoxFromDisk(name);
-          print(
+          debugPrint(
             'HiveBootstrap: Deleted corrupted box "$name". Retrying open...',
           );
           return await Hive.openBox<T>(name, encryptionCipher: cipher);
         } catch (e2) {
-          print(
+          debugPrint(
             'HiveBootstrap: CRITICAL ERROR: Could not recover box "$name": $e2',
           );
           rethrow;
         }
       } else {
         // For timeouts and other errors, retry without deleting.
-        print('HiveBootstrap: Retrying open without deletion...');
+        debugPrint('HiveBootstrap: Retrying open without deletion...');
         try {
           return await Hive.openBox<T>(name, encryptionCipher: cipher);
         } catch (e2) {
-          print(
+          debugPrint(
             'HiveBootstrap: CRITICAL ERROR: Could not open box "$name": $e2',
           );
           rethrow;
