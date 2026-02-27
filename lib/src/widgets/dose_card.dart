@@ -82,7 +82,7 @@ class DoseCard extends StatelessWidget {
           : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
     );
 
-    final takeText = 'Take $doseMetrics';
+    final takeText = 'Log $doseMetrics';
     final takeColor = isActive
         ? statusColor.withValues(alpha: kOpacityFull)
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
@@ -126,6 +126,7 @@ class DoseCard extends StatelessWidget {
                           denseContent: NextDoseBadgeDenseContent.time,
                           showNextLabel: false,
                           showTodayIcon: true,
+                          doseMetrics: doseMetrics,
                         ),
                         if (doseNumber != null) ...[
                           SizedBox(height: badgeToDateGap),

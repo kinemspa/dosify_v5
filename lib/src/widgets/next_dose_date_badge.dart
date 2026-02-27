@@ -17,6 +17,7 @@ class NextDoseDateBadge extends StatelessWidget {
     this.showNextLabel = false,
     this.showTodayIcon = true,
     this.nextLabelStyle = NextDoseBadgeLabelStyle.standard,
+    this.doseMetrics,
     super.key,
   });
 
@@ -29,19 +30,16 @@ class NextDoseDateBadge extends StatelessWidget {
   final bool showTodayIcon;
   final NextDoseBadgeLabelStyle nextLabelStyle;
 
+  /// Optional dose amount + units (e.g. "50 mg") shown inside the pill badge
+  /// when [dense] is true and [denseContent] is [NextDoseBadgeDenseContent.time].
+  final String? doseMetrics;
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     final hasNext = nextDose != null;
     final isEnabled = isActive && hasNext;
-
-    final size = dense
-        ? kNextDoseDateCircleSizeCompact
-        : kNextDoseDateCircleSizeLarge;
-    final contentPadding = dense
-        ? kNextDoseDateCircleContentPaddingCompact
-        : kNextDoseDateCircleContentPaddingLarge;
 
     final accentColor = activeColor ?? cs.primary;
 
@@ -183,16 +181,87 @@ class NextDoseDateBadge extends StatelessWidget {
       );
     }
 
-    final circleCore = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: circleBg,
-        border: Border.all(width: kBorderWidthThin, color: circleBorder),
-      ),
-      child: Padding(padding: contentPadding, child: circleContent),
-    );
+    // In dense + time mode, use a pill/chip shape instead of a circle so the
+    // time text sits comfortably. The circle is kept for the date variant.
+    final bool usePill =
+        dense && denseContent == NextDoseBadgeDenseContent.time;
+
+    final Widget circleCore;
+    if (usePill) {
+      // Build the pill: time rows + optional dose metrics divider.
+      final metricsText = doseMetrics;
+      circleCore = Container(
+        constraints: const BoxConstraints(minWidth: kDoseTimePillMinWidth),
+        padding: kDoseTimePillPadding,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(kDoseTimePillBorderRadius),
+          color: circleBg,
+          border: Border.all(width: kBorderWidthThin, color: circleBorder),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                hasNext ? timeMain : '—',
+                style: nextDoseBadgeDayTextStyle(
+                  context,
+                  dense: true,
+                  color: primaryTextColor,
+                ),
+              ),
+            ),
+            if (timeSuffix != null && timeSuffix.trim().isNotEmpty)
+              Text(
+                timeSuffix.toUpperCase(),
+                style: nextDoseBadgeMonthTextStyle(
+                  context,
+                  dense: true,
+                  color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+                ),
+              ),
+            if (metricsText != null && metricsText.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                color: circleBorder.withValues(alpha: kOpacityMedium),
+              ),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  metricsText,
+                  style: (nextDoseBadgeMonthTextStyle(
+                    context,
+                    dense: true,
+                    color: primaryTextColor,
+                  ) ?? const TextStyle()).copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    } else {
+      final circleSize = dense
+          ? kNextDoseDateCircleSizeCompact
+          : kNextDoseDateCircleSizeLarge;
+      final circleContentPadding = dense
+          ? kNextDoseDateCircleContentPaddingCompact
+          : kNextDoseDateCircleContentPaddingLarge;
+      circleCore = Container(
+        width: circleSize,
+        height: circleSize,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: circleBg,
+          border: Border.all(width: kBorderWidthThin, color: circleBorder),
+        ),
+        child: Padding(padding: circleContentPadding, child: circleContent),
+      );
+    }
 
     final nextLabelPadding = nextLabelStyle == NextDoseBadgeLabelStyle.tall
         ? kNextDoseBadgeNextLabelPaddingTall
