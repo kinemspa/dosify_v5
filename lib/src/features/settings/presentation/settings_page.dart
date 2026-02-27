@@ -625,44 +625,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/settings/debug'),
             ),
-            // ⚠️ REMOVE BEFORE PRODUCTION — debug-only Pro unlock toggle
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: kSpacingS),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.15),
-                border: Border.all(color: Colors.amber, width: kBorderWidthMedium),
-                borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-              ),
-              child: SwitchListTile(
-                secondary: Icon(
-                  Icons.workspace_premium,
-                  color: Colors.amber.shade700,
-                ),
-                title: Text(
-                  '⚠️ DEBUG: Toggle Pro',
-                  style: TextStyle(
-                    color: Colors.amber.shade800,
-                    fontWeight: kFontWeightBold,
-                  ),
-                ),
-                subtitle: Text(
-                  entitlement.isPro ? 'Currently: PRO — remove this before production!' : 'Currently: FREE — remove this before production!',
-                  style: TextStyle(color: Colors.amber.shade700),
-                ),
-                value: entitlement.isPro,
-                activeColor: Colors.amber.shade700,
-                onChanged: (value) async {
-                  await ref
-                      .read(entitlementServiceProvider.notifier)
-                      .setPro(value);
-                  if (!context.mounted) return;
-                  showAppSnackBar(
-                    context,
-                    value ? 'DEBUG: Pro enabled' : 'DEBUG: Pro disabled',
-                  );
-                },
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: kSpacingM,
