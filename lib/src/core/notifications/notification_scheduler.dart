@@ -230,19 +230,19 @@ class NotificationScheduler {
               ? BigPictureStyleInformation(
                   bigPicture,
                   contentTitle: title,
-                  summaryText: 'Take  Snooze  Skip',
+                  summaryText: 'Log  Snooze  Skip',
                   hideExpandedLargeIcon: true,
                 )
               : (expandedLines != null && expandedLines.isNotEmpty
                     ? InboxStyleInformation(
                         expandedLines,
                         contentTitle: title,
-                        summaryText: 'Take  Snooze  Skip',
+                        summaryText: 'Log  Snooze  Skip',
                       )
                     : BigTextStyleInformation(
                         body,
                         contentTitle: title,
-                        summaryText: 'Take  Snooze  Skip',
+                        summaryText: 'Log  Snooze  Skip',
                       )))
         : null;
 
@@ -598,7 +598,7 @@ class NotificationScheduler {
         styleInformation: BigTextStyleInformation(
           body,
           contentTitle: title,
-          summaryText: 'Take  Snooze  Skip',
+          summaryText: 'Log  Snooze  Skip',
         ),
       ),
     );

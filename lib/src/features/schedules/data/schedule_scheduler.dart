@@ -390,6 +390,15 @@ class ScheduleScheduler {
   static String doseGroupKeyFor(DateTime localDateTime) =>
       _doseGroupKey(localDateTime);
 
+  /// Public API: deterministic notification ID for the Android group summary
+  /// notification associated with a given dose time-slot.  Pass the dose's
+  /// *local* DateTime.  Used by the action-sheet to cancel the summary when
+  /// the last (or only) dose in a group is acted on.
+  static int doseSummaryNotificationIdFor(DateTime localDateTime) {
+    final groupKey = _doseGroupKey(localDateTime);
+    return _stableHash31('dose_summary|$groupKey');
+  }
+
   /// Cancel scheduled notifications for a schedule (best-effort)
   static Future<void> cancelFor(
     String scheduleId, {

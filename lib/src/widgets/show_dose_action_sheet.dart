@@ -37,6 +37,13 @@ Future<void> showDoseActionSheetFromModels(
       )) {
         await NotificationService.cancel(overdueId);
       }
+      // Cancel the Android group summary so "Upcoming doses" clears from the
+      // notification tray when the user acts on a dose from a notification.
+      await NotificationService.cancel(
+        ScheduleScheduler.doseSummaryNotificationIdFor(
+          dose.scheduledTime.toLocal(),
+        ),
+      );
     } catch (_) {
       // Best-effort cancellation only.
     }
