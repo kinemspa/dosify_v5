@@ -19,6 +19,7 @@ import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
+import 'package:dosifi_v5/src/widgets/notification_permission_banner.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -287,6 +288,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               style: homeHeroSubtitleStyle(context),
             ),
             const SizedBox(height: kSpacingL),
+            const NotificationPermissionBanner(),
             _buildHomeCards(context),
             const SizedBox(height: kSpacingXL),
           ],
