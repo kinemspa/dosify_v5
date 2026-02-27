@@ -43,6 +43,10 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   static const int _endHour = 23; // 11 PM
   static const int _hourCount = _endHour - _startHour + 1; // 24 hours
 
+  /// When true, hours with no scheduled doses are rendered at
+  /// [kCalendarHourHeightCollapsed] instead of [kCalendarHourHeight].
+  bool _collapseEmptyHours = true;
+
   @override
   void initState() {
     super.initState();
@@ -64,8 +68,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
     if (_isToday(widget.date)) {
       final currentHour = now.hour;
       if (currentHour >= _startHour && currentHour <= _endHour) {
-        final hoursSinceStart = currentHour - _startHour;
-        final scrollPosition = hoursSinceStart * kCalendarHourHeight;
+        final scrollPosition = _hourTop(currentHour);
         _scrollController.animateTo(
           scrollPosition,
           duration: const Duration(milliseconds: 300),
@@ -73,6 +76,19 @@ class _CalendarDayViewState extends State<CalendarDayView> {
         );
       }
     }
+  }
+
+  /// Cumulative Y offset from the top of the list to the start of [hour].
+  /// Accounts for collapsed empty-hour rows.
+  double _hourTop(int hour) {
+    var y = 0.0;
+    for (var h = _startHour; h < hour; h++) {
+      final hasDose = _getDosesForHour(h).isNotEmpty;
+      y += _collapseEmptyHours && !hasDose
+          ? kCalendarHourHeightCollapsed
+          : kCalendarHourHeight;
+    }
+    return y;
   }
 
   bool _isToday(DateTime date) {
@@ -91,9 +107,11 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 
     if (currentHour < _startHour || currentHour > _endHour) return -1;
 
-    final hoursSinceStart = currentHour - _startHour;
+    final rowHeight = (_collapseEmptyHours && _getDosesForHour(currentHour).isEmpty)
+        ? kCalendarHourHeightCollapsed
+        : kCalendarHourHeight;
     final minuteFraction = currentMinute / 60.0;
-    return (hoursSinceStart + minuteFraction) * kCalendarHourHeight;
+    return _hourTop(currentHour) + minuteFraction * rowHeight;
   }
 
   List<CalculatedDose> _getDosesForHour(int hour) {
@@ -132,12 +150,14 @@ class _CalendarDayViewState extends State<CalendarDayView> {
             itemCount: _hourCount,
             itemBuilder: (context, index) {
               final hour = _startHour + index;
+              final doses = _getDosesForHour(hour);
               return _HourRow(
                 hour: hour,
-                doses: _getDosesForHour(hour),
+                doses: doses,
                 onDoseTap: widget.onDoseTap,
                 isSelected: widget.selectedHour == hour,
                 onHourTap: widget.onHourTap,
+                isCollapsed: _collapseEmptyHours && doses.isEmpty,
               );
             },
           ),
@@ -155,7 +175,12 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 
     return Column(
       children: [
-        _DayDateBanner(date: widget.date),
+        _DayDateBanner(
+          date: widget.date,
+          collapseEmptyHours: _collapseEmptyHours,
+          onToggleCollapse: () =>
+              setState(() => _collapseEmptyHours = !_collapseEmptyHours),
+        ),
         Expanded(
           child: hasDoses
               ? hourGrid
@@ -173,6 +198,7 @@ class _HourRow extends StatelessWidget {
     this.onDoseTap,
     this.isSelected = false,
     this.onHourTap,
+    this.isCollapsed = false,
   });
 
   final int hour;
@@ -180,13 +206,18 @@ class _HourRow extends StatelessWidget {
   final void Function(CalculatedDose dose)? onDoseTap;
   final bool isSelected;
   final void Function(int hour)? onHourTap;
+  /// When true the row is rendered at [kCalendarHourHeightCollapsed] with only
+  /// the time label visible. Only set when the hour contains no scheduled doses.
+  final bool isCollapsed;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final rowHeight =
+        isCollapsed ? kCalendarHourHeightCollapsed : kCalendarHourHeight;
 
     return SizedBox(
-      height: kCalendarHourHeight,
+      height: rowHeight,
       child: InkWell(
         onTap: onHourTap != null ? () => onHourTap!(hour) : null,
         child: Row(
@@ -202,14 +233,16 @@ class _HourRow extends StatelessWidget {
                   top: BorderSide(
                     color: Theme.of(
                       context,
-                    ).colorScheme.outline.withAlpha((0.2 * 255).round()),
+                    ).colorScheme.outline.withAlpha(
+                          isCollapsed ? (0.10 * 255).round() : (0.2 * 255).round(),
+                        ),
                   ),
                 ),
                 color: isSelected
                     ? colorScheme.primary.withAlpha((0.06 * 255).round())
                     : null,
               ),
-              child: doses.isEmpty
+              child: isCollapsed || doses.isEmpty
                   ? null
                   : SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(
@@ -285,9 +318,15 @@ class _CurrentTimeIndicator extends StatelessWidget {
 /// Shows the current day's full date (e.g. "Saturday, 22 February") at the
 /// top of the [CalendarDayView] so the user can confirm which day they are on.
 class _DayDateBanner extends StatelessWidget {
-  const _DayDateBanner({required this.date});
+  const _DayDateBanner({
+    required this.date,
+    this.collapseEmptyHours = true,
+    this.onToggleCollapse,
+  });
 
   final DateTime date;
+  final bool collapseEmptyHours;
+  final VoidCallback? onToggleCollapse;
 
   bool get _isToday {
     final now = DateTime.now();
@@ -318,14 +357,40 @@ class _DayDateBanner extends StatelessWidget {
           ),
         ),
       ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: isToday
-              ? colorScheme.primary
-              : colorScheme.onSurface.withValues(alpha: kOpacityHigh),
-          fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: isToday
+                    ? colorScheme.primary
+                    : colorScheme.onSurface.withValues(alpha: kOpacityHigh),
+                fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ),
+          if (onToggleCollapse != null)
+            Tooltip(
+              message: collapseEmptyHours
+                  ? 'Show all hours'
+                  : 'Hide empty hours',
+              child: IconButton(
+                icon: Icon(
+                  collapseEmptyHours
+                      ? Icons.unfold_more_rounded
+                      : Icons.unfold_less_rounded,
+                  size: kIconSizeSmall,
+                ),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                onPressed: onToggleCollapse,
+                color: isToday
+                    ? colorScheme.primary
+                    : colorScheme.onSurface.withValues(alpha: kOpacityHigh),
+              ),
+            ),
+        ],
       ),
     );
   }

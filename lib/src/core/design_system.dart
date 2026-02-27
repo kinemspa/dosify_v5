@@ -361,6 +361,7 @@ const double kCalendarDayHeight =
     52; // Height of day cell in month view (reduced from 80)
 const double kCalendarMonthDayHeaderHeight = 28;
 const double kCalendarHourHeight = 60; // Height of hour row in day view
+const double kCalendarHourHeightCollapsed = 24; // Height of empty/collapsed hour row
 const double kCalendarDoseBlockHeight = 60; // Default dose block height
 const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
 const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
