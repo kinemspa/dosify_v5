@@ -59,7 +59,7 @@ Next steps (when resuming)
 3) Foreground timer diagnostic for a short delay path.
 4) Consider WorkManager/JobScheduler for long delays (≥15m) where appropriate.
 5) Try plugin pin/downgrade (e.g., 17.0.x) to rule out regressions.
-6) In-app guardrails: surface banners when exact alarms or channel importance are insufficient.
+6) ✅ In-app guardrails: `NotificationPermissionBanner` on home page surfaces a warning when exact alarms or notification permission are insufficient, with a direct "Fix" button to the relevant OS settings page.
 
 References
 - Original detailed investigation content was consolidated here from docs/notification_scheduling_investigation.md.
