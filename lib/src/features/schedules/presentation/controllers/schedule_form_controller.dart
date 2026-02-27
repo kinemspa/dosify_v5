@@ -69,10 +69,8 @@ class ScheduleFormController
 
       return ScheduleFormState(
         mode: mode,
-        endDate:
-            null, // TODO: Add endDate to Schedule model if needed, currently not in model?
-        noEnd:
-            true, // Assuming no end date in model for now based on previous code
+        endDate: initial.endAt,
+        noEnd: initial.endAt == null,
         name: initial.name,
         medicationName: initial.medicationName,
         medicationId: initial.medicationId,
@@ -90,7 +88,7 @@ class ScheduleFormController
         cycleN: initial.cycleEveryNDays ?? 2,
         cycleAnchor: initial.cycleAnchorDate ?? DateTime.now(),
         nameAuto: false, // Existing schedule name considered manual
-        startDate: DateTime.now(), // TODO: Add startDate to Schedule model?
+        startDate: initial.startAt ?? DateTime.now(),
         // selectedMed: null, // We need to fetch this? Or pass it in?
         // For now, we might not have the full Medication object unless we fetch it.
         // The original code didn't load the medication object in initState,
