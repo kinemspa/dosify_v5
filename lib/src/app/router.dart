@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -195,6 +196,7 @@ final router = GoRouter(
         GoRoute(
           path: '/settings/debug',
           name: 'debug',
+          redirect: (context, state) => kDebugMode ? null : '/settings',
           builder: (context, state) => const DebugPage(),
         ),
         // Nested under shell so bottom nav persists

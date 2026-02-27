@@ -1,6 +1,7 @@
 import 'dart:async';
 
 // Flutter imports:
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -616,6 +617,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 NotificationService.showTestExpiryReminder,
               ),
             ),
+            if (kDebugMode)
             ListTile(
               leading: const Icon(Icons.bug_report),
               title: const Text('Debug & Diagnostics'),
