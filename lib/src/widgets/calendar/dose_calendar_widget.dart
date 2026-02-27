@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -587,14 +587,14 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       context,
       dose: dose,
       initialStatus: initialStatus,
-      onMarkTaken: (request) => _markDoseAsTaken(dose, request),
+      onMarkLogged: (request) => _markDoseAsLogged(dose, request),
       onSnooze: (request) => _snoozeDose(dose, request),
       onSkip: (request) => _skipDose(dose, request),
       onDelete: (request) => _deleteDoseLog(dose),
     );
   }
 
-  Future<void> _markDoseAsTaken(
+  Future<void> _markDoseAsLogged(
     CalculatedDose dose,
     DoseActionSheetSaveRequest request,
   ) async {

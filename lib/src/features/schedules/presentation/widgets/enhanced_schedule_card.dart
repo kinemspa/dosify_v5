@@ -1,4 +1,4 @@
-﻿// ignore_for_file: unused_element
+// ignore_for_file: unused_element
 
 // Flutter imports:
 import 'package:flutter/material.dart';
@@ -80,7 +80,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       context,
       dose: dose,
       initialStatus: initialStatus,
-      onMarkTaken: (request) async {
+      onMarkLogged: (request) async {
         final logId = DoseLogIds.occurrenceId(
           scheduleId: dose.scheduleId,
           scheduledTime: dose.scheduledTime,

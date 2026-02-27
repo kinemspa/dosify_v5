@@ -1,4 +1,4 @@
-﻿// Flutter imports:
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -209,7 +209,7 @@ class _CombinedReportsHistoryWidgetState
         context,
         dose: dose,
         initialStatus: DoseStatus.logged,
-        onMarkTaken: (_) async {
+        onMarkLogged: (_) async {
           // Ad-hoc persistence is handled inside DoseActionSheet.
         },
         onSnooze: (_) async {
@@ -262,7 +262,7 @@ class _CombinedReportsHistoryWidgetState
     return DoseActionSheet.show(
       context,
       dose: dose,
-      onMarkTaken: (request) async {
+      onMarkLogged: (request) async {
         final trimmed = request.notes?.trim();
         final latest = logBox.get(log.id) ?? log;
 

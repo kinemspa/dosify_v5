@@ -83,7 +83,7 @@ void main() {
         home: Scaffold(
           body: DoseActionSheet(
             dose: dose,
-            onMarkTaken: (_) async {},
+            onMarkLogged: (_) async {},
             onSnooze: (_) async {},
             onSkip: (_) async {},
             onDelete: (_) async {},

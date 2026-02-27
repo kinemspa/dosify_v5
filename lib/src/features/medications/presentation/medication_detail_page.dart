@@ -1,4 +1,4 @@
-﻿// ignore_for_file: unnecessary_null_comparison, unused_element, unused_element_parameter, unused_local_variable
+// ignore_for_file: unnecessary_null_comparison, unused_element, unused_element_parameter, unused_local_variable
 
 // Dart imports:
 
@@ -4153,7 +4153,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
     context,
     dose: dose,
     initialStatus: DoseStatus.logged,
-    onMarkTaken: (_) async {
+    onMarkLogged: (_) async {
       // Ad-hoc persistence is handled inside DoseActionSheet.
     },
     onSnooze: (_) async {

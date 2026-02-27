@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
@@ -46,7 +46,7 @@ Future<void> showDoseActionSheetFromModels(
     context,
     dose: dose,
     initialStatus: initialStatus,
-    onMarkTaken: (request) async {
+    onMarkLogged: (request) async {
       final logId = DoseLogIds.occurrenceId(
         scheduleId: dose.scheduleId,
         scheduledTime: dose.scheduledTime,

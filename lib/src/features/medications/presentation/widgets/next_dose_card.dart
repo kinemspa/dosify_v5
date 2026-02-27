@@ -1,4 +1,4 @@
-﻿// ignore_for_file: unused_element, unused_local_variable
+// ignore_for_file: unused_element, unused_local_variable
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
@@ -727,7 +727,7 @@ class _NextDoseCardState extends State<NextDoseCard>
       context,
       dose: dose,
       initialStatus: initialStatus,
-      onMarkTaken: (request) async {
+      onMarkLogged: (request) async {
         final logId = DoseLogIds.occurrenceId(
           scheduleId: dose.scheduleId,
           scheduledTime: dose.scheduledTime,

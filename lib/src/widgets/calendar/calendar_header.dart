@@ -143,11 +143,22 @@ class CalendarHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              child: Text(
-                'Today',
-                style: calendarDayOverflowTextStyle(
-                  context,
-                )?.copyWith(color: colorScheme.onPrimary),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.today_rounded,
+                    size: kIconSizeSmall,
+                    color: colorScheme.onPrimary,
+                  ),
+                  const SizedBox(width: kSpacingXXS),
+                  Text(
+                    'Back to Today',
+                    style: calendarDayOverflowTextStyle(
+                      context,
+                    )?.copyWith(color: colorScheme.onPrimary),
+                  ),
+                ],
               ),
             ),
 

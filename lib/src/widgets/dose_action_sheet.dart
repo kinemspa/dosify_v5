@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -50,7 +50,7 @@ class DoseActionSheetSaveRequest {
 /// Dose details and actions (Take, Snooze, Skip)
 class DoseActionSheet extends StatefulWidget {
   final CalculatedDose dose;
-  final Future<void> Function(DoseActionSheetSaveRequest request) onMarkTaken;
+  final Future<void> Function(DoseActionSheetSaveRequest request) onMarkLogged;
   final Future<void> Function(DoseActionSheetSaveRequest request) onSnooze;
   final Future<void> Function(DoseActionSheetSaveRequest request) onSkip;
   final Future<void> Function(DoseActionSheetSaveRequest request) onDelete;
@@ -60,7 +60,7 @@ class DoseActionSheet extends StatefulWidget {
   const DoseActionSheet({
     super.key,
     required this.dose,
-    required this.onMarkTaken,
+    required this.onMarkLogged,
     required this.onSnooze,
     required this.onSkip,
     required this.onDelete,
@@ -72,7 +72,7 @@ class DoseActionSheet extends StatefulWidget {
     BuildContext context, {
     required CalculatedDose dose,
     required Future<void> Function(DoseActionSheetSaveRequest request)
-    onMarkTaken,
+    onMarkLogged,
     required Future<void> Function(DoseActionSheetSaveRequest request) onSnooze,
     required Future<void> Function(DoseActionSheetSaveRequest request) onSkip,
     required Future<void> Function(DoseActionSheetSaveRequest request) onDelete,
@@ -88,7 +88,7 @@ class DoseActionSheet extends StatefulWidget {
       backgroundColor: cs.surface.withValues(alpha: kOpacityTransparent),
       builder: (context) => DoseActionSheet(
         dose: dose,
-        onMarkTaken: onMarkTaken,
+        onMarkLogged: onMarkLogged,
         onSnooze: onSnooze,
         onSkip: onSkip,
         onDelete: onDelete,
@@ -118,7 +118,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   DateTime? _selectedSnoozeUntil;
   bool _hasChanged = false;
   bool _editExpanded = false;
-  DoseLog? _lastTakenLog;
+  DoseLog? _lastLoggedLog;
   bool _showDownScrollHint = false;
 
   void _updateDownScrollHint(ScrollMetrics metrics) {
@@ -549,7 +549,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     ];
   }
 
-  Widget _buildTakenTimeField(BuildContext context) {
+  Widget _buildLoggedTimeField(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -758,7 +758,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         : schedule.displayMetrics(med);
 
     String? lastDoseLine() {
-      final log = _lastTakenLog;
+      final log = _lastLoggedLog;
       final at = log?.actionTime;
       if (log == null || at == null) return null;
 
@@ -976,7 +976,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         }
       }
 
-      _lastTakenLog = best;
+      _lastLoggedLog = best;
     }
 
     // Always expand Advanced section so users can see it immediately
@@ -1502,7 +1502,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
         switch (_selectedStatus) {
           case DoseStatus.logged:
-            await widget.onMarkTaken(request);
+            await widget.onMarkLogged(request);
             break;
           case DoseStatus.skipped:
             await widget.onSkip(request);
@@ -1555,7 +1555,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             _buildNotesField(context),
             if (_selectedStatus == DoseStatus.logged) ...[
               const SizedBox(height: kSpacingM),
-              _buildTakenTimeField(context),
+              _buildLoggedTimeField(context),
             ],
             if (_selectedStatus == DoseStatus.snoozed) ...[
               const SizedBox(height: kSpacingM),
