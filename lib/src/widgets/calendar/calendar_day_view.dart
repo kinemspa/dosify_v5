@@ -64,6 +64,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   }
 
   void _scrollToCurrentHour() {
+    if (!_scrollController.hasClients) return;
     final now = DateTime.now();
     if (_isToday(widget.date)) {
       final currentHour = now.hour;
@@ -75,6 +76,16 @@ class _CalendarDayViewState extends State<CalendarDayView> {
           curve: Curves.easeInOut,
         );
       }
+    } else if (widget.doses.isNotEmpty) {
+      // Non-today: scroll to the earliest scheduled dose.
+      final firstDoseHour = widget.doses
+          .map((d) => d.scheduledTime.hour)
+          .reduce((a, b) => a < b ? a : b);
+      _scrollController.animateTo(
+        _hourTop(firstDoseHour),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -178,8 +189,17 @@ class _CalendarDayViewState extends State<CalendarDayView> {
         _DayDateBanner(
           date: widget.date,
           collapseEmptyHours: _collapseEmptyHours,
-          onToggleCollapse: () =>
-              setState(() => _collapseEmptyHours = !_collapseEmptyHours),
+          // Only show the toggle when there are doses to collapse/expand.
+          onToggleCollapse: hasDoses
+              ? () {
+                  setState(() => _collapseEmptyHours = !_collapseEmptyHours);
+                  // Re-scroll after the layout updates so the view snaps to the
+                  // right position instead of drifting on the stale offset.
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _scrollToCurrentHour(),
+                  );
+                }
+              : null,
         ),
         Expanded(
           child: hasDoses
