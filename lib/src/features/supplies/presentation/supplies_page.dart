@@ -927,6 +927,20 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final repo = SupplyRepository();
+    final recentMovements = repo
+        .movementsFor(widget.supply.id)
+        .reversed
+        .take(8)
+        .toList(growable: false);
+
+    final unit = switch (widget.supply.unit) {
+      SupplyUnit.pcs => 'pcs',
+      SupplyUnit.ml => 'mL',
+      SupplyUnit.l => 'L',
+    };
+
     return Padding(
       padding: buildBottomSheetPagePadding(context),
       child: Column(
@@ -1012,9 +1026,61 @@ class _StockAdjustSheetState extends State<StockAdjustSheet> {
               ),
             ],
           ),
+          if (recentMovements.isNotEmpty) ...[
+            const SizedBox(height: kSpacingM),
+            const Divider(height: 1),
+            const SizedBox(height: kSpacingS),
+            Text(
+              'Recent adjustments',
+              style: helperTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: kSpacingXS),
+            for (final m in recentMovements)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(
+                  children: [
+                    Text(
+                      DateFormat('d MMM').format(m.at.toLocal()),
+                      style: microHelperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant.withValues(
+                          alpha: kOpacityMediumHigh,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: kSpacingS),
+                    Text(
+                      _reasonLabel(m.reason),
+                      style: microHelperTextStyle(
+                        context,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${m.delta >= 0 ? '+' : ''}${m.delta % 1 == 0 ? m.delta.toInt() : m.delta} $unit',
+                      style: microHelperTextStyle(
+                        context,
+                        color: m.delta >= 0 ? cs.primary : cs.error,
+                      )?.copyWith(fontWeight: kFontWeightSemiBold),
+                    ),
+                  ],
+                ),
+              ),
+          ],
           const SizedBox(height: kSpacingM),
         ],
       ),
     );
   }
-}
+
+  String _reasonLabel(MovementReason reason) => switch (reason) {
+        MovementReason.used => 'Used',
+        MovementReason.purchase => 'Added',
+        MovementReason.correction => 'Correction',
+        MovementReason.other => 'Other',
+      };}
