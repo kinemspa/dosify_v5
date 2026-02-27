@@ -1,4 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
+﻿// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'dose_log.dart';
 
@@ -84,20 +84,20 @@ class DoseActionAdapter extends TypeAdapter<DoseAction> {
   DoseAction read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return DoseAction.taken;
+        return DoseAction.logged;
       case 1:
         return DoseAction.skipped;
       case 2:
         return DoseAction.snoozed;
       default:
-        return DoseAction.taken;
+        return DoseAction.logged;
     }
   }
 
   @override
   void write(BinaryWriter writer, DoseAction obj) {
     switch (obj) {
-      case DoseAction.taken:
+      case DoseAction.logged:
         writer.writeByte(0);
         break;
       case DoseAction.skipped:

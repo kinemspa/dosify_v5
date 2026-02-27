@@ -1,9 +1,9 @@
-// Package imports:
+﻿// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'dose_log.g.dart';
 
-/// Records when a scheduled dose was taken, skipped, or snoozed.
+/// Records when a scheduled dose was logged, skipped, or snoozed.
 /// Persists even if medication or schedule is deleted for historical reporting.
 @HiveType(typeId: 41)
 class DoseLog {
@@ -51,7 +51,7 @@ class DoseLog {
   final String doseUnit; // Scheduled dose unit (mcg/mg/g/tablets/etc)
 
   @HiveField(9)
-  final DoseAction action; // taken, skipped, snoozed
+  final DoseAction action; // logged, skipped, snoozed
 
   @HiveField(10)
   final double? actualDoseValue; // Actual dose taken (if different from scheduled)
@@ -62,10 +62,10 @@ class DoseLog {
   @HiveField(12)
   final String? notes; // Optional user notes
 
-  /// Whether the dose was taken on time (within acceptable window)
+  /// Whether the dose was logged on time (within acceptable window)
   /// Acceptable window: within 30 minutes of scheduled time
   bool get wasOnTime {
-    if (action != DoseAction.taken) return false;
+    if (action != DoseAction.logged) return false;
     final difference = actionTime.difference(scheduledTime).abs();
     return difference.inMinutes <= 30;
   }
@@ -89,7 +89,7 @@ class DoseLog {
 @HiveType(typeId: 42)
 enum DoseAction {
   @HiveField(0)
-  taken,
+  logged, // was: taken — renamed for regulatory neutrality; Hive index unchanged
 
   @HiveField(1)
   skipped,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -12,7 +12,7 @@ class DoseQuickActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final takenColor =
-      doseStatusVisual(context, DoseStatus.taken, disabled: false).color;
+      doseStatusVisual(context, DoseStatus.logged, disabled: false).color;
     final snoozedColor =
       doseStatusVisual(context, DoseStatus.snoozed, disabled: false).color;
     final skippedColor =
@@ -22,10 +22,10 @@ class DoseQuickActionRow extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _QuickTextButton(
-          label: 'Take',
+          label: 'Log',
           backgroundColor: takenColor,
           foregroundColor: statusColorOnPrimary(context, takenColor),
-          onPressed: () => onAction(DoseStatus.taken),
+          onPressed: () => onAction(DoseStatus.logged),
         ),
         const SizedBox(width: kSpacingXS),
         _QuickTextButton(

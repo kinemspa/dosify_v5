@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
@@ -61,7 +61,7 @@ Future<void> showDoseActionSheetFromModels(
         actionTime: request.actionTime,
         doseValue: dose.doseValue,
         doseUnit: dose.doseUnit,
-        action: DoseAction.taken,
+        action: DoseAction.logged,
         actualDoseValue: request.actualDoseValue,
         actualDoseUnit: request.actualDoseUnit,
         notes: request.notes?.isEmpty ?? true ? null : request.notes,
@@ -198,7 +198,7 @@ Future<void> showDoseActionSheetFromModels(
           logBox.get(baseId) ??
           logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
 
-      if (existingLog != null && existingLog.action == DoseAction.taken) {
+      if (existingLog != null && existingLog.action == DoseAction.logged) {
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(medication.id);
         if (currentMed != null) {

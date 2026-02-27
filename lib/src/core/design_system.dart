@@ -1,4 +1,4 @@
-/// ============================================================================
+﻿/// ============================================================================
 /// DOSIFI V5 - UNIVERSAL DESIGN SYSTEM
 /// ============================================================================
 ///
@@ -861,7 +861,7 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
   if (disabled) return 'DISABLED';
 
   return switch (status) {
-    DoseStatus.taken => 'TAKEN',
+    DoseStatus.logged => 'LOGGED',
     DoseStatus.skipped => 'SKIPPED',
     DoseStatus.snoozed => 'SNOOZED',
     DoseStatus.due => 'OVERDUE',
@@ -886,7 +886,7 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
   }
 
   return switch (status) {
-    DoseStatus.taken => (
+    DoseStatus.logged => (
       color: kDoseStatusTakenGreenAdaptive(context),
       icon: Icons.check_rounded,
     ),
@@ -919,7 +919,7 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
   DoseAction action,
 ) {
   return switch (action) {
-    DoseAction.taken => (
+    DoseAction.logged => (
       color: kDoseStatusTakenGreenAdaptive(context),
       icon: Icons.check_rounded,
     ),

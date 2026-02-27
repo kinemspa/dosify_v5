@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dosifi_v5/src/core/clock.dart';
@@ -280,7 +280,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
         .where((i) => i.dose.status == DoseStatus.snoozed)
         .length;
     final takenCount = items
-        .where((i) => i.dose.status == DoseStatus.taken)
+        .where((i) => i.dose.status == DoseStatus.logged)
         .length;
     final skippedCount = items
         .where((i) => i.dose.status == DoseStatus.skipped)
@@ -368,7 +368,7 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
                     const SizedBox(width: kSpacingXS),
                     _buildPrimarySummaryCell(
                       context,
-                      label: 'Taken',
+                      label: 'Logged',
                       count: takenCount,
                     ),
                   ],

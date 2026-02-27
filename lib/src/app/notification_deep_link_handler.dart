@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -90,8 +90,8 @@ class NotificationDeepLinkHandler {
 
   static DoseStatus? _initialStatusForActionId(String? actionId) {
     switch (actionId) {
-      case 'take':
-        return DoseStatus.taken;
+      case 'log':
+        return DoseStatus.logged;
       case 'snooze':
         return DoseStatus.snoozed;
       case 'skip':

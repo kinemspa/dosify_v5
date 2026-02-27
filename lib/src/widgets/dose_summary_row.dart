@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -41,11 +41,11 @@ class DoseSummaryRow extends StatelessWidget {
     final statusText = disabled
         ? 'Disabled'
         : switch (dose.status) {
-            DoseStatus.taken => () {
+            DoseStatus.logged => () {
                 final actionTime = dose.existingLog?.actionTime;
                 return actionTime != null
                     ? 'Taken at ${DateTimeFormatter.formatTime(context, actionTime)}'
-                    : 'Taken';
+                    : 'Logged';
               }(),
             DoseStatus.skipped => 'Skipped',
             DoseStatus.snoozed => 'Snoozed',

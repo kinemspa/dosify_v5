@@ -64,7 +64,7 @@ void main() {
       scheduledTime: scheduledTime,
       doseValue: 10,
       doseUnit: 'units',
-      action: DoseAction.taken,
+      action: DoseAction.logged,
       actionTime: DateTime(2025, 1, 1, 8, 5),
     );
 
@@ -88,7 +88,7 @@ void main() {
             onSkip: (_) async {},
             onDelete: (_) async {},
             presentation: DoseActionSheetPresentation.bottomSheet,
-            initialStatus: DoseStatus.taken,
+            initialStatus: DoseStatus.logged,
           ),
         ),
       ),

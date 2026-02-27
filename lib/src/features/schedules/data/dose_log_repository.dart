@@ -1,4 +1,4 @@
-// Package imports:
+﻿// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
@@ -94,14 +94,14 @@ class DoseLogRepository {
   /// Get adherence statistics for a schedule
   Map<String, dynamic> getAdherenceStats(String scheduleId) {
     final logs = getByScheduleId(scheduleId);
-    final taken = logs.where((l) => l.action == DoseAction.taken).length;
+    final taken = logs.where((l) => l.action == DoseAction.logged).length;
     final skipped = logs.where((l) => l.action == DoseAction.skipped).length;
     final snoozed = logs.where((l) => l.action == DoseAction.snoozed).length;
     final onTime = logs.where((l) => l.wasOnTime).length;
 
     return {
       'total': logs.length,
-      'taken': taken,
+      'logged': taken,
       'skipped': skipped,
       'snoozed': snoozed,
       'onTime': onTime,

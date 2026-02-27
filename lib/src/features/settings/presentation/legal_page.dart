@@ -92,16 +92,6 @@ class _LegalContent extends StatelessWidget {
           'diagnosis, or treatment of any kind.',
         ),
         const SizedBox(height: kSpacingM),
-        _SubHeading('No Regulatory Approval'),
-        const SizedBox(height: kSpacingS),
-        _Para(
-          'Dosifi has not been assessed, registered, or approved by the '
-          'Therapeutic Goods Administration (TGA, Australia), the Food and '
-          'Drug Administration (FDA, USA), the European Medicines Agency '
-          '(EMA), or any other health authority as a clinical or '
-          'diagnostic tool.',
-        ),
-        const SizedBox(height: kSpacingM),
         _SubHeading('Reconstitution Reference Calculator'),
         const SizedBox(height: kSpacingS),
         _Para(

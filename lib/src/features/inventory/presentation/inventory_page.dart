@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -66,7 +66,7 @@ class _InventoryPageState extends State<InventoryPage> {
                       .length;
 
                   final takenDoses = doseLogItems
-                      .where((d) => d.action == DoseAction.taken)
+                      .where((d) => d.action == DoseAction.logged)
                       .length;
 
                   return ListView(

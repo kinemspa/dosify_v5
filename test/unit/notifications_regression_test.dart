@@ -23,7 +23,7 @@ void main() {
       actionTime: scheduled,
       doseValue: 1,
       doseUnit: 'mg',
-      action: DoseAction.taken,
+      action: DoseAction.logged,
     );
 
     final snooze = DoseLog(

@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -148,7 +148,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             );
 
                       final taken = logItems
-                          .where((l) => l.action == DoseAction.taken)
+                          .where((l) => l.action == DoseAction.logged)
                           .length;
                       final skipped = logItems
                           .where((l) => l.action == DoseAction.skipped)
@@ -302,7 +302,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               ),
                               buildDetailInfoRow(
                                 context,
-                                label: 'Taken',
+                                label: 'Logged',
                                 value: taken.toString(),
                               ),
                               buildDetailInfoRow(
@@ -371,7 +371,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               const SizedBox(height: kSpacingS),
                               _buildMetricBar(
                                 context,
-                                label: 'Taken',
+                                label: 'Logged',
                                 value: taken,
                                 maxValue: maxDoseStatus,
                                 color: Theme.of(context).colorScheme.primary,

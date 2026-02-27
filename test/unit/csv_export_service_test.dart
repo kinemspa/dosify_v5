@@ -61,7 +61,7 @@ void main() {
       actionTime: t0,
       doseValue: 1,
       doseUnit: 'mg',
-      action: DoseAction.taken,
+      action: DoseAction.logged,
     );
     final l2 = DoseLog(
       id: 'a',
@@ -73,7 +73,7 @@ void main() {
       actionTime: t1,
       doseValue: 1,
       doseUnit: 'mg',
-      action: DoseAction.taken,
+      action: DoseAction.logged,
     );
 
     final out = csv.doseLogsToCsv([l1, l2]);

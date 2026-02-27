@@ -1,4 +1,4 @@
-// Project imports:
+﻿// Project imports:
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 
@@ -40,8 +40,8 @@ class CalculatedDose {
     return DoseStatus.overdue;
   }
 
-  /// Whether this dose has been taken
-  bool get isTaken => existingLog?.action == DoseAction.taken;
+  /// Whether this dose has been logged
+  bool get isTaken => existingLog?.action == DoseAction.logged;
 
   /// Whether this dose was skipped
   bool get isSkipped => existingLog?.action == DoseAction.skipped;
@@ -119,8 +119,8 @@ enum DoseStatus {
   /// Dose time has passed but is still within the grace window
   due,
 
-  /// Dose was taken
-  taken,
+  /// Dose was logged
+  logged,
 
   /// Dose was skipped
   skipped,
@@ -134,8 +134,8 @@ enum DoseStatus {
   /// Creates status from DoseAction
   static DoseStatus fromAction(DoseAction action) {
     switch (action) {
-      case DoseAction.taken:
-        return DoseStatus.taken;
+      case DoseAction.logged:
+        return DoseStatus.logged;
       case DoseAction.skipped:
         return DoseStatus.skipped;
       case DoseAction.snoozed:
@@ -143,8 +143,8 @@ enum DoseStatus {
     }
   }
 
-  /// Whether this status indicates completion (taken or skipped)
-  bool get isCompleted => this == taken || this == skipped;
+  /// Whether this status indicates completion (logged or skipped)
+  bool get isCompleted => this == logged || this == skipped;
 
   /// Whether this status requires attention (overdue or snoozed)
   bool get requiresAttention => this == overdue || this == due || this == snoozed;

@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -208,7 +208,7 @@ class _CombinedReportsHistoryWidgetState
       return DoseActionSheet.show(
         context,
         dose: dose,
-        initialStatus: DoseStatus.taken,
+        initialStatus: DoseStatus.logged,
         onMarkTaken: (_) async {
           // Ad-hoc persistence is handled inside DoseActionSheet.
         },
@@ -222,7 +222,7 @@ class _CombinedReportsHistoryWidgetState
           final latest = logBox.get(log.id);
           if (latest == null) return;
 
-          if (latest.action == DoseAction.taken) {
+          if (latest.action == DoseAction.logged) {
             final medBox = Hive.box<Medication>('medications');
             final currentMed = medBox.get(latest.medicationId);
             if (currentMed != null) {
@@ -266,7 +266,7 @@ class _CombinedReportsHistoryWidgetState
         final trimmed = request.notes?.trim();
         final latest = logBox.get(log.id) ?? log;
 
-        if (latest.action != DoseAction.taken) {
+        if (latest.action != DoseAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
@@ -312,7 +312,7 @@ class _CombinedReportsHistoryWidgetState
           actionTime: request.actionTime,
           doseValue: latest.doseValue,
           doseUnit: latest.doseUnit,
-          action: DoseAction.taken,
+          action: DoseAction.logged,
           actualDoseValue: request.actualDoseValue ?? latest.actualDoseValue,
           actualDoseUnit: request.actualDoseUnit ?? latest.actualDoseUnit,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
@@ -328,7 +328,7 @@ class _CombinedReportsHistoryWidgetState
         final trimmed = request.notes?.trim();
         final latest = logBox.get(log.id) ?? log;
 
-        if (latest.action == DoseAction.taken) {
+        if (latest.action == DoseAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
@@ -382,7 +382,7 @@ class _CombinedReportsHistoryWidgetState
         final trimmed = request.notes?.trim();
         final latest = logBox.get(log.id) ?? log;
 
-        if (latest.action == DoseAction.taken) {
+        if (latest.action == DoseAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
@@ -432,7 +432,7 @@ class _CombinedReportsHistoryWidgetState
       },
       onDelete: (_) async {
         final latest = logBox.get(log.id) ?? log;
-        if (latest.action == DoseAction.taken) {
+        if (latest.action == DoseAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
@@ -534,7 +534,7 @@ class _CombinedReportsHistoryWidgetState
 
     String doseActionBadgeLabel(DoseAction action) {
       return switch (action) {
-        DoseAction.taken => 'TAKEN',
+        DoseAction.logged => 'LOGGED',
         DoseAction.skipped => 'SKIPPED',
         DoseAction.snoozed => 'SNOOZED',
       };

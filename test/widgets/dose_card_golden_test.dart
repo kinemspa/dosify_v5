@@ -133,7 +133,7 @@ void main() {
             isActive: true,
             compact: false,
             showActions: true,
-            statusOverride: DoseStatus.taken,
+            statusOverride: DoseStatus.logged,
           ),
         ),
       );

@@ -4136,7 +4136,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
     actionTime: now,
     doseValue: defaultAmount,
     doseUnit: doseUnit,
-    action: DoseAction.taken,
+    action: DoseAction.logged,
   );
 
   final dose = CalculatedDose(
@@ -4152,7 +4152,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
   await DoseActionSheet.show(
     context,
     dose: dose,
-    initialStatus: DoseStatus.taken,
+    initialStatus: DoseStatus.logged,
     onMarkTaken: (_) async {
       // Ad-hoc persistence is handled inside DoseActionSheet.
     },
@@ -4167,7 +4167,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
       final existing = logBox.get(draftLog.id);
       if (existing == null) return;
 
-      if (existing.action == DoseAction.taken) {
+      if (existing.action == DoseAction.logged) {
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(existing.medicationId);
         if (currentMed != null) {
@@ -4874,7 +4874,7 @@ Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
     final taken = doseBox.values.any((log) {
       final localScheduled = log.scheduledTime.toLocal();
       return log.medicationId == med.id &&
-          log.action == DoseAction.taken &&
+          log.action == DoseAction.logged &&
           localScheduled.year == date.year &&
           localScheduled.month == date.month &&
           localScheduled.day == date.day;

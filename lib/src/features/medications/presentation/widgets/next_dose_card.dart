@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element, unused_local_variable
+﻿// ignore_for_file: unused_element, unused_local_variable
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
@@ -344,7 +344,7 @@ class _NextDoseCardState extends State<NextDoseCard>
 
   Widget _buildDoseCard(CalculatedDose dose, int index, int total) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isTaken = dose.status == DoseStatus.taken;
+    final isTaken = dose.status == DoseStatus.logged;
     final isOverdue = dose.status == DoseStatus.overdue;
     final isSkipped = dose.status == DoseStatus.skipped;
     final isSnoozed = dose.status == DoseStatus.snoozed;
@@ -742,7 +742,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
-          action: DoseAction.taken,
+          action: DoseAction.logged,
           actualDoseValue: request.actualDoseValue,
           actualDoseUnit: request.actualDoseUnit,
           notes: request.notes?.isEmpty ?? true ? null : request.notes,
@@ -889,7 +889,7 @@ class _NextDoseCardState extends State<NextDoseCard>
             logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
 
         // When deleting/undoing a dose, restore the stock if it was taken
-        if (existingLog != null && existingLog.action == DoseAction.taken) {
+        if (existingLog != null && existingLog.action == DoseAction.logged) {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {

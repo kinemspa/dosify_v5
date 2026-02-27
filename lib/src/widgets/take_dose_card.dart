@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -137,7 +137,7 @@ class TakeDoseCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          dose.status == DoseStatus.taken
+                          dose.status == DoseStatus.logged
                               ? Icons.check_circle_rounded
                               : Icons.event,
                           size: kIconSizeSmall,
@@ -208,11 +208,11 @@ class TakeDoseCard extends StatelessWidget {
     }
 
     final label = switch (dose.status) {
-      DoseStatus.taken => () {
+      DoseStatus.logged => () {
           final actionTime = dose.existingLog?.actionTime;
           return actionTime != null
               ? 'Taken at ${DateTimeFormatter.formatTime(context, actionTime)}'
-              : 'Taken';
+              : 'Logged';
         }(),
       DoseStatus.skipped => 'Skipped',
       DoseStatus.snoozed => 'Snoozed',

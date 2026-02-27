@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
@@ -27,7 +27,7 @@ class DoseStatusActionButton extends StatelessWidget {
       tooltip: 'Change status',
       onSelected: onSelect,
       itemBuilder: (context) => [
-        _buildItem(context, DoseStatus.taken, enabled: !disabled),
+        _buildItem(context, DoseStatus.logged, enabled: !disabled),
         _buildItem(context, DoseStatus.snoozed, enabled: !disabled),
         _buildItem(context, DoseStatus.skipped, enabled: !disabled),
       ],

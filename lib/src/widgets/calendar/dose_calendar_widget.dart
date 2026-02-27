@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -613,7 +613,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       actionTime: request.actionTime,
       doseValue: dose.doseValue,
       doseUnit: dose.doseUnit,
-      action: DoseAction.taken,
+      action: DoseAction.logged,
       actualDoseValue: request.actualDoseValue,
       actualDoseUnit: request.actualDoseUnit,
       notes: request.notes?.isEmpty ?? true ? null : request.notes,
@@ -793,7 +793,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       await _cancelNotificationForDose(dose);
 
       // Restore stock if the dose was previously taken
-      if (dose.existingLog!.action == DoseAction.taken) {
+      if (dose.existingLog!.action == DoseAction.logged) {
         final existing = dose.existingLog!;
         final oldDoseValue = existing.actualDoseValue ?? existing.doseValue;
         final oldDoseUnit = existing.actualDoseUnit ?? existing.doseUnit;

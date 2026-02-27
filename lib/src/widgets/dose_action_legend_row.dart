@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -8,7 +8,7 @@ class DoseActionLegendRow extends StatelessWidget {
   const DoseActionLegendRow({
     super.key,
     this.actions = const [
-      DoseAction.taken,
+      DoseAction.logged,
       DoseAction.skipped,
       DoseAction.snoozed,
     ],
@@ -22,7 +22,7 @@ class DoseActionLegendRow extends StatelessWidget {
 
   String _label(DoseAction action) {
     return switch (action) {
-      DoseAction.taken => 'Taken',
+      DoseAction.logged => 'Logged',
       DoseAction.skipped => 'Skipped',
       DoseAction.snoozed => 'Snoozed',
     };

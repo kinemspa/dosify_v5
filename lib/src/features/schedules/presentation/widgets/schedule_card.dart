@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -239,7 +239,7 @@ class ScheduleCard extends StatelessWidget {
                     minimumSize: const Size(0, 32),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text('Take'),
+                  child: const Text('Log'),
                 )
               else
                 FilledButton.tonal(
@@ -430,7 +430,7 @@ class ScheduleCard extends StatelessWidget {
       scheduledTime: next,
       doseValue: s.doseValue,
       doseUnit: s.doseUnit,
-      action: DoseAction.taken,
+      action: DoseAction.logged,
       actionTime: DateTime.now(),
     );
 

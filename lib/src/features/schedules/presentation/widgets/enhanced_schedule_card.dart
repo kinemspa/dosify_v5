@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element
+﻿// ignore_for_file: unused_element
 
 // Flutter imports:
 import 'package:flutter/material.dart';
@@ -95,7 +95,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           actionTime: request.actionTime,
           doseValue: dose.doseValue,
           doseUnit: dose.doseUnit,
-          action: DoseAction.taken,
+          action: DoseAction.logged,
           actualDoseValue: request.actualDoseValue,
           actualDoseUnit: request.actualDoseUnit,
           notes: request.notes?.isEmpty ?? true ? null : request.notes,
@@ -223,7 +223,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             logBox.get(baseId) ??
             logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
 
-        if (existingLog != null && existingLog.action == DoseAction.taken) {
+        if (existingLog != null && existingLog.action == DoseAction.logged) {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {
@@ -813,11 +813,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         .where((log) => log.scheduleId == widget.schedule.id)
         .toList();
 
-    final taken = logs.where((l) => l.action == DoseAction.taken).length;
+    final taken = logs.where((l) => l.action == DoseAction.logged).length;
     final total = logs.length;
     final rate = total > 0 ? (taken / total) * 100 : 0.0;
 
-    return {'taken': taken, 'total': total, 'rate': rate};
+    return {'logged': taken, 'total': total, 'rate': rate};
   }
 
   List<DoseLog> _getRecentLogs() {
@@ -953,7 +953,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
   IconData _getActionIcon(DoseAction action) {
     switch (action) {
-      case DoseAction.taken:
+      case DoseAction.logged:
         return Icons.check_circle;
       case DoseAction.skipped:
         return Icons.block;
@@ -968,8 +968,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
   String _getActionLabel(DoseAction action) {
     switch (action) {
-      case DoseAction.taken:
-        return 'Taken';
+      case DoseAction.logged:
+        return 'Logged';
       case DoseAction.skipped:
         return 'Skipped';
       case DoseAction.snoozed:
@@ -1067,7 +1067,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         scheduledTime: now,
         doseValue: widget.schedule.doseValue,
         doseUnit: widget.schedule.doseUnit,
-        action: DoseAction.taken,
+        action: DoseAction.logged,
         notes: combinedNotes,
       );
 

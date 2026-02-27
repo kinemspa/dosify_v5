@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -160,7 +160,7 @@ class CalendarDoseBlock extends StatelessWidget {
     }
 
     switch (dose.status) {
-      case DoseStatus.taken:
+      case DoseStatus.logged:
         return statusColor.withValues(alpha: kOpacitySubtle);
       case DoseStatus.skipped:
         return statusColor.withValues(alpha: kOpacitySubtleLow);
@@ -184,7 +184,7 @@ class CalendarDoseBlock extends StatelessWidget {
     }
 
     switch (dose.status) {
-      case DoseStatus.taken:
+      case DoseStatus.logged:
         return statusColor.withValues(alpha: kOpacityMediumLow);
       case DoseStatus.skipped:
         return statusColor.withValues(alpha: kOpacityVeryLow);
@@ -207,7 +207,7 @@ class CalendarDoseBlock extends StatelessWidget {
       return statusColor.withValues(alpha: kOpacityMediumHigh);
     }
     switch (dose.status) {
-      case DoseStatus.taken:
+      case DoseStatus.logged:
       case DoseStatus.skipped:
       case DoseStatus.snoozed:
       case DoseStatus.due:

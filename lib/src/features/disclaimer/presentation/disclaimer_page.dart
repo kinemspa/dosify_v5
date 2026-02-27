@@ -147,12 +147,6 @@ class _DisclaimerBody extends StatelessWidget {
         ),
         const SizedBox(height: kSpacingL),
         _Paragraph(
-          'Dosifi is not a medical device and has not been evaluated or '
-          'approved by the TGA, FDA, or any other regulatory authority '
-          'as a clinical decision-support tool.',
-        ),
-        const SizedBox(height: kSpacingL),
-        _Paragraph(
           'All calculations, logs, and references produced by this application '
           'are for personal tracking and reference only. They must be verified '
           'by a qualified healthcare professional before being acted upon.',

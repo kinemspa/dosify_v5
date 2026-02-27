@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -29,7 +29,7 @@ import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 enum _MdvDoseChangeMode { strength, volume, units }
 
-enum _DoseStatusOption { scheduled, taken, snoozed, skipped, delete }
+enum _DoseStatusOption { scheduled, logged, snoozed, skipped, delete }
 
 enum DoseActionSheetPresentation { bottomSheet, dialog }
 
@@ -196,12 +196,12 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
   _DoseStatusOption _currentStatusOption() {
     if (_isAdHoc) {
-      return _selectedStatus == DoseStatus.taken
-          ? _DoseStatusOption.taken
+      return _selectedStatus == DoseStatus.logged
+          ? _DoseStatusOption.logged
           : _DoseStatusOption.delete;
     }
 
-    if (_selectedStatus == DoseStatus.taken) return _DoseStatusOption.taken;
+    if (_selectedStatus == DoseStatus.logged) return _DoseStatusOption.logged;
     if (_selectedStatus == DoseStatus.snoozed) return _DoseStatusOption.snoozed;
     if (_selectedStatus == DoseStatus.skipped) return _DoseStatusOption.skipped;
     return _DoseStatusOption.scheduled;
@@ -214,8 +214,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           _selectedStatus = DoseStatus.pending;
           _hasChanged = true;
           break;
-        case _DoseStatusOption.taken:
-          _selectedStatus = DoseStatus.taken;
+        case _DoseStatusOption.logged:
+          _selectedStatus = DoseStatus.logged;
           _hasChanged = true;
           break;
         case _DoseStatusOption.snoozed:
@@ -246,7 +246,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     String labelFor(_DoseStatusOption o) {
       return switch (o) {
         _DoseStatusOption.scheduled => 'Scheduled',
-        _DoseStatusOption.taken => 'Taken',
+        _DoseStatusOption.logged => 'Logged',
         _DoseStatusOption.snoozed => 'Snoozed',
         _DoseStatusOption.skipped => 'Skipped',
         _DoseStatusOption.delete => 'Delete',
@@ -256,7 +256,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     IconData iconFor(_DoseStatusOption o) {
       return switch (o) {
         _DoseStatusOption.scheduled => Icons.event_available_rounded,
-        _DoseStatusOption.taken => Icons.check_circle_rounded,
+        _DoseStatusOption.logged => Icons.check_circle_rounded,
         _DoseStatusOption.snoozed => Icons.snooze_rounded,
         _DoseStatusOption.skipped => Icons.do_not_disturb_on_rounded,
         _DoseStatusOption.delete => Icons.delete_outline_rounded,
@@ -265,17 +265,17 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
     _DoseStatusOption nextOption(_DoseStatusOption current) {
       if (_isAdHoc) {
-        return current == _DoseStatusOption.taken
+        return current == _DoseStatusOption.logged
             ? _DoseStatusOption.delete
-            : _DoseStatusOption.taken;
+            : _DoseStatusOption.logged;
       }
 
       return switch (current) {
-        _DoseStatusOption.scheduled => _DoseStatusOption.taken,
-        _DoseStatusOption.taken => _DoseStatusOption.snoozed,
+        _DoseStatusOption.scheduled => _DoseStatusOption.logged,
+        _DoseStatusOption.logged => _DoseStatusOption.snoozed,
         _DoseStatusOption.snoozed => _DoseStatusOption.skipped,
         _DoseStatusOption.skipped => _DoseStatusOption.scheduled,
-        _DoseStatusOption.delete => _DoseStatusOption.taken,
+        _DoseStatusOption.delete => _DoseStatusOption.logged,
       };
     }
 
@@ -553,7 +553,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Time taken', style: sectionTitleStyle(context)),
+        Text('Time logged', style: sectionTitleStyle(context)),
         const SizedBox(height: kSpacingXS),
         SizedBox(
           width: double.infinity,
@@ -968,7 +968,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
       DoseLog? best;
       for (final l in logs) {
-        if (l.action != DoseAction.taken) continue;
+        if (l.action != DoseAction.logged) continue;
         final at = l.actionTime;
         if (currentId != null && l.id == currentId) continue;
         if (best == null || at.isAfter(best.actionTime)) {
@@ -1371,7 +1371,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
       if (!notesChanged && !actualValueChanged && !actualUnitChanged) return;
 
-      if (existing.action == DoseAction.taken &&
+      if (existing.action == DoseAction.logged &&
           (actualValueChanged || actualUnitChanged)) {
         final schedule = Hive.box<Schedule>(
           'schedules',
@@ -1501,7 +1501,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         );
 
         switch (_selectedStatus) {
-          case DoseStatus.taken:
+          case DoseStatus.logged:
             await widget.onMarkTaken(request);
             break;
           case DoseStatus.skipped:
@@ -1553,7 +1553,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             _buildStatusHint(context),
             const SizedBox(height: kSpacingM),
             _buildNotesField(context),
-            if (_selectedStatus == DoseStatus.taken) ...[
+            if (_selectedStatus == DoseStatus.logged) ...[
               const SizedBox(height: kSpacingM),
               _buildTakenTimeField(context),
             ],
@@ -1608,7 +1608,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Take dose',
+                                    'Log dose',
                                     style: cardTitleStyle(
                                       context,
                                     )?.copyWith(color: colorScheme.primary),
@@ -1675,7 +1675,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         context,
       )?.copyWith(color: colorScheme.primary),
       contentTextStyle: bodyTextStyle(context),
-      title: const Text('Take dose'),
+      title: const Text('Log dose'),
       content: SizedBox(
         width: double.maxFinite,
         child: ConstrainedBox(

@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
@@ -1057,8 +1057,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
     if (!mounted) return;
 
-    final actionText = action == DoseAction.taken
-        ? 'taken'
+    final actionText = action == DoseAction.logged
+        ? 'logged'
         : action == DoseAction.skipped
         ? 'skipped'
         : 'snoozed for 15 minutes';
@@ -1072,7 +1072,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   Color _getActionColor(BuildContext context, DoseAction action) {
     final cs = Theme.of(context).colorScheme;
     return switch (action) {
-      DoseAction.taken => cs.primary,
+      DoseAction.logged => cs.primary,
       DoseAction.snoozed => cs.tertiary,
       DoseAction.skipped => cs.error,
     };
@@ -1080,7 +1080,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
   IconData _getActionIcon(DoseAction action) {
     return switch (action) {
-      DoseAction.taken => Icons.check_circle,
+      DoseAction.logged => Icons.check_circle,
       DoseAction.snoozed => Icons.snooze,
       DoseAction.skipped => Icons.cancel,
     };
@@ -1088,7 +1088,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
   String _getActionLabel(DoseAction action) {
     return switch (action) {
-      DoseAction.taken => 'Taken',
+      DoseAction.logged => 'Logged',
       DoseAction.snoozed => 'Snoozed',
       DoseAction.skipped => 'Skipped',
     };
@@ -1471,7 +1471,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     DateTime nextDose,
   ) {
     final existingLog = _getExistingLog(nextDose);
-    final isTaken = existingLog?.action == DoseAction.taken;
+    final isTaken = existingLog?.action == DoseAction.logged;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -1511,7 +1511,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     _showRecordDoseDialog(
                       schedule: s,
                       scheduledTime: nextDose,
-                      action: DoseAction.taken,
+                      action: DoseAction.logged,
                       existingLog: existingLog,
                     );
                   },
@@ -1519,7 +1519,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     existingLog != null ? Icons.edit : Icons.check,
                     size: kIconSizeSmall,
                   ),
-                  label: Text(existingLog != null ? 'Edit' : 'Take'),
+                  label: Text(existingLog != null ? 'Edit' : 'Log'),
                 ),
               ),
               if (!isTaken) ...[
@@ -1702,7 +1702,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     required bool isToday,
   }) {
     final cs = Theme.of(context).colorScheme;
-    final isTaken = existingLog?.action == DoseAction.taken;
+    final isTaken = existingLog?.action == DoseAction.logged;
     final hasLog = existingLog != null;
     final accentColor = hasLog
         ? _getActionColor(context, existingLog.action)
@@ -1818,13 +1818,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                           _showRecordDoseDialog(
                             schedule: s,
                             scheduledTime: dt,
-                            action: DoseAction.taken,
+                            action: DoseAction.logged,
                             existingLog: existingLog,
                           );
                         },
                         icon: const Icon(Icons.check, size: kIconSizeXSmall),
                         label: Text(
-                          existingLog != null ? 'Edit' : 'Take',
+                          existingLog != null ? 'Edit' : 'Log',
                           style: microHelperTextStyle(
                             context,
                           )?.copyWith(fontWeight: kFontWeightSemiBold),
@@ -1887,7 +1887,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                           _showRecordDoseDialog(
                             schedule: s,
                             scheduledTime: dt,
-                            action: DoseAction.taken,
+                            action: DoseAction.logged,
                             existingLog: existingLog,
                           );
                         },
@@ -2178,7 +2178,7 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
 
   String get _actionLabel {
     return switch (widget.action) {
-      DoseAction.taken => 'Take Dose',
+      DoseAction.logged => 'Log Dose',
       DoseAction.snoozed => 'Snooze Dose',
       DoseAction.skipped => 'Skip Dose',
     };

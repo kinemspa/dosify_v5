@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element, unused_local_variable
+﻿// ignore_for_file: unused_element, unused_local_variable
 
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
@@ -412,7 +412,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
       );
 
       takenDoses = dayLogs
-          .where((log) => log.action == DoseAction.taken)
+          .where((log) => log.action == DoseAction.logged)
           .length;
 
       if (expectedDoses == 0) {
