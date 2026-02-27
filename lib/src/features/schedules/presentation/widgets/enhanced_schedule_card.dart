@@ -22,6 +22,7 @@ import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_dose_metrics.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
@@ -1200,7 +1201,25 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
       await repo.upsert(log);
 
-      // TODO: Schedule notification for snooze time
+      // Schedule a reminder notification at the snooze-until time.
+      final snoozeUntil = now.add(snoozeDuration);
+      await NotificationService.cancel(
+        ScheduleScheduler.doseNotificationIdFor(widget.schedule.id, now),
+      );
+      final metrics = ScheduleDoseMetrics.format(widget.schedule);
+      if (mounted) {
+        final timeLabel = DateTimeFormatter.formatTime(context, snoozeUntil);
+        await NotificationService.scheduleAtAlarmClock(
+          ScheduleScheduler.doseNotificationIdFor(widget.schedule.id, now),
+          snoozeUntil,
+          title: widget.medication.name,
+          body: '$metrics | Snoozed until $timeLabel',
+          payload:
+              'dose:${widget.schedule.id}:${now.millisecondsSinceEpoch}',
+          actions: NotificationService.upcomingDoseActions,
+          expandedLines: <String>[metrics, 'Snoozed until $timeLabel'],
+        );
+      }
 
       if (mounted) {
         setState(() {});
