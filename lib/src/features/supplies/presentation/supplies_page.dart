@@ -357,6 +357,42 @@ class SupplyCard extends StatelessWidget {
       );
     }
 
+    Future<void> openEdit() async {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          fullscreenDialog: true,
+          builder: (_) => AddEditSupplyPage(initial: s),
+        ),
+      );
+    }
+
+    Future<void> openDelete() async {
+      if (!context.mounted) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Delete supply?'),
+          content: Text(
+            'Remove "${s.name}" and all its stock movements? This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: FilledButton.styleFrom(backgroundColor: cs.error),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed == true && context.mounted) {
+        await SupplyRepository().delete(s.id);
+      }
+    }
+
     final title = Text(
       s.name,
       style: dense
@@ -420,7 +456,31 @@ class SupplyCard extends StatelessWidget {
 
     final trailing = Column(
       crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
       children: [
+        PopupMenuButton<String>(
+          iconSize: kIconSizeSmall,
+          padding: EdgeInsets.zero,
+          icon: Icon(
+            Icons.more_vert,
+            size: kIconSizeSmall,
+            color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
+          ),
+          onSelected: (value) async {
+            if (value == 'edit') {
+              await openEdit();
+            } else if (value == 'delete') {
+              await openDelete();
+            }
+          },
+          itemBuilder: (_) => [
+            const PopupMenuItem(value: 'edit', child: Text('Edit details')),
+            PopupMenuItem(
+              value: 'delete',
+              child: Text('Delete', style: TextStyle(color: cs.error)),
+            ),
+          ],
+        ),
         if (low)
           Icon(
             Icons.warning,
