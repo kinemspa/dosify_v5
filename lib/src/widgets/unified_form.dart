@@ -86,6 +86,7 @@ class SectionFormCard extends StatelessWidget {
     if (frameless) {
       return Container(
         decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           border: Border.all(
             color: theme.colorScheme.outlineVariant.withValues(
@@ -295,10 +296,10 @@ class CollapsibleSectionFormCard extends StatelessWidget {
     );
 
     if (frameless) {
-      // Frameless cards still get a very subtle border so adjacent cards are
-      // visually distinguishable without adding a background fill.
+      // Frameless cards use a surface fill so the shadow and border are visible.
       return Container(
         decoration: BoxDecoration(
+          color: cs.surfaceContainerLow,
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           border: Border.all(
             color: cs.outlineVariant.withValues(

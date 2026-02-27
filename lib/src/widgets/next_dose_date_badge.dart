@@ -188,8 +188,7 @@ class NextDoseDateBadge extends StatelessWidget {
 
     final Widget circleCore;
     if (usePill) {
-      // Build the pill: time rows + optional dose metrics divider.
-      final metricsText = doseMetrics;
+      // Build the pill: time text (bold) + AM/PM suffix only.
       circleCore = Container(
         constraints: const BoxConstraints(minWidth: kDoseTimePillMinWidth),
         padding: kDoseTimePillPadding,
@@ -221,26 +220,6 @@ class NextDoseDateBadge extends StatelessWidget {
                   color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
                 ),
               ),
-            if (metricsText != null && metricsText.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Divider(
-                height: 1,
-                thickness: 0.5,
-                color: circleBorder.withValues(alpha: kOpacityMedium),
-              ),
-              const SizedBox(height: 4),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  metricsText,
-                  style: (nextDoseBadgeMonthTextStyle(
-                    context,
-                    dense: true,
-                    color: primaryTextColor,
-                  ) ?? const TextStyle()).copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
           ],
         ),
       );
