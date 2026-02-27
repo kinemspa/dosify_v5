@@ -152,6 +152,15 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
 
   bool get _isLastStep => _stepIndex == _steps.length - 1;
 
+  /// Returns true when the immediately next step targets the same route path,
+  /// so a "Next" button is shown instead of "Got it".
+  bool _hasNextStepOnSameRoute() {
+    if (_isLastStep) return false;
+    final current = _steps[_stepIndex];
+    final next = _steps[_stepIndex + 1];
+    return next.routePath == current.routePath;
+  }
+
   String _currentPath(BuildContext context) {
     final rootContext = rootNavigatorKey.currentContext;
     if (rootContext != null) {
@@ -379,18 +388,6 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                       ),
                                     ),
                                     const Spacer(),
-                                    TextButton(
-                                      onPressed: widget.onFinish,
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: coachFg,
-                                        textStyle: TextStyle(
-                                          color: coachFg,
-                                          fontWeight: kFontWeightSemiBold,
-                                        ),
-                                      ),
-                                      child: const Text('Skip'),
-                                    ),
-                                    const SizedBox(width: kSpacingXS),
                                     FilledButton(
                                       onPressed: _goNext,
                                       style: FilledButton.styleFrom(
@@ -411,7 +408,11 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                         step.waitForUserNavigation &&
                                                 !onExpectedRoute
                                             ? 'Open page'
-                                            : (_isLastStep ? 'Done' : 'Next'),
+                                            : _hasNextStepOnSameRoute()
+                                            ? 'Next'
+                                            : (_isLastStep
+                                                ? 'Close'
+                                                : 'Got it'),
                                       ),
                                     ),
                                   ],
