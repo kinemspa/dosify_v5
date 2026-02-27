@@ -321,16 +321,6 @@ class ScheduleScheduler {
             final dtLocal = dtUtc.toLocal();
             if (dtLocal.isAfter(now) && _withinBounds(s, dtLocal)) {
               final groupKey = _doseGroupKey(dtLocal);
-              final summaryId = _stableHash31('dose_summary|$groupKey');
-              await NotificationService.scheduleAtAlarmClock(
-                summaryId,
-                dtLocal,
-                title: 'Upcoming doses',
-                body: 'Tap to view your doses',
-                groupKey: groupKey,
-                setAsGroupSummary: true,
-                payload: 'dose_group:$groupKey',
-              );
               final id = doseNotificationIdFor(s.id, dtLocal);
               await scheduleDoseNotification(
                 id: id,
@@ -353,16 +343,6 @@ class ScheduleScheduler {
             );
             if (dt.isAfter(now) && _withinBounds(s, dt)) {
               final groupKey = _doseGroupKey(dt);
-              final summaryId = _stableHash31('dose_summary|$groupKey');
-              await NotificationService.scheduleAtAlarmClock(
-                summaryId,
-                dt,
-                title: 'Upcoming doses',
-                body: 'Tap to view your doses',
-                groupKey: groupKey,
-                setAsGroupSummary: true,
-                payload: 'dose_group:$groupKey',
-              );
               final id = doseNotificationIdFor(s.id, dt);
               await scheduleDoseNotification(
                 id: id,
