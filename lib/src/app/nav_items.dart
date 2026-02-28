@@ -48,6 +48,12 @@ const allNavItems = <NavItemConfig>[
     location: '/supplies',
   ),
   NavItemConfig(
+    id: 'inventory',
+    label: 'Inventory',
+    icon: Icons.inventory,
+    location: '/inventory',
+  ),
+  NavItemConfig(
     id: 'analytics',
     label: 'Analytics',
     icon: Icons.insights,

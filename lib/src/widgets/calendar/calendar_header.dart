@@ -93,74 +93,28 @@ class CalendarHeader extends StatelessWidget {
           const SizedBox(width: kSpacingXXS),
 
           // Today button
-          if (isOnTodayContext)
-            OutlinedButton(
-              onPressed: onToday,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: colorScheme.primary,
-                side: BorderSide(
-                  color: colorScheme.primary.withValues(alpha: kOpacityMedium),
-                  width: kBorderWidthThin,
-                ),
-                padding: kCalendarTodayButtonPadding,
-                minimumSize: kCalendarTodayButtonMinSize,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    kCalendarTodayButtonBorderRadius,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.check,
-                    size: kIconSizeSmall,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(width: kSpacingXXS),
-                  Text(
-                    'Today',
-                    style: calendarDayOverflowTextStyle(
-                      context,
-                    )?.copyWith(color: colorScheme.primary),
-                  ),
-                ],
-              ),
-            )
-          else
-            FilledButton(
-              onPressed: onToday,
-              style: FilledButton.styleFrom(
-                foregroundColor: colorScheme.onPrimary,
-                padding: kCalendarTodayButtonPadding,
-                minimumSize: kCalendarTodayButtonMinSize,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    kCalendarTodayButtonBorderRadius,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.today_rounded,
-                    size: kIconSizeSmall,
-                    color: colorScheme.onPrimary,
-                  ),
-                  const SizedBox(width: kSpacingXXS),
-                  Text(
-                    'Back to Today',
-                    style: calendarDayOverflowTextStyle(
-                      context,
-                    )?.copyWith(color: colorScheme.onPrimary),
-                  ),
-                ],
-              ),
+          IconButton(
+            icon: Icon(
+              isOnTodayContext ? Icons.check : Icons.undo_rounded,
+              color: isOnTodayContext ? colorScheme.primary : colorScheme.onPrimary,
             ),
+            onPressed: onToday,
+            tooltip: isOnTodayContext ? 'Today' : 'Back to Today',
+            style: isOnTodayContext
+                ? IconButton.styleFrom(
+                    side: BorderSide(
+                      color: colorScheme.primary.withValues(alpha: kOpacityMedium),
+                      width: kBorderWidthThin,
+                    ),
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+                  )
+                : IconButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
+                  ),
+          ),
 
           if (showViewToggle) ...[
             const SizedBox(width: kSpacingXXS),
