@@ -302,6 +302,11 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
                 labelFor(option),
                 style: bodyTextStyle(context)?.copyWith(color: cs.onPrimary),
               ),
+              const SizedBox(width: kSpacingS),
+              Opacity(
+                opacity: 0.65,
+                child: Icon(Icons.sync_alt_rounded, size: kIconSizeSmall),
+              ),
             ],
           ),
         ),
