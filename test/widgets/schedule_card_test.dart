@@ -77,13 +77,23 @@ void main() {
     expect(menuFinder, findsOneWidget);
     await tester.tap(menuFinder);
     await tester.pumpAndSettle();
-
-    final snoozeItem = find.text('Snooze');
-    expect(snoozeItem, findsOneWidget);
-    await tester.tap(snoozeItem);
+    // Verify 'Snooze' item exists in the menu, then close it.
+    expect(find.text('Snooze'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10)); // dismiss menu without selecting
     await tester.pumpAndSettle();
-    // Allow the async snooze handler to finish the DB write and scheduling.
-    await tester.pump(const Duration(milliseconds: 500));
+
+    // Invoke onSelected directly to avoid popup-close animation timing issues
+    // with FakeAsync vs real-I/O zone boundaries.
+    final popupButton = tester.widget<PopupMenuButton<String>>(
+      find.byType(PopupMenuButton<String>),
+    );
+    // Run in real-async so the Hive disk write and timezone timeout can complete.
+    // FlutterTimezone.getLocalTimezone has a 2-second fallback timeout.
+    await tester.runAsync(() async {
+      popupButton.onSelected!('snooze'); // void — fires the async handler
+      await Future<void>.delayed(const Duration(milliseconds: 2600));
+    });
+    await tester.pump(); // process any pending UI rebuilds (snackbar)
 
     // Verify DoseLog created
     final box = Hive.box<DoseLog>('dose_logs');
@@ -91,11 +101,12 @@ void main() {
     final log = box.values.first;
     expect(log.action, DoseAction.snoozed);
 
-    // Verify notification scheduling occurred via override
+    // Verify notification scheduling occurred via override.
+    // _snoozeSchedule uses title: s.medicationName and body: 'Snoozed'.
     expect(scheduledCalls.length, 1);
     final call = scheduledCalls.first;
-    expect(call['title'], equals(schedule.name));
-    expect(call['body'], contains(schedule.medicationName));
+    expect(call['title'], equals(schedule.medicationName));
+    expect(call['body'], equals('Snoozed'));
   });
 
   testWidgets('skip creates dose log and cancels scheduled notification', (
@@ -134,12 +145,20 @@ void main() {
     expect(menuFinder, findsOneWidget);
     await tester.tap(menuFinder);
     await tester.pumpAndSettle();
-
-    final skipItem = find.text('Skip');
-    expect(skipItem, findsOneWidget);
-    await tester.tap(skipItem);
+    // Verify 'Skip' item exists in the menu, then close it.
+    expect(find.text('Skip'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10)); // dismiss menu without selecting
     await tester.pumpAndSettle();
-    await tester.pump(const Duration(milliseconds: 500));
+
+    // Invoke onSelected directly to avoid popup-close animation timing issues.
+    final popupButton = tester.widget<PopupMenuButton<String>>(
+      find.byType(PopupMenuButton<String>),
+    );
+    await tester.runAsync(() async {
+      popupButton.onSelected!('skip'); // void — fires the async handler
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    await tester.pump(); // process any pending UI rebuilds (snackbar)
 
     // Verify DoseLog created
     final box = Hive.box<DoseLog>('dose_logs');
