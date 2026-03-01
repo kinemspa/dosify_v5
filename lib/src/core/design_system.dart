@@ -1208,7 +1208,7 @@ BoxDecoration buildStandardCardDecoration({
   final cs = Theme.of(context).colorScheme;
   return BoxDecoration(
     borderRadius: BorderRadius.circular(borderRadius),
-    color: useGradient ? null : cs.surface,
+    color: useGradient ? null : cs.surfaceContainerLow,
     gradient: useGradient
         ? LinearGradient(
             colors: [

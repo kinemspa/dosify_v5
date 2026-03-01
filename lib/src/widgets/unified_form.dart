@@ -696,6 +696,19 @@ class _MultiSelectDropdown36State<T> extends State<MultiSelectDropdown36<T>> {
                       controller.open();
                     }
                   },
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: cs.surfaceContainerHighest,
+                    padding: kButtonContentPadding,
+                    minimumSize: const Size(0, kFieldHeight),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    side: BorderSide(
+                      color: cs.outlineVariant.withValues(alpha: kCardBorderOpacity),
+                      width: kBorderWidthThin,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+                    ),
+                  ),
                   icon: Icon(widget.icon, size: kIconSizeSmall),
                   label: Align(
                     alignment: Alignment.centerLeft,
