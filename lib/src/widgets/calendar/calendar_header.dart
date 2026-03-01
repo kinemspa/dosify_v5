@@ -95,7 +95,7 @@ class CalendarHeader extends StatelessWidget {
           // Today button
           IconButton(
             icon: Icon(
-              isOnTodayContext ? Icons.check : Icons.undo_rounded,
+              isOnTodayContext ? Icons.check : Icons.today_rounded,
               color: isOnTodayContext ? colorScheme.primary : colorScheme.onPrimary,
             ),
             onPressed: onToday,

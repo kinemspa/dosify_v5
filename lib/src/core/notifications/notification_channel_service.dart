@@ -64,8 +64,8 @@ class NotificationChannelService {
   static const AndroidNotificationChannel _upcomingDose =
       AndroidNotificationChannel(
         'upcoming_dose',
-        'Upcoming Dose',
-        description: 'Reminders for upcoming doses',
+        'Dose Reminders',
+        description: 'Alerts sent at each scheduled dose time requiring action',
         importance: Importance.high,
       );
   static const AndroidNotificationChannel _lowStock =

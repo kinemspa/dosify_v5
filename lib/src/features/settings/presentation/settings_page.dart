@@ -586,14 +586,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ListTile(
               leading: const Icon(Icons.notifications_active_outlined),
               title: const Text('Show test dose reminder'),
-              subtitle: const Text('Preview the Upcoming Dose notification'),
+              subtitle: const Text('Fires exactly at each scheduled dose time'),
               trailing: const Icon(Icons.play_arrow_rounded),
               onTap: () => runNotificationTest(NotificationService.showTest),
             ),
             ListTile(
               leading: const Icon(Icons.stacked_bar_chart_outlined),
               title: const Text('Show test grouped reminders'),
-              subtitle: const Text('Preview grouped upcoming doses'),
+              subtitle: const Text(
+                'When multiple doses are due at the same time they appear as a group',
+              ),
               trailing: const Icon(Icons.play_arrow_rounded),
               onTap: () => runNotificationTest(
                 NotificationService.showTestGroupedUpcomingDoseReminders,
