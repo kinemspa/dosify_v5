@@ -22,6 +22,7 @@ class BottomNavIdsController extends StateNotifier<List<String>> {
     'medications',
     'schedules',
     'calendar',
+    'inventory',
   ];
 
   Future<void> load() async {

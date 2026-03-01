@@ -213,23 +213,18 @@ class NextDoseDateBadge extends StatelessWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                hasNext ? timeMain : '—',
+                hasNext
+                    ? (timeSuffix != null && timeSuffix.trim().isNotEmpty
+                        ? '$timeMain ${timeSuffix.toUpperCase()}'
+                        : timeMain)
+                    : '—',
                 style: nextDoseBadgeDayTextStyle(
                   context,
                   dense: true,
                   color: primaryTextColor,
-                ),
+                )?.copyWith(fontSize: kFontSizeMedium),
               ),
             ),
-            if (timeSuffix != null && timeSuffix.trim().isNotEmpty)
-              Text(
-                timeSuffix.toUpperCase(),
-                style: nextDoseBadgeMonthTextStyle(
-                  context,
-                  dense: true,
-                  color: dimColor,
-                ),
-              ),
             if (medicationName != null || doseMetrics != null) ...([
               const SizedBox(height: 2),
               Divider(height: 1, thickness: 0.5, color: circleBorder),

@@ -84,19 +84,26 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
     required int count,
   }) {
     final cs = Theme.of(context).colorScheme;
-    final baseStyle = helperTextStyle(context) ?? const TextStyle();
-    final numberStyle = baseStyle.copyWith(
+    final base = helperTextStyle(context) ?? const TextStyle();
+    final countStyle = base.copyWith(
+      fontSize: kFontSizeMedium,
+      fontWeight: kFontWeightBold,
       color: cs.primary,
-      fontWeight: kFontWeightSemiBold,
+      height: 1.0,
     );
-    return RichText(
-      maxLines: 1,
-      text: TextSpan(
-        children: [
-          TextSpan(text: '$label ', style: baseStyle),
-          TextSpan(text: '$count', style: numberStyle),
-        ],
-      ),
+    final labelStyle = base.copyWith(
+      fontSize: kFontSizeCaption,
+      color: cs.onSurfaceVariant,
+      height: 1.0,
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text('$count', style: countStyle),
+        const SizedBox(height: 1),
+        Text(label, style: labelStyle),
+      ],
     );
   }
 
@@ -319,8 +326,8 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
           Center(
             child: Wrap(
               alignment: WrapAlignment.center,
-              spacing: kSpacingXS,
-              runSpacing: kSpacingXXS,
+              spacing: kSpacingS,
+              runSpacing: kSpacingXS,
               children: [
                 _buildStatCell(context, label: 'Scheduled', count: scheduledCount),
                 _buildStatCell(context, label: 'Upcoming',  count: upcomingCount),
