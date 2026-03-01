@@ -25,7 +25,8 @@ import 'package:dosifi_v5/src/widgets/dose_card_meta_lines.dart';
 import 'package:dosifi_v5/src/widgets/dose_dialog_dose_preview.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
+import 'package:dosifi_v5/src/widgets/dose_action/dose_syringe_gauge.dart';
+import 'package:dosifi_v5/src/widgets/dose_action/dose_time_fields.dart';
 
 enum _MdvDoseChangeMode { strength, volume, units }
 
@@ -172,16 +173,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
         ),
       ],
     );
-  }
-
-  DateTime _clampDate(
-    DateTime value, {
-    required DateTime first,
-    required DateTime last,
-  }) {
-    if (value.isBefore(first)) return first;
-    if (value.isAfter(last)) return last;
-    return value;
   }
 
   bool get _isAdHoc => widget.dose.existingLog?.scheduleId == 'ad_hoc';
@@ -555,166 +546,26 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   }
 
   Widget _buildLoggedTimeField(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Time logged', style: sectionTitleStyle(context)),
-        const SizedBox(height: kSpacingXS),
-        SizedBox(
-          width: double.infinity,
-          height: kStandardFieldHeight,
-          child: OutlinedButton.icon(
-            onPressed: () async {
-              try {
-                final firstDate = DateUtils.dateOnly(DateTime(2000));
-                final lastDate = DateUtils.dateOnly(DateTime(2100));
-                final initialDate = _clampDate(
-                  DateUtils.dateOnly(_selectedActionTime),
-                  first: firstDate,
-                  last: lastDate,
-                );
-                final pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: initialDate,
-                  firstDate: firstDate,
-                  lastDate: lastDate,
-                );
-                if (pickedDate == null) return;
-                if (!context.mounted) return;
-
-                final pickedTime = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.fromDateTime(_selectedActionTime),
-                );
-                if (pickedTime == null) return;
-                if (!context.mounted) return;
-
-                setState(() {
-                  _selectedActionTime = DateTime(
-                    pickedDate.year,
-                    pickedDate.month,
-                    pickedDate.day,
-                    pickedTime.hour,
-                    pickedTime.minute,
-                  );
-                  _hasChanged = true;
-                });
-              } catch (e) {
-                if (context.mounted) {
-                  showAppSnackBar(context, 'Unable to open time picker: $e');
-                }
-              }
-            },
-            icon: Icon(
-              Icons.check_circle_rounded,
-              size: kIconSizeSmall,
-              color: _statusAccentColor(context),
-            ),
-            label: Text(() {
-              final date = MaterialLocalizations.of(
-                context,
-              ).formatMediumDate(_selectedActionTime);
-              final time = DateTimeFormatter.formatTime(
-                context,
-                _selectedActionTime,
-              );
-              return '$date • $time';
-            }()),
-          ),
-        ),
-      ],
+    return DoseLoggedTimeField(
+      currentTime: _selectedActionTime,
+      accentColor: _statusAccentColor(context),
+      onTimeChanged: (dt) => setState(() {
+        _selectedActionTime = dt;
+        _hasChanged = true;
+      }),
     );
   }
 
   Widget _buildSnoozeUntilField(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Snooze until', style: sectionTitleStyle(context)),
-        const SizedBox(height: kSpacingS),
-        if (_maxSnoozeUntil() != null) ...[
-          Text(() {
-            final max = _maxSnoozeUntil()!;
-            final date = MaterialLocalizations.of(
-              context,
-            ).formatMediumDate(max);
-            final time = DateTimeFormatter.formatTime(context, max);
-            return 'Next dose is at $date • $time.';
-          }(), style: helperTextStyle(context)),
-          const SizedBox(height: kSpacingS),
-        ],
-        SizedBox(
-          width: double.infinity,
-          height: kStandardFieldHeight,
-          child: OutlinedButton.icon(
-            onPressed: () async {
-              try {
-                final now = DateTime.now();
-                final initial = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-                final max = _maxSnoozeUntil();
-
-                final firstDate = DateUtils.dateOnly(now);
-                final lastDate = DateUtils.dateOnly(DateTime(2100));
-                final initialDate = _clampDate(
-                  DateUtils.dateOnly(initial),
-                  first: firstDate,
-                  last: lastDate,
-                );
-
-                final pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: initialDate,
-                  firstDate: firstDate,
-                  lastDate: lastDate,
-                );
-                if (pickedDate == null) return;
-                if (!context.mounted) return;
-
-                final pickedTime = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.fromDateTime(initial),
-                );
-                if (pickedTime == null) return;
-                if (!context.mounted) return;
-
-                var dt = DateTime(
-                  pickedDate.year,
-                  pickedDate.month,
-                  pickedDate.day,
-                  pickedTime.hour,
-                  pickedTime.minute,
-                );
-
-                if (dt.isBefore(now)) dt = now;
-                if (max != null && dt.isAfter(max)) {
-                  await _showSnoozePastNextDoseAlert(max);
-                  if (!context.mounted) return;
-                  dt = max;
-                }
-
-                setState(() {
-                  _selectedSnoozeUntil = dt;
-                  _selectedActionTime = dt;
-                  _hasChanged = true;
-                });
-              } catch (e) {
-                if (context.mounted) {
-                  showAppSnackBar(context, 'Unable to open snooze picker: $e');
-                }
-              }
-            },
-            icon: const Icon(Icons.snooze_rounded, size: kIconSizeSmall),
-            label: Text(() {
-              final dt = _selectedSnoozeUntil ?? _defaultSnoozeUntil();
-              final date = MaterialLocalizations.of(
-                context,
-              ).formatMediumDate(dt);
-              final time = DateTimeFormatter.formatTime(context, dt);
-              return '$date • $time';
-            }()),
-          ),
-        ),
-      ],
+    return DoseSnoozeUntilField(
+      selectedSnoozeUntil: _selectedSnoozeUntil,
+      defaultSnoozeUntil: _defaultSnoozeUntil(),
+      maxSnoozeUntil: _maxSnoozeUntil(),
+      onSnoozeChanged: (dt) => setState(() {
+        _selectedSnoozeUntil = dt;
+        _selectedActionTime = dt;
+        _hasChanged = true;
+      }),
     );
   }
 
@@ -835,26 +686,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
       syringe.maxUnits.toDouble(),
     );
 
-    final cs = Theme.of(context).colorScheme;
-    final captionStyle = microHelperTextStyle(context)?.copyWith(
-      color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh),
-    );
-    final syringeLabel = syringe.name.replaceAll('ml', 'mL');
-    final unitsLabel = fillUnits.round();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        WhiteSyringeGauge(
-          totalUnits: syringe.maxUnits.toDouble(),
-          fillUnits: fillUnits,
-          interactive: false,
-          showValueLabel: false,
-        ),
-        const SizedBox(height: kSpacingXS),
-        Text('$unitsLabel units on $syringeLabel syringe', style: captionStyle),
-      ],
-    );
+    return DoseSyringeGauge(syringeType: syringe, fillUnits: fillUnits);
   }
 
   @override
@@ -1162,27 +994,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final max = next.subtract(const Duration(minutes: 1));
     if (max.isBefore(now)) return now;
     return max;
-  }
-
-  Future<void> _showSnoozePastNextDoseAlert(DateTime max) {
-    final date = MaterialLocalizations.of(context).formatMediumDate(max);
-    final time = DateTimeFormatter.formatTime(context, max);
-    return showDialog<void>(
-      context: context,
-      useRootNavigator: true,
-      builder: (context) => AlertDialog(
-        title: const Text('Snooze limit'),
-        content: Text(
-          'Snooze time must be before the next scheduled dose. The latest allowed snooze is $date • $time.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   double _adHocStepSize(String unit) {
