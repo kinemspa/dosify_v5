@@ -11,9 +11,12 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:dosifi_v5/src/widgets/dose_action/dose_partial_entry_sheet.dart';
+import 'package:dosifi_v5/src/widgets/dose_action/dose_syringe_picker_sheet.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
@@ -28,7 +31,6 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/dose_action/dose_syringe_gauge.dart';
 import 'package:dosifi_v5/src/widgets/dose_action/dose_time_fields.dart';
 
-enum _MdvDoseChangeMode { strength, volume, units }
 
 enum _DoseStatusOption { scheduled, logged, snoozed, skipped, delete }
 
@@ -111,7 +113,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
   TextEditingController? _doseOverrideController;
   double? _originalDoseOverrideValue;
   String? _doseOverrideUnit;
-  _MdvDoseChangeMode? _mdvDoseChangeMode;
+  MdvDoseChangeMode? _mdvDoseChangeMode;
   SyringeType? _mdvSyringeType;
   String _mdvStrengthUnit = 'mg';
   late DoseStatus _selectedStatus;
@@ -305,246 +307,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     );
   }
 
-  List<Widget> _buildEditSectionChildren(BuildContext context) {
-    return [
-      if (_isAdHoc && widget.dose.existingLog != null) ...[
-        Text('Amount', style: sectionTitleStyle(context)),
-        const SizedBox(height: kSpacingS),
-        Row(
-          children: [
-            Expanded(
-              child: StepperRow36(
-                controller: _amountController!,
-                onDec: () {
-                  final step = _adHocStepSize(
-                    widget.dose.existingLog!.doseUnit,
-                  );
-                  final max = _maxAdHocAmount ?? double.infinity;
-                  final v = double.tryParse(_amountController!.text) ?? 0;
-                  _amountController!.text = _formatAmount(
-                    (v - step).clamp(0.0, max),
-                  );
-                  setState(() => _hasChanged = true);
-                },
-                onInc: () {
-                  final step = _adHocStepSize(
-                    widget.dose.existingLog!.doseUnit,
-                  );
-                  final max = _maxAdHocAmount ?? double.infinity;
-                  final v = double.tryParse(_amountController!.text) ?? 0;
-                  _amountController!.text = _formatAmount(
-                    (v + step).clamp(0.0, max),
-                  );
-                  setState(() => _hasChanged = true);
-                },
-                decoration: buildCompactFieldDecoration(context: context),
-              ),
-            ),
-            const SizedBox(width: kSpacingS),
-            Text(
-              widget.dose.existingLog!.doseUnit,
-              style: helperTextStyle(
-                context,
-              )?.copyWith(fontWeight: kFontWeightMedium),
-            ),
-          ],
-        ),
-        const SizedBox(height: kSpacingM),
-      ],
-      if (!_isAdHoc) ...[
-        Text('Dose change', style: sectionTitleStyle(context)),
-        const SizedBox(height: kSpacingXS),
-        Builder(
-          builder: (context) {
-            final schedule = Hive.box<Schedule>(
-              'schedules',
-            ).get(widget.dose.scheduleId);
-            final medId = schedule?.medicationId;
-            final med = medId == null
-                ? null
-                : Hive.box<Medication>('medications').get(medId);
-
-            final isMdv = med?.form == MedicationForm.multiDoseVial;
-
-            if (!isMdv || med == null) {
-              const strengthUnits = <String>['mcg', 'mg', 'g'];
-              final normalizedUnit = (_doseOverrideUnit ?? widget.dose.doseUnit)
-                  .toLowerCase();
-              final selectedStrengthUnit =
-                  strengthUnits.contains(normalizedUnit)
-                  ? normalizedUnit
-                  : 'mg';
-
-              return Row(
-                children: [
-                  Expanded(
-                    child: StepperRow36(
-                      controller: _doseOverrideController!,
-                      onDec: () {
-                        final unit = _doseOverrideUnit ?? '';
-                        final step = _doseOverrideStepSize(unit);
-                        final v =
-                            double.tryParse(_doseOverrideController!.text) ?? 0;
-                        _doseOverrideController!.text = _formatAmount(
-                          (v - step).clamp(0.0, double.infinity),
-                        );
-                        setState(() => _hasChanged = true);
-                      },
-                      onInc: () {
-                        final unit = _doseOverrideUnit ?? '';
-                        final step = _doseOverrideStepSize(unit);
-                        final v =
-                            double.tryParse(_doseOverrideController!.text) ?? 0;
-                        _doseOverrideController!.text = _formatAmount(
-                          (v + step).clamp(0.0, double.infinity),
-                        );
-                        setState(() => _hasChanged = true);
-                      },
-                      decoration: buildCompactFieldDecoration(context: context),
-                    ),
-                  ),
-                  const SizedBox(width: kSpacingS),
-                  SizedBox(
-                    width: kCompactControlWidth,
-                    child: SmallDropdown36<String>(
-                      value: selectedStrengthUnit,
-                      items: strengthUnits
-                          .map(
-                            (unit) => DropdownMenuItem<String>(
-                              value: unit,
-                              child: Text(unit),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value == null || value == _doseOverrideUnit) return;
-                        setState(() {
-                          _doseOverrideUnit = value;
-                          _hasChanged = true;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            final mode = _mdvDoseChangeMode ?? _MdvDoseChangeMode.strength;
-            final syringe = _mdvSyringeType ?? SyringeType.ml_1_0;
-            final unitLabel = _mdvDoseChangeUnitLabel(mode, _mdvStrengthUnit);
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                LabelFieldRow(
-                  label: 'Mode',
-                  field: SmallDropdown36<_MdvDoseChangeMode>(
-                    value: mode,
-                    items: const [
-                      DropdownMenuItem(
-                        value: _MdvDoseChangeMode.strength,
-                        child: Text('Strength'),
-                      ),
-                      DropdownMenuItem(
-                        value: _MdvDoseChangeMode.volume,
-                        child: Text('Volume'),
-                      ),
-                      DropdownMenuItem(
-                        value: _MdvDoseChangeMode.units,
-                        child: Text('Units'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value == null || value == _mdvDoseChangeMode) {
-                        return;
-                      }
-                      setState(() {
-                        _mdvDoseChangeMode = value;
-                        _doseOverrideUnit = _mdvDoseChangeUnitLabel(
-                          value,
-                          _mdvStrengthUnit,
-                        );
-                        _hasChanged = true;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: kSpacingXS),
-                LabelFieldRow(
-                  label: 'Syringe',
-                  field: SmallDropdown36<SyringeType>(
-                    value: syringe,
-                    items: SyringeType.values
-                        .where((t) => t != SyringeType.ml_10_0)
-                        .map(
-                          (t) => DropdownMenuItem<SyringeType>(
-                            value: t,
-                            child: Text(t.name),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value == null || value == _mdvSyringeType) {
-                        return;
-                      }
-                      setState(() {
-                        _mdvSyringeType = value;
-                        _hasChanged = true;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: kSpacingXS),
-                Row(
-                  children: [
-                    Expanded(
-                      child: StepperRow36(
-                        controller: _doseOverrideController!,
-                        onDec: () {
-                          final step = _doseOverrideStepSize(unitLabel);
-                          final v =
-                              double.tryParse(_doseOverrideController!.text) ??
-                              0;
-                          _doseOverrideController!.text = _formatAmount(
-                            (v - step).clamp(0.0, double.infinity),
-                          );
-                          setState(() => _hasChanged = true);
-                        },
-                        onInc: () {
-                          final step = _doseOverrideStepSize(unitLabel);
-                          final v =
-                              double.tryParse(_doseOverrideController!.text) ??
-                              0;
-                          _doseOverrideController!.text = _formatAmount(
-                            (v + step).clamp(0.0, double.infinity),
-                          );
-                          setState(() => _hasChanged = true);
-                        },
-                        decoration: buildCompactFieldDecoration(
-                          context: context,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: kSpacingS),
-                    Text(
-                      unitLabel,
-                      style: helperTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightMedium),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: kSpacingXS),
-                // Gauge is embedded in the dose card preview.
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: kSpacingM),
-      ],
-    ];
-  }
-
   Widget _buildLoggedTimeField(BuildContext context) {
     return DoseLoggedTimeField(
       currentTime: _selectedActionTime,
@@ -671,9 +433,12 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final syringe = _mdvSyringeType ?? SyringeType.ml_1_0;
     final result = _doseOverrideController == null
         ? null
-        : _mdvDoseChangeResult(
+        : mdvDoseChangeResult(
             med: med,
             rawText: _doseOverrideController!.text,
+            mode: _mdvDoseChangeMode,
+            syringe: _mdvSyringeType,
+            strengthUnit: _mdvStrengthUnit,
           );
 
     final fallbackVolumeMl = med.volumePerDose;
@@ -767,8 +532,8 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
           ? null
           : Hive.box<Medication>('medications').get(medId);
       if (med != null && med.form == MedicationForm.multiDoseVial) {
-        _mdvStrengthUnit = _mdvStrengthUnitFor(med);
-        _mdvDoseChangeMode = _inferMdvModeFromUnit(
+        _mdvStrengthUnit = mdvStrengthUnitFor(med);
+        _mdvDoseChangeMode = inferMdvModeFromUnit(
           _doseOverrideUnit ?? widget.dose.doseUnit,
         );
 
@@ -779,13 +544,13 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
         _mdvSyringeType = savedSyringeSizeMl != null && savedSyringeSizeMl > 0
             ? SyringeTypeLookup.forVolumeMl(savedSyringeSizeMl)
-            : _defaultMdvSyringeType(
+            : defaultMdvSyringeType(
                 med,
                 overrideValue: _originalDoseOverrideValue,
                 overrideUnit: _doseOverrideUnit ?? widget.dose.doseUnit,
               );
 
-        _doseOverrideUnit = _mdvDoseChangeUnitLabel(
+        _doseOverrideUnit = mdvDoseChangeUnitLabel(
           _mdvDoseChangeMode!,
           _mdvStrengthUnit,
         );
@@ -818,133 +583,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
     // Always expand Advanced section so users can see it immediately
     _editExpanded = true;
-  }
-
-  String _mdvStrengthUnitFor(Medication med) {
-    return switch (med.strengthUnit) {
-      Unit.mcg || Unit.mcgPerMl => 'mcg',
-      Unit.mg || Unit.mgPerMl => 'mg',
-      Unit.g || Unit.gPerMl => 'g',
-      Unit.units || Unit.unitsPerMl => 'units',
-    };
-  }
-
-  _MdvDoseChangeMode _inferMdvModeFromUnit(String rawUnit) {
-    final u = rawUnit.trim().toLowerCase();
-    if (u == 'ml' || u.contains('ml')) return _MdvDoseChangeMode.volume;
-    if (u == 'u' || u.contains('unit')) return _MdvDoseChangeMode.units;
-    return _MdvDoseChangeMode.strength;
-  }
-
-  String _mdvDoseChangeUnitLabel(_MdvDoseChangeMode mode, String strengthUnit) {
-    switch (mode) {
-      case _MdvDoseChangeMode.units:
-        return 'units';
-      case _MdvDoseChangeMode.volume:
-        return 'ml';
-      case _MdvDoseChangeMode.strength:
-        return strengthUnit;
-    }
-  }
-
-  SyringeType _defaultMdvSyringeType(
-    Medication med, {
-    required double? overrideValue,
-    required String overrideUnit,
-  }) {
-    final doseVolumeMl = med.volumePerDose;
-    if (doseVolumeMl != null && doseVolumeMl > 0) {
-      return SyringeTypeLookup.forVolumeMl(doseVolumeMl);
-    }
-
-    final unit = overrideUnit.trim().toLowerCase();
-    final v = overrideValue;
-    if (v != null && v > 0) {
-      if (unit == 'ml' || unit.contains('ml')) {
-        return SyringeTypeLookup.forVolumeMl(v);
-      }
-      if (unit == 'u' || unit.contains('unit')) {
-        return SyringeTypeLookup.forUnits(v);
-      }
-    }
-
-    return SyringeType.ml_1_0;
-  }
-
-  double _mdvStrengthToMcg(double value) {
-    switch (_mdvStrengthUnit) {
-      case 'mcg':
-        return value;
-      case 'mg':
-        return value * 1000;
-      case 'g':
-        return value * 1000000;
-      case 'units':
-        return value;
-      default:
-        return value * 1000;
-    }
-  }
-
-  DoseCalculationResult? _mdvDoseChangeResult({
-    required Medication med,
-    required String rawText,
-  }) {
-    final mode = _mdvDoseChangeMode;
-    final syringe = _mdvSyringeType;
-    final totalStrengthMcg = _mdvTotalVialStrengthMcg(med);
-    final totalVolumeMicroliter = _mdvTotalVialVolumeMicroliter(med);
-    if (mode == null || syringe == null) return null;
-    if (totalStrengthMcg == null || totalVolumeMicroliter == null) return null;
-
-    final value = double.tryParse(rawText.trim()) ?? 0;
-    switch (mode) {
-      case _MdvDoseChangeMode.strength:
-        return DoseCalculator.calculateFromStrengthMDV(
-          strengthMcg: _mdvStrengthToMcg(value),
-          totalVialStrengthMcg: totalStrengthMcg,
-          totalVialVolumeMicroliter: totalVolumeMicroliter,
-          syringeType: syringe,
-        );
-      case _MdvDoseChangeMode.volume:
-        return DoseCalculator.calculateFromVolumeMDV(
-          volumeMicroliter: value * 1000,
-          totalVialStrengthMcg: totalStrengthMcg,
-          totalVialVolumeMicroliter: totalVolumeMicroliter,
-          syringeType: syringe,
-        );
-      case _MdvDoseChangeMode.units:
-        return DoseCalculator.calculateFromUnitsMDV(
-          syringeUnits: value,
-          totalVialStrengthMcg: totalStrengthMcg,
-          totalVialVolumeMicroliter: totalVolumeMicroliter,
-          syringeType: syringe,
-        );
-    }
-  }
-
-  double? _mdvTotalVialStrengthMcg(Medication med) {
-    if (med.form != MedicationForm.multiDoseVial) return null;
-
-    final volumeMl = med.containerVolumeMl ?? 1.0;
-    final strength = med.strengthValue;
-
-    return switch (med.strengthUnit) {
-      Unit.mcg => strength,
-      Unit.mg => strength * 1000,
-      Unit.g => strength * 1000000,
-      Unit.units => strength,
-      Unit.mcgPerMl => strength * volumeMl,
-      Unit.mgPerMl => (strength * 1000) * volumeMl,
-      Unit.gPerMl => (strength * 1000000) * volumeMl,
-      Unit.unitsPerMl => strength * volumeMl,
-    };
-  }
-
-  double? _mdvTotalVialVolumeMicroliter(Medication med) {
-    if (med.form != MedicationForm.multiDoseVial) return null;
-    final volumeMl = med.containerVolumeMl ?? 1.0;
-    return volumeMl * 1000;
   }
 
   @override
@@ -994,14 +632,6 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
     final max = next.subtract(const Duration(minutes: 1));
     if (max.isBefore(now)) return now;
     return max;
-  }
-
-  double _adHocStepSize(String unit) {
-    return DoseValueFormatter.stepSizeForUnit(unit);
-  }
-
-  double _doseOverrideStepSize(String unit) {
-    return DoseValueFormatter.stepSizeForUnit(unit);
   }
 
   (double?, String?) _resolvedActualDoseOverride() {
@@ -1383,7 +1013,36 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
               neutral: true,
               isExpanded: _editExpanded,
               onExpandedChanged: (v) => setState(() => _editExpanded = v),
-              children: _buildEditSectionChildren(context),
+              children: [
+                DosePartialEntrySection(
+                  isAdHoc: _isAdHoc,
+                  existingLog: widget.dose.existingLog,
+                  scheduleId: widget.dose.scheduleId,
+                  amountController: _amountController,
+                  maxAdHocAmount: _maxAdHocAmount,
+                  doseBaseUnit: widget.dose.doseUnit,
+                  doseOverrideController: _doseOverrideController,
+                  doseOverrideUnit: _doseOverrideUnit,
+                  mdvMode: _mdvDoseChangeMode,
+                  mdvSyringe: _mdvSyringeType,
+                  mdvStrengthUnit: _mdvStrengthUnit,
+                  onChanged: () => setState(() => _hasChanged = true),
+                  onMdvModeChanged: (value) => setState(() {
+                    _mdvDoseChangeMode = value;
+                    _doseOverrideUnit =
+                        mdvDoseChangeUnitLabel(value, _mdvStrengthUnit);
+                    _hasChanged = true;
+                  }),
+                  onMdvSyringeChanged: (value) => setState(() {
+                    _mdvSyringeType = value;
+                    _hasChanged = true;
+                  }),
+                  onUnitChanged: (value) => setState(() {
+                    _doseOverrideUnit = value;
+                    _hasChanged = true;
+                  }),
+                ),
+              ],
             ),
           ],
         ),
