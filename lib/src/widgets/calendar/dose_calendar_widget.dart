@@ -23,9 +23,10 @@ import 'package:dosifi_v5/src/widgets/calendar/calendar_month_view.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_week_view.dart';
 import 'package:dosifi_v5/src/widgets/dose_card.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
+
 import 'package:dosifi_v5/src/widgets/up_next_dose_card.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
+import 'package:dosifi_v5/src/widgets/calendar/calendar_stage_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -110,9 +111,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
   List<CalculatedDose> _doses = [];
   bool _isLoading = false;
   bool _showSelectedDayStageDownHint = false;
-  bool _showDayStageDownHint = false;
 
-  final ScrollController _dayStageScrollController = ScrollController();
   final ScrollController _selectedDayScrollController = ScrollController();
   final DraggableScrollableController _selectedDayStageController =
       DraggableScrollableController();
@@ -175,7 +174,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     _reloadDebounce?.cancel();
     _doseLogsListenable?.removeListener(_scheduleReload);
     _schedulesListenable?.removeListener(_scheduleReload);
-    _dayStageScrollController.dispose();
     _selectedDayScrollController.dispose();
     _selectedDayStageController.dispose();
     super.dispose();
@@ -246,13 +244,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     if (_showSelectedDayStageDownHint == shouldShow) return;
     if (!mounted) return;
     setState(() => _showSelectedDayStageDownHint = shouldShow);
-  }
-
-  void _updateDayStageDownHint(ScrollMetrics metrics) {
-    final shouldShow = metrics.maxScrollExtent > (metrics.pixels + 0.5);
-    if (_showDayStageDownHint == shouldShow) return;
-    if (!mounted) return;
-    setState(() => _showDayStageDownHint = shouldShow);
   }
 
   Widget _wrapWithCenteredDownScrollHint({
@@ -1106,11 +1097,31 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
             // Month / week views are intrinsically sized — no flex wrapper.
             buildCalendarArea(),
           if (widget.requireHourSelectionInDayView &&
-              _currentView == CalendarView.day)
+              _currentView == CalendarView.day &&
+              _selectedHour != null)
             if (widget.variant == CalendarVariant.full && panelHeight != null)
-              SizedBox(height: panelHeight, child: _buildSelectedHourPanel())
+              SizedBox(
+                height: panelHeight,
+                child: CalendarSelectedHourPanel(
+                  doses: _doses,
+                  currentDate: _currentDate,
+                  selectedHour: _selectedHour!,
+                  isFullVariant: true,
+                  onDoseTap: _onDoseTapInternal,
+                  onOpenDoseActionSheet: _openDoseActionSheetFor,
+                ),
+              )
             else
-              Expanded(child: _buildSelectedHourPanel()),
+              Expanded(
+                child: CalendarSelectedHourPanel(
+                  doses: _doses,
+                  currentDate: _currentDate,
+                  selectedHour: _selectedHour!,
+                  isFullVariant: widget.variant == CalendarVariant.full,
+                  onDoseTap: _onDoseTapInternal,
+                  onOpenDoseActionSheet: _openDoseActionSheetFor,
+                ),
+              ),
         ],
       );
 
@@ -1430,7 +1441,14 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     switch (_currentView) {
       case CalendarView.day:
         if (!widget.requireHourSelectionInDayView) {
-          return _buildDayStageView();
+          return CalendarDayStagePanel(
+            doses: _doses,
+            currentDate: _currentDate,
+            isFullVariant: widget.variant == CalendarVariant.full,
+            onDoseTap: _onDoseTapInternal,
+            onOpenDoseActionSheet: _openDoseActionSheetFor,
+            onDateChanged: _onDateChanged,
+          );
         }
 
         return CalendarDayView(
@@ -1476,76 +1494,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           startWeekOnMonday: startOnMonday,
         );
     }
-  }
-
-  Widget _buildDayStageView() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (!_dayStageScrollController.hasClients) return;
-      _updateDayStageDownHint(_dayStageScrollController.position);
-    });
-
-    final dayDoses = _doses.where((dose) {
-      return dose.scheduledTime.year == _currentDate.year &&
-          dose.scheduledTime.month == _currentDate.month &&
-          dose.scheduledTime.day == _currentDate.day;
-    }).toList();
-    dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
-
-    final dosesByHour = <int, List<CalculatedDose>>{};
-    for (final dose in dayDoses) {
-      dosesByHour.putIfAbsent(dose.scheduledTime.hour, () => []).add(dose);
-    }
-    final hours = dosesByHour.keys.toList()..sort();
-
-    final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding = widget.variant == CalendarVariant.full
-        ? safeBottom + kPageBottomPadding
-        : safeBottom + kSpacingXXL + kSpacingXL;
-
-    if (dayDoses.isEmpty) {
-      return const CalendarNoDosesState();
-    }
-
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        // Swipe left = next day, swipe right = previous day
-        if (details.primaryVelocity != null) {
-          if (details.primaryVelocity! < -500) {
-            _onDateChanged(_currentDate.add(const Duration(days: 1)));
-          } else if (details.primaryVelocity! > 500) {
-            _onDateChanged(_currentDate.subtract(const Duration(days: 1)));
-          }
-        }
-      },
-      child: _wrapWithCenteredDownScrollHint(
-        showHint: _showDayStageDownHint,
-        onMetrics: _updateDayStageDownHint,
-        child: ListView.builder(
-          controller: _dayStageScrollController,
-          padding: calendarStageListPadding(listBottomPadding),
-          itemCount: hours.length,
-          itemBuilder: (context, index) {
-            final hour = hours[index];
-            final hourDoses = dosesByHour[hour] ?? const [];
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (index != 0)
-                  Divider(
-                    height: kSpacingM,
-                    thickness: kBorderWidthThin,
-                    color: Theme.of(context).colorScheme.outlineVariant
-                        .withValues(alpha: kOpacityVeryLow),
-                  ),
-                _buildHourDoseSection(hour: hour, hourDoses: hourDoses),
-              ],
-            );
-          },
-        ),
-      ),
-    );
   }
 
   double _selectedDayStageInitialRatioForFullHeight(
@@ -1616,126 +1564,6 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     // than July (6 rows), etc.
     return kCalendarMonthDayHeaderHeight +
         (_computeMonthRowCount() * kCalendarDayHeight);
-  }
-
-  Widget _buildSelectedHourPanel() {
-    final selectedHour = _selectedHour;
-    if (selectedHour == null) return const SizedBox.shrink();
-
-    final dayDoses = _doses.where((dose) {
-      return dose.scheduledTime.year == _currentDate.year &&
-          dose.scheduledTime.month == _currentDate.month &&
-          dose.scheduledTime.day == _currentDate.day &&
-          dose.scheduledTime.hour == selectedHour;
-    }).toList();
-
-    dayDoses.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
-
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final listBottomPadding = widget.variant == CalendarVariant.full
-        ? safeBottom + kPageBottomPadding
-        : safeBottom + kSpacingL;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: kSpacingS),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          border: Border(
-            top: BorderSide(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-              width: 1,
-            ),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: kSpacingL,
-                vertical: kSpacingM,
-              ),
-              child: Text(
-                'Hour: ${formatCalendarHour(selectedHour)}',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Expanded(
-              child: dayDoses.isEmpty
-                  ? const CalendarNoDosesState(showIcon: false, compact: true)
-                  : ListView.builder(
-                      padding: calendarStageListPadding(listBottomPadding),
-                      itemCount: dayDoses.length,
-                      itemBuilder: (context, index) {
-                        final dose = dayDoses[index];
-
-                        final schedule = Hive.box<Schedule>(
-                          'schedules',
-                        ).get(dose.scheduleId);
-                        final med = (schedule?.medicationId != null)
-                            ? Hive.box<Medication>(
-                                'medications',
-                              ).get(schedule!.medicationId)
-                            : null;
-
-                        if (schedule != null && med != null) {
-                          final strengthLabel =
-                              MedicationDisplayHelpers.strengthOrConcentrationLabel(
-                                med,
-                              );
-
-                          final metrics = schedule.displayMetrics(med);
-
-                          if (strengthLabel.trim().isNotEmpty &&
-                              metrics.trim().isNotEmpty) {
-                            return DoseCard(
-                              dose: dose,
-                              medicationName: med.name,
-                              strengthOrConcentrationLabel: strengthLabel,
-                              doseMetrics: metrics,
-                              isActive: schedule.isActive,
-                              medicationFormIcon:
-                                  MedicationDisplayHelpers.medicationFormIcon(
-                                    med.form,
-                                  ),
-                              doseNumber:
-                                  ScheduleOccurrenceService.occurrenceNumber(
-                                    schedule,
-                                    dose.scheduledTime,
-                                  ),
-                              onQuickAction: (status) {
-                                if (widget.onDoseTap != null) {
-                                  widget.onDoseTap!(dose);
-                                  return;
-                                }
-                                _openDoseActionSheetFor(
-                                  dose,
-                                  initialStatus: status,
-                                );
-                              },
-                              onTap: () => _onDoseTapInternal(dose),
-                            );
-                          }
-                        }
-
-                        return DoseSummaryRow(
-                          dose: dose,
-                          showMedicationName: true,
-                          onTap: () => _onDoseTapInternal(dose),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildDoseCardFor(CalculatedDose dose) {
@@ -1852,16 +1680,4 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
 
     return isToday ? 'Today — $formatted' : formatted;
   }
-}
-
-/// Variant of the calendar widget.
-enum CalendarVariant {
-  /// Full-featured calendar with all controls.
-  full,
-
-  /// Compact calendar without view toggle (for detail pages).
-  compact,
-
-  /// Minimal calendar (today only, for home page).
-  mini,
 }

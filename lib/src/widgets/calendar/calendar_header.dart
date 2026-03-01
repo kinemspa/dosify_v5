@@ -7,6 +7,18 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 /// Calendar view modes
 enum CalendarView { month, week, day }
 
+/// Variant of the calendar widget.
+enum CalendarVariant {
+  /// Full-featured calendar with all controls.
+  full,
+
+  /// Compact calendar without view toggle (for detail pages).
+  compact,
+
+  /// Minimal calendar (today only, for home page).
+  mini,
+}
+
 /// Header widget for calendar with navigation and view toggle
 class CalendarHeader extends StatelessWidget {
   final DateTime currentDate;
