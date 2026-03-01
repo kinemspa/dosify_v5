@@ -78,56 +78,26 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
   bool _internalExpanded = true;
   bool _showAll = false;
 
-  Widget _buildPrimarySummaryCell(
+  Widget _buildStatCell(
     BuildContext context, {
     required String label,
     required int count,
   }) {
     final cs = Theme.of(context).colorScheme;
     final baseStyle = helperTextStyle(context) ?? const TextStyle();
-    final numberStyle = baseStyle.copyWith(color: cs.primary);
-
-    return Expanded(
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.center,
-        child: RichText(
-          maxLines: 1,
-          overflow: TextOverflow.visible,
-          text: TextSpan(
-            children: [
-              TextSpan(text: '$label ', style: baseStyle),
-              TextSpan(text: '$count', style: numberStyle),
-            ],
-          ),
-        ),
+    final numberStyle = baseStyle.copyWith(
+      color: cs.primary,
+      fontWeight: kFontWeightSemiBold,
+    );
+    return RichText(
+      maxLines: 1,
+      text: TextSpan(
+        children: [
+          TextSpan(text: '$label ', style: baseStyle),
+          TextSpan(text: '$count', style: numberStyle),
+        ],
       ),
     );
-  }
-
-  List<InlineSpan> _buildCountSpans(
-    BuildContext context,
-    List<(String label, int count, String? suffix)> parts,
-  ) {
-    final cs = Theme.of(context).colorScheme;
-    final baseStyle = helperTextStyle(context) ?? const TextStyle();
-    final numberStyle = baseStyle.copyWith(color: cs.primary);
-
-    final spans = <InlineSpan>[];
-    for (final part in parts) {
-      final label = part.$1;
-      final count = part.$2;
-      final suffix = part.$3;
-      if (spans.isNotEmpty) {
-        spans.add(TextSpan(text: ' · ', style: baseStyle));
-      }
-      spans.add(TextSpan(text: '$label ', style: baseStyle));
-      spans.add(TextSpan(text: '$count', style: numberStyle));
-      if (suffix != null && suffix.trim().isNotEmpty) {
-        spans.add(TextSpan(text: suffix, style: baseStyle));
-      }
-    }
-    return spans;
   }
 
   bool get _expanded => widget.isExpanded ?? _internalExpanded;
@@ -346,43 +316,21 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       onExpandedChanged: _setExpanded,
       children: [
         if (items.isNotEmpty) ...[
-          DefaultTextStyle(
-            style: helperTextStyle(context) ?? const TextStyle(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+          Center(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              spacing: kSpacingXS,
+              runSpacing: kSpacingXXS,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildPrimarySummaryCell(
-                      context,
-                      label: 'Scheduled',
-                      count: scheduledCount,
-                    ),
-                    const SizedBox(width: kSpacingXS),
-                    _buildPrimarySummaryCell(
-                      context,
-                      label: 'Upcoming',
-                      count: upcomingCount,
-                    ),
-                    const SizedBox(width: kSpacingXS),
-                    _buildPrimarySummaryCell(
-                      context,
-                      label: 'Logged',
-                      count: takenCount,
-                    ),
-                  ],
-                ),
-                if (missedCount > 0 || snoozedCount > 0 || skippedCount > 0)
-                  RichText(
-                    text: TextSpan(
-                      children: _buildCountSpans(context, [
-                        if (missedCount > 0) ('Missed', missedCount, null),
-                        if (snoozedCount > 0) ('Snoozed', snoozedCount, null),
-                        if (skippedCount > 0) ('Skipped', skippedCount, null),
-                      ]),
-                    ),
-                  ),
+                _buildStatCell(context, label: 'Scheduled', count: scheduledCount),
+                _buildStatCell(context, label: 'Upcoming',  count: upcomingCount),
+                _buildStatCell(context, label: 'Logged',    count: takenCount),
+                if (missedCount > 0)
+                  _buildStatCell(context, label: 'Missed',  count: missedCount),
+                if (snoozedCount > 0)
+                  _buildStatCell(context, label: 'Snoozed', count: snoozedCount),
+                if (skippedCount > 0)
+                  _buildStatCell(context, label: 'Skipped', count: skippedCount),
               ],
             ),
           ),

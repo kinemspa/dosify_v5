@@ -161,7 +161,10 @@ class ScheduleCard extends StatelessWidget {
       onTap: () =>
           context.pushNamed('scheduleDetail', pathParameters: {'id': s.id}),
       useGradient: useGradient,
-      child: Column(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -181,10 +184,6 @@ class ScheduleCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (!s.isActive) ...[
-                const SizedBox(width: kSpacingS),
-                ScheduleStatusBadge(schedule: s, dense: true),
-              ],
             ],
           ),
           const SizedBox(height: kFieldSpacing),
@@ -258,6 +257,13 @@ class ScheduleCard extends StatelessWidget {
                   child: const Text('View'),
                 ),
             ],
+          ),
+        ],
+      ),
+          Positioned(
+            top: kSpacingXS,
+            right: kSpacingXS,
+            child: ScheduleStatusBadge(schedule: s, dense: true),
           ),
         ],
       ),
