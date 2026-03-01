@@ -215,9 +215,9 @@ const EdgeInsets kNextDoseDateCircleContentPaddingLarge = EdgeInsets.symmetric(
 /// Dose-card leading pill badge (replaces circle when dense+time mode).
 /// Pill shape: wider/taller than the circle so times like "10:30 AM" sit
 /// comfortably, with optional dose-metrics row below a hairline divider.
-const double kDoseTimePillMinWidth = 54.0;
-const double kDoseTimePillMaxWidth = 88.0;
-const double kDoseTimePillBorderRadius = 40.0;
+const double kDoseTimePillMinWidth = 48.0;
+const double kDoseTimePillMaxWidth = 64.0;
+const double kDoseTimePillBorderRadius = 8.0;
 const EdgeInsets kDoseTimePillPadding = EdgeInsets.symmetric(
   horizontal: 4,
   vertical: 4,
@@ -660,8 +660,8 @@ const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
 /// DoseCard status chip sizing
 const double kDoseCardStatusChipHeight = 28;
 const double kDoseCardStatusChipHeightCompact = 26;
-const double kDoseCardStatusChipWidth = 80;
-const double kDoseCardStatusChipWidthCompact = 72;
+const double kDoseCardStatusChipWidth = 96;
+const double kDoseCardStatusChipWidthCompact = 86;
 
 /// Button spacing
 const double kButtonSpacing = 8;
@@ -1208,7 +1208,7 @@ BoxDecoration buildStandardCardDecoration({
   final cs = Theme.of(context).colorScheme;
   return BoxDecoration(
     borderRadius: BorderRadius.circular(borderRadius),
-    color: useGradient ? null : cs.surfaceContainerLow,
+    color: useGradient ? null : cs.surface,
     gradient: useGradient
         ? LinearGradient(
             colors: [
@@ -1460,7 +1460,7 @@ InputDecoration buildFieldDecoration(
           cs.onSurface.withValues(alpha: kOpacitySubtleLow),
           cs.surface,
         )
-      : cs.surfaceContainerHighest;
+      : cs.surface;
   return InputDecoration(
     floatingLabelBehavior: FloatingLabelBehavior.never,
     isDense: false,
@@ -1532,7 +1532,7 @@ InputDecoration buildCompactFieldDecoration({
           cs.onSurface.withValues(alpha: kOpacitySubtleLow),
           cs.surface,
         )
-      : cs.surfaceContainerHighest;
+      : cs.surface;
   return InputDecoration(
     hintText: hint,
     isDense: false,

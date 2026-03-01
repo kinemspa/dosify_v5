@@ -192,6 +192,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
     this.neutral = false,
     this.frameless = false,
     this.backgroundColor,
+    this.contentPadding,
     this.reserveReorderHandleGutterWhenCollapsed = false,
     this.leadingCollapsedOnly = false,
   });
@@ -206,6 +207,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
   final bool neutral;
   final bool frameless;
   final Color? backgroundColor;
+  final EdgeInsets? contentPadding;
   final bool reserveReorderHandleGutterWhenCollapsed;
   final bool leadingCollapsedOnly;
 
@@ -280,12 +282,13 @@ class CollapsibleSectionFormCard extends StatelessWidget {
               : CrossFadeState.showFirst,
           firstChild: const SizedBox.shrink(),
           secondChild: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              kSpacingM,
-              0,
-              kSpacingM,
-              kSpacingM,
-            ),
+            padding: contentPadding ??
+                const EdgeInsets.fromLTRB(
+                  kSpacingM,
+                  0,
+                  kSpacingM,
+                  kSpacingM,
+                ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: children,
@@ -299,7 +302,7 @@ class CollapsibleSectionFormCard extends StatelessWidget {
       // Frameless cards use a surface fill so the shadow and border are visible.
       return Container(
         decoration: BoxDecoration(
-          color: cs.surfaceContainerLow,
+          color: cs.surface,
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           border: Border.all(
             color: cs.outlineVariant.withValues(
@@ -697,7 +700,7 @@ class _MultiSelectDropdown36State<T> extends State<MultiSelectDropdown36<T>> {
                     }
                   },
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: cs.surfaceContainerHighest,
+                    backgroundColor: cs.surface,
                     padding: kButtonContentPadding,
                     minimumSize: const Size(0, kFieldHeight),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,

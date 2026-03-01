@@ -321,54 +321,66 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
       reserveReorderHandleGutterWhenCollapsed:
           widget.reserveReorderHandleGutterWhenCollapsed,
       onExpandedChanged: _setExpanded,
+      // No horizontal inset — dose cards fill the full card width, matching
+      // the calendar stage layout. Stat row + button add their own padding.
+      contentPadding: const EdgeInsets.only(bottom: kSpacingM),
       children: [
         if (items.isNotEmpty) ...[
-          Center(
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: kSpacingS,
-              runSpacing: kSpacingXS,
-              children: [
-                _buildStatCell(context, label: 'Scheduled', count: scheduledCount),
-                _buildStatCell(context, label: 'Upcoming',  count: upcomingCount),
-                _buildStatCell(context, label: 'Logged',    count: takenCount),
-                if (missedCount > 0)
-                  _buildStatCell(context, label: 'Missed',  count: missedCount),
-                if (snoozedCount > 0)
-                  _buildStatCell(context, label: 'Snoozed', count: snoozedCount),
-                if (skippedCount > 0)
-                  _buildStatCell(context, label: 'Skipped', count: skippedCount),
-              ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: kSpacingM),
+            child: Center(
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: kSpacingS,
+                runSpacing: kSpacingXS,
+                children: [
+                  _buildStatCell(context, label: 'Scheduled', count: scheduledCount),
+                  _buildStatCell(context, label: 'Upcoming',  count: upcomingCount),
+                  _buildStatCell(context, label: 'Logged',    count: takenCount),
+                  if (missedCount > 0)
+                    _buildStatCell(context, label: 'Missed',  count: missedCount),
+                  if (snoozedCount > 0)
+                    _buildStatCell(context, label: 'Snoozed', count: snoozedCount),
+                  if (skippedCount > 0)
+                    _buildStatCell(context, label: 'Skipped', count: skippedCount),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: kSpacingXS),
         ],
         if (items.isEmpty)
-          const UnifiedEmptyState(title: 'No upcoming doses')
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: kSpacingM),
+            child: UnifiedEmptyState(title: 'No upcoming doses'),
+          )
         else ...[
           for (final item in previewItems) ...[
             buildDoseRow(context, item),
             const SizedBox(height: kSpacingS),
           ],
           if (hasMoreThanPreview)
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                style: TextButton.styleFrom(
-                  padding: kTightTextButtonPadding,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: kSpacingM),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    padding: kTightTextButtonPadding,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () {
+                    setState(() => _showAll = !_showAll);
+                  },
+                  icon: Icon(
+                    _showAll
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: kIconSizeLarge,
+                  ),
+                  label: Text(_showAll ? 'Show less' : 'Show all'),
                 ),
-                onPressed: () {
-                  setState(() => _showAll = !_showAll);
-                },
-                icon: Icon(
-                  _showAll
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
-                  size: kIconSizeLarge,
-                ),
-                label: Text(_showAll ? 'Show less' : 'Show all'),
               ),
             ),
         ],
