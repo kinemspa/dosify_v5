@@ -30,10 +30,10 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/medication_detail_sections.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_detail_header_identity.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_sealed_vials_editor_card.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
@@ -42,7 +42,6 @@ import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
-import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 import 'package:dosifi_v5/src/widgets/selection_cards.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
@@ -50,7 +49,6 @@ import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
-import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
 
 /// Modern, revolutionized medication detail screen with:
@@ -616,7 +614,13 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
     final cards = <String, Widget>{
       if (med.form == MedicationForm.multiDoseVial)
-        _kCardReconstitution: _buildReconstitutionCard(context, med),
+        _kCardReconstitution: MedicationReconstitutionSection(
+          med: med,
+          isExpanded: _isReconstitutionExpanded,
+          onExpandedChanged: (v) =>
+              setState(() => _isReconstitutionExpanded = v),
+          onEdit: () => _editReconstitution(context, med),
+        ),
       _kCardToday: TodayDosesCard(
         scope: TodayDosesScope.medication(med.id),
         isExpanded: _isTodayExpanded,
@@ -626,19 +630,17 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         },
         reserveReorderHandleGutterWhenCollapsed: true,
       ),
-      _kCardActivity: ActivityCard(
-        medications: [med],
-        includedMedicationIds: {med.id},
+      _kCardActivity: MedicationActivitySection(
+        med: med,
+        isExpanded: _isActivityExpanded,
+        onExpandedChanged: (v) {
+          if (!mounted) return;
+          setState(() => _isActivityExpanded = v);
+        },
         rangePreset: _activityRangePreset,
         onRangePresetChanged: (next) {
           if (!mounted) return;
           setState(() => _activityRangePreset = next);
-        },
-        isExpanded: _isActivityExpanded,
-        reserveReorderHandleGutterWhenCollapsed: true,
-        onExpandedChanged: (expanded) {
-          if (!mounted) return;
-          setState(() => _isActivityExpanded = expanded);
         },
       ),
       _kCardSchedule: _buildScheduleCard(
@@ -1379,7 +1381,14 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
                   if (med.form == MedicationForm.multiDoseVial) ...[
                     const SizedBox(height: kSpacingM),
-                    _buildBackupStockSection(context, med),
+                    MedicationBackupStockSection(
+                      med: med,
+                      onEditBatch: () => _editBackupVialBatch(context, med),
+                      onEditLocation:
+                          () => _editBackupVialLocation(context, med),
+                      onEditExpiry:
+                          () => _editBackupVialExpiry(context, med),
+                    ),
                   ],
 
                   const SizedBox(height: kSpacingL),
@@ -1806,6 +1815,128 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     return StatusPill(label: label, color: cs.primary, icon: icon, dense: true);
   }
 
+  Widget _buildActiveVialConditionsRow(BuildContext context, Medication med) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final conditions = <Widget>[];
+
+    if (med.activeVialRequiresRefrigeration) {
+      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
+    }
+    if (med.activeVialRequiresFreezer) {
+      conditions.add(
+        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
+      );
+    }
+    if (med.activeVialLightSensitive) {
+      conditions.add(
+        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
+      );
+    }
+    if (conditions.isEmpty) {
+      conditions.add(
+        _buildMiniChip(context, 'Room', icon: Icons.thermostat_outlined),
+      );
+    }
+
+    return InkWell(
+      onTap: () => _showActiveVialConditionsDialog(context, med),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingL,
+          vertical: kSpacingS,
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: kMedicationDetailInlineLabelWidth,
+              child: Text(
+                'Conditions',
+                style: smallHelperTextStyle(
+                  context,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Wrap(spacing: kFieldSpacing, children: conditions),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right,
+              size: kIconSizeSmall,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: kOpacityLow),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showActiveVialConditionsDialog(BuildContext context, Medication med) {
+    bool fridge = med.activeVialRequiresRefrigeration;
+    bool freezer = med.activeVialRequiresFreezer;
+    bool light = med.activeVialLightSensitive;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (ctx, setState) {
+          final cs = Theme.of(ctx).colorScheme;
+          return AlertDialog(
+            titleTextStyle: cardTitleStyle(ctx)?.copyWith(color: cs.primary),
+            contentTextStyle: bodyTextStyle(ctx),
+            title: const Text('Active Vial Conditions'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CheckboxListTile(
+                  title: const Text('❄️ Requires Refrigeration'),
+                  value: fridge,
+                  onChanged: (v) => setState(() {
+                    fridge = v ?? false;
+                    if (fridge) freezer = false;
+                  }),
+                ),
+                CheckboxListTile(
+                  title: const Text('🧊 Requires Freezer'),
+                  value: freezer,
+                  onChanged: (v) => setState(() {
+                    freezer = v ?? false;
+                    if (freezer) fridge = false;
+                  }),
+                ),
+                CheckboxListTile(
+                  title: const Text('☀️ Light Sensitive'),
+                  value: light,
+                  onChanged: (v) => setState(() => light = v ?? false),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final box = Hive.box<Medication>('medications');
+                  box.put(
+                    med.id,
+                    med.copyWith(
+                      activeVialRequiresRefrigeration: fridge,
+                      activeVialRequiresFreezer: freezer,
+                      activeVialLightSensitive: light,
+                    ),
+                  );
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   String _getStorageConditionsLabel(Medication med) {
     final conditions = <String>[];
     if (med.requiresRefrigeration) conditions.add('Refrigerate');
@@ -1985,518 +2116,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     );
   }
 
-  Widget _buildActiveVialSection(BuildContext context, Medication med) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Info banner
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kSpacingL,
-              vertical: kSpacingS + kSpacingXXS,
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(kBorderRadiusLarge),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.science_outlined,
-                  size: kIconSizeSmall,
-                  color: colorScheme.primary,
-                ),
-                const SizedBox(width: kSpacingS),
-                Expanded(
-                  child: Text(
-                    'Vial currently in use for injections',
-                    style: helperTextStyle(
-                      context,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          // Volume remaining (prominent display)
-          if (med.containerVolumeMl != null && med.containerVolumeMl! > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: kSpacingL,
-                vertical: kSpacingM,
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    'Volume',
-                    style: helperTextStyle(
-                      context,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    '${_formatNumber(med.activeVialVolume ?? med.containerVolumeMl!)} / ${_formatNumber(med.containerVolumeMl!)} mL',
-                    style: cardTitleStyle(context)?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: kFontWeightBold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
-          Divider(
-            height: 1,
-            indent: kSpacingL,
-            endIndent: kSpacingL,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-          ),
-
-          // Details
-          if (med.diluentName != null && med.diluentName!.isNotEmpty)
-            _buildDetailTile(context, 'Diluent', med.diluentName!),
-          _buildDetailTile(
-            context,
-            'Batch #',
-            med.activeVialBatchNumber ?? 'Not set',
-            isPlaceholder: med.activeVialBatchNumber == null,
-            onTap: () => _editActiveVialBatch(context, med),
-          ),
-          _buildDetailTile(
-            context,
-            'Location',
-            med.activeVialStorageLocation ?? 'Not set',
-            isPlaceholder: med.activeVialStorageLocation == null,
-            onTap: () => _editActiveVialLocation(context, med),
-          ),
-          _buildDetailTile(
-            context,
-            'Low Alert',
-            med.activeVialLowStockMl != null
-                ? '${_formatNumber(med.activeVialLowStockMl!)} mL'
-                : 'Not set',
-            isPlaceholder: med.activeVialLowStockMl == null,
-            onTap: () => _editActiveVialLowStock(context, med),
-          ),
-
-          Divider(
-            height: 1,
-            indent: 16,
-            endIndent: 16,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-          ),
-
-          // Storage conditions as tappable chips
-          _buildActiveVialConditionsRow(context, med),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActiveVialConditionsRow(BuildContext context, Medication med) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final conditions = <Widget>[];
-
-    // Only show chips for active conditions
-    if (med.activeVialRequiresRefrigeration) {
-      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
-    }
-    if (med.activeVialRequiresFreezer) {
-      conditions.add(
-        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
-      );
-    }
-    if (med.activeVialLightSensitive) {
-      conditions.add(
-        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
-      );
-    }
-    if (conditions.isEmpty) {
-      conditions.add(
-        _buildMiniChip(context, 'Room', icon: Icons.thermostat_outlined),
-      );
-    }
-
-    return InkWell(
-      onTap: () => _showActiveVialConditionsDialog(context, med),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kSpacingL,
-          vertical: kSpacingS,
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: kMedicationDetailInlineLabelWidth,
-              child: Text(
-                'Conditions',
-                style: smallHelperTextStyle(
-                  context,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            Wrap(spacing: kFieldSpacing, children: conditions),
-            const Spacer(),
-            Icon(
-              Icons.chevron_right,
-              size: kIconSizeSmall,
-              color: colorScheme.onSurfaceVariant.withValues(
-                alpha: kOpacityLow,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Dialog for editing Active Vial storage conditions
-  void _showActiveVialConditionsDialog(BuildContext context, Medication med) {
-    bool fridge = med.activeVialRequiresRefrigeration;
-    bool freezer = med.activeVialRequiresFreezer;
-    bool light = med.activeVialLightSensitive;
-
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (ctx, setState) {
-          final theme = Theme.of(ctx);
-          final cs = theme.colorScheme;
-          return AlertDialog(
-            titleTextStyle: cardTitleStyle(ctx)?.copyWith(color: cs.primary),
-            contentTextStyle: bodyTextStyle(ctx),
-            title: const Text('Active Vial Conditions'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CheckboxListTile(
-                  title: const Text('❄️ Requires Refrigeration'),
-                  value: fridge,
-                  onChanged: (v) => setState(() {
-                    fridge = v ?? false;
-                    if (fridge) freezer = false;
-                  }),
-                ),
-                CheckboxListTile(
-                  title: const Text('🧊 Requires Freezer'),
-                  value: freezer,
-                  onChanged: (v) => setState(() {
-                    freezer = v ?? false;
-                    if (freezer) fridge = false;
-                  }),
-                ),
-                CheckboxListTile(
-                  title: const Text('☀️ Light Sensitive'),
-                  value: light,
-                  onChanged: (v) => setState(() => light = v ?? false),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final box = Hive.box<Medication>('medications');
-                  box.put(
-                    med.id,
-                    med.copyWith(
-                      activeVialRequiresRefrigeration: fridge,
-                      activeVialRequiresFreezer: freezer,
-                      activeVialLightSensitive: light,
-                    ),
-                  );
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text('Save'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildBackupStockConditionsRow(BuildContext context, Medication med) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final conditions = <Widget>[];
-
-    // Only show chips for active conditions
-    if (med.backupVialsRequiresRefrigeration) {
-      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
-    }
-    if (med.backupVialsRequiresFreezer) {
-      conditions.add(
-        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
-      );
-    }
-    if (med.backupVialsLightSensitive) {
-      conditions.add(
-        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
-      );
-    }
-    if (conditions.isEmpty) {
-      conditions.add(
-        _buildMiniChip(context, 'Room', icon: Icons.thermostat_outlined),
-      );
-    }
-
-    return InkWell(
-      onTap: () => _showBackupStockConditionsDialog(context, med),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kSpacingL,
-          vertical: kSpacingS,
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: kMedicationDetailInlineLabelWidth,
-              child: Text(
-                'Conditions',
-                style: smallHelperTextStyle(
-                  context,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            Wrap(spacing: kFieldSpacing, children: conditions),
-            const Spacer(),
-            Icon(
-              Icons.chevron_right,
-              size: kIconSizeSmall,
-              color: colorScheme.onSurfaceVariant.withValues(
-                alpha: kOpacityLow,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Dialog for editing sealed vial storage conditions
-  void _showBackupStockConditionsDialog(BuildContext context, Medication med) {
-    bool fridge = med.backupVialsRequiresRefrigeration;
-    bool freezer = med.backupVialsRequiresFreezer;
-    bool light = med.backupVialsLightSensitive;
-
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (ctx, setState) {
-          final theme = Theme.of(ctx);
-          final cs = theme.colorScheme;
-          return AlertDialog(
-            titleTextStyle: cardTitleStyle(ctx)?.copyWith(color: cs.primary),
-            contentTextStyle: bodyTextStyle(ctx),
-            title: const Text('Sealed Vial Storage Conditions'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CheckboxListTile(
-                  title: const Text('❄️ Requires Refrigeration'),
-                  value: fridge,
-                  onChanged: (v) => setState(() {
-                    fridge = v ?? false;
-                    if (fridge) freezer = false;
-                  }),
-                ),
-                CheckboxListTile(
-                  title: const Text('🧊 Requires Freezer'),
-                  value: freezer,
-                  onChanged: (v) => setState(() {
-                    freezer = v ?? false;
-                    if (freezer) fridge = false;
-                  }),
-                ),
-                CheckboxListTile(
-                  title: const Text('☀️ Light Sensitive'),
-                  value: light,
-                  onChanged: (v) => setState(() => light = v ?? false),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final box = Hive.box<Medication>('medications');
-                  box.put(
-                    med.id,
-                    med.copyWith(
-                      backupVialsRequiresRefrigeration: fridge,
-                      backupVialsRequiresFreezer: freezer,
-                      backupVialsLightSensitive: light,
-                    ),
-                  );
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text('Save'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildBackupStockSection(BuildContext context, Medication med) {
-    return MedicationSealedVialsEditorCard(
-      sealedVialsCountLabel:
-          '${_formatNumber(med.stockValue).split('.')[0]} sealed vials',
-      batchNumberValue: med.backupVialsBatchNumber ?? 'Not set',
-      batchNumberIsPlaceholder: med.backupVialsBatchNumber == null,
-      onEditBatchNumber: () => _editBackupVialBatch(context, med),
-      expiryValue: med.backupVialsExpiry != null
-          ? _formatExpiry(med.backupVialsExpiry!)
-          : 'Not set',
-      expiryIsPlaceholder: med.backupVialsExpiry == null,
-      expiryIsWarning:
-          med.backupVialsExpiry != null &&
-          _isExpiringSoon(med.backupVialsExpiry!),
-      onEditExpiry: () => _editBackupVialExpiry(context, med),
-      locationValue: med.backupVialsStorageLocation ?? 'Not set',
-      locationIsPlaceholder: med.backupVialsStorageLocation == null,
-      onEditLocation: () => _editBackupVialLocation(context, med),
-      conditionsRow: _buildBackupStockConditionsRow(context, med),
-    );
-  }
-
-  Widget _buildReconstitutionCard(BuildContext context, Medication med) {
-    if (med.form != MedicationForm.multiDoseVial ||
-        med.strengthValue <= 0 ||
-        (med.containerVolumeMl == null && med.perMlValue == null)) {
-      return const SizedBox.shrink();
-    }
-
-    final cs = Theme.of(context).colorScheme;
-
-    final savedRecon = SavedReconstitutionRepository().ownedForMedication(
-      med.id,
-    );
-    final actualDoseStrengthValue =
-        (savedRecon?.calculatedDose != null &&
-            savedRecon!.calculatedDose! > 0)
-        ? savedRecon.calculatedDose
-        : _inferDoseAmountFromSavedRecon(med);
-    final actualDoseStrengthUnit =
-        savedRecon?.doseUnit?.trim().isNotEmpty == true
-        ? savedRecon!.doseUnit!.trim()
-        : _unitLabel(med.strengthUnit);
-    final syringeSizeMl = (savedRecon != null && savedRecon.syringeSizeMl > 0)
-        ? savedRecon.syringeSizeMl
-        : 3.0;
-    final diluentName = savedRecon?.diluentName ?? med.diluentName;
-
-    return GlassCardSurface(
-      useGradient: false,
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () => _editReconstitution(context, med),
-            child: Padding(
-              padding: kDetailCardCollapsedHeaderPadding,
-              child: Row(
-                children: [
-                  if (!_isReconstitutionExpanded)
-                    const SizedBox(width: kDetailCardReorderHandleGutterWidth),
-                  Icon(
-                    Icons.science_outlined,
-                    size: kIconSizeMedium,
-                    color: cs.primary,
-                  ),
-                  const SizedBox(width: kSpacingS),
-                  Text(
-                    'Reconstitution',
-                    style: cardTitleStyle(context)?.copyWith(color: cs.primary),
-                  ),
-                  const Spacer(),
-                  AnimatedRotation(
-                    turns: _isReconstitutionExpanded ? 0 : -0.25,
-                    duration: const Duration(milliseconds: 200),
-                    child: ConstrainedBox(
-                      constraints: kTightIconButtonConstraints,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          setState(
-                            () => _isReconstitutionExpanded =
-                                !_isReconstitutionExpanded,
-                          );
-                        },
-                        child: Icon(
-                          Icons.keyboard_arrow_down,
-                          size: kIconSizeLarge,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedCrossFade(
-            duration: const Duration(milliseconds: 200),
-            crossFadeState: _isReconstitutionExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            firstChild: const SizedBox.shrink(),
-            secondChild: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                kCardPadding,
-                0,
-                kCardPadding,
-                kCardPadding,
-              ),
-              child: InkWell(
-                onTap: () => _editReconstitution(context, med),
-                child: ReconstitutionSummaryCard(
-                  strengthValue: med.strengthValue,
-                  strengthUnit: _unitLabel(med.strengthUnit),
-                  medicationName: med.name,
-                  containerVolumeMl: med.containerVolumeMl,
-                  perMlValue: med.perMlValue,
-                  volumePerDose: med.volumePerDose,
-                  doseStrengthValue: actualDoseStrengthValue,
-                  doseStrengthUnit: actualDoseStrengthUnit,
-                  reconFluidName: diluentName ?? 'Bacteriostatic Water',
-                  syringeSizeMl: syringeSizeMl,
-                  compact: true,
-                  showCardSurface: false,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _editReconstitution(BuildContext context, Medication med) async {
     if (med.form != MedicationForm.multiDoseVial) return;
