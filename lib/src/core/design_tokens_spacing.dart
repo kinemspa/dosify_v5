@@ -723,5 +723,5 @@ const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
 /// DoseCard status chip sizing
 const double kDoseCardStatusChipHeight = 28;
 const double kDoseCardStatusChipHeightCompact = 26;
-const double kDoseCardStatusChipWidth = 96;
-const double kDoseCardStatusChipWidthCompact = 86;
+const double kDoseCardStatusChipWidth = 84;
+const double kDoseCardStatusChipWidthCompact = 76;

@@ -81,11 +81,6 @@ class DoseCard extends StatelessWidget {
           : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
     );
 
-    final takeText = doseMetrics;
-    final takeColor = isActive
-        ? statusColor.withValues(alpha: kOpacityFull)
-        : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow);
-
     final normalizedDetailLines = (detailLines ?? const <Widget>[])
         .where((w) => w is! SizedBox)
         .toList();
@@ -125,6 +120,8 @@ class DoseCard extends StatelessWidget {
                           denseContent: NextDoseBadgeDenseContent.time,
                           showNextLabel: false,
                           showTodayIcon: true,
+                          medicationName: medicationName,
+                          doseMetrics: doseMetrics,
                         ),
                         if (leadingFooter != null) ...[
                           const SizedBox(height: kSpacingXS),
@@ -159,15 +156,7 @@ class DoseCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Text(
-                            takeText,
-                            style: doseCardTakeMetricsTextStyle(
-                              context,
-                              color: takeColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+
                           if (hasDetails) ...[
                             const SizedBox(height: kSpacingXXS),
                             ...normalizedDetailLines,
