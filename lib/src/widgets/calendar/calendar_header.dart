@@ -40,7 +40,7 @@ class CalendarHeader extends StatelessWidget {
       height: kCalendarHeaderHeight,
       padding: kCalendarHeaderPadding,
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: Colors.transparent,
         border: Border(
           bottom: BorderSide(
             color: colorScheme.outlineVariant.withValues(

@@ -1452,14 +1452,14 @@ InputDecoration buildFieldDecoration(
   final cs = Theme.of(context).colorScheme;
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  // In dark mode, slightly lift the field fill above `surface` so fields remain
-  // visually distinct from cards/backgrounds.
+  // Use surfaceContainerHighest as fill (M3 spec for filled TextFields)
+  // — gives fields a visible tonal background that works inside any card.
   final fill = isDark
       ? Color.alphaBlend(
           cs.onSurface.withValues(alpha: kOpacitySubtleLow),
           cs.surface,
         )
-      : cs.surface;
+      : cs.surfaceContainerHighest;
   return InputDecoration(
     floatingLabelBehavior: FloatingLabelBehavior.never,
     isDense: false,
@@ -1531,7 +1531,7 @@ InputDecoration buildCompactFieldDecoration({
           cs.onSurface.withValues(alpha: kOpacitySubtleLow),
           cs.surface,
         )
-      : cs.surface;
+      : cs.surfaceContainerHighest;
   return InputDecoration(
     hintText: hint,
     isDense: false,

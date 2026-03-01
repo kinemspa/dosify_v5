@@ -928,7 +928,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
         vertical: kSpacingS,
       ),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: cs.surfaceContainerLow,
         border: Border.all(
           color: cs.outlineVariant.withValues(alpha: kOpacityMinimal),
           width: kBorderWidthThin,
@@ -1262,25 +1262,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
           return SizedBox(height: effectiveHeight, child: body);
         }
 
-        return SizedBox(
-          height: effectiveHeight,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: widget.variant == CalendarVariant.full
-                  ? null
-                  : BorderRadius.circular(kBorderRadiusMedium),
-              border: widget.variant != CalendarVariant.full
-                  ? Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withValues(alpha: 0.2),
-                    )
-                  : null,
-            ),
-            child: body,
-          ),
-        );
+        return SizedBox(height: effectiveHeight, child: body);
       },
     );
   }
@@ -1308,7 +1290,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            color: colorScheme.surfaceContainerLow,
             border: Border(
               top: BorderSide(
                 color: colorScheme.outlineVariant.withValues(alpha: 0.3),
@@ -1661,7 +1643,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       padding: const EdgeInsets.only(top: kSpacingS),
       child: Container(
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: colorScheme.surfaceContainerLow,
           border: Border(
             top: BorderSide(
               color: colorScheme.outlineVariant.withValues(alpha: 0.3),
@@ -1811,7 +1793,7 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
       padding: const EdgeInsets.only(top: kSpacingS),
       child: Container(
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: colorScheme.surfaceContainerLow,
           border: Border(
             top: BorderSide(
               color: colorScheme.outlineVariant.withValues(alpha: 0.3),
