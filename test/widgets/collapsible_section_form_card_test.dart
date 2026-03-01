@@ -45,7 +45,7 @@ void main() {
     expect(crossFade0.crossFadeState, CrossFadeState.showFirst);
 
     expect(
-      tester.getSize(find.byType(InkWell)).height,
+      tester.getSize(find.byType(InkWell).first).height,
       greaterThanOrEqualTo(48),
     );
 
