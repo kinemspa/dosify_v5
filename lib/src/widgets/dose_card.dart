@@ -57,7 +57,6 @@ class DoseCard extends StatelessWidget {
     final radius = compact ? kBorderRadiusSmall : kBorderRadiusMedium;
     final contentPadding = doseCardContentPadding(compact: compact);
     final columnGap = doseCardColumnGap(compact: compact);
-    final badgeToDateGap = compact ? kSpacingXXS : kSpacingXS;
 
     final effectiveStatus = statusOverride ?? dose.status;
     final disabled = !isActive;
@@ -99,7 +98,7 @@ class DoseCard extends StatelessWidget {
         borderRadius: radius,
       ),
       child: Material(
-        color: cs.surface,
+        color: cs.surfaceContainerLow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radius),
         ),
@@ -127,24 +126,8 @@ class DoseCard extends StatelessWidget {
                           showNextLabel: false,
                           showTodayIcon: true,
                           doseMetrics: doseMetrics,
+                          medicationName: medicationName,
                         ),
-                        if (doseNumber != null) ...[
-                          SizedBox(height: badgeToDateGap),
-                          Text(
-                            'Dose $doseNumber',
-                            style: doseCardDoseNumberTextStyle(
-                              context,
-                              color: isActive
-                                  ? statusColor.withValues(alpha: kOpacityFull)
-                                  : cs.onSurfaceVariant.withValues(
-                                      alpha: kOpacityMediumLow,
-                                    ),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
                         if (leadingFooter != null) ...[
                           const SizedBox(height: kSpacingXS),
                           leadingFooter!,

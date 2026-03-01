@@ -216,6 +216,7 @@ const EdgeInsets kNextDoseDateCircleContentPaddingLarge = EdgeInsets.symmetric(
 /// Pill shape: wider/taller than the circle so times like "10:30 AM" sit
 /// comfortably, with optional dose-metrics row below a hairline divider.
 const double kDoseTimePillMinWidth = 54.0;
+const double kDoseTimePillMaxWidth = 72.0;
 const double kDoseTimePillBorderRadius = 40.0;
 const EdgeInsets kDoseTimePillPadding = EdgeInsets.symmetric(
   horizontal: 4,

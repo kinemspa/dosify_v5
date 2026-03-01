@@ -18,6 +18,7 @@ class NextDoseDateBadge extends StatelessWidget {
     this.showTodayIcon = true,
     this.nextLabelStyle = NextDoseBadgeLabelStyle.standard,
     this.doseMetrics,
+    this.medicationName,
     super.key,
   });
 
@@ -33,6 +34,9 @@ class NextDoseDateBadge extends StatelessWidget {
   /// Optional dose amount + units (e.g. "50 mg") shown inside the pill badge
   /// when [dense] is true and [denseContent] is [NextDoseBadgeDenseContent.time].
   final String? doseMetrics;
+
+  /// Optional medication name shown inside the pill badge below the time.
+  final String? medicationName;
 
   @override
   Widget build(BuildContext context) {
@@ -188,9 +192,14 @@ class NextDoseDateBadge extends StatelessWidget {
 
     final Widget circleCore;
     if (usePill) {
-      // Build the pill: time text (bold) + AM/PM suffix only.
+      // Build the pill: time (bold) → AM/PM → med name → dose metrics.
+      final dimColor = primaryTextColor.withValues(alpha: kOpacityMediumHigh);
+      final metaColor = primaryTextColor.withValues(alpha: kOpacityMedium);
       circleCore = Container(
-        constraints: const BoxConstraints(minWidth: kDoseTimePillMinWidth),
+        constraints: const BoxConstraints(
+          minWidth: kDoseTimePillMinWidth,
+          maxWidth: kDoseTimePillMaxWidth,
+        ),
         padding: kDoseTimePillPadding,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(kDoseTimePillBorderRadius),
@@ -199,6 +208,7 @@ class NextDoseDateBadge extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             FittedBox(
               fit: BoxFit.scaleDown,
@@ -217,9 +227,37 @@ class NextDoseDateBadge extends StatelessWidget {
                 style: nextDoseBadgeMonthTextStyle(
                   context,
                   dense: true,
-                  color: primaryTextColor.withValues(alpha: kOpacityMediumHigh),
+                  color: dimColor,
                 ),
               ),
+            if (medicationName != null || doseMetrics != null) ...([
+              const SizedBox(height: 2),
+              Divider(height: 1, thickness: 0.5, color: circleBorder),
+              const SizedBox(height: 2),
+              if (medicationName != null)
+                Text(
+                  medicationName!,
+                  style: nextDoseBadgeMonthTextStyle(
+                    context,
+                    dense: true,
+                    color: dimColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              if (doseMetrics != null)
+                Text(
+                  doseMetrics!,
+                  style: nextDoseBadgeNextTagTextStyle(
+                    context,
+                    color: metaColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+            ]),
           ],
         ),
       );
