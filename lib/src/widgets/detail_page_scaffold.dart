@@ -136,6 +136,8 @@ class _DetailPageScaffoldState extends State<DetailPageScaffold> {
                       context.go('/schedules');
                     case 'calendar':
                       context.go('/calendar');
+                    case 'inventory':
+                      context.go('/inventory');
                     case 'reconstitution':
                       context.push('/medications/reconstitution');
                     case 'analytics':
@@ -163,6 +165,10 @@ class _DetailPageScaffoldState extends State<DetailPageScaffold> {
                   const PopupMenuItem(
                     value: 'calendar',
                     child: Text('Calendar'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'inventory',
+                    child: Text('Inventory'),
                   ),
                   const PopupMenuItem(
                     value: 'reconstitution',

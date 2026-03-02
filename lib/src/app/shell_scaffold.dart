@@ -22,7 +22,6 @@ class BottomNavIdsController extends StateNotifier<List<String>> {
     'medications',
     'schedules',
     'calendar',
-    'inventory',
   ];
 
   Future<void> load() async {
@@ -38,7 +37,7 @@ class BottomNavIdsController extends StateNotifier<List<String>> {
       }
     }
 
-    if (normalized.length != _defaultIds.length) {
+    if (normalized.length != 4) {
       state = _defaultIds;
       await prefs.setStringList(_prefsKey, state);
     } else {

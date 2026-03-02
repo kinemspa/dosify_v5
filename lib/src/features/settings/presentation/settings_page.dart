@@ -702,6 +702,93 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/bottom-nav'),
           ),
+          const SizedBox(height: kSpacingL),
+          Text(
+            'Dose Card Style',
+            style: cardTitleStyle(
+              context,
+            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+          ),
+          const SizedBox(height: kSpacingXS),
+          Text(
+            'Choose how dose cards look throughout the app. Changes apply instantly.',
+            style: helperTextStyle(context),
+          ),
+          const SizedBox(height: kSpacingS),
+          ValueListenableBuilder<DoseCardLayoutConfig>(
+            valueListenable: DoseCardLayoutSettings.value,
+            builder: (context, config, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: DoseCardLayout.values.map((layout) {
+                  final selected = config.layout == layout;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: kSpacingXS),
+                    child: InkWell(
+                      onTap: () => DoseCardLayoutSettings.setLayout(layout),
+                      borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: selected
+                              ? cs.primaryContainer.withValues(alpha: 0.35)
+                              : cs.surfaceContainerHighest
+                                  .withValues(alpha: 0.40),
+                          borderRadius:
+                              BorderRadius.circular(kBorderRadiusMedium),
+                          border: Border.all(
+                            color: selected
+                                ? cs.primary
+                                : cs.outlineVariant.withValues(
+                                    alpha: kStandardCardBorderOpacity),
+                            width: selected ? 2 : 1,
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: kSpacingL,
+                          vertical: kSpacingM,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    layout.label,
+                                    style: cardTitleStyle(context)?.copyWith(
+                                      fontWeight: kFontWeightSemiBold,
+                                      color: selected ? cs.primary : null,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    layout.description,
+                                    style: helperTextStyle(context),
+                                  ),
+                                  const SizedBox(height: kSpacingXS),
+                                  _buildLayoutPreview(context, layout, selected),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: kSpacingM),
+                            Icon(
+                              selected
+                                  ? Icons.check_circle_rounded
+                                  : Icons.radio_button_unchecked_rounded,
+                              color: selected
+                                  ? cs.primary
+                                  : cs.onSurfaceVariant
+                                      .withValues(alpha: kOpacityMedium),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
           if (_devEnabled) ...[
             const SizedBox(height: kSpacingL),
             Text(
@@ -716,98 +803,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               style: helperTextStyle(context),
             ),
             const SizedBox(height: kSpacingM),
-            Text(
-              'Dose Card Style',
-              style: cardTitleStyle(
-                context,
-              )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
-            ),
-            const SizedBox(height: kSpacingXS),
-            Text(
-              'Choose how dose cards look throughout the app. Changes apply instantly.',
-              style: helperTextStyle(context),
-            ),
-            const SizedBox(height: kSpacingS),
-            ValueListenableBuilder<DoseCardLayoutConfig>(
-              valueListenable: DoseCardLayoutSettings.value,
-              builder: (context, config, _) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: DoseCardLayout.values.map((layout) {
-                    final selected = config.layout == layout;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: kSpacingXS),
-                      child: InkWell(
-                        onTap: () => DoseCardLayoutSettings.setLayout(layout),
-                        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: selected
-                                ? cs.primaryContainer.withValues(alpha: 0.35)
-                                : cs.surfaceContainerHighest
-                                    .withValues(alpha: 0.40),
-                            borderRadius:
-                                BorderRadius.circular(kBorderRadiusMedium),
-                            border: Border.all(
-                              color: selected
-                                  ? cs.primary
-                                  : cs.outlineVariant.withValues(
-                                      alpha: kStandardCardBorderOpacity),
-                              width: selected ? 2 : 1,
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: kSpacingL,
-                            vertical: kSpacingM,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      layout.label,
-                                      style: cardTitleStyle(context)
-                                          ?.copyWith(
-                                        fontWeight: kFontWeightSemiBold,
-                                        color: selected
-                                            ? cs.primary
-                                            : null,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      layout.description,
-                                      style: helperTextStyle(context),
-                                    ),
-                                    const SizedBox(height: kSpacingXS),
-                                    _buildLayoutPreview(
-                                        context, layout, selected),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: kSpacingM),
-                              Icon(
-                                selected
-                                    ? Icons.check_circle_rounded
-                                    : Icons.radio_button_unchecked_rounded,
-                                color: selected
-                                    ? cs.primary
-                                    : cs.onSurfaceVariant
-                                        .withValues(alpha: kOpacityMedium),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
-            ),
-            const SizedBox(height: kSpacingS),
             Text(
               'Experimental',
               style: cardTitleStyle(

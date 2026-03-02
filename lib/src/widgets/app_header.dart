@@ -48,6 +48,8 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
               context.go('/calendar');
             case 'supplies':
               context.go('/supplies');
+            case 'inventory':
+              context.go('/inventory');
             case 'reconstitution':
               context.push('/medications/reconstitution');
             case 'analytics':
@@ -62,6 +64,7 @@ class GradientAppBar extends StatelessWidget implements PreferredSizeWidget {
           const PopupMenuItem(value: 'schedules', child: Text('Schedules')),
           const PopupMenuItem(value: 'calendar', child: Text('Calendar')),
           const PopupMenuItem(value: 'supplies', child: Text('Supplies')),
+          const PopupMenuItem(value: 'inventory', child: Text('Inventory')),
           const PopupMenuItem(
             value: 'reconstitution',
             child: Text('Reconstitution Calculator'),
