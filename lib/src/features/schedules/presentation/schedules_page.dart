@@ -394,7 +394,7 @@ class _ScheduleListRow extends StatelessWidget {
 
     final cadence = _ScheduleText.cadenceLabel(s);
     final timesPerDay = _ScheduleText.timesPerDayLabel(s);
-    final detailLabel = '$cadence · $timesPerDay';
+    final detailLabel = '$cadence | $timesPerDay';
     final medTitle = _ScheduleText.medTitle(s);
     final scheduleSubtitle = _ScheduleText.scheduleSubtitle(s);
 

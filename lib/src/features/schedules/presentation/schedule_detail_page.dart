@@ -1,4 +1,4 @@
-﻿// Flutter imports:
+// Flutter imports:
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
@@ -1486,7 +1486,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             context,
             label: 'When',
             value:
-                '${DateFormat('EEE, MMM d').format(nextDose)} • ${DateTimeFormatter.formatTime(context, nextDose)}',
+                '${DateFormat('EEE, MMM d').format(nextDose)} | ${DateTimeFormatter.formatTime(context, nextDose)}',
             maxLines: 2,
           ),
           buildDetailInfoRow(

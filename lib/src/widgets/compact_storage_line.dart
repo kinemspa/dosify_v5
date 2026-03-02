@@ -88,7 +88,7 @@ class CompactStorageLine extends StatelessWidget {
         text: label,
         style: const TextStyle(fontWeight: kFontWeightSemiBold),
       ),
-      if (location != null) TextSpan(text: ' · $location'),
+      if (location != null) TextSpan(text: ' | $location'),
     ];
 
     return Row(

@@ -193,15 +193,14 @@ class DoseCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 1),
-                      Text(
-                        doseMetrics.isNotEmpty
-                            ? '${dose.scheduleName}  \u00b7  $doseMetrics'
-                            : dose.scheduleName,
-                        style: c.secondaryStyle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      if (doseMetrics.isNotEmpty) ...[const SizedBox(height: 1),
+                        Text(
+                          doseMetrics,
+                          style: c.secondaryStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                       const SizedBox(height: 2),
                       Text(timeStr, style: timeStyle),
                       if (leadingFooter != null) ...[
@@ -326,16 +325,17 @@ class DoseCard extends StatelessWidget {
                         style: doseCardTimeTextStyle(context, color: timeColor),
                       ),
                       const SizedBox(width: kSpacingM),
-                      Expanded(
-                        child: Text(
-                          doseMetrics.isNotEmpty
-                              ? '${dose.scheduleName}  \u00b7  $doseMetrics'
-                              : dose.scheduleName,
-                          style: c.secondaryStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                      if (doseMetrics.isNotEmpty)
+                        Expanded(
+                          child: Text(
+                            doseMetrics,
+                            style: c.secondaryStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )
+                      else
+                        const Spacer(),
                     ],
                   ),
                 ),
@@ -433,7 +433,7 @@ class DoseCard extends StatelessWidget {
                 children: [
                   // Time sidebar
                   Container(
-                    width: compact ? 48.0 : 54.0,
+                    width: compact ? 52.0 : 58.0,
                     color: timeColor.withValues(alpha: 0.09),
                     padding: EdgeInsets.symmetric(vertical: vPad),
                     child: Column(
@@ -446,6 +446,32 @@ class DoseCard extends StatelessWidget {
                           Text(amPmPart,
                               style: timeSubStyle,
                               textAlign: TextAlign.center),
+                        if (doseMetrics.isNotEmpty) ...[const SizedBox(height: 2),
+                          Text(
+                            doseMetrics,
+                            style: TextStyle(
+                              fontSize: 8.0,
+                              fontWeight: kFontWeightSemiBold,
+                              color: timeColor.withValues(alpha: 0.70),
+                              height: 1.1,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        if (doseNumber != null) ...[const SizedBox(height: 1),
+                          Text(
+                            '#$doseNumber',
+                            style: TextStyle(
+                              fontSize: 8.0,
+                              fontWeight: kFontWeightSemiBold,
+                              color: timeColor.withValues(alpha: 0.45),
+                              height: 1.1,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -494,15 +520,6 @@ class DoseCard extends StatelessWidget {
                                     disabled: c.disabled),
                               ],
                             ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            doseMetrics.isNotEmpty
-                                ? '${dose.scheduleName}  \u00b7  $doseMetrics'
-                                : dose.scheduleName,
-                            style: c.secondaryStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                           if (leadingFooter != null) ...[
                             const SizedBox(height: kSpacingXS),

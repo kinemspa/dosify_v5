@@ -500,7 +500,7 @@ class _CombinedReportsHistoryWidgetState
     Widget buildDateHeader(DateTime localTime) {
       final localizations = MaterialLocalizations.of(context);
       final label =
-          '${DateTimeFormatter.formatWeekdayAbbr(localTime)} · ${localizations.formatShortDate(localTime)}';
+          '${DateTimeFormatter.formatWeekdayAbbr(localTime)} | ${localizations.formatShortDate(localTime)}';
       return Padding(
         padding: const EdgeInsets.fromLTRB(kSpacingS, kSpacingXS, kSpacingS, 0),
         child: Text(

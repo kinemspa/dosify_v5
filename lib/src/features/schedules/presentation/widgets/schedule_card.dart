@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -552,7 +552,7 @@ class ScheduleCard extends StatelessWidget {
         final time = DateTimeFormatter.formatTime(context, snoozeUntil);
         final label = sameDay
             ? 'Dose snoozed until $time'
-            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} • $time';
+            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} | $time';
         showAppSnackBar(context, label);
       }
     } catch (e) {
@@ -642,7 +642,7 @@ Future<bool> confirmTake(BuildContext context, Schedule s) async {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Mark dose as taken?'),
-          content: Text('${s.medicationName} • ${s.doseValue} ${s.doseUnit}'),
+          content: Text('${s.medicationName} | ${s.doseValue} ${s.doseUnit}'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),

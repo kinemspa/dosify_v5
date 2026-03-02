@@ -3020,7 +3020,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     final diluent = (result.diluentName ?? topUpDiluentName)?.trim();
     topUpReconLabel = diluent == null || diluent.isEmpty
         ? '${result.perMlConcentration.toStringAsFixed(2)} ${MedicationDisplayHelpers.unitLabel(med.strengthUnit)}/mL'
-        : '${result.perMlConcentration.toStringAsFixed(2)} ${MedicationDisplayHelpers.unitLabel(med.strengthUnit)}/mL • $diluent';
+        : '${result.perMlConcentration.toStringAsFixed(2)} ${MedicationDisplayHelpers.unitLabel(med.strengthUnit)}/mL | $diluent';
   }
 
   final result = await showDialog<Map<String, dynamic>>(
@@ -3517,8 +3517,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         changeAmount: usedSealedVial ? -1 : 0,
         notes:
             'Topped up +${_formatNumber(addVolume)} mL to ${_formatNumber(newVolume)} mL'
-            '${usedSealedVial ? ' • used 1 sealed vial' : ''}'
-            '${(currentPerMl != null && topPerMl != null) ? ' • ${fmt2(currentPerMl)}→${fmt2(newPerMl ?? currentPerMl)} $unit/mL' : ''}',
+            '${usedSealedVial ? ' | used 1 sealed vial' : ''}'
+            '${(currentPerMl != null && topPerMl != null) ? ' | ${fmt2(currentPerMl)}→${fmt2(newPerMl ?? currentPerMl)} $unit/mL' : ''}',
         timestamp: now,
       );
       inventoryLogBox.put(inventoryLog.id, inventoryLog);
@@ -3569,8 +3569,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       changeAmount: usedSealedVial ? -1 : 0,
       notes:
           'Replaced to ${_formatNumber(reconVolume)} mL'
-          '${usedSealedVial ? ' • used 1 sealed vial' : ''}'
-          '${reconLabel != null ? ' • $reconLabel' : ''}',
+          '${usedSealedVial ? ' | used 1 sealed vial' : ''}'
+          '${reconLabel != null ? ' | $reconLabel' : ''}',
       timestamp: now,
     );
     inventoryLogBox.put(inventoryLog.id, inventoryLog);

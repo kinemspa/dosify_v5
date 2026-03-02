@@ -78,7 +78,7 @@ class DoseLoggedTimeField extends StatelessWidget {
                 context,
               ).formatMediumDate(currentTime);
               final time = DateTimeFormatter.formatTime(context, currentTime);
-              return '$date • $time';
+              return '$date | $time';
             }()),
           ),
         ),
@@ -148,7 +148,7 @@ class DoseSnoozeUntilField extends StatelessWidget {
             () {
               final date = MaterialLocalizations.of(context).formatMediumDate(max);
               final time = DateTimeFormatter.formatTime(context, max);
-              return 'Next dose is at $date • $time.';
+              return 'Next dose is at $date | $time.';
             }(),
             style: helperTextStyle(context),
           ),
@@ -215,7 +215,7 @@ class DoseSnoozeUntilField extends StatelessWidget {
               final date =
                   MaterialLocalizations.of(context).formatMediumDate(dt);
               final time = DateTimeFormatter.formatTime(context, dt);
-              return '$date • $time';
+              return '$date | $time';
             }()),
           ),
         ),

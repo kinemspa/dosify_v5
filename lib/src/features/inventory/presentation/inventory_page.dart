@@ -1,4 +1,4 @@
-﻿// Flutter imports:
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -825,8 +825,8 @@ class _MedicationInventoryRow extends StatelessWidget {
                 ),
                 const SizedBox(height: kSpacingXS),
                 Text(
-                  '${MedicationDisplayHelpers.formLabel(medication.form)} • ${stockInfo.label}'
-                  '${isMdv && sealedCount != null ? ' • $sealedCount sealed' : ''}',
+                  '${MedicationDisplayHelpers.formLabel(medication.form)} | ${stockInfo.label}'
+                  '${isMdv && sealedCount != null ? ' | $sealedCount sealed' : ''}',
                   style: helperTextStyle(context)?.copyWith(
                     fontWeight: kFontWeightSemiBold,
                     color: stockStatusColorFromPercentage(

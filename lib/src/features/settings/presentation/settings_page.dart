@@ -105,7 +105,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final outlineColor =
         cs.outlineVariant.withValues(alpha: kStandardCardBorderOpacity);
     const mockMed = 'Methotrexate 15mg';
-    const mockSched = 'Mon AM  ·  0.5mL';
+    const mockSched = 'Mon AM  |  0.5mL';
     const mockTime = '8:00 AM';
     const mockStatus = 'PENDING';
 
@@ -253,7 +253,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Container(
-                    width: 40,
+                    width: 44,
                     color: accent.withValues(alpha: 0.09),
                     padding: const EdgeInsets.symmetric(vertical: 7),
                     child: Column(
@@ -273,6 +273,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 fontWeight: FontWeight.w600,
                                 color: accent.withValues(alpha: 0.70),
                                 height: 1.2)),
+                        const SizedBox(height: 2),
+                        Text('40U',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: accent.withValues(alpha: 0.70),
+                                height: 1.1)),
+                        const SizedBox(height: 1),
+                        Text('#3',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: accent.withValues(alpha: 0.45),
+                                height: 1.1)),
                       ],
                     ),
                   ),
@@ -290,7 +306,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(mockMed, style: medStyle),
-                                Text(mockSched, style: dimStyle),
                               ],
                             ),
                           ),
@@ -968,7 +983,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               entitlement.isPro
                   ? 'Unlimited medications and no ads'
                   : billing.product != null
-                  ? 'Up to $kFreeTierMedicationLimit medications + ads • Pro: ${billing.product!.price}'
+                  ? 'Up to $kFreeTierMedicationLimit medications + ads | Pro: ${billing.product!.price}'
                   : 'Up to $kFreeTierMedicationLimit medications + ads',
             ),
           ),
@@ -1452,7 +1467,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               return ListTile(
                 leading: const Icon(Icons.info_outline),
                 title: const Text('Build'),
-                subtitle: Text('$versionText · $subtitle'),
+                subtitle: Text('$versionText | $subtitle'),
                 onTap: () => _handleBuildTap(context),
               );
             },

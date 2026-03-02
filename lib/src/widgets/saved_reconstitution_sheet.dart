@@ -1,4 +1,4 @@
-﻿// Flutter imports:
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -125,7 +125,7 @@ class SavedReconstitutionSheet extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      subtitleParts.join(' • '),
+                                      subtitleParts.join(' | '),
                                       style: helperTextStyle(context),
                                     ),
                                   ],

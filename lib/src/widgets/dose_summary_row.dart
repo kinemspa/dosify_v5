@@ -1,4 +1,4 @@
-﻿// Flutter imports:
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -64,7 +64,7 @@ class DoseSummaryRow extends StatelessWidget {
     final dateStr = '$weekday $shortDate';
 
     final line2 = showMedicationName
-        ? '${dose.medicationName} • $doseInfo'
+        ? '${dose.medicationName} | $doseInfo'
         : doseInfo;
 
     return Material(
@@ -131,7 +131,7 @@ class DoseSummaryRow extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          '$dateStr • ',
+                          '$dateStr | ',
                           style: helperTextStyle(
                             context,
                             color: cs.onSurfaceVariant,

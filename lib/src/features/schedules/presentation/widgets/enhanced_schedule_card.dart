@@ -170,7 +170,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             ),
             when,
             title: widget.medication.name,
-            body: '${widget.schedule.name} • Snoozed until $time',
+            body: '${widget.schedule.name} | Snoozed until $time',
             payload:
                 'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
             actions: NotificationService.upcomingDoseActions,
@@ -742,7 +742,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '${_formatLastTaken(log.actionTime)} • ${_getActionLabel(log.action)}',
+                        '${_formatLastTaken(log.actionTime)} | ${_getActionLabel(log.action)}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
@@ -920,7 +920,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
     final base = m.isNotEmpty ? m : fallbackDose;
     if (s.isEmpty) return base;
-    return '$base • $s';
+    return '$base | $s';
   }
 
   String _getTimesText() {

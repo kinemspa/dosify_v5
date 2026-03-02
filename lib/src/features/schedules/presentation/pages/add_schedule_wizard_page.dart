@@ -1,4 +1,4 @@
-﻿// Flutter imports:
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -455,7 +455,7 @@ class _AddScheduleWizardPageState
     return '$prettyValue $prettyUnit';
   }
 
-  String _doseMetricsSummaryLabel({String separator = ' • '}) {
+  String _doseMetricsSummaryLabel({String separator = ' | '}) {
     final med = _selectedMed;
     final r = _doseResult;
     if (med == null || r == null || r.hasError) {
@@ -503,7 +503,7 @@ class _AddScheduleWizardPageState
           buffer.write(days.join(', '));
         }
     }
-    buffer.write(' • ');
+    buffer.write(' | ');
     buffer.write(_times.map((t) => t.format(context)).join(', '));
     return buffer.toString();
   }
@@ -1929,7 +1929,7 @@ class _MedicationListRow extends StatelessWidget {
         '${MedicationDisplayHelpers.formLabel(medication.form, plural: true)}';
     final detailLabel = manufacturer.isEmpty
         ? strengthLabel
-        : '$manufacturer · $strengthLabel';
+        : '$manufacturer | $strengthLabel';
 
     final stockInfo = MedicationDisplayHelpers.calculateStock(medication);
     final stockColor = _stockColorFor(context);

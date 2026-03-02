@@ -162,7 +162,7 @@ Future<void> showDoseActionSheetFromModels(
         final time = DateTimeFormatter.formatTime(context, request.actionTime);
         final label = sameDay
             ? 'Dose snoozed until $time'
-            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
+            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} | $time';
         showAppSnackBar(context, label);
       }
     },

@@ -130,7 +130,7 @@ class NextDoseRow extends StatelessWidget {
 
     final timeText = DateTimeFormatter.formatTime(context, local);
 
-    return '$dateText • $timeText';
+    return '$dateText | $timeText';
   }
 
   String _formatPausedUntil(BuildContext context, DateTime dt) {
@@ -148,6 +148,6 @@ class NextDoseRow extends StatelessWidget {
 
     final timeText = DateTimeFormatter.formatTime(context, local);
 
-    return '$dateText • $timeText';
+    return '$dateText | $timeText';
   }
 }

@@ -827,7 +827,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final manufacturer = (m.manufacturer ?? '').trim();
     final detailLabel = manufacturer.isEmpty
         ? strengthLabel
-        : '$manufacturer · $strengthLabel';
+        : '$manufacturer | $strengthLabel';
 
     return Material(
       color: Colors.transparent,
@@ -1085,7 +1085,7 @@ class _MedCard extends StatelessWidget {
                         m,
                         baseStyle: helperTextStyle(context),
                       ),
-                      TextSpan(text: ' · $strengthAndFormLabel'),
+                      TextSpan(text: ' | $strengthAndFormLabel'),
                     ],
                   ),
                 ),

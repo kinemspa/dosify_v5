@@ -821,7 +821,7 @@ class _NextDoseCardState extends State<NextDoseCard>
             ),
             when,
             title: widget.medication.name,
-            body: '${dose.scheduleName} • Snoozed until $time',
+            body: '${dose.scheduleName} | Snoozed until $time',
             payload:
                 'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
             actions: NotificationService.upcomingDoseActions,
@@ -843,7 +843,7 @@ class _NextDoseCardState extends State<NextDoseCard>
         final time = DateTimeFormatter.formatTime(context, request.actionTime);
         final label = sameDay
             ? 'Dose snoozed until $time'
-            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} • $time';
+            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} | $time';
         showAppSnackBar(context, label);
       },
       onSkip: (request) async {

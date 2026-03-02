@@ -86,7 +86,7 @@ class ExpiryNotificationScheduler {
 
     final id = _idFor(medicationId, type);
     final title = 'Expiring soon';
-    final body = '$medicationName · $label in $leadDays days';
+    final body = '$medicationName | $label in $leadDays days';
 
     try {
       await NotificationService.scheduleAtAlarmClockUtc(

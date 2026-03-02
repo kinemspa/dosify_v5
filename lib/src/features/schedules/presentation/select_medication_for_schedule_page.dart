@@ -30,7 +30,7 @@ class SelectMedicationForSchedulePage extends StatelessWidget {
         '${MedicationDisplayHelpers.formLabel(m.form, plural: true)}';
     final detailLabel = manufacturer.isEmpty
         ? strengthLabel
-        : '$manufacturer · $strengthLabel';
+        : '$manufacturer | $strengthLabel';
 
     final stockInfo = MedicationDisplayHelpers.calculateStock(m);
     final stockColor = _stockColorFor(context, m);

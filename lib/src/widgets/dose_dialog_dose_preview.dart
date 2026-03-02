@@ -296,7 +296,7 @@ class DoseDialogDoseFallbackSummary extends StatelessWidget {
             const SizedBox(width: kSpacingM),
             Expanded(
               child: Text(
-                '$date • $time',
+                '$date | $time',
                 style: bodyTextStyle(context)?.copyWith(
                   color: cs.onSurface.withValues(alpha: kOpacityMediumHigh),
                 ),
