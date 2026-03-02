@@ -39,7 +39,6 @@ import 'package:dosifi_v5/src/features/schedules/presentation/select_medication_
 import 'package:dosifi_v5/src/features/settings/presentation/bottom_nav_settings_page.dart';
 import 'package:dosifi_v5/src/features/settings/presentation/debug_page.dart';
 import 'package:dosifi_v5/src/features/settings/presentation/settings_page.dart';
-import 'package:dosifi_v5/src/features/supplies/presentation/supplies_page.dart';
 
 // Removed incorrect import
 final _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
@@ -111,7 +110,7 @@ final router = GoRouter(
         GoRoute(
           path: '/supplies',
           name: 'supplies',
-          builder: (context, state) => const SuppliesPage(),
+          redirect: (_, __) => '/',
         ),
         GoRoute(
           path: '/inventory',
@@ -121,7 +120,7 @@ final router = GoRouter(
         GoRoute(
           path: '/supplies/add',
           name: 'addSupply',
-          builder: (context, state) => const AddEditSupplyPage(),
+          redirect: (_, __) => '/',
         ),
         GoRoute(
           path: '/schedules/add',
