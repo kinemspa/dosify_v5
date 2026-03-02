@@ -313,13 +313,13 @@ final router = GoRouter(
             return MedicationDetailPage(medicationId: id);
           },
         ),
+        // Analytics inside ShellRoute so bottom nav persists and back stack works
+        GoRoute(
+          path: '/analytics',
+          name: 'analytics',
+          builder: (context, state) => const AnalyticsPage(),
+        ),
       ],
-    ),
-    // Analytics placeholder route
-    GoRoute(
-      path: '/analytics',
-      name: 'analytics',
-      builder: (context, state) => const AnalyticsPage(),
     ),
     // Disclaimer gate — full-screen, outside ShellRoute (no bottom nav)
     // Pass `extra: true` when navigating from Settings (read-only mode).

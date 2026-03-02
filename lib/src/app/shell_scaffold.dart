@@ -81,24 +81,40 @@ class ShellScaffold extends ConsumerWidget {
 
     // If bottom nav hasn't loaded yet or is misconfigured, render without it to avoid assertion.
     if (items.length < 2) {
-      return Scaffold(body: child);
+      return PopScope(
+        canPop: location == '/',
+        onPopInvoked: (didPop) {
+          if (!didPop && location != '/') context.go('/');
+        },
+        child: Scaffold(body: child),
+      );
     }
 
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) {
-          final target = items[index].location;
-          if (target != location) {
-            context.go(target);
-          }
-        },
-        destinations: items
-            .map(
-              (e) => NavigationDestination(icon: Icon(e.icon), label: e.label),
-            )
-            .toList(),
+    return PopScope(
+      // Intercept Android back: if we are not at root, go home instead of exiting.
+      canPop: location == '/',
+      onPopInvoked: (didPop) {
+        if (!didPop && location != '/') {
+          context.go('/');
+        }
+      },
+      child: Scaffold(
+        body: child,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: selectedIndex,
+          onDestinationSelected: (index) {
+            final target = items[index].location;
+            if (target != location) {
+              context.go(target);
+            }
+          },
+          destinations: items
+              .map(
+                (e) =>
+                    NavigationDestination(icon: Icon(e.icon), label: e.label),
+              )
+              .toList(),
+        ),
       ),
     );
   }
