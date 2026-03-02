@@ -230,7 +230,7 @@ const String kAndroidLegacyIconAssetPath =
 const String kPrimaryBrandTagline = 'Track Smarter Every Day';
 
 /// Branded app-launch hold timing.
-const Duration kBrandedLaunchHoldDuration = Duration(milliseconds: 1200);
+const Duration kBrandedLaunchHoldDuration = Duration(milliseconds: 2800);
 
 /// Branded launch logo sizing.
 const double kBrandedLaunchLogoMinWidth = 220;

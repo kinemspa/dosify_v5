@@ -220,18 +220,22 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
     _goToPath('/medications/$firstMedicationId');
   }
 
-  void _syncRouteForStep(_CoachStep step, String currentPath) {
-    if (step.waitForUserNavigation || _isOnStepRoute(step, currentPath)) {
-      return;
-    }
+  /// Silently advances [_stepIndex] to the first step whose route matches
+  /// [currentPath], but only forward (never back).  Called at the start of
+  /// each build so that tips fire on whichever screen the user naturally
+  /// navigates to, rather than forcing a wizard sequence.
+  void _advanceToMatchingRoute(String currentPath) {
     if (_queuedRouteSync) return;
-
-    _queuedRouteSync = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _queuedRouteSync = false;
-      if (!mounted) return;
-      _goToPath(step.routePath);
-    });
+    for (int i = _stepIndex + 1; i < _steps.length; i++) {
+      if (_isOnStepRoute(_steps[i], currentPath)) {
+        _queuedRouteSync = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _queuedRouteSync = false;
+          if (mounted) setState(() => _stepIndex = i);
+        });
+        return;
+      }
+    }
   }
 
   Alignment _bubbleAlignmentForTarget(Alignment target) {
@@ -259,20 +263,25 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
     }
 
     if (!mounted) return;
+    // Advance step index only — no auto-navigation.  The tip for the next
+    // step will appear when the user naturally navigates to that screen.
     setState(() => _stepIndex += 1);
-
-    final next = _steps[_stepIndex];
-    if (!next.waitForUserNavigation) {
-      _goToPath(next.routePath);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final step = _steps[_stepIndex];
     final currentPath = _currentPath(context);
-    _syncRouteForStep(step, currentPath);
+    // Advance to matching step if user navigated ahead naturally.
+    _advanceToMatchingRoute(currentPath);
+    final step = _steps[_stepIndex];
     final onExpectedRoute = _isOnStepRoute(step, currentPath);
+
+    // When not on the expected route, render nothing so the user can
+    // navigate freely (including past the disclaimer gate).
+    if (!onExpectedRoute) {
+      return const SizedBox.shrink();
+    }
+
     final cs = Theme.of(context).colorScheme;
     final bubbleAlignment = _bubbleAlignmentForTarget(step.targetAlignment);
     final coachFg = kOnboardingCoachForegroundColor;
