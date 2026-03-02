@@ -62,7 +62,7 @@ class _InventoryPageState extends State<InventoryPage> {
                       .where(MedicationStockService.isLowStock)
                       .length;
                   final medOut = medItems
-                      .where((m) => m.stockValue <= 0)
+                      .where((m) => MedicationStockService.calculateStockRatio(m) <= 0)
                       .length;
 
                   final takenDoses = doseLogItems

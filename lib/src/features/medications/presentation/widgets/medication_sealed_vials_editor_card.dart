@@ -42,7 +42,6 @@ class MedicationSealedVialsEditorCard extends StatelessWidget {
 
     return SectionFormCard(
       title: 'Sealed Vials',
-      neutral: true,
       trailing: Text(
         sealedVialsCountLabel,
         style: bodyTextStyle(context)?.copyWith(fontWeight: kFontWeightBold),

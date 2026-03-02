@@ -1,10 +1,19 @@
+import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 /// Service for calculating medication stock levels and projections
 class MedicationStockService {
   /// Calculate the stock fill ratio (0.0 to 1.0)
+  /// For MDV: ratio of active vial volume remaining vs container volume.
+  /// For other types: ratio of stockValue vs initialStockValue.
   static double calculateStockRatio(Medication med) {
+    if (med.form == MedicationForm.multiDoseVial &&
+        med.containerVolumeMl != null &&
+        med.containerVolumeMl! > 0) {
+      final vol = med.activeVialVolume ?? 0.0;
+      return (vol / med.containerVolumeMl!).clamp(0.0, 1.0);
+    }
     if (med.stockValue <= 0) return 0.0;
     final maxStock = med.initialStockValue ?? med.stockValue;
     if (maxStock <= 0) return 1.0;
@@ -27,7 +36,11 @@ class MedicationStockService {
     Medication med,
     List<Schedule> linkedSchedules,
   ) {
-    if (med.stockValue <= 0) return 0.0;
+    // For MDV, days remaining is based on the active vial volume, not sealed count.
+    final effectiveStock = med.form == MedicationForm.multiDoseVial
+        ? (med.activeVialVolume ?? 0.0)
+        : med.stockValue;
+    if (effectiveStock <= 0) return 0.0;
     if (linkedSchedules.isEmpty) return null;
 
     // Calculate total daily consumption from all active schedules
@@ -61,7 +74,7 @@ class MedicationStockService {
 
     if (totalDailyConsumption <= 0) return null;
 
-    return med.stockValue / totalDailyConsumption;
+    return effectiveStock / totalDailyConsumption;
   }
 
   /// Calculate the projected stockout date
