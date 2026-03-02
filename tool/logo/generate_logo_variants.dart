@@ -16,8 +16,8 @@ const int _brandFillArgb = 0xFF09A8BD;
 
 // Insets are expressed as a fraction of the canvas size per side.
 // Larger inset => smaller visible logo.
-const double _legacyIconInsetFraction = 0.22;
-const double _adaptiveForegroundInsetFraction = 0.26;
+const double _legacyIconInsetFraction = 0.14;
+const double _adaptiveForegroundInsetFraction = 0.18;
 const double _splashInsetFraction = 0.32;
 
 Future<void> main() async {
