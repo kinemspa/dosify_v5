@@ -24,6 +24,7 @@ import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.d
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
+import 'package:dosifi_v5/src/core/ui/dose_card_layout_settings.dart';
 import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
 import 'package:dosifi_v5/src/core/ui/onboarding_settings.dart';
 import 'package:dosifi_v5/src/core/utils/developer_options.dart';
@@ -89,6 +90,215 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context,
       nextEnabled ? 'Developer options enabled' : 'Developer options disabled',
     );
+  }
+
+  /// Renders a static mini-preview illustrating the [layout] card style.
+  Widget _buildLayoutPreview(
+    BuildContext context,
+    DoseCardLayout layout,
+    bool selected,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final accent = selected ? cs.primary : cs.onSurfaceVariant;
+    final dim = cs.onSurfaceVariant.withValues(alpha: kOpacityMedium);
+    final bg = cs.surfaceContainerLow;
+    final outlineColor =
+        cs.outlineVariant.withValues(alpha: kStandardCardBorderOpacity);
+    const mockMed = 'Methotrexate 15mg';
+    const mockSched = 'Mon AM  ·  0.5mL';
+    const mockTime = '8:00 AM';
+    const mockStatus = 'PENDING';
+
+    final medStyle = TextStyle(
+      fontSize: 10,
+      fontWeight: FontWeight.w700,
+      color: accent,
+      height: 1.2,
+    );
+    final dimStyle = TextStyle(
+      fontSize: 9,
+      color: dim,
+      height: 1.2,
+    );
+    final chipDecoration = BoxDecoration(
+      color: accent.withValues(alpha: 0.18),
+      borderRadius: BorderRadius.circular(4),
+    );
+
+    switch (layout) {
+      case DoseCardLayout.pill:
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            border: Border.all(color: outlineColor),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Time pill mock
+              Container(
+                width: 36,
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: accent.withValues(alpha: 0.5)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('8:00',
+                        style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: accent,
+                            height: 1.1)),
+                    Text('AM',
+                        style: TextStyle(
+                            fontSize: 7, color: dim, height: 1.1)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(mockMed, style: medStyle),
+                    Text(mockSched, style: dimStyle),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                decoration: chipDecoration,
+                child: Text(mockStatus,
+                    style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w700,
+                        color: accent)),
+              ),
+            ],
+          ),
+        );
+
+      case DoseCardLayout.accent:
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+          child: Container(
+            decoration: BoxDecoration(color: bg),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(width: 3, color: accent),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(color: outlineColor),
+                          top: BorderSide(color: outlineColor),
+                          bottom: BorderSide(color: outlineColor),
+                        ),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(mockMed, style: medStyle),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(mockTime, style: dimStyle),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 3),
+                                decoration: chipDecoration,
+                                child: Text(mockStatus,
+                                    style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w700,
+                                        color: accent)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(mockSched, style: dimStyle),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+
+      case DoseCardLayout.minimal:
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            border: Border.all(color: outlineColor),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                      color: accent, shape: BoxShape.circle),
+                ),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(mockTime,
+                            style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                                color: accent.withValues(alpha: 0.75),
+                                height: 1.2)),
+                        const SizedBox(width: 4),
+                        Expanded(child: Text(mockMed, style: medStyle)),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 3),
+                          decoration: chipDecoration,
+                          child: Text(mockStatus,
+                              style: TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w700,
+                                  color: accent)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(mockSched, style: dimStyle),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+    }
   }
 
   @override
@@ -504,6 +714,98 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             Text(
               'Experimental features, diagnostics, and test tools.',
               style: helperTextStyle(context),
+            ),
+            const SizedBox(height: kSpacingM),
+            Text(
+              'Dose Card Style',
+              style: cardTitleStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+            ),
+            const SizedBox(height: kSpacingXS),
+            Text(
+              'Choose how dose cards look throughout the app. Changes apply instantly.',
+              style: helperTextStyle(context),
+            ),
+            const SizedBox(height: kSpacingS),
+            ValueListenableBuilder<DoseCardLayoutConfig>(
+              valueListenable: DoseCardLayoutSettings.value,
+              builder: (context, config, _) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: DoseCardLayout.values.map((layout) {
+                    final selected = config.layout == layout;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: kSpacingXS),
+                      child: InkWell(
+                        onTap: () => DoseCardLayoutSettings.setLayout(layout),
+                        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: selected
+                                ? cs.primaryContainer.withValues(alpha: 0.35)
+                                : cs.surfaceContainerHighest
+                                    .withValues(alpha: 0.40),
+                            borderRadius:
+                                BorderRadius.circular(kBorderRadiusMedium),
+                            border: Border.all(
+                              color: selected
+                                  ? cs.primary
+                                  : cs.outlineVariant.withValues(
+                                      alpha: kStandardCardBorderOpacity),
+                              width: selected ? 2 : 1,
+                            ),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: kSpacingL,
+                            vertical: kSpacingM,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      layout.label,
+                                      style: cardTitleStyle(context)
+                                          ?.copyWith(
+                                        fontWeight: kFontWeightSemiBold,
+                                        color: selected
+                                            ? cs.primary
+                                            : null,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      layout.description,
+                                      style: helperTextStyle(context),
+                                    ),
+                                    const SizedBox(height: kSpacingXS),
+                                    _buildLayoutPreview(
+                                        context, layout, selected),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: kSpacingM),
+                              Icon(
+                                selected
+                                    ? Icons.check_circle_rounded
+                                    : Icons.radio_button_unchecked_rounded,
+                                color: selected
+                                    ? cs.primary
+                                    : cs.onSurfaceVariant
+                                        .withValues(alpha: kOpacityMedium),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
             ),
             const SizedBox(height: kSpacingS),
             Text(

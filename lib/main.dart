@@ -13,6 +13,7 @@ import 'package:dosifi_v5/src/app/notification_deep_link_handler.dart';
 import 'package:dosifi_v5/src/app/router.dart' show disclaimerNotifier;
 import 'package:dosifi_v5/src/core/hive/hive_bootstrap.dart';
 import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/ui/dose_card_layout_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
@@ -59,6 +60,7 @@ Future<void> main() async {
 
           await DoseTimingSettings.load();
           await ExperimentalUiSettings.load();
+          await DoseCardLayoutSettings.load();
           await SnoozeSettings.load();
           await DateTimeFormatSettings.load();
           await ExpiryNotificationSettings.load();
