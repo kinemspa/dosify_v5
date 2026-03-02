@@ -126,15 +126,15 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: false
-  image_path_android: assets/logo/logo_001_android_icon.png
-  adaptive_icon_background: "#09A8BD"
-  adaptive_icon_foreground: assets/logo/logo_001_white_adaptive_fg.png
+  image_path_android: assets/logo/logo_001_primary.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/logo/logo_001_primary.png
 
 flutter_native_splash:
   android: true
   ios: false
-  color: "#09A8BD"
-  image: assets/logo/logo_001_white.png
+  color: "#FFFFFF"
+  image: assets/logo/logo_001_primary.png
   android_12:
-    color: "#09A8BD"
-    image: assets/logo/logo_001_white.png
+    color: "#FFFFFF"
+    image: assets/logo/logo_001_primary.png

@@ -1,0 +1,1798 @@
+00:00 +0: loading F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart
+00:00 +0: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Happy Path 2 tablets ├ù 50mg = 100mg
+00:00 +0 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Happy Path 2 tablets ├ù 50mg = 100mg [E]
+  Expected: contains '100.0mg'
+    Actual: '2 tablets ├ù 50mg = 100mg total'
+     Which: does not contain '100.0mg'
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\domain\dose_calculator_test.dart 18:9          main.<fn>.<fn>.<fn>
+  
+00:00 +0 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Happy Path 0.25 tablets ├ù 100mg = 25mg
+00:00 +1 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Happy Path 2.75 tablets ├ù 40mg = 110mg
+00:00 +2 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Valid 1/4 Increments 0.25 increment works
+00:00 +3 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Valid 1/4 Increments 0.5 increment works
+00:00 +4 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Valid 1/4 Increments 0.75 increment works
+00:00 +5 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Valid 1/4 Increments 1.25 increment works
+00:00 +6 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Invalid Increments 0.3 tablets shows warning and rounds to 0.25
+00:00 +7 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromTablets - Invalid Increments 2.33 tablets rounds to 2.25 with warning
+00:00 +8 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromStrength - Tablets 100mg ├╖ 50mg = 2 tablets
+00:00 +9 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Tablets calculateFromStrength - Tablets 115mg ├╖ 50mg = 2.3 tablets ΓåÆ shows warning
+00:00 +10 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Capsules calculateFromCapsules - Happy Path 3 capsules ├ù 500mg = 1500mg
+00:00 +11 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Capsules calculateFromCapsules - Happy Path 1 capsule ├ù 25mg = 25mg
+00:00 +12 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Capsules calculateFromStrengthCapsules - Whole Numbers 1500mg ├╖ 500mg = 3 capsules
+00:00 +13 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Capsules calculateFromStrengthCapsules - Whole Numbers 1250mg ├╖ 500mg = 2.5 ΓåÆ rounds to 3 with warning
+00:00 +14 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) calculateFromStrengthMDV - Happy Path 500mcg ΓåÆ 0.25ml, 25U
+00:00 +15 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) calculateFromStrengthMDV - Happy Path 1000mcg ΓåÆ 0.5ml, 50U
+00:00 +16 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) calculateFromVolumeMDV - Happy Path 0.25ml ΓåÆ 500mcg, 25U
+00:00 +17 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) calculateFromUnitsMDV - Happy Path 25U ΓåÆ 500mcg, 0.25ml
+00:00 +18 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) MDV - Edge Cases 12mg exceeds 10mg vial ΓåÆ error
+00:00 +19 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) MDV - Edge Cases 6ml exceeds 5ml volume ΓåÆ error
+00:00 +20 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) MDV - Edge Cases 9mg (90% of vial) ΓåÆ warning
+00:00 +21 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) MDV - Different Syringe Types 500mcg on 0.3ml syringe ΓåÆ error (exceeds capacity)
+00:00 +22 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) MDV - Different Syringe Types 500mcg on 1ml syringe ΓåÆ 25U
+00:00 +23 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - MDV (Multi-Dose Vial) MDV - Different Syringe Types 500mcg on 3ml syringe ΓåÆ 25U
+00:00 +24 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Formatting formatMass - mcg
+00:00 +25 -1: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Formatting formatMass - mg
+00:00 +25 -2: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Formatting formatMass - mg [E]
+  Expected: '1.0mg'
+    Actual: '1mg'
+     Which: is different.
+            Expected: 1.0mg
+              Actual: 1mg
+                       ^
+             Differ at offset 1
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\domain\dose_calculator_test.dart 351:7         main.<fn>.<fn>
+  
+00:00 +25 -2: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Formatting formatMass - g
+00:00 +25 -3: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Formatting formatMass - g [E]
+  Expected: '1.0g'
+    Actual: '1g'
+     Which: is different.
+            Expected: 1.0g
+              Actual: 1g
+                       ^
+             Differ at offset 1
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\domain\dose_calculator_test.dart 356:7         main.<fn>.<fn>
+  
+00:00 +25 -3: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Formatting formatVolume - ml
+00:00 +25 -4: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Formatting formatVolume - ml [E]
+  Expected: '0.50ml'
+    Actual: '0.5ml'
+     Which: is different.
+            Expected: 0.50ml
+              Actual: 0.5ml
+                         ^
+             Differ at offset 3
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\domain\dose_calculator_test.dart 361:7         main.<fn>.<fn>
+  
+00:00 +25 -4: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Pre-filled Injections 1 injection ├ù 0.3mg ├ù 0.3ml
+00:00 +26 -4: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Pre-filled Injections 2 injections ├ù 0.3mg ├ù 0.3ml = 0.6mg, 0.6ml
+00:00 +27 -4: F:/Android Apps/dosifi_v5/test/domain/dose_calculator_test.dart: DoseCalculator - Single Dose Vials 2 vials ├ù 10mg ├ù 2ml
+00:00 +28 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService isExpiringSoon returns true when expiry is within 30 days
+00:00 +29 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService isExpiringSoon returns false when expiry is more than 30 days away
+00:00 +30 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService isExpiringSoon returns false when expiry is null
+00:00 +31 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService isExpiringSoon returns false when already expired
+00:00 +32 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService isExpired returns true when date is in the past
+00:00 +33 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService isExpired returns false when date is in the future
+00:00 +34 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService isExpired returns false when expiry is null
+00:00 +35 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService daysUntilExpiry returns positive number for future date
+00:00 +36 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService daysUntilExpiry returns negative number for past date
+00:00 +37 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService daysUntilExpiry returns large number when expiry is null
+00:00 +38 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService willExpireBeforeStockout returns true when expiry is before stockout
+00:00 +39 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService willExpireBeforeStockout returns false when expiry is after stockout
+00:00 +40 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService willExpireBeforeStockout returns false when either date is null
+00:00 +41 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getExpiryStatus returns "No expiry set" when null
+00:00 +42 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getExpiryStatus returns "Expired" when in past
+00:00 +43 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getExpiryStatus returns "Expires today" when expiring today
+00:00 +44 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getExpiryStatus returns day count for near future
+00:00 +45 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getWarningLevel returns none when no expiry
+00:00 +46 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getWarningLevel returns expired when in past
+00:00 +47 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getWarningLevel returns critical when within 7 days
+00:00 +48 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getWarningLevel returns warning when within 30 days
+00:00 +49 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getWarningLevel returns notice when within 90 days
+00:00 +50 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService getWarningLevel returns none when far in future
+00:00 +51 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService formatExpiryDate returns "Not set" when null
+00:00 +52 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService formatExpiryDate returns "Today" for today
+00:00 +53 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService formatExpiryDate returns "Tomorrow" for tomorrow
+00:00 +54 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/expiry_tracking_service_test.dart: ExpiryTrackingService formatExpiryDate formats date correctly
+00:00 +55 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateStockRatio returns 0.0 when stock is empty
+00:00 +56 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateStockRatio returns 1.0 when stock is full
+00:00 +57 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateStockRatio returns 0.5 when stock is half full
+00:00 +58 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateStockRatio clamps values above 1.0
+00:00 +59 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService isLowStock returns true when stock is below 25%
+00:00 +60 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService isLowStock returns false when stock is above 25%
+00:00 +61 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateDaysRemaining returns 0 when stock is empty
+00:00 +62 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateDaysRemaining calculates days remaining for daily schedule
+00:00 +63 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateDaysRemaining calculates days remaining for twice daily schedule
+00:00 +64 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService calculateDaysRemaining returns null when no schedules
+00:00 +65 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService getStockStatus returns "Out of stock" when empty
+00:00 +66 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService getStockStatus returns "Critically low" when below 10%
+00:00 +67 -4: F:/Android Apps/dosifi_v5/test/features/medications/domain/services/medication_stock_service_test.dart: MedicationStockService getStockStatus returns "Good" when above 50%
+00:00 +68 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromStrengthMDV half-vial dose: 5000 mcg ΓåÆ 1000 ┬╡L ΓåÆ 100 U
+00:00 +69 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromStrengthMDV quarter-vial dose: 2500 mcg ΓåÆ 500 ┬╡L ΓåÆ 50 U
+00:00 +70 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromStrengthMDV dose > vial strength reports error
+00:00 +71 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromStrengthMDV >80% vial usage returns warning (not error)
+00:00 +72 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromStrengthMDV zero dose succeeds with zero output
+00:00 +73 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromVolumeMDV 1000 ┬╡L ΓåÆ 5000 mcg ΓåÆ 100 U
+00:00 +74 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromVolumeMDV volume > vial capacity reports error
+00:00 +75 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromUnitsMDV 50 U ΓåÆ 500 ┬╡L ΓåÆ 2500 mcg
+00:00 +76 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator.calculateFromUnitsMDV units > syringe max reports error
+00:00 +77 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/dose_calculator_test.dart: DoseCalculator ΓÇö round-trip consistency strength ΓåÆ volume ΓåÆ units all agree (500 ┬╡L round-trip)
+00:01 +78 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService nextOccurrence returns next occurrence for daily schedule
+00:01 +79 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService nextOccurrence returns next day occurrence when time has passed
+00:01 +80 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService nextOccurrence returns correct occurrence for weekly schedule
+00:01 +81 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService nextOccurrence handles multiple times per day
+00:01 +82 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService nextOccurrence returns correct occurrence for cyclic schedule
+00:01 +83 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService nextOccurrence returns correct occurrence for monthly schedule
+00:01 +84 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService nextOccurrence returns null when no occurrence within 60 days
+00:01 +85 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService occurrencesInRange returns all occurrences in date range for daily schedule
+00:01 +86 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService occurrencesInRange returns multiple times per day in range
+00:01 +87 -4: F:/Android Apps/dosifi_v5/test/features/schedules/domain/schedule_occurrence_service_test.dart: ScheduleOccurrenceService occurrencesInRange respects weekly schedule in range
+00:01 +88 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/controllers/schedule_form_controller_test.dart: ScheduleFormController initial state is correct for new schedule
+00:01 +89 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/controllers/schedule_form_controller_test.dart: ScheduleFormController setMode updates state correctly
+00:01 +90 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/controllers/schedule_form_controller_test.dart: ScheduleFormController addTime adds a time
+00:01 +91 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: (setUpAll)
+00:01 +91 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +92 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +93 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +94 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +95 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +96 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +97 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +98 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +99 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +100 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +101 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:02 +102 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +103 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +104 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +105 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +106 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +107 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +108 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +109 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +110 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +111 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +112 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +113 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +114 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +115 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +116 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +117 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +118 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +119 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +120 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +121 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +122 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +123 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +124 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +125 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +126 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +127 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +128 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +129 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +130 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +131 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +132 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +133 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +134 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +135 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:03 +136 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +137 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +138 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +139 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +140 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +141 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +142 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +143 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +144 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +145 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +146 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +147 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +148 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +149 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +150 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +151 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +152 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +153 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +154 -4: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:04 +154 -4: loading F:/Android Apps/dosifi_v5/test/widgets/activity_card_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:05 +154 -4: F:/Android Apps/dosifi_v5/test/widgets/activity_card_golden_test.dart: ActivityCard goldens compact width with large text
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/activity_card_compact_large_text.png": Pixel test failed, 86.28%, 165649px diff
+detected.
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/activity_card_golden_test.dart:99:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:05 +154 -5: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:05 +154 -5: F:/Android Apps/dosifi_v5/test/widgets/activity_card_golden_test.dart: ActivityCard goldens compact width with large text [E]
+  Test failed. See exception logs above.
+  The test description was: compact width with large text
+  
+00:05 +154 -5: F:/Android Apps/dosifi_v5/test/widgets/collapsible_section_form_card_test.dart: CollapsibleSectionFormCard expands and collapses
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following StateError was thrown running a test:
+Bad state: Too many elements
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:696:24)
+#1      WidgetController.getSize (package:flutter_test/src/controller.dart:2094:47)
+#2      main.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/collapsible_section_form_card_test.dart:48:14)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  CollapsibleSectionFormCard expands and collapses
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:05 +154 -6: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:05 +154 -6: F:/Android Apps/dosifi_v5/test/widgets/collapsible_section_form_card_test.dart: CollapsibleSectionFormCard expands and collapses [E]
+  Test failed. See exception logs above.
+  The test description was: CollapsibleSectionFormCard expands and collapses
+  
+00:05 +154 -6: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +155 -6: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +156 -6: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +156 -6: loading F:/Android Apps/dosifi_v5/test/widgets/dose_calendar_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:06 +156 -6: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +156 -6: F:/Android Apps/dosifi_v5/test/widgets/dose_action_legend_row_test.dart: DoseActionLegendRow renders Taken/Skipped/Snoozed with DS colors
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _AncestorWidgetFinder:<Found 0 widgets with type "UnifiedStatusBadge" that are ancestors
+of widgets with text "Taken": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_action_legend_row_test.dart:23:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_action_legend_row_test.dart line 23
+The test description was:
+  DoseActionLegendRow renders Taken/Skipped/Snoozed with DS colors
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:06 +156 -7: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +156 -7: F:/Android Apps/dosifi_v5/test/widgets/dose_action_legend_row_test.dart: DoseActionLegendRow renders Taken/Skipped/Snoozed with DS colors [E]
+  Test failed. See exception logs above.
+  The test description was: DoseActionLegendRow renders Taken/Skipped/Snoozed with DS colors
+  
+00:06 +157 -7: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +157 -7: loading F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:06 +157 -7: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +157 -7: F:/Android Apps/dosifi_v5/test/widgets/dose_action_sheet_affordance_test.dart: DoseActionSheet shows Scrollbar and taken tick icon
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY WIDGETS LIBRARY Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following HiveError was thrown building KeyedSubtree-[GlobalKey#84f79]:
+Box not found. Did you forget to call Hive.openBox()?
+
+The relevant error-causing widget was:
+  Scaffold
+  Scaffold:file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_action_sheet_affordance_test.dart:83:15
+
+When the exception was thrown, this was the stack:
+#0      HiveImpl._getBoxInternal (package:hive/src/hive_impl.dart:186:7)
+#1      HiveImpl.box (package:hive/src/hive_impl.dart:197:33)
+#2      _DoseActionSheetState.initState (package:dosifi_v5/src/widgets/dose_action_sheet.dart:965:43)
+#3      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:5953:55)
+#4      ComponentElement.mount (package:flutter/src/widgets/framework.dart:5796:5)
+...     Normal element mounting (25 frames)
+#29     Element.inflateWidget (package:flutter/src/widgets/framework.dart:4590:20)
+#30     MultiChildRenderObjectElement.inflateWidget (package:flutter/src/widgets/framework.dart:7269:36)
+#31     MultiChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7285:32)
+...     Normal element mounting (364 frames)
+#395    Element.inflateWidget (package:flutter/src/widgets/framework.dart:4590:20)
+#396    MultiChildRenderObjectElement.inflateWidget (package:flutter/src/widgets/framework.dart:7269:36)
+#397    MultiChildRenderObjectElement.mount (package:flutter/src/widgets/framework.dart:7285:32)
+...     Normal element mounting (465 frames)
+#862    Element.inflateWidget (package:flutter/src/widgets/framework.dart:4590:20)
+#863    Element.updateChild (package:flutter/src/widgets/framework.dart:4053:20)
+#864    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#865    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#866    ProxyElement.update (package:flutter/src/widgets/framework.dart:6152:5)
+#867    _InheritedNotifierElement.update (package:flutter/src/widgets/inherited_notifier.dart:108:11)
+#868    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#869    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#870    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)
+#871    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#872    StatefulElement.update (package:flutter/src/widgets/framework.dart:6010:5)
+#873    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#874    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#875    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#876    ProxyElement.update (package:flutter/src/widgets/framework.dart:6152:5)
+#877    _InheritedNotifierElement.update (package:flutter/src/widgets/inherited_notifier.dart:108:11)
+#878    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#879    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#880    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)
+#881    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#882    StatefulElement.update (package:flutter/src/widgets/framework.dart:6010:5)
+#883    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#884    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#885    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)
+#886    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#887    StatefulElement.update (package:flutter/src/widgets/framework.dart:6010:5)
+#888    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#889    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#890    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#891    ProxyElement.update (package:flutter/src/widgets/framework.dart:6152:5)
+#892    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#893    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#894    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)
+#895    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#896    StatefulElement.update (package:flutter/src/widgets/framework.dart:6010:5)
+#897    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#898    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#899    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#900    ProxyElement.update (package:flutter/src/widgets/framework.dart:6152:5)
+#901    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#902    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#903    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#904    ProxyElement.update (package:flutter/src/widgets/framework.dart:6152:5)
+#905    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#906    _RawViewElement._updateChild (package:flutter/src/widgets/view.dart:481:16)
+#907    _RawViewElement.update (package:flutter/src/widgets/view.dart:568:5)
+#908    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#909    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#910    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#911    StatelessElement.update (package:flutter/src/widgets/framework.dart:5898:5)
+#912    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#913    ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:5844:16)
+#914    StatefulElement.performRebuild (package:flutter/src/widgets/framework.dart:5985:11)
+#915    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#916    StatefulElement.update (package:flutter/src/widgets/framework.dart:6010:5)
+#917    Element.updateChild (package:flutter/src/widgets/framework.dart:4037:15)
+#918    RootElement._rebuild (package:flutter/src/widgets/binding.dart:1782:16)
+#919    RootElement.update (package:flutter/src/widgets/binding.dart:1760:5)
+#920    RootElement.performRebuild (package:flutter/src/widgets/binding.dart:1774:7)
+#921    Element.rebuild (package:flutter/src/widgets/framework.dart:5532:7)
+#922    BuildScope._tryRebuild (package:flutter/src/widgets/framework.dart:2750:15)
+#923    BuildScope._flushDirtyElements (package:flutter/src/widgets/framework.dart:2807:11)
+#924    BuildOwner.buildScope (package:flutter/src/widgets/framework.dart:3111:18)
+#925    AutomatedTestWidgetsFlutterBinding.drawFrame (package:flutter_test/src/binding.dart:1506:19)
+#926    RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:495:5)
+#927    SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1434:15)
+#928    SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1347:9)
+#929    AutomatedTestWidgetsFlutterBinding.pump.<anonymous closure> (package:flutter_test/src/binding.dart:1335:9)
+#932    TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#933    AutomatedTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:1324:27)
+#934    WidgetTester.pumpWidget.<anonymous closure> (package:flutter_test/src/widget_tester.dart:598:22)
+#937    TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
+#938    WidgetTester.pumpWidget (package:flutter_test/src/widget_tester.dart:595:27)
+#939    main.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_action_sheet_affordance_test.dart:81:18)
+#940    testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:29)
+<asynchronous suspension>
+#941    TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 5 frames from dart:async and package:stack_trace)
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "Scrollbar": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_action_sheet_affordance_test.dart:100:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_action_sheet_affordance_test.dart line 100
+The test description was:
+  DoseActionSheet shows Scrollbar and taken tick icon
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:06 +157 -8: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:06 +157 -8: F:/Android Apps/dosifi_v5/test/widgets/dose_action_sheet_affordance_test.dart: DoseActionSheet shows Scrollbar and taken tick icon [E]
+  Test failed. See exception logs above.
+  The test description was: DoseActionSheet shows Scrollbar and taken tick icon
+  
+00:06 +157 -8: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +157 -8: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens pending (active)
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_card_pending.png": Pixel test failed, image sizes do not match.
+Master Image: 380 X 91
+Test Image: 380 X 85
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart:116:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +157 -9: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +157 -9: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens pending (active) [E]
+  Test failed. See exception logs above.
+  The test description was: pending (active)
+  
+00:07 +157 -9: F:/Android Apps/dosifi_v5/test/widgets/dose_calendar_golden_test.dart: DoseCalendarWidget goldens (compact) month view
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY RENDERING LIBRARY Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 60 pixels on the right.
+
+The relevant error-causing widget was:
+  Row Row:file:///F:/Android%20Apps/dosifi_v5/lib/src/widgets/calendar/calendar_header.dart:53:14
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#e150c relayoutBoundary=up4 OVERFLOWING:
+  creator: Row ΓåÉ Padding ΓåÉ DecoratedBox ΓåÉ ConstrainedBox ΓåÉ Container ΓåÉ CalendarHeader ΓåÉ Column ΓåÉ
+    SizedBox ΓåÉ LayoutBuilder ΓåÉ DoseCalendarWidget ΓåÉ Padding ΓåÉ SizedBox ΓåÉ Γï»
+  parentData: offset=Offset(12.0, 8.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=272.0, h=39.0)
+  size: Size(272.0, 39.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+ΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñ
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_calendar_month_compact.png": Pixel test failed, 31.31%, 72149px diff detected.
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_calendar_golden_test.dart:126:4)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +157 -10: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +157 -10: F:/Android Apps/dosifi_v5/test/widgets/dose_calendar_golden_test.dart: DoseCalendarWidget goldens (compact) month view [E]
+  Test failed. See exception logs above.
+  The test description was: month view
+  
+00:07 +157 -10: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens taken (active)
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_card_taken.png": Pixel test failed, image sizes do not match.
+Master Image: 380 X 91
+Test Image: 380 X 85
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart:142:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +157 -11: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +157 -11: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens taken (active) [E]
+  Test failed. See exception logs above.
+  The test description was: taken (active)
+  
+00:07 +157 -11: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens overdue (active)
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_card_missed.png": Pixel test failed, image sizes do not match.
+Master Image: 380 X 91
+Test Image: 380 X 85
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart:168:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +157 -12: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +157 -12: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens overdue (active) [E]
+  Test failed. See exception logs above.
+  The test description was: overdue (active)
+  
+00:07 +157 -12: loading F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:07 +157 -12: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens disabled (inactive schedule)
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_card_disabled.png": Pixel test failed, image sizes do not match.
+Master Image: 380 X 91
+Test Image: 380 X 85
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart:194:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +157 -13: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +157 -13: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens disabled (inactive schedule) [E]
+  Test failed. See exception logs above.
+  The test description was: disabled (inactive schedule)
+  
+00:07 +158 -13: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +158 -13: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens compact (pending)
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_card_compact_pending.png": Pixel test failed, image sizes do not match.
+Master Image: 380 X 81
+Test Image: 380 X 77
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart:220:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +158 -14: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +158 -14: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens compact (pending) [E]
+  Test failed. See exception logs above.
+  The test description was: compact (pending)
+  
+00:07 +158 -14: F:/Android Apps/dosifi_v5/test/widgets/dose_calendar_golden_test.dart: DoseCalendarWidget goldens (compact) week view
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY RENDERING LIBRARY Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 60 pixels on the right.
+
+The relevant error-causing widget was:
+  Row Row:file:///F:/Android%20Apps/dosifi_v5/lib/src/widgets/calendar/calendar_header.dart:53:14
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#dd000 relayoutBoundary=up4 OVERFLOWING:
+  creator: Row ΓåÉ Padding ΓåÉ DecoratedBox ΓåÉ ConstrainedBox ΓåÉ Container ΓåÉ CalendarHeader ΓåÉ Column ΓåÉ
+    SizedBox ΓåÉ LayoutBuilder ΓåÉ DoseCalendarWidget ΓåÉ Padding ΓåÉ SizedBox ΓåÉ Γï»
+  parentData: offset=Offset(12.0, 8.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=272.0, h=39.0)
+  size: Size(272.0, 39.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+ΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñ
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_calendar_week_compact.png": Pixel test failed, 3.31%, 7634px diff detected.
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_calendar_golden_test.dart:152:4)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +158 -15: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +158 -15: F:/Android Apps/dosifi_v5/test/widgets/dose_calendar_golden_test.dart: DoseCalendarWidget goldens (compact) week view [E]
+  Test failed. See exception logs above.
+  The test description was: week view
+  
+00:07 +159 -15: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +159 -15: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens compact (long metrics)
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_card_compact_long.png": Pixel test failed, image sizes do not match.
+Master Image: 380 X 81
+Test Image: 380 X 77
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart:246:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +159 -16: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +159 -16: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens compact (long metrics) [E]
+  Test failed. See exception logs above.
+  The test description was: compact (long metrics)
+  
+00:07 +159 -16: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens compact pending - compact width with large text
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/dose_card_compact_pending_compact_large_text.png": Pixel test failed, 39.41%,
+10971px diff detected.
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart:276:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:07 +159 -17: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +159 -17: F:/Android Apps/dosifi_v5/test/widgets/dose_card_golden_test.dart: DoseCard goldens compact pending - compact width with large text [E]
+  Test failed. See exception logs above.
+  The test description was: compact pending - compact width with large text
+  
+00:07 +159 -17: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:07 +159 -17: loading F:/Android Apps/dosifi_v5/test/widgets/medication_details_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:08 +159 -17: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +159 -17: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: SectionFormCard goldens standard width with normal text scale
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/section_form_card_standard.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#a45c7
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file: "goldens/section_form_card_standard.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart:77:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  standard width with normal text scale
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +159 -18: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +159 -18: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: SectionFormCard goldens standard width with normal text scale [E]
+  Test failed. See exception logs above.
+  The test description was: standard width with normal text scale
+  
+00:08 +159 -18: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets displays mode toggle with Tablets and Strength options
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Strength": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:27:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart line 27
+The test description was:
+  displays mode toggle with Tablets and Strength options
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +159 -19: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +159 -19: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets displays mode toggle with Tablets and Strength options [E]
+  Test failed. See exception logs above.
+  The test description was: displays mode toggle with Tablets and Strength options
+  
+00:08 +159 -19: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: SectionFormCard goldens compact width with large text scale
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/section_form_card_compact_large_text.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#74efa
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/section_form_card_compact_large_text.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart:100:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  compact width with large text scale
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +159 -20: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +159 -20: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: SectionFormCard goldens compact width with large text scale [E]
+  Test failed. See exception logs above.
+  The test description was: compact width with large text scale
+  
+00:08 +159 -20: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: SectionFormCard goldens neutral variant
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/section_form_card_neutral.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#5e9c4
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file: "goldens/section_form_card_neutral.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart:122:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  neutral variant
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +159 -21: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +159 -21: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: SectionFormCard goldens neutral variant [E]
+  Test failed. See exception logs above.
+  The test description was: neutral variant
+  
+00:08 +160 -21: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +160 -21: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: CollapsibleSectionFormCard goldens expanded state - standard width
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/collapsible_section_form_card_expanded.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#d8771
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/collapsible_section_form_card_expanded.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart:149:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  expanded state - standard width
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +160 -22: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +160 -22: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: CollapsibleSectionFormCard goldens expanded state - standard width [E]
+  Test failed. See exception logs above.
+  The test description was: expanded state - standard width
+  
+00:08 +160 -22: F:/Android Apps/dosifi_v5/test/widgets/medication_details_golden_test.dart: Medication Details targeted goldens header identity - compact width with large text
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/medication_details_header_identity_compact_large_text.png": Pixel test failed,
+3.43%, 6576px diff detected.
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/medication_details_golden_test.dart:85:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +160 -23: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +160 -23: F:/Android Apps/dosifi_v5/test/widgets/medication_details_golden_test.dart: Medication Details targeted goldens header identity - compact width with large text [E]
+  Test failed. See exception logs above.
+  The test description was: header identity - compact width with large text
+  
+00:08 +161 -23: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +161 -23: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: CollapsibleSectionFormCard goldens collapsed state - compact width with large text
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/collapsible_section_form_card_collapsed_compact_large_text.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#f7fdf
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/collapsible_section_form_card_collapsed_compact_large_text.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart:173:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  collapsed state - compact width with large text
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +161 -24: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +161 -24: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: CollapsibleSectionFormCard goldens collapsed state - compact width with large text [E]
+  Test failed. See exception logs above.
+  The test description was: collapsed state - compact width with large text
+  
+00:08 +161 -24: F:/Android Apps/dosifi_v5/test/widgets/medication_details_golden_test.dart: Medication Details targeted goldens sealed vials editor card - compact width with large text
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/medication_details_sealed_vials_editor_compact_large_text.png": Pixel test failed,
+16.58%, 31840px diff detected.
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/medication_details_golden_test.dart:147:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +161 -25: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +161 -25: F:/Android Apps/dosifi_v5/test/widgets/medication_details_golden_test.dart: Medication Details targeted goldens sealed vials editor card - compact width with large text [E]
+  Test failed. See exception logs above.
+  The test description was: sealed vials editor card - compact width with large text
+  
+00:08 +161 -25: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: CollapsibleSectionFormCard goldens expanded neutral variant with long title
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/collapsible_section_form_card_long_title.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#2517a
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/collapsible_section_form_card_long_title.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart:200:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  expanded neutral variant with long title
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +161 -26: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:08 +161 -26: F:/Android Apps/dosifi_v5/test/widgets/form_cards_golden_test.dart: CollapsibleSectionFormCard goldens expanded neutral variant with long title [E]
+  Test failed. See exception logs above.
+  The test description was: expanded neutral variant with long title
+  
+00:09 +162 -26: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +162 -26: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets stepper buttons increment/decrement by 0.25
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with icon "IconData(U+0E047)": []" (used in a call to "tap()") could not
+find any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1045:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:126:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  stepper buttons increment/decrement by 0.25
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +162 -27: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +162 -27: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets stepper buttons increment/decrement by 0.25 [E]
+  Test failed. See exception logs above.
+  The test description was: stepper buttons increment/decrement by 0.25
+  
+00:09 +163 -27: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +163 -27: loading F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:09 +164 -27: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +164 -27: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets toggles to Strength mode
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with text "Strength": []" (used in a call to "tap()") could not find any
+matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1045:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:152:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  toggles to Strength mode
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +164 -28: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +164 -28: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets toggles to Strength mode [E]
+  Test failed. See exception logs above.
+  The test description was: toggles to Strength mode
+  
+00:09 +164 -28: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +164 -28: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets calculates from strength input
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with text "Strength": []" (used in a call to "tap()") could not find any
+matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1045:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:176:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  calculates from strength input
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +164 -29: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +164 -29: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Tablets calculates from strength input [E]
+  Test failed. See exception logs above.
+  The test description was: calculates from strength input
+  
+00:09 +164 -29: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Capsules displays mode toggle
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Strength": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:205:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart line 205
+The test description was:
+  displays mode toggle
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:09 +164 -30: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +164 -30: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Capsules displays mode toggle [E]
+  Test failed. See exception logs above.
+  The test description was: displays mode toggle
+  
+00:09 +165 -30: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:09 +165 -30: loading F:/Android Apps/dosifi_v5/test/widgets/schedule_list_card_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:10 +165 -30: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Capsules stepper increments by 1 for capsules
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with icon "IconData(U+0E047)": []" (used in a call to "tap()") could not
+find any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1045:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:248:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  stepper increments by 1 for capsules
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +165 -31: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +165 -31: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - Capsules stepper increments by 1 for capsules [E]
+  Test failed. See exception logs above.
+  The test description was: stepper increments by 1 for capsules
+  
+00:10 +165 -31: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens active schedule with next dose - standard width
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/schedule_detail_header_banner_active.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#77f95
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/schedule_detail_header_banner_active.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart:96:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  active schedule with next dose - standard width
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +165 -32: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +165 -32: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens active schedule with next dose - standard width [E]
+  Test failed. See exception logs above.
+  The test description was: active schedule with next dose - standard width
+  
+00:10 +166 -32: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +166 -32: F:/Android Apps/dosifi_v5/test/widgets/schedule_card_test.dart: snooze creates dose log and schedules one-off snooze
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: <1>
+  Actual: <0>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_card_test.dart:95:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_card_test.dart line 95
+The test description was:
+  snooze creates dose log and schedules one-off snooze
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +166 -32: loading F:/Android Apps/dosifi_v5/test/widgets/today_doses_card_golden_test.dart
+Warning: A tag was used that wasn't specified in dart_test.yaml.
+  golden was used in the suite itself
+
+00:10 +166 -33: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +166 -33: F:/Android Apps/dosifi_v5/test/widgets/schedule_card_test.dart: snooze creates dose log and schedules one-off snooze [E]
+  Test failed. See exception logs above.
+  The test description was: snooze creates dose log and schedules one-off snooze
+  
+00:10 +167 -33: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +167 -34: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +167 -34: F:/Android Apps/dosifi_v5/test/widgets/today_doses_card_golden_test.dart: (setUpAll) [E]
+  MissingPluginException(No implementation found for method getApplicationDocumentsDirectory on channel plugins.flutter.io/path_provider)
+  package:flutter/src/services/platform_channel.dart 365:7  MethodChannel._invokeMethod
+  
+00:10 +167 -34: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +167 -34: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens paused schedule - compact width with large text
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY RENDERING LIBRARY Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown during layout:
+A RenderFlex overflowed by 10 pixels on the right.
+
+The relevant error-causing widget was:
+  Row Row:file:///F:/Android%20Apps/dosifi_v5/lib/src/widgets/detail_page_scaffold.dart:438:9
+
+The overflowing RenderFlex has an orientation of Axis.horizontal.
+The edge of the RenderFlex that is overflowing has been marked in the rendering with a yellow and
+black striped pattern. This is usually caused by the contents being too big for the RenderFlex.
+Consider applying a flex factor (e.g. using an Expanded widget) to force the children of the
+RenderFlex to fit within the available space instead of being sized to their natural size.
+This is considered an error condition because it indicates that there is content that cannot be
+seen. If the content is legitimately bigger than the available space, consider clipping it with a
+ClipRect widget before putting it in the flex, or using a scrollable container rather than a Flex,
+like a ListView.
+The specific RenderFlex in question is: RenderFlex#1fafc relayoutBoundary=up7 OVERFLOWING:
+  creator: Row ΓåÉ Column ΓåÉ DetailStatItem ΓåÉ Expanded ΓåÉ Row ΓåÉ Column ΓåÉ DetailStatsBanner ΓåÉ
+    ScheduleDetailHeaderBanner ΓåÉ ConstrainedBox ΓåÉ RepaintBoundary-[<'golden'>] ΓåÉ Center ΓåÉ
+    KeyedSubtree-[GlobalKey#2b71b] ΓåÉ Γï»
+  parentData: offset=Offset(0.0, 0.0); flex=null; fit=null (can use size)
+  constraints: BoxConstraints(0.0<=w<=154.0, 0.0<=h<=Infinity)
+  size: Size(154.0, 21.0)
+  direction: horizontal
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: center
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+ΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñΓùóΓùñ
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/schedule_detail_header_banner_paused_compact_large_text.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#7e0e5
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/schedule_detail_header_banner_paused_compact_large_text.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart:126:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  paused schedule - compact width with large text
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following message was thrown:
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+unexpected.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +167 -35: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +167 -35: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens paused schedule - compact width with large text [E]
+  Test failed. See exception logs above.
+  The test description was: paused schedule - compact width with large text
+  
+00:10 +168 -35: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +169 -35: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +169 -35: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart: ScheduleDetailHeaderBanner does not overflow at compact width
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Pause": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart:104:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart line 104
+The test description was:
+  ScheduleDetailHeaderBanner does not overflow at compact width
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +169 -36: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +169 -36: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart: ScheduleDetailHeaderBanner does not overflow at compact width [E]
+  Test failed. See exception logs above.
+  The test description was: ScheduleDetailHeaderBanner does not overflow at compact width
+  
+00:10 +169 -36: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens inactive schedule - no next dose
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/schedule_detail_header_banner_inactive.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#cf804
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/schedule_detail_header_banner_inactive.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart:149:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  inactive schedule - no next dose
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +169 -37: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +169 -37: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens inactive schedule - no next dose [E]
+  Test failed. See exception logs above.
+  The test description was: inactive schedule - no next dose
+  
+00:10 +169 -37: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens completed schedule - compact width
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/schedule_detail_header_banner_completed_compact.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#02b2d
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/schedule_detail_header_banner_completed_compact.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart:176:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  completed schedule - compact width
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +170 -37: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +170 -38: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +170 -38: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens completed schedule - compact width [E]
+  Test failed. See exception logs above.
+  The test description was: completed schedule - compact width
+  
+00:10 +170 -38: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart: ScheduleDetailHeaderBanner shows Resume when paused
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Resume": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart:136:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart line 136
+The test description was:
+  ScheduleDetailHeaderBanner shows Resume when paused
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +170 -39: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +170 -39: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_test.dart: ScheduleDetailHeaderBanner shows Resume when paused [E]
+  Test failed. See exception logs above.
+  The test description was: ScheduleDetailHeaderBanner shows Resume when paused
+  
+00:10 +170 -39: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +170 -39: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens long medication name - text wrapping
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: one widget whose rasterized image matches golden image
+"goldens/schedule_detail_header_banner_long_title.png"
+  Actual: _KeyWidgetFinder:<Found 1 widget with key [<'golden'>]: [
+            RepaintBoundary-[<'golden'>](renderObject: RenderRepaintBoundary#a2600
+relayoutBoundary=up2),
+          ]>
+   Which: Could not be compared against non-existent file:
+"goldens/schedule_detail_header_banner_long_title.png"
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+#8      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#9      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart:204:7)
+<asynchronous suspension>
+#10     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#11     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 7 frames from dart:async and package:stack_trace)
+
+The test description was:
+  long medication name - text wrapping
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +170 -40: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +170 -40: F:/Android Apps/dosifi_v5/test/widgets/schedule_detail_header_banner_golden_test.dart: ScheduleDetailHeaderBanner goldens long medication name - text wrapping [E]
+  Test failed. See exception logs above.
+  The test description was: long medication name - text wrapping
+  
+00:10 +170 -40: F:/Android Apps/dosifi_v5/test/widgets/schedule_list_card_golden_test.dart: ScheduleListCard goldens dense - compact width with large text
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown while running async test code:
+Golden "goldens/schedule_list_card_dense_compact_large_text.png": Pixel test failed, 10.13%, 4864px
+diff detected.
+Failure feedback can be found at /F:/Android%20Apps/dosifi_v5/test/widgets/failures
+
+When the exception was thrown, this was the stack:
+#0      LocalFileComparator.compare (package:flutter_test/src/_goldens_io.dart:108:5)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/schedule_list_card_golden_test.dart:85:7)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:10 +170 -41: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +170 -41: F:/Android Apps/dosifi_v5/test/widgets/schedule_list_card_golden_test.dart: ScheduleListCard goldens dense - compact width with large text [E]
+  Test failed. See exception logs above.
+  The test description was: dense - compact width with large text
+  
+00:10 +171 -41: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +172 -41: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:10 +173 -41: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +173 -41: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) displays 3-way mode toggle for MDV
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Volume": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:489:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart line 489
+The test description was:
+  displays 3-way mode toggle for MDV
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:11 +173 -42: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +173 -42: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) displays 3-way mode toggle for MDV [E]
+  Test failed. See exception logs above.
+  The test description was: displays 3-way mode toggle for MDV
+  
+00:11 +174 -42: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +175 -42: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +175 -42: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) switches to Volume mode
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with text "Volume": []" (used in a call to "tap()") could not find any
+matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1045:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:571:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  switches to Volume mode
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:11 +175 -43: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +175 -43: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) switches to Volume mode [E]
+  Test failed. See exception logs above.
+  The test description was: switches to Volume mode
+  
+00:11 +175 -43: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) switches to Units mode
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with text "Units": []" (used in a call to "tap()") could not find any
+matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2013:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1865:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1045:7)
+#3      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:607:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  switches to Units mode
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:11 +175 -44: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +175 -44: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) switches to Units mode [E]
+  Test failed. See exception logs above.
+  The test description was: switches to Units mode
+  
+00:11 +176 -44: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +176 -44: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) displays 3-value summary for MDV
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: at least one matching candidate
+  Actual: _TextContainingWidgetFinder:<Found 0 widgets with text containing 25.0 Units: []>
+   Which: means none were found but some were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:651:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart line 651
+The test description was:
+  displays 3-value summary for MDV
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:11 +176 -45: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +176 -45: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) displays 3-value summary for MDV [E]
+  Test failed. See exception logs above.
+  The test description was: displays 3-value summary for MDV
+  
+00:11 +176 -45: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) initializes with strength value
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "500.0": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure> (file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart:679:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///F:/Android%20Apps/dosifi_v5/test/widgets/dose_input_field_test.dart line 679
+The test description was:
+  initializes with strength value
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:11 +176 -46: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +176 -46: F:/Android Apps/dosifi_v5/test/widgets/dose_input_field_test.dart: DoseInputField - MDV (Multi-Dose Vial) initializes with strength value [E]
+  Test failed. See exception logs above.
+  The test description was: initializes with strength value
+  
+00:11 +177 -46: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +178 -46: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:11 +179 -46: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:12 +180 -46: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
+00:12 +181 -46: F:/Android Apps/dosifi_v5/test/features/schedules/presentation/schedule_detail_page_test.dart: ScheduleDetailPage initializes without crashing
