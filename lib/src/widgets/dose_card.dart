@@ -6,6 +6,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/ui/dose_card_layout_settings.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/dose_value_formatter.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
 
@@ -439,27 +440,39 @@ class DoseCard extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(timePart,
-                            style: timeMainStyle,
-                            textAlign: TextAlign.center),
-                        if (amPmPart.isNotEmpty)
-                          Text(amPmPart,
-                              style: timeSubStyle,
-                              textAlign: TextAlign.center),
-                        if (doseMetrics.isNotEmpty) ...[const SizedBox(height: 2),
-                          Text(
-                            doseMetrics,
-                            style: TextStyle(
-                              fontSize: 8.0,
-                              fontWeight: kFontWeightSemiBold,
-                              color: timeColor.withValues(alpha: 0.70),
-                              height: 1.1,
+                        // Time + AM/PM on same row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(timePart, style: timeMainStyle),
+                            if (amPmPart.isNotEmpty) ...[const SizedBox(width: 2),
+                              Text(amPmPart, style: timeSubStyle),
+                            ],
+                          ],
+                        ),
+                        // Dose: value + unit (short form)
+                        Builder(builder: (_) {
+                          final shortDose =
+                              '${DoseValueFormatter.format(dose.doseValue, dose.doseUnit)} ${dose.doseUnit}';
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              shortDose,
+                              style: TextStyle(
+                                fontSize: 8.0,
+                                fontWeight: kFontWeightSemiBold,
+                                color: timeColor.withValues(alpha: 0.70),
+                                height: 1.1,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                          );
+                        }),
                         if (doseNumber != null) ...[const SizedBox(height: 1),
                           Text(
                             '#$doseNumber',
@@ -488,52 +501,63 @@ class DoseCard extends StatelessWidget {
                             : kSpacingL.toDouble(),
                         vertical: vPad,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        medicationName,
-                                        style: c.primaryStyle,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                      child: Center(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          medicationName,
+                                          style: c.primaryStyle,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                    ),
-                                    if (titleTrailing != null) ...[
-                                      const SizedBox(width: kSpacingXS),
-                                      titleTrailing!,
+                                      if (titleTrailing != null) ...[
+                                        const SizedBox(width: kSpacingXS),
+                                        titleTrailing!,
+                                      ],
                                     ],
-                                  ],
+                                  ),
                                 ),
-                              ),
-                              if (showActions) ...[
-                                const SizedBox(width: kSpacingS),
-                                _chip(context,
-                                    status: c.effectiveStatus,
-                                    disabled: c.disabled),
+                                if (showActions) ...[
+                                  const SizedBox(width: kSpacingS),
+                                  _chip(context,
+                                      status: c.effectiveStatus,
+                                      disabled: c.disabled),
+                                ],
                               ],
+                            ),
+                            if (doseMetrics.isNotEmpty) ...[
+                              const SizedBox(height: 1),
+                              Text(
+                                doseMetrics,
+                                style: c.secondaryStyle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ],
-                          ),
-                          if (leadingFooter != null) ...[
-                            const SizedBox(height: kSpacingXS),
-                            leadingFooter!,
+                            if (leadingFooter != null) ...[
+                              const SizedBox(height: kSpacingXS),
+                              leadingFooter!,
+                            ],
+                            if (c.hasDetails) ...[
+                              const SizedBox(height: kSpacingXXS),
+                              ...c.detailWidgets,
+                            ],
+                            if (c.hasFooter) ...[
+                              const SizedBox(height: kSpacingS),
+                              footer!,
+                            ],
                           ],
-                          if (c.hasDetails) ...[
-                            const SizedBox(height: kSpacingXXS),
-                            ...c.detailWidgets,
-                          ],
-                          if (c.hasFooter) ...[
-                            const SizedBox(height: kSpacingS),
-                            footer!,
-                          ],
-                        ],
+                        ),
                       ),
                     ),
                   ),

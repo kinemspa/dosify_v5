@@ -259,22 +259,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('8:00',
+                        Text('8:00 AM',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
                                 color: accent,
                                 height: 1.15)),
-                        Text('AM',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 7,
-                                fontWeight: FontWeight.w600,
-                                color: accent.withValues(alpha: 0.70),
-                                height: 1.2)),
                         const SizedBox(height: 2),
-                        Text('40U',
+                        Text('40 units',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 8,
@@ -306,6 +299,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(mockMed, style: medStyle),
+                                const SizedBox(height: 2),
+                                Text('0.75 mL · Vial 2',
+                                    style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w500,
+                                        color: accent.withValues(alpha: 0.60),
+                                        height: 1.2),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis),
                               ],
                             ),
                           ),
