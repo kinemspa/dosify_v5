@@ -191,20 +191,13 @@ class _HeaderPauseResumeAction extends StatelessWidget {
         ? Icons.pause_circle_outline_rounded
         : Icons.play_circle_outline_rounded;
 
-    return InkWell(
+    final button = InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: kSpacingS,
           vertical: kSpacingXXS,
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: cs.onPrimary.withValues(alpha: 0.35),
-            width: kBorderWidthThin,
-          ),
-          borderRadius: BorderRadius.circular(kBorderRadiusChipTight),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -220,5 +213,29 @@ class _HeaderPauseResumeAction extends StatelessWidget {
         ),
       ),
     );
+
+    final pausedUntil = schedule.pausedUntil;
+    if (!isActive && pausedUntil != null) {
+      final formatted = MaterialLocalizations.of(
+        context,
+      ).formatShortMonthDay(pausedUntil.toLocal());
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          button,
+          const SizedBox(height: kSpacingXXS),
+          Text(
+            'Until $formatted',
+            style: microHelperTextStyle(
+              context,
+              color: cs.onPrimary.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return button;
   }
 }

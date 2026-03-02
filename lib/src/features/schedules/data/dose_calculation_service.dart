@@ -64,7 +64,8 @@ class DoseCalculationService {
     final doses = <CalculatedDose>[];
 
     for (final schedule in schedules) {
-      if (!includeInactive && !schedule.active) continue;
+      // Let paused-until schedules through; only hard-skip fully disabled ones.
+      if (!includeInactive && schedule.isDisabled) continue;
 
       final scheduleDoses = _calculateScheduleDoses(
         schedule,
@@ -311,6 +312,11 @@ class DoseCalculationService {
     if (startAt != null && time.isBefore(startAt)) return false;
     final endAt = schedule.endAt;
     if (endAt != null && time.isAfter(endAt)) return false;
+
+    // Suppress occurrences that fall within the paused window.
+    final pausedUntil = schedule.pausedUntil;
+    if (pausedUntil != null && time.isBefore(pausedUntil)) return false;
+
     return true;
   }
 
