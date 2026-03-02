@@ -57,14 +57,36 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
     final cs = Theme.of(context).colorScheme;
     final displayValue = log.actualDoseValue ?? log.doseValue;
     final displayUnit = log.actualDoseUnit ?? log.doseUnit;
+    final spec = doseActionVisualSpec(context, log.action);
 
-    return Text(
-      '${_formatAmount(displayValue)} $displayUnit',
-      style: bodyTextStyle(
-        context,
-      )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          medicationName,
+          style: bodyTextStyle(
+            context,
+          )?.copyWith(fontWeight: kFontWeightSemiBold, color: cs.primary),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: kSpacingXS / 2),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: kSpacingXS,
+          children: [
+            Text(
+              '${_formatAmount(displayValue)} $displayUnit',
+              style: smallHelperTextStyle(
+                context,
+                color: spec.color.withValues(alpha: kOpacityMediumHigh),
+              )?.copyWith(fontWeight: kFontWeightSemiBold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
