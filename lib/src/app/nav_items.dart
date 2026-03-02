@@ -42,12 +42,6 @@ const allNavItems = <NavItemConfig>[
     location: '/medications/reconstitution',
   ),
   NavItemConfig(
-    id: 'supplies',
-    label: 'Supplies',
-    icon: Icons.inventory_2,
-    location: '/supplies',
-  ),
-  NavItemConfig(
     id: 'inventory',
     label: 'Inventory',
     icon: Icons.inventory,
