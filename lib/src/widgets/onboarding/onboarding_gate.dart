@@ -83,9 +83,9 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
 
   final List<_CoachStep> _steps = const [
     _CoachStep(
-      title: 'Home screen',
+      title: 'Welcome to Dosifi',
       message:
-          'This is your dashboard with an overall view of medications, schedules, and due doses.',
+          "Dosifi helps you organise medications, schedules, and track activity for personal reference. All data stays on your device. Let's take a quick tour.",
       routePath: '/',
       targetAlignment: Alignment(0, -0.70),
     ),
@@ -99,21 +99,21 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
     _CoachStep(
       title: 'Schedules',
       message:
-          'Create dose schedules here. You receive notifications from these schedules.',
+          'Create schedules here. You receive notifications when a scheduled time arrives.',
       routePath: '/schedules',
       targetAlignment: Alignment(0.25, 0.92),
     ),
     _CoachStep(
       title: 'Schedule links',
       message:
-          'Each schedule is attached to a medication, and doses are attached to a schedule.',
+          'Each schedule is attached to a medication, and log entries are attached to a schedule.',
       routePath: '/schedules',
       targetAlignment: Alignment(0.25, 0.92),
     ),
     _CoachStep(
       title: 'Medication details',
       message:
-          'Open any medication details page. It has an ad hoc dose action for doses taken outside a schedule.',
+          'Open any medication details page. It includes a quick-log action for recording activity outside a scheduled time.',
       routePath: '/medications/',
       usesPrefixMatch: true,
       waitForUserNavigation: true,
@@ -121,23 +121,23 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
       targetAlignment: Alignment(0, -0.18),
     ),
     _CoachStep(
-      title: 'Reconstitution calculator',
+      title: 'Reconstitution entries',
       message:
-          'Quickly calculate and save reconstitutions for later use when adding medications.',
+          'Record and save vial reconstitution entries here for organisational reference. Always verify values with your clinician.',
       routePath: '/medications/reconstitution',
       targetAlignment: Alignment(-0.25, 0.92),
     ),
     _CoachStep(
       title: 'Multi-dose vial support',
       message:
-          'Multi-dose vials include a built-in reconstitution calculator in their add/edit flow.',
+          'Multi-dose vials include a built-in reconstitution tracking tool in their add/edit flow.',
       routePath: '/medications/add/injection/multi',
       targetAlignment: Alignment(-0.25, 0.92),
     ),
     _CoachStep(
       title: 'Analytics',
       message:
-          'Get reports and trend insights across your dose activity and history.',
+          'Get reports and trend insights across your activity and history.',
       routePath: '/analytics',
       targetAlignment: Alignment(0.68, -0.82),
     ),
@@ -386,17 +386,8 @@ class _OnboardingCoachOverlayState extends State<_OnboardingCoachOverlay> {
                                 ),
                                 const SizedBox(height: kSpacingS),
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      '${_stepIndex + 1}/${_steps.length}',
-                                      style: smallHelperTextStyle(
-                                        context,
-                                        color: coachFg,
-                                      )?.copyWith(
-                                        fontSize: kOnboardingCoachMetaFontSize,
-                                      ),
-                                    ),
-                                    const Spacer(),
                                     FilledButton(
                                       onPressed: _goNext,
                                       style: FilledButton.styleFrom(

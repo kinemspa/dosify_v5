@@ -378,7 +378,7 @@ class DoseCard extends StatelessWidget {
   Widget _buildMinimalLayout(BuildContext context) {
     final c = _computed(context);
     final cs = Theme.of(context).colorScheme;
-    final vPad = compact ? kSpacingS.toDouble() : kSpacingM.toDouble();
+    final vPad = compact ? kSpacingXS.toDouble() : kSpacingS.toDouble();
     final localTime = dose.scheduledTime.toLocal();
     final timeColor =
         isActive ? c.statusColor : c.statusColor.withValues(alpha: kOpacityMediumLow);
@@ -396,7 +396,7 @@ class DoseCard extends StatelessWidget {
         spaceIdx > 0 ? fullTime.substring(spaceIdx + 1) : '';
 
     final timeMainStyle = TextStyle(
-      fontSize: compact ? 13.0 : 14.0,
+      fontSize: compact ? 10.0 : 11.0,
       fontWeight: kFontWeightBold,
       color: timeColor,
       height: 1.15,
