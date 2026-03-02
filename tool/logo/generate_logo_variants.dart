@@ -84,9 +84,14 @@ img.Image _composeTransparentPadded({
   required int size,
   required double insetFraction,
 }) {
-  final canvas = img.Image(width: size, height: size);
+  // Explicitly 4-channel RGBA so the transparent fill is preserved.
+  final canvas = img.Image(
+    width: size,
+    height: size,
+    numChannels: 4,
+  );
 
-  // Transparent background by default.
+  // Transparent background.
   img.fill(canvas, color: img.ColorRgba8(0, 0, 0, 0));
 
   final targetMax = (size * (1.0 - 2 * insetFraction)).round();
