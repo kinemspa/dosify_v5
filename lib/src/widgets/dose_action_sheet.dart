@@ -238,7 +238,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
     String labelFor(_DoseStatusOption o) {
       return switch (o) {
-        _DoseStatusOption.scheduled => 'Scheduled',
+        _DoseStatusOption.scheduled => 'Pending',
         _DoseStatusOption.logged => 'Logged',
         _DoseStatusOption.snoozed => 'Snoozed',
         _DoseStatusOption.skipped => 'Skipped',
@@ -1010,7 +1010,7 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
             const SizedBox(height: kSpacingM),
             CollapsibleSectionFormCard(
               title: 'Advanced',
-              neutral: true,
+              backgroundColor: _statusAccentColor(context).withValues(alpha: 0.07),
               isExpanded: _editExpanded,
               onExpandedChanged: (v) => setState(() => _editExpanded = v),
               children: [
@@ -1188,23 +1188,16 @@ class _DoseActionSheetState extends State<DoseActionSheet> {
 
   Widget _buildStatusHint(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Icon(
-          _hasChanged ? Icons.info_outline_rounded : Icons.schedule_rounded,
-          size: kIconSizeSmall,
+    return Center(
+      child: Text(
+        _hasChanged
+            ? 'Tap Save & Close to apply changes.'
+            : 'Tap to toggle the Dose status.',
+        style: helperTextStyle(context)?.copyWith(
           color: cs.onSurfaceVariant.withValues(alpha: kOpacityMediumLow),
         ),
-        const SizedBox(width: kSpacingS),
-        Expanded(
-          child: Text(
-            _hasChanged
-                ? 'Tap Save & Close to apply changes.'
-                : 'Tap to toggle the Dose status.',
-            style: helperTextStyle(context),
-          ),
-        ),
-      ],
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }

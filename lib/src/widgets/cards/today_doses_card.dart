@@ -356,7 +356,10 @@ class _TodayDosesCardState extends ConsumerState<TodayDosesCard> {
           )
         else ...[
           for (final item in previewItems) ...[
-            buildDoseRow(context, item),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: kSpacingM),
+              child: buildDoseRow(context, item),
+            ),
             const SizedBox(height: kSpacingS),
           ],
           if (hasMoreThanPreview)

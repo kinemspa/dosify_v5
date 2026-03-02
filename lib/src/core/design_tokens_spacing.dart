@@ -568,8 +568,8 @@ const EdgeInsets kCalendarStageHourRowPadding = EdgeInsets.fromLTRB(
   kSpacingXS,
   kSpacingS,
 );
-const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.only(
-  bottom: kSpacingS,
+const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.fromLTRB(
+  kSpacingM, 0, kSpacingM, kSpacingS,
 );
 
 /// Selected-day stage sizing (full-screen calendar).
