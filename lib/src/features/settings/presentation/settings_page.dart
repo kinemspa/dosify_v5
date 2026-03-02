@@ -127,6 +127,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     switch (layout) {
       case DoseCardLayout.pill:
+        // Icon Row: avatar left, 3 text rows centre, chip right
         return Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -137,29 +138,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Time pill mock
               Container(
-                width: 36,
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: accent.withValues(alpha: 0.5)),
+                  border: Border.all(color: accent.withValues(alpha: 0.28)),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('8:00',
-                        style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: accent,
-                            height: 1.1)),
-                    Text('AM',
-                        style: TextStyle(
-                            fontSize: 7, color: dim, height: 1.1)),
-                  ],
-                ),
+                child: Icon(Icons.alarm_rounded, size: 16, color: accent),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -168,6 +155,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   children: [
                     Text(mockMed, style: medStyle),
                     Text(mockSched, style: dimStyle),
+                    Text(mockTime,
+                        style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: accent.withValues(alpha: 0.70),
+                            height: 1.2)),
                   ],
                 ),
               ),
@@ -186,52 +179,132 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         );
 
       case DoseCardLayout.accent:
+        // Header Band: tinted band top (name+chip), clock+time+sched body
         return ClipRRect(
           borderRadius: BorderRadius.circular(kBorderRadiusSmall),
           child: Container(
-            decoration: BoxDecoration(color: bg),
+            decoration: BoxDecoration(
+              color: bg,
+              border: Border.all(color: outlineColor),
+              borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  color: accent.withValues(alpha: 0.13),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(mockMed, style: medStyle)),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 3),
+                        decoration: chipDecoration,
+                        child: Text(mockStatus,
+                            style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w700,
+                                color: accent)),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  child: Row(
+                    children: [
+                      Icon(Icons.schedule_rounded,
+                          size: 10,
+                          color: accent.withValues(alpha: 0.70)),
+                      const SizedBox(width: 3),
+                      Text(mockTime,
+                          style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: accent.withValues(alpha: 0.70),
+                              height: 1.2)),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text(mockSched, style: dimStyle)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+      case DoseCardLayout.minimal:
+        // Sidebar Time: narrow tinted time column, divider, name+sched+chip
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+          child: Container(
+            decoration: BoxDecoration(
+              color: bg,
+              border: Border.all(color: outlineColor),
+              borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            ),
             child: IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(width: 3, color: accent),
+                  Container(
+                    width: 40,
+                    color: accent.withValues(alpha: 0.09),
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('8:00',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: accent,
+                                height: 1.15)),
+                        Text('AM',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 7,
+                                fontWeight: FontWeight.w600,
+                                color: accent.withValues(alpha: 0.70),
+                                height: 1.2)),
+                      ],
+                    ),
+                  ),
+                  Container(width: 1, color: accent.withValues(alpha: 0.20)),
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: outlineColor),
-                          top: BorderSide(color: outlineColor),
-                          bottom: BorderSide(color: outlineColor),
-                        ),
-                      ),
+                    child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(mockMed, style: medStyle),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(mockTime, style: dimStyle),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 3),
-                                decoration: chipDecoration,
-                                child: Text(mockStatus,
-                                    style: TextStyle(
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.w700,
-                                        color: accent)),
-                              ),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(mockMed, style: medStyle),
+                                Text(mockSched, style: dimStyle),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(mockSched, style: dimStyle),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 3),
+                            decoration: chipDecoration,
+                            child: Text(mockStatus,
+                                style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                    color: accent)),
+                          ),
                         ],
                       ),
                     ),
@@ -239,63 +312,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
               ),
             ),
-          ),
-        );
-
-      case DoseCardLayout.minimal:
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(kBorderRadiusSmall),
-            border: Border.all(color: outlineColor),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 3),
-                child: Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                      color: accent, shape: BoxShape.circle),
-                ),
-              ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(mockTime,
-                            style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: accent.withValues(alpha: 0.75),
-                                height: 1.2)),
-                        const SizedBox(width: 4),
-                        Expanded(child: Text(mockMed, style: medStyle)),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 3),
-                          decoration: chipDecoration,
-                          child: Text(mockStatus,
-                              style: TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w700,
-                                  color: accent)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(mockSched, style: dimStyle),
-                  ],
-                ),
-              ),
-            ],
           ),
         );
     }

@@ -8,7 +8,6 @@ import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_date_badge.dart';
 
 class DoseCard extends StatelessWidget {
   const DoseCard({
@@ -124,19 +123,28 @@ class DoseCard extends StatelessWidget {
     );
   }
 
-  // ── Layout A: pill ────────────────────────────────────────────────────────
-  // Narrow time-only pill on the left, med name + schedule + dose in center,
-  // status chip on right.
+  // ---- Layout A: icon-row --------------------------------------------------
+  // 40x40 rounded-square avatar (status colour tint + med/clock icon) left.
+  // Med name bold, schedule.dose, then time muted below in centre column.
+  // Status chip anchored to the right.
 
   Widget _buildPillLayout(BuildContext context) {
     final c = _computed(context);
     final padding = doseCardContentPadding(compact: compact);
-    final gap = doseCardColumnGap(compact: compact);
+    final avatarSize = compact ? 36.0 : 40.0;
+    final localTime = dose.scheduledTime.toLocal();
+    final timeStr = DateTimeFormatter.formatTime(context, localTime);
+    final iconColor =
+        isActive ? c.statusColor : c.statusColor.withValues(alpha: kOpacityMediumLow);
+
+    final timeStyle = doseCardTimeTextStyle(
+      context,
+      color: iconColor,
+    );
 
     return _shell(
       context: context,
-      decoration:
-          buildDoseCardDecoration(context: context, borderRadius: _radius),
+      decoration: buildDoseCardDecoration(context: context, borderRadius: _radius),
       child: Padding(
         padding: padding,
         child: Column(
@@ -145,29 +153,29 @@ class DoseCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    NextDoseDateBadge(
-                      nextDose: dose.scheduledTime,
-                      isActive: isActive,
-                      dense: true,
-                      activeColor: c.statusColor,
-                      denseContent: NextDoseBadgeDenseContent.time,
-                      showNextLabel: false,
-                      showTodayIcon: true,
-                      // Pill shows time only — no duplicated med/dose content.
+                // Avatar
+                Container(
+                  width: avatarSize,
+                  height: avatarSize,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: kOpacityMinimal + 0.04),
+                    borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+                    border: Border.all(
+                      color: iconColor.withValues(alpha: 0.18),
+                      width: 1.2,
                     ),
-                    if (leadingFooter != null) ...[
-                      const SizedBox(height: kSpacingXS),
-                      leadingFooter!,
-                    ],
-                  ],
+                  ),
+                  child: Icon(
+                    medicationFormIcon ?? Icons.alarm_rounded,
+                    size: compact ? kIconSizeMedium : kIconSizeLarge,
+                    color: iconColor,
+                  ),
                 ),
-                SizedBox(width: gap),
+                const SizedBox(width: kSpacingM),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         children: [
@@ -180,24 +188,26 @@ class DoseCard extends StatelessWidget {
                             ),
                           ),
                           if (titleTrailing != null) ...[
-                            const SizedBox(width: kSpacingS),
+                            const SizedBox(width: kSpacingXS),
                             titleTrailing!,
                           ],
                         ],
                       ),
+                      const SizedBox(height: 1),
                       Text(
-                        dose.scheduleName,
+                        doseMetrics.isNotEmpty
+                            ? '${dose.scheduleName}  \u00b7  $doseMetrics'
+                            : dose.scheduleName,
                         style: c.secondaryStyle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (doseMetrics.isNotEmpty)
-                        Text(
-                          doseMetrics,
-                          style: c.secondaryStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      const SizedBox(height: 2),
+                      Text(timeStr, style: timeStyle),
+                      if (leadingFooter != null) ...[
+                        const SizedBox(height: kSpacingXS),
+                        leadingFooter!,
+                      ],
                       if (c.hasDetails) ...[
                         const SizedBox(height: kSpacingXXS),
                         ...c.detailWidgets,
@@ -206,45 +216,205 @@ class DoseCard extends StatelessWidget {
                   ),
                 ),
                 if (showActions) ...[
-                  SizedBox(width: gap),
-                  _chip(context,
-                      status: c.effectiveStatus, disabled: c.disabled),
+                  const SizedBox(width: kSpacingS),
+                  _chip(context, status: c.effectiveStatus, disabled: c.disabled),
                 ],
               ],
             ),
-            if (c.hasFooter) ...[
-              const SizedBox(height: kSpacingS),
-              footer!,
-            ],
+            if (c.hasFooter) ...[const SizedBox(height: kSpacingS), footer!],
           ],
         ),
       ),
     );
   }
 
-  // ── Layout B: accent ──────────────────────────────────────────────────────
-  // Status-coloured 4dp left strip.  Time shown inline on the first text row.
-  // Most information-dense while remaining visually clean.
+  // ---- Layout B: header-band -----------------------------------------------
+  // Full-width status-tinted title band: med name + chip inside.
+  // Clean body below: clock icon + time + schedule.dose detail.
 
   Widget _buildAccentLayout(BuildContext context) {
     final c = _computed(context);
     final cs = Theme.of(context).colorScheme;
-    final vPad = compact ? kSpacingS.toDouble() : kSpacingM.toDouble();
     final hPad = compact ? kSpacingM.toDouble() : kSpacingL.toDouble();
     final localTime = dose.scheduledTime.toLocal();
     final timeStr = DateTimeFormatter.formatTime(context, localTime);
     final outlineColor =
         cs.outlineVariant.withValues(alpha: kStandardCardBorderOpacity);
-
+    final bandColor = c.statusColor.withValues(alpha: isActive ? 0.13 : 0.07);
     final cardColor =
-        buildStandardCardDecoration(context: context, useGradient: false)
-            .color;
+        buildStandardCardDecoration(context: context, useGradient: false).color;
+    final timeColor = c.statusColor
+        .withValues(alpha: isActive ? kOpacityMediumHigh : kOpacityMediumLow);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(_radius),
       child: Container(
         decoration: BoxDecoration(
           color: cardColor,
+          border: Border.all(color: outlineColor),
+          borderRadius: BorderRadius.circular(_radius),
+          boxShadow: [
+            BoxShadow(
+              color: cs.shadow.withValues(alpha: kDoseCardShadowOpacity),
+              blurRadius: kDoseCardShadowBlurRadius,
+              offset: kDoseCardShadowOffset,
+            ),
+          ],
+        ),
+        child: Material(
+          color: kColorTransparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header band
+                Container(
+                  color: bandColor,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: hPad,
+                    vertical: compact ? 7.0 : 9.0,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                medicationName,
+                                style: c.primaryStyle?.copyWith(
+                                  color: c.statusColor.withValues(
+                                    alpha: isActive ? 1.0 : kOpacityMediumHigh,
+                                  ),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (titleTrailing != null) ...[
+                              const SizedBox(width: kSpacingXS),
+                              titleTrailing!,
+                            ],
+                          ],
+                        ),
+                      ),
+                      if (showActions) ...[
+                        const SizedBox(width: kSpacingS),
+                        _chip(context,
+                            status: c.effectiveStatus, disabled: c.disabled),
+                      ],
+                    ],
+                  ),
+                ),
+                // Body row
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: hPad,
+                    vertical: compact ? 7.0 : 10.0,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.schedule_rounded,
+                          size: kIconSizeSmall, color: timeColor),
+                      const SizedBox(width: 5),
+                      Text(
+                        timeStr,
+                        style: doseCardTimeTextStyle(context, color: timeColor),
+                      ),
+                      const SizedBox(width: kSpacingM),
+                      Expanded(
+                        child: Text(
+                          doseMetrics.isNotEmpty
+                              ? '${dose.scheduleName}  \u00b7  $doseMetrics'
+                              : dose.scheduleName,
+                          style: c.secondaryStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (leadingFooter != null || c.hasDetails || c.hasFooter)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: hPad,
+                      right: hPad,
+                      bottom: compact ? 7.0 : 10.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (leadingFooter != null) leadingFooter!,
+                        if (c.hasDetails) ...[
+                          const SizedBox(height: kSpacingXXS),
+                          ...c.detailWidgets,
+                        ],
+                        if (c.hasFooter) ...[
+                          const SizedBox(height: kSpacingS),
+                          footer!,
+                        ],
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---- Layout C: sidebar-time ----------------------------------------------
+  // Time stacked in a narrow status-tinted left column (HH:MM / AM|PM).
+  // Thin vertical divider. Med name + schedule.dose + chip to the right.
+
+  Widget _buildMinimalLayout(BuildContext context) {
+    final c = _computed(context);
+    final cs = Theme.of(context).colorScheme;
+    final vPad = compact ? kSpacingS.toDouble() : kSpacingM.toDouble();
+    final localTime = dose.scheduledTime.toLocal();
+    final timeColor =
+        isActive ? c.statusColor : c.statusColor.withValues(alpha: kOpacityMediumLow);
+    final outlineColor =
+        cs.outlineVariant.withValues(alpha: kStandardCardBorderOpacity);
+    final cardColor =
+        buildStandardCardDecoration(context: context, useGradient: false).color;
+
+    // Split "8:00 AM" into "8:00" + "AM"
+    final fullTime = DateTimeFormatter.formatTime(context, localTime);
+    final spaceIdx = fullTime.lastIndexOf(' ');
+    final timePart =
+        spaceIdx > 0 ? fullTime.substring(0, spaceIdx) : fullTime;
+    final amPmPart =
+        spaceIdx > 0 ? fullTime.substring(spaceIdx + 1) : '';
+
+    final timeMainStyle = TextStyle(
+      fontSize: compact ? 13.0 : 14.0,
+      fontWeight: kFontWeightBold,
+      color: timeColor,
+      height: 1.15,
+      letterSpacing: -0.3,
+    );
+    final timeSubStyle = TextStyle(
+      fontSize: 9.0,
+      fontWeight: kFontWeightSemiBold,
+      color: timeColor.withValues(alpha: 0.75),
+      height: 1.2,
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(_radius),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardColor,
+          border: Border.all(color: outlineColor),
+          borderRadius: BorderRadius.circular(_radius),
           boxShadow: [
             BoxShadow(
               color: cs.shadow.withValues(alpha: kDoseCardShadowOpacity),
@@ -261,19 +431,37 @@ class DoseCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Accent strip.
-                  Container(width: 4, color: c.statusColor),
-                  // Content with subtle right/top/bottom borders.
+                  // Time sidebar
+                  Container(
+                    width: compact ? 48.0 : 54.0,
+                    color: timeColor.withValues(alpha: 0.09),
+                    padding: EdgeInsets.symmetric(vertical: vPad),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(timePart,
+                            style: timeMainStyle,
+                            textAlign: TextAlign.center),
+                        if (amPmPart.isNotEmpty)
+                          Text(amPmPart,
+                              style: timeSubStyle,
+                              textAlign: TextAlign.center),
+                      ],
+                    ),
+                  ),
+                  // Divider
+                  Container(
+                      width: 1,
+                      color: timeColor.withValues(alpha: 0.20)),
+                  // Content
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: outlineColor),
-                          top: BorderSide(color: outlineColor),
-                          bottom: BorderSide(color: outlineColor),
-                        ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact
+                            ? kSpacingM.toDouble()
+                            : kSpacingL.toDouble(),
+                        vertical: vPad,
                       ),
-                      padding: EdgeInsets.fromLTRB(hPad, vPad, hPad, vPad),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -293,22 +481,10 @@ class DoseCard extends StatelessWidget {
                                       ),
                                     ),
                                     if (titleTrailing != null) ...[
-                                      const SizedBox(width: kSpacingS),
+                                      const SizedBox(width: kSpacingXS),
                                       titleTrailing!,
                                     ],
                                   ],
-                                ),
-                              ),
-                              const SizedBox(width: kSpacingS),
-                              Text(
-                                timeStr,
-                                style: c.secondaryStyle?.copyWith(
-                                  color: c.statusColor.withValues(
-                                    alpha: isActive
-                                        ? kOpacityMediumHigh
-                                        : kOpacityMediumLow,
-                                  ),
-                                  fontWeight: kFontWeightBold,
                                 ),
                               ),
                               if (showActions) ...[
@@ -322,7 +498,7 @@ class DoseCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             doseMetrics.isNotEmpty
-                                ? '${dose.scheduleName}  ·  $doseMetrics'
+                                ? '${dose.scheduleName}  \u00b7  $doseMetrics'
                                 : dose.scheduleName,
                             style: c.secondaryStyle,
                             maxLines: 1,
@@ -353,114 +529,7 @@ class DoseCard extends StatelessWidget {
     );
   }
 
-  // ── Layout C: minimal ─────────────────────────────────────────────────────
-  // Tiny status dot + inline time.  Everything on two compact text rows.
-  // No pill, no separate chip column — most height-efficient.
-
-  Widget _buildMinimalLayout(BuildContext context) {
-    final c = _computed(context);
-    final padding = doseCardContentPadding(compact: compact);
-    final localTime = dose.scheduledTime.toLocal();
-    final timeStr = DateTimeFormatter.formatTime(context, localTime);
-    final dotSize = compact ? 7.0 : 8.0;
-
-    final timeStyle = doseCardTimeTextStyle(
-      context,
-      color: c.statusColor.withValues(
-        alpha: isActive ? kOpacityMediumHigh : kOpacityMediumLow,
-      ),
-    );
-
-    return _shell(
-      context: context,
-      decoration:
-          buildDoseCardDecoration(context: context, borderRadius: _radius),
-      child: Padding(
-        padding: padding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Status dot.
-                Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Container(
-                    width: dotSize,
-                    height: dotSize,
-                    decoration: BoxDecoration(
-                      color: c.statusColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(timeStr, style: timeStyle),
-                          const SizedBox(width: kSpacingXS),
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    medicationName,
-                                    style: c.primaryStyle,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                if (titleTrailing != null) ...[
-                                  const SizedBox(width: kSpacingS),
-                                  titleTrailing!,
-                                ],
-                              ],
-                            ),
-                          ),
-                          if (showActions) ...[
-                            const SizedBox(width: kSpacingXS),
-                            _chip(context,
-                                status: c.effectiveStatus,
-                                disabled: c.disabled),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        doseMetrics.isNotEmpty
-                            ? '${dose.scheduleName}  ·  $doseMetrics'
-                            : dose.scheduleName,
-                        style: c.secondaryStyle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (leadingFooter != null) ...[
-                        const SizedBox(height: kSpacingXS),
-                        leadingFooter!,
-                      ],
-                      if (c.hasDetails) ...[
-                        const SizedBox(height: kSpacingXXS),
-                        ...c.detailWidgets,
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (c.hasFooter) ...[const SizedBox(height: kSpacingS), footer!],
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── build ─────────────────────────────────────────────────────────────────
+  // ---- build ---------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
