@@ -20,17 +20,17 @@ enum DoseCardLayout {
 extension DoseCardLayoutMeta on DoseCardLayout {
   String get label => switch (this) {
     DoseCardLayout.pill => 'Icon Row',
-    DoseCardLayout.accent => 'Header Band',
-    DoseCardLayout.minimal => 'Sidebar Time',
+    DoseCardLayout.accent => 'Accent Strip',
+    DoseCardLayout.minimal => 'Compact',
   };
 
   String get description => switch (this) {
     DoseCardLayout.pill =>
-      'Status icon avatar left, med name + time centre, chip right.',
+      'Status icon avatar left, med name + time + metrics centre, chip right.',
     DoseCardLayout.accent =>
-      'Coloured title band with med name and chip, clean detail row below.',
+      'Coloured left strip, time anchored left, med name expanding right, metrics below.',
     DoseCardLayout.minimal =>
-      'Time stacked in a narrow left column, content and chip to the right.',
+      'Status dot + name on top row; time · dose · dose# inline below. Most compact.',
   };
 }
 
