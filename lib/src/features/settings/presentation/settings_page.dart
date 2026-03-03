@@ -127,7 +127,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     switch (layout) {
       case DoseCardLayout.pill:
-        // Icon Row: 32px avatar left, 3 text rows centre, chip right
+        // Icon Row: avatar left, 3 text rows centre, chip right
         return Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -142,11 +142,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.10),
+                  color: accent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: accent.withValues(alpha: 0.22)),
+                  border: Border.all(color: accent.withValues(alpha: 0.28)),
                 ),
-                child: Icon(Icons.medication_rounded, size: 16, color: accent),
+                child: Icon(Icons.alarm_rounded, size: 16, color: accent),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -159,7 +159,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
-                            color: accent.withValues(alpha: 0.75),
+                            color: accent.withValues(alpha: 0.70),
                             height: 1.2)),
                   ],
                 ),
@@ -179,7 +179,67 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         );
 
       case DoseCardLayout.accent:
-        // Accent Strip: 4px left strip, time (bold) + name + chip row 1, metrics row 2
+        // Header Band: tinted band top (name+chip), clock+time+sched body
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+          child: Container(
+            decoration: BoxDecoration(
+              color: bg,
+              border: Border.all(color: outlineColor),
+              borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  color: accent.withValues(alpha: 0.13),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(mockMed, style: medStyle)),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 3),
+                        decoration: chipDecoration,
+                        child: Text(mockStatus,
+                            style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w700,
+                                color: accent)),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  child: Row(
+                    children: [
+                      Icon(Icons.schedule_rounded,
+                          size: 10,
+                          color: accent.withValues(alpha: 0.70)),
+                      const SizedBox(width: 3),
+                      Text(mockTime,
+                          style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: accent.withValues(alpha: 0.70),
+                              height: 1.2)),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text(mockSched, style: dimStyle)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+      case DoseCardLayout.minimal:
+        // Sidebar Time: narrow tinted time column, divider, name+sched+chip
         return ClipRRect(
           borderRadius: BorderRadius.circular(kBorderRadiusSmall),
           child: Container(
@@ -192,51 +252,75 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 4 px accent strip
-                  Container(width: 4, color: accent),
+                  Container(
+                    width: 44,
+                    color: accent.withValues(alpha: 0.09),
+                    padding: const EdgeInsets.symmetric(vertical: 7),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('8:00 AM',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: accent,
+                                height: 1.15)),
+                        const SizedBox(height: 2),
+                        Text('40 units',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: accent.withValues(alpha: 0.70),
+                                height: 1.1)),
+                        const SizedBox(height: 1),
+                        Text('#3',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: accent.withValues(alpha: 0.45),
+                                height: 1.1)),
+                      ],
+                    ),
+                  ),
+                  Container(width: 1, color: accent.withValues(alpha: 0.20)),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 6),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Row 1: time (fixed 44dp) + name + chip
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 44,
-                                child: Text(mockTime,
-                                    style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w800,
-                                        color: accent,
-                                        height: 1.2)),
-                              ),
-                              Expanded(child: Text(mockMed, style: medStyle)),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 3),
-                                decoration: chipDecoration,
-                                child: Text(mockStatus,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(mockMed, style: medStyle),
+                                const SizedBox(height: 2),
+                                Text('0.75 mL · Vial 2',
                                     style: TextStyle(
                                         fontSize: 8,
-                                        fontWeight: FontWeight.w700,
-                                        color: accent)),
-                              ),
-                            ],
+                                        fontWeight: FontWeight.w500,
+                                        color: accent.withValues(alpha: 0.60),
+                                        height: 1.2),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 3),
-                          // Row 2: indent + metrics + #N
-                          Row(
-                            children: [
-                              const SizedBox(width: 44),
-                              Expanded(
-                                  child: Text(mockSched, style: dimStyle)),
-                              Text('#3', style: dimStyle),
-                            ],
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 3),
+                            decoration: chipDecoration,
+                            child: Text(mockStatus,
+                                style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w700,
+                                    color: accent)),
                           ),
                         ],
                       ),
@@ -245,72 +329,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ],
               ),
             ),
-          ),
-        );
-
-      case DoseCardLayout.minimal:
-        // Compact: status dot + name + chip row 1; time · dose · #N row 2
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(kBorderRadiusSmall),
-            border: Border.all(color: outlineColor),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Row 1: dot + name + chip
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                        color: accent, shape: BoxShape.circle),
-                  ),
-                  Expanded(child: Text(mockMed, style: medStyle)),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 5, vertical: 3),
-                    decoration: chipDecoration,
-                    child: Text(mockStatus,
-                        style: TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w700,
-                            color: accent)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              // Row 2: time · dose · #N (indented)
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Row(
-                  children: [
-                    Text(mockTime,
-                        style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: accent,
-                            height: 1.2)),
-                    const SizedBox(width: 4),
-                    Text('·',
-                        style: TextStyle(
-                            fontSize: 9,
-                            color: dim,
-                            height: 1.2)),
-                    const SizedBox(width: 4),
-                    Expanded(child: Text('40 units', style: dimStyle)),
-                    Text('#3', style: dimStyle),
-                  ],
-                ),
-              ),
-            ],
           ),
         );
     }
