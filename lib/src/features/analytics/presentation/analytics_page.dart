@@ -674,6 +674,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.medication_outlined,
                                     label: 'Medications',
                                     value: medItems.length.toString(),
+                                    iconColor: cs.primary,
+                                    valueColor: cs.primary,
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
@@ -681,6 +683,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.schedule_outlined,
                                     label: 'Schedules',
                                     value: scheduleItems.length.toString(),
+                                    iconColor: cs.secondary,
+                                    valueColor: cs.secondary,
                                   ),
                                 ],
                               ),
@@ -692,6 +696,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.check_circle_outline,
                                     label: 'Dose logs',
                                     value: logItems.length.toString(),
+                                    iconColor: cs.tertiary,
+                                    valueColor: cs.tertiary,
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
@@ -699,6 +705,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.inventory_2_outlined,
                                     label: 'Stock logs',
                                     value: inventoryItems.length.toString(),
+                                    iconColor: cs.tertiaryContainer,
+                                    valueColor: cs.onTertiaryContainer,
                                   ),
                                 ],
                               ),
@@ -747,9 +755,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             title: 'Daily Dose Activity',
                             neutral: true,
                             children: [
-                              buildHelperText(
-                                context,
-                                'Logged doses per day — last $trendDays days.',
+                              Center(
+                                child: buildHelperText(
+                                  context,
+                                  'Logged doses per day — last $trendDays days.',
+                                ),
                               ),
                               const SizedBox(height: kSpacingM),
                               _buildDailyTrendChart(
@@ -793,8 +803,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     value: lowStockCount == 0
                                         ? '—'
                                         : lowStockCount.toString(),
+                                    iconColor: lowStockCount > 0
+                                        ? cs.error
+                                        : cs.onSurfaceVariant,
                                     valueColor: lowStockCount > 0
-                                        ? Theme.of(context).colorScheme.error
+                                        ? cs.error
                                         : null,
                                   ),
                                   const SizedBox(width: kSpacingS),
@@ -805,8 +818,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     value: expiringCount == 0
                                         ? '—'
                                         : expiringCount.toString(),
+                                    iconColor: expiringCount > 0
+                                        ? cs.tertiary
+                                        : cs.onSurfaceVariant,
                                     valueColor: expiringCount > 0
-                                        ? Theme.of(context).colorScheme.tertiary
+                                        ? cs.tertiary
                                         : null,
                                   ),
                                 ],
@@ -819,6 +835,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.refresh_outlined,
                                     label: 'Refill events',
                                     value: stockRefills.toString(),
+                                    iconColor: cs.primary,
+                                    valueColor: cs.primary,
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
@@ -826,6 +844,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.remove_circle_outline,
                                     label: 'Usage events',
                                     value: stockUsage.toString(),
+                                    iconColor: cs.secondary,
+                                    valueColor: cs.secondary,
                                   ),
                                 ],
                               ),
@@ -837,6 +857,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.tune_outlined,
                                     label: 'Adjustments',
                                     value: stockAdjustments.toString(),
+                                    iconColor: cs.tertiary,
+                                    valueColor: cs.tertiary,
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
@@ -844,38 +866,48 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.delete_outline,
                                     label: 'Expired',
                                     value: stockExpired.toString(),
+                                    iconColor: cs.outline,
+                                    valueColor: cs.onSurfaceVariant,
                                   ),
                                 ],
                               ),
                               const SizedBox(height: kSpacingS),
-                              buildDetailInfoRow(
-                                context,
-                                label: 'Saved reconstitutions',
-                                value: savedReconCount.toString(),
+                              Center(
+                                child: buildDetailInfoRow(
+                                  context,
+                                  label: 'Saved reconstitutions',
+                                  value: savedReconCount.toString(),
+                                ),
                               ),
                               if (allSupplies.isNotEmpty) ...[                                const SizedBox(height: kSpacingS),
                                 const Divider(height: 1),
                                 const SizedBox(height: kSpacingS),
-                                buildDetailInfoRow(
-                                  context,
-                                  label: 'Supplies tracked',
-                                  value: allSupplies.length.toString(),
+                                Center(
+                                  child: buildDetailInfoRow(
+                                    context,
+                                    label: 'Supplies tracked',
+                                    value: allSupplies.length.toString(),
+                                  ),
                                 ),
-                                buildDetailInfoRow(
-                                  context,
-                                  label: 'Low-stock supplies',
-                                  value: lowSuppliesCount == 0
-                                      ? '—'
-                                      : lowSuppliesCount.toString(),
-                                  warning: lowSuppliesCount > 0,
+                                Center(
+                                  child: buildDetailInfoRow(
+                                    context,
+                                    label: 'Low-stock supplies',
+                                    value: lowSuppliesCount == 0
+                                        ? '—'
+                                        : lowSuppliesCount.toString(),
+                                    warning: lowSuppliesCount > 0,
+                                  ),
                                 ),
-                                buildDetailInfoRow(
-                                  context,
-                                  label: 'Supplies expiring ≤30d',
-                                  value: expiringSuppliesCount == 0
-                                      ? '—'
-                                      : expiringSuppliesCount.toString(),
-                                  highlighted: expiringSuppliesCount > 0,
+                                Center(
+                                  child: buildDetailInfoRow(
+                                    context,
+                                    label: 'Supplies expiring ≤30d',
+                                    value: expiringSuppliesCount == 0
+                                        ? '—'
+                                        : expiringSuppliesCount.toString(),
+                                    highlighted: expiringSuppliesCount > 0,
+                                  ),
                                 ),
                               ],
                             ],
@@ -1040,43 +1072,44 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     required String label,
     required String value,
     Color? valueColor,
+    Color? iconColor,
   }) {
     final cs = Theme.of(context).colorScheme;
+    final effectiveIconColor = iconColor ?? cs.primary;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: kSpacingM,
-          vertical: kSpacingS,
+          vertical: kSpacingM,
         ),
         decoration: buildStandardCardDecoration(context: context),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                Icon(
-                  icon,
-                  size: kIconSizeSmall,
-                  color: cs.onSurfaceVariant,
-                ),
-                const SizedBox(width: kSpacingXS),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: helperTextStyle(context),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+            Icon(
+              icon,
+              size: kIconSizeLarge,
+              color: effectiveIconColor,
+            ),
+            const SizedBox(height: kSpacingS),
+            Text(
+              label,
+              style: helperTextStyle(context),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
             const SizedBox(height: kSpacingXS),
             Text(
               value,
               style: bodyTextStyle(context)?.copyWith(
-                fontWeight: kFontWeightSemiBold,
-                fontSize: kFontSizeLarge,
-                color: valueColor,
+                fontWeight: kFontWeightBold,
+                fontSize: kFontSizeXXL,
+                color: valueColor ?? cs.onSurface,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
