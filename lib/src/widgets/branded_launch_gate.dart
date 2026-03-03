@@ -6,6 +6,15 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 
 /// Branded launch gate that shows a primary-colour splash with logo and
 /// animated tagline.  Displayed once per cold-start, then fades away.
+///
+/// Flow:
+///   1. Overlay appears immediately (logo visible, tagline hidden).
+///   2. After [kBrandedLaunchTaglineDelay] the tagline fades+slides in
+///      over [kBrandedLaunchTaglineDuration].
+///   3. Once the tagline animation completes, hold for
+///      [kBrandedLaunchHoldAfterVisible] so the user can comfortably read.
+///   4. Dismiss fade ([kBrandedLaunchDismissDuration]) then the overlay
+///      is removed from the tree.
 class BrandedLaunchGate extends StatefulWidget {
   const BrandedLaunchGate({required this.child, super.key});
 
@@ -18,12 +27,17 @@ class BrandedLaunchGate extends StatefulWidget {
 class _BrandedLaunchGateState extends State<BrandedLaunchGate>
     with TickerProviderStateMixin {
   bool _showBranding = true;
-  Timer? _timer;
+  Timer? _holdTimer;
+  Timer? _delayTimer;
 
   // Tagline: fade + gentle upward slide
   late final AnimationController _taglineController;
   late final Animation<double> _taglineOpacity;
   late final Animation<Offset> _taglineOffset;
+
+  // Logo: subtle scale-up entrance
+  late final AnimationController _logoController;
+  late final Animation<double> _logoScale;
 
   // Dismiss: fade the whole overlay out
   late final AnimationController _dismissController;
@@ -33,51 +47,66 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate>
   void initState() {
     super.initState();
 
+    // Logo scale animation (immediate, 400 ms)
+    _logoController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _logoScale = Tween<double>(begin: 0.88, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
+    );
+
     // Tagline animation
     _taglineController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
+      duration: kBrandedLaunchTaglineDuration,
     );
     _taglineOpacity = CurvedAnimation(
       parent: _taglineController,
-      curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+      curve: Curves.easeOut,
     );
     _taglineOffset = Tween<Offset>(
-      begin: const Offset(0, 0.25),
+      begin: const Offset(0, 0.30),
       end: Offset.zero,
     ).animate(
-      CurvedAnimation(
-        parent: _taglineController,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeOutCubic),
-      ),
+      CurvedAnimation(parent: _taglineController, curve: Curves.easeOutCubic),
     );
 
-    // Dismiss animation (fade to transparent)
+    // Dismiss animation
     _dismissController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 250),
+      duration: kBrandedLaunchDismissDuration,
     );
     _dismissOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _dismissController, curve: Curves.easeIn),
     );
 
-    // Start tagline animation immediately
-    _taglineController.forward();
+    // Start logo animation immediately
+    _logoController.forward();
 
-    // Hold for the configured duration, then fade out
-    _timer = Timer(kBrandedLaunchHoldDuration, () {
+    // After logo settles, animate tagline in
+    _delayTimer = Timer(kBrandedLaunchTaglineDelay, () {
       if (!mounted) return;
-      _dismissController.forward().orCancel.then((_) {
-        if (mounted) setState(() => _showBranding = false);
-      }, onError: (_) {
-        // Animation cancelled (widget disposed) — safe to ignore.
+      _taglineController.forward().whenComplete(() {
+        // Tagline fully visible — start hold timer
+        if (!mounted) return;
+        _holdTimer = Timer(kBrandedLaunchHoldAfterVisible, () {
+          if (!mounted) return;
+          _dismissController.forward().orCancel.then((_) {
+            if (mounted) setState(() => _showBranding = false);
+          }, onError: (_) {
+            // Animation cancelled (widget disposed) — safe to ignore.
+          });
+        });
       });
     });
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _delayTimer?.cancel();
+    _holdTimer?.cancel();
+    _logoController.dispose();
     _taglineController.dispose();
     _dismissController.dispose();
     super.dispose();
@@ -118,14 +147,18 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Logo — static, never moves
-                            Image.asset(
-                              kSplashLogoAssetPath,
-                              width: logoWidth,
-                              fit: BoxFit.contain,
+                            // Logo — scale-up entrance
+                            ScaleTransition(
+                              scale: _logoScale,
+                              child: Image.asset(
+                                kSplashLogoAssetPath,
+                                width: logoWidth,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                             const SizedBox(height: kSpacingM),
                             // Tagline animates in below logo
+                            // (invisible until kBrandedLaunchTaglineDelay fires)
                             FadeTransition(
                               opacity: _taglineOpacity,
                               child: SlideTransition(
@@ -157,3 +190,4 @@ class _BrandedLaunchGateState extends State<BrandedLaunchGate>
     );
   }
 }
+

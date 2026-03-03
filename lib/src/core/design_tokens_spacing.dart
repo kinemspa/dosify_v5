@@ -229,8 +229,18 @@ const String kAndroidLegacyIconAssetPath =
     'assets/logo/logo_001_android_icon.png';
 const String kPrimaryBrandTagline = 'Track Smarter Every Day';
 
-/// Branded app-launch hold timing.
-const Duration kBrandedLaunchHoldDuration = Duration(milliseconds: 2800);
+/// How long the branded launch overlay remains visible AFTER the tagline
+/// animation completes. Dismiss fade begins only when this timer fires.
+const Duration kBrandedLaunchHoldAfterVisible = Duration(milliseconds: 3000);
+
+/// Delay before the tagline starts animating in (lets the logo "land" first).
+const Duration kBrandedLaunchTaglineDelay = Duration(milliseconds: 350);
+
+/// Duration of the tagline fade+slide-in animation.
+const Duration kBrandedLaunchTaglineDuration = Duration(milliseconds: 600);
+
+/// Duration of the dismiss (fade-out) animation.
+const Duration kBrandedLaunchDismissDuration = Duration(milliseconds: 350);
 
 /// Branded launch logo sizing.
 const double kBrandedLaunchLogoMinWidth = 220;
