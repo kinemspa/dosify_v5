@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/app/nav_items.dart';
+import 'package:dosifi_v5/src/widgets/onboarding/onboarding_gate.dart';
 
 final bottomNavIdsProvider =
     StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {
@@ -86,7 +87,7 @@ class ShellScaffold extends ConsumerWidget {
         onPopInvoked: (didPop) {
           if (!didPop && location != '/') context.go('/');
         },
-        child: Scaffold(body: child),
+        child: Scaffold(body: OnboardingGate(child: child)),
       );
     }
 
@@ -99,7 +100,7 @@ class ShellScaffold extends ConsumerWidget {
         }
       },
       child: Scaffold(
-        body: child,
+        body: OnboardingGate(child: child),
         bottomNavigationBar: NavigationBar(
           selectedIndex: selectedIndex,
           onDestinationSelected: (index) {

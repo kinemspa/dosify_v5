@@ -10,7 +10,6 @@ import 'package:dosifi_v5/src/app/router.dart';
 import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/branded_launch_gate.dart';
-import 'package:dosifi_v5/src/widgets/onboarding/onboarding_gate.dart';
 
 class DosifiApp extends ConsumerWidget {
   const DosifiApp({super.key});
@@ -468,8 +467,7 @@ class DosifiApp extends ConsumerWidget {
         return MediaQuery(
           data: clampedMq,
           child: BrandedLaunchGate(
-            child: OnboardingGate(
-                child: GestureDetector(
+            child: GestureDetector(
                 onTap: () {
                   // Unfocus any active input field
                   final currentFocus = FocusScope.of(context);
@@ -480,7 +478,6 @@ class DosifiApp extends ConsumerWidget {
                 },
                   child: child,
               ),
-            ),
           ),
         );
       },
