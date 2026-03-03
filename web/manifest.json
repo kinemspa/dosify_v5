@@ -1,11 +1,11 @@
 {
-    "name": "dosifi_v5",
-    "short_name": "dosifi_v5",
+    "name": "Skedux",
+    "short_name": "Skedux",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Medication organization and tracking tool for research and informational purposes.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

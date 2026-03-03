@@ -591,11 +591,11 @@ const double kCalendarSelectedDayStageMaxInitialRatio = 0.85;
 
 /// Selected-day stage header spacing (kept compact so it fits in peek mode).
 const EdgeInsets kCalendarSelectedDayStageHandleMargin = EdgeInsets.symmetric(
-  vertical: kSpacingS,
+  vertical: kSpacingL,
 );
 const EdgeInsets kCalendarSelectedDayStageHeaderPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
-  vertical: 0,
+  vertical: kSpacingS,
 );
 
 /// Calendar stage scroll indicator (Scrollbar)

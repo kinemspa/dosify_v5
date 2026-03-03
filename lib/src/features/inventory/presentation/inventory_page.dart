@@ -197,13 +197,15 @@ class _MedicationInventoryTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 600;
 
     return Column(
       children: [
         Row(
           children: [
             Expanded(
-              flex: 5,
+              flex: isCompact ? 4 : 5,
               child: Text(
                 'Medication',
                 style: hintLabelTextStyle(
@@ -213,7 +215,7 @@ class _MedicationInventoryTable extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 3,
+              flex: isCompact ? 2 : 3,
               child: Text(
                 'Remaining',
                 textAlign: TextAlign.end,
@@ -237,7 +239,7 @@ class _MedicationInventoryTable extends StatelessWidget {
             ),
             const SizedBox(width: kSpacingS),
             Expanded(
-              flex: 3,
+              flex: isCompact ? 4 : 3,
               child: Text(
                 'Expiry',
                 textAlign: TextAlign.end,
@@ -262,6 +264,7 @@ class _MedicationInventoryTable extends StatelessWidget {
           _MedicationInventoryTableRow(
             medication: medications[i],
             linkedSchedules: _linkedSchedules(medications[i]),
+            isCompact: isCompact,
           ),
           if (i != medications.length - 1)
             Divider(
@@ -278,10 +281,12 @@ class _MedicationInventoryTableRow extends StatelessWidget {
   const _MedicationInventoryTableRow({
     required this.medication,
     required this.linkedSchedules,
+    required this.isCompact,
   });
 
   final Medication medication;
   final List<Schedule> linkedSchedules;
+  final bool isCompact;
 
   String _formatShortDate(BuildContext context, DateTime date) {
     return MaterialLocalizations.of(context).formatShortDate(date);
@@ -633,7 +638,7 @@ class _MedicationInventoryTableRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            flex: 5,
+            flex: isCompact ? 4 : 5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -658,7 +663,7 @@ class _MedicationInventoryTableRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: isCompact ? 2 : 3,
             child: Text(
               isMdv && sealedCount != null
                   ? '${stockInfo.label}\n$sealedCount sealed'
@@ -687,7 +692,7 @@ class _MedicationInventoryTableRow extends StatelessWidget {
           ),
           const SizedBox(width: kSpacingS),
           Expanded(
-            flex: 3,
+            flex: isCompact ? 4 : 3,
             child: Text(
               _formatExpiryCell(context),
               textAlign: TextAlign.end,
