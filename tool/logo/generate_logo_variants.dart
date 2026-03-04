@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:image/image.dart' as img;
 
-const String _primaryLogoPath = 'assets/logo/logo_001_primary.png';
+const String _primaryLogoPath = 'assets/logo/logo_002_primary.png';
 const String _whiteLogoPath = 'assets/logo/logo_001_white.png';
 const String _androidIconPath = 'assets/logo/logo_001_android_icon.png';
 const String _androidAdaptiveForegroundPath =

@@ -222,7 +222,7 @@ const EdgeInsets kScheduleWizardSummaryPatternPadding = EdgeInsets.only(
   left: kScheduleWizardSummaryIndent,
 );
 
-const String kPrimaryLogoAssetPath = 'assets/logo/logo_001_primary.png';
+const String kPrimaryLogoAssetPath = 'assets/logo/logo_002_primary.png';
 const String kWhiteLogoAssetPath = 'assets/logo/logo_001_white.png';
 const String kSplashLogoAssetPath = kWhiteLogoAssetPath;
 const String kAndroidLegacyIconAssetPath =
