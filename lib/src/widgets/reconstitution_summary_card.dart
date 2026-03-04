@@ -247,7 +247,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               text: TextSpan(
                 style: baseStyle,
                 children: [
-                  const TextSpan(text: 'Dose Strength  '),
+                  const TextSpan(text: 'Amount Strength  '),
                   TextSpan(
                     text:
                         '${_formatNoTrailing(doseStrengthValue!)} ${doseStrengthUnit!.trim()}',
@@ -265,7 +265,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               text: TextSpan(
                 style: baseStyle,
                 children: [
-                  const TextSpan(text: 'Volume per Dose  '),
+                  const TextSpan(text: 'Volume per Amount  '),
                   TextSpan(
                     text: '${_formatNoTrailing(volumePerDose!)} mL',
                     style: valueStyle,

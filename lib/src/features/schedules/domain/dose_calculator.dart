@@ -103,7 +103,7 @@ final warnUnit = validTabletCount == 1.0 ? 'tablet' : 'tablets';
 
     if (roundedCount < 1) {
       return DoseCalculationResult.error(
-        'Dose too small - requires less than 1 capsule',
+        'Amount too small - requires less than 1 capsule',
       );
     }
 
@@ -115,7 +115,7 @@ final warnUnit = validTabletCount == 1.0 ? 'tablet' : 'tablets';
         displayText:
             '${formatMass(roundedCount * strengthPerCapsuleMcg)} ($roundedCount ${roundedCount == 1 ? 'capsule' : 'capsules'})',
         warning:
-            '⚠️ Dose requires ${exactCapsuleCount.toStringAsFixed(1)} capsules (rounded to $roundedCount)',
+            '⚠️ Amount requires ${exactCapsuleCount.toStringAsFixed(1)} capsules (rounded to $roundedCount)',
       );
     }
 
@@ -186,7 +186,7 @@ final warnUnit = validTabletCount == 1.0 ? 'tablet' : 'tablets';
     // Validate doesn't exceed vial capacity
     if (strengthMcg > totalVialStrengthMcg) {
       return DoseCalculationResult.error(
-        'Dose exceeds vial strength (${formatMass(totalVialStrengthMcg)} max)',
+        'Amount exceeds vial strength (${formatMass(totalVialStrengthMcg)} max)',
       );
     }
 
@@ -199,7 +199,7 @@ final warnUnit = validTabletCount == 1.0 ? 'tablet' : 'tablets';
     // Validate doesn't exceed vial volume
     if (volumeMicroliter > totalVialVolumeMicroliter) {
       return DoseCalculationResult.error(
-        'Dose exceeds vial capacity (${formatVolume(totalVialVolumeMicroliter)} max)',
+        'Amount exceeds vial capacity (${formatVolume(totalVialVolumeMicroliter)} max)',
       );
     }
 
@@ -210,7 +210,7 @@ final warnUnit = validTabletCount == 1.0 ? 'tablet' : 'tablets';
     // Validate doesn't exceed syringe capacity
     if (syringeUnits > syringeType.maxUnits) {
       return DoseCalculationResult.error(
-        'Dose exceeds syringe capacity (${syringeType.maxUnits}U max for ${syringeType.name} syringe)',
+        'Amount exceeds syringe capacity (${syringeType.maxUnits}U max for ${syringeType.name} syringe)',
       );
     }
 

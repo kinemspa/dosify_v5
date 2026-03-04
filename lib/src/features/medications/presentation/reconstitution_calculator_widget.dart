@@ -488,7 +488,8 @@ class _ReconstitutionCalculatorWidgetState
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Text(
-            'The calculator determines how much diluent to add for correct doses. Enter diluent name (optional), desired dose (D), syringe size, and optional max vial size. Then pick an option below or fine-tune with the slider.',
+            'The calculator determines how much diluent to add for correct amounts. Enter diluent name (optional), desired amount (D), syringe size, and optional max vial size. Then pick an option below or fine-tune with the slider.',
+
             style: theme.textTheme.bodySmall?.copyWith(
               color: fg.withValues(alpha: kReconTextMediumOpacity),
             ),
@@ -516,7 +517,7 @@ class _ReconstitutionCalculatorWidgetState
         ),
         _rowLabelField(
           context,
-          label: 'Desired Dose',
+          label: 'Desired Amount',
           field: StepperRow36(
             controller: _doseCtrl,
             onDec: () {
@@ -542,7 +543,7 @@ class _ReconstitutionCalculatorWidgetState
         ),
         _rowLabelField(
           context,
-          label: 'Dose Unit',
+          label: 'Amount Unit',
           field: SmallDropdown36<String>(
             value: _doseUnit,
             items: [
@@ -574,7 +575,7 @@ class _ReconstitutionCalculatorWidgetState
           ),
         ),
         _helperText(
-          'Desired dose (D): amount per injection. Choose the unit that matches your dose.',
+          'Desired amount (D): amount per injection. Choose the unit that matches your amount.',
         ),
         _rowLabelField(
           context,
@@ -693,18 +694,18 @@ class _ReconstitutionCalculatorWidgetState
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              'No valid options — Check strength, dose, or syringe size',
+              'No valid options — Check strength, amount, or syringe size',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.error,
               ),
             ),
           ),
         _gradientDivider(context),
-        // Target Dose heading
+        // Target Amount heading
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
-            'Target Dose',
+            'Target Amount',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,
               color: reconForegroundColor(context).withValues(
@@ -1105,7 +1106,7 @@ class _ReconstitutionCalculatorWidgetState
                         height: 1.4,
                       ),
                       children: [
-                        const TextSpan(text: 'for a dose of '),
+                        const TextSpan(text: 'for an amount of '),
                         TextSpan(
                           text: '${_formatNoTrailing(Draw)} $_doseUnit',
                           style: reconSummaryValueTextStyle(
@@ -1121,9 +1122,9 @@ class _ReconstitutionCalculatorWidgetState
                   const SizedBox(height: 16),
                   // Clarification text
                   Text(
-                    'This calculates the reconstitution volume needed to achieve the correct concentration for your target dose. '
-                    'This target dose will become your default dose in the schedule screen. '
-                    'Doses can be created, adjusted, and tracked on the schedule screen where all medication administration is managed.',
+                    'This calculates the reconstitution volume needed to achieve the correct concentration for your target amount. '
+                    'This target amount will become your default amount in the schedule screen. '
+                    'Entries can be created, adjusted, and tracked on the schedule screen.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: fg.withValues(alpha: kReconTextMutedOpacity),
@@ -1208,11 +1209,11 @@ class _ReconstitutionCalculatorWidgetState
     // Get explainer text based on label
     String explainerText;
     if (label == 'Concentrated') {
-      explainerText = 'High concentration, draw less volume (smaller doses)';
+      explainerText = 'High concentration, draw less volume (smaller amounts)';
     } else if (label == 'Balanced') {
       explainerText = 'Moderate concentration, balanced draw volume';
     } else if (label == 'Diluted') {
-      explainerText = 'Low concentration, draw more volume (larger doses)';
+      explainerText = 'Low concentration, draw more volume (larger amounts)';
     } else {
       explainerText = '';
     }
