@@ -123,7 +123,7 @@ class DoseSnoozeUntilField extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Snooze limit'),
         content: Text(
-          'Snooze time must be before the next scheduled dose. The latest allowed snooze is $date \u2022 $time.',
+          'Snooze time must be before the next scheduled entry. The latest allowed snooze is $date \u2022 $time.',
         ),
         actions: [
           TextButton(
@@ -148,7 +148,7 @@ class DoseSnoozeUntilField extends StatelessWidget {
             () {
               final date = MaterialLocalizations.of(context).formatMediumDate(max);
               final time = DateTimeFormatter.formatTime(context, max);
-              return 'Next dose is at $date | $time.';
+              return 'Next entry is at $date | $time.';
             }(),
             style: helperTextStyle(context),
           ),

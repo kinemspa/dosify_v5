@@ -90,7 +90,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: kSpacingXL),
           child: Text(
-            'No dose activity in selected range.',
+            'No activity in selected range.',
             style: helperTextStyle(context),
             textAlign: TextAlign.center,
           ),
@@ -247,7 +247,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: kSpacingXL),
           child: Text(
-            'No logged doses in selected range.',
+            'No entries in selected range.',
             style: helperTextStyle(context),
             textAlign: TextAlign.center,
           ),
@@ -323,7 +323,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               getTooltipItem: (group, _, rod, __) {
                 final day = startDay.add(Duration(days: group.x));
                 return BarTooltipItem(
-                  '${day.month}/${day.day}\n${rod.toY.toInt()} doses',
+                  '${day.month}/${day.day}\n${rod.toY.toInt()} entries',
                   (helperTextStyle(context) ?? const TextStyle()).copyWith(
                     color: cs.onSurface,
                     fontSize: kFontSizeSmall,
@@ -674,7 +674,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                         'report,value',
                         'Medications,${medItems.length}',
                         'Schedules,${scheduleItems.length}',
-                        'Dose logs,${logItems.length}',
+                        'Activity log,${logItems.length}',
                         'Inventory logs,${inventoryItems.length}',
                         'Logged,$logged',
                         'Skipped,$skipped',
@@ -725,7 +725,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   _statTile(
                                     context,
                                     icon: Icons.check_circle_outline,
-                                    label: 'Dose logs',
+                                    label: 'Activity log',
                                     value: logItems.length.toString(),
                                   ),
                                   const SizedBox(width: kSpacingS),
@@ -785,7 +785,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               Center(
                                 child: buildHelperText(
                                   context,
-                                  'Logged doses per day — last $trendDays days.',
+                                  'Entries per day — last $trendDays days.',
                                 ),
                               ),
                               const SizedBox(height: kSpacingM),
@@ -806,7 +806,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               Center(
                                 child: buildHelperText(
                                   context,
-                                  'Top ${topActivity.take(8).length} medications by dose actions in selected range.',
+                                  'Top ${topActivity.take(8).length} medications by activity in selected range.',
                                 ),
                               ),
                               const SizedBox(height: kSpacingM),
@@ -928,7 +928,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             children: [
                               buildHelperText(
                                 context,
-                                'Export data as CSV or HTML. Dose & inventory exports use the selected time range.',
+                                'Export data as CSV or HTML. Activity & inventory exports use the selected time range.',
                               ),
                               const SizedBox(height: kSpacingM),
                               _exportButton(
@@ -1055,7 +1055,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               const Divider(height: kSpacingL),
                               _exportButton(
                                 context,
-                                label: 'Dose Logs',
+                                label: 'Activity Log',
                                 icon: Icons.history_outlined,
                                 enabled: logItems.isNotEmpty,
                                 onCsv: () async {
@@ -1063,7 +1063,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     logItems,
                                     range: range,
                                   );
-                                  await _copyExport(csv, 'Dose Logs CSV copied');
+                                  await _copyExport(csv, 'Activity Log CSV copied');
                                 },
                                 onHtml: () async {
                                   final csv = _csv.doseLogsToCsv(
@@ -1071,12 +1071,12 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     range: range,
                                   );
                                   final html = _csv.csvToHtmlDocument(
-                                    title: 'Dose Logs',
+                                    title: 'Activity Log',
                                     csv: csv,
                                   );
                                   await _copyExport(
                                     html,
-                                    'Dose Logs HTML copied',
+                                    'Activity Log HTML copied',
                                   );
                                 },
                                 onShareCsv: () async {
@@ -1086,8 +1086,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   );
                                   await _shareExport(
                                     csv,
-                                    'skedux_dose_logs.csv',
-                                    'Skedux Dose Logs',
+                                    'skedux_activity_log.csv',
+                                    'Skedux Activity Log',
                                   );
                                 },
                                 onShareHtml: () async {
@@ -1096,13 +1096,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     range: range,
                                   );
                                   final html = _csv.csvToHtmlDocument(
-                                    title: 'Dose Logs',
+                                    title: 'Activity Log',
                                     csv: csv,
                                   );
                                   await _shareExport(
                                     html,
-                                    'skedux_dose_logs.html',
-                                    'Skedux Dose Logs',
+                                    'skedux_activity_log.html',
+                                    'Skedux Activity Log',
                                   );
                                 },
                               ),

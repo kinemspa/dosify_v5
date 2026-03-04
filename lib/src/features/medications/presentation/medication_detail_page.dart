@@ -3751,7 +3751,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
   final draftLog = DoseLog(
     id: id,
     scheduleId: 'ad_hoc',
-    scheduleName: 'Ad-hoc Dose',
+    scheduleName: 'Ad-hoc Entry',
     medicationId: med.id,
     medicationName: med.name,
     scheduledTime: now.toUtc(),
@@ -3763,7 +3763,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
 
   final dose = CalculatedDose(
     scheduleId: 'ad_hoc',
-    scheduleName: 'Ad-hoc Dose',
+    scheduleName: 'Ad-hoc Entry',
     medicationName: med.name,
     scheduledTime: draftLog.scheduledTime,
     doseValue: defaultAmount,
@@ -3820,7 +3820,7 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
       await logBox.delete(existing.id);
 
       if (context.mounted) {
-        showAppSnackBar(context, 'Ad-hoc dose deleted');
+        showAppSnackBar(context, 'Entry deleted');
       }
     },
   );
@@ -4409,7 +4409,7 @@ void _deleteMedication(BuildContext context, Medication med) async {
         contentTextStyle: bodyTextStyle(dialogContext),
         title: const Text('Delete Medication'),
         content: Text(
-          'Deleting ${med.name} will delete all associated schedules and cancel their notifications. Historical dose and inventory data will be kept.',
+          'Deleting ${med.name} will delete all associated schedules and cancel their notifications. Historical activity and inventory data will be kept.',
         ),
         actions: [
           TextButton(

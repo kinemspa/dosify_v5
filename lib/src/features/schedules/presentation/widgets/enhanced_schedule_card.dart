@@ -133,7 +133,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        showAppSnackBar(context, 'Dose marked as taken');
+        showAppSnackBar(context, 'Entry recorded');
       },
       onSnooze: (request) async {
         final logId = DoseLogIds.occurrenceId(
@@ -183,7 +183,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        showAppSnackBar(context, 'Dose snoozed');
+        showAppSnackBar(context, 'Reminder snoozed');
       },
       onSkip: (request) async {
         final logId = DoseLogIds.occurrenceId(
@@ -212,7 +212,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        showAppSnackBar(context, 'Dose skipped');
+        showAppSnackBar(context, 'Entry skipped');
       },
       onDelete: (request) async {
         final logBox = Hive.box<DoseLog>('dose_logs');
@@ -259,7 +259,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
         if (!mounted) return;
         setState(() {});
-        showAppSnackBar(context, 'Dose log deleted');
+        showAppSnackBar(context, 'Entry removed');
       },
     );
   }
@@ -480,7 +480,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           ),
                           _buildDetailRow(
                             context,
-                            'Dose',
+                            'Amount',
                             _formatExpandedDoseDetails(
                               metrics: metrics,
                               strengthOrConcentrationLabel: strengthLabel,
@@ -715,7 +715,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
     if (logs.isEmpty) {
       return Text(
-        'No doses recorded yet',
+        'No entries yet',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: Theme.of(
             context,
@@ -990,7 +990,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         final siteController = TextEditingController();
 
         return AlertDialog(
-          title: const Text('Record Dose'),
+          title: const Text('Record Entry'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1092,7 +1092,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
       if (mounted) {
         setState(() {});
-        showAppSnackBar(context, 'Dose recorded successfully');
+        showAppSnackBar(context, 'Entry recorded');
       }
     }
   }
@@ -1142,7 +1142,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
 
       if (mounted) {
         setState(() {});
-        showAppSnackBar(context, 'Dose skipped');
+        showAppSnackBar(context, 'Entry skipped');
       }
     }
   }
@@ -1225,7 +1225,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         setState(() {});
         showAppSnackBar(
           context,
-          'Dose snoozed for ${snoozeDuration.inMinutes} minutes',
+          'Reminder snoozed for ${snoozeDuration.inMinutes} minutes',
         );
       }
     }
@@ -1302,14 +1302,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         );
 
         return AlertDialog(
-          title: const Text('Edit Dose Amount'),
+          title: const Text('Edit Amount'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: controller,
                 decoration: InputDecoration(
-                  labelText: 'Dose Amount',
+                  labelText: 'Amount',
                   suffixText: widget.schedule.doseUnit,
                   border: const OutlineInputBorder(),
                 ),
@@ -1391,7 +1391,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       setState(() {});
       showAppSnackBar(
         context,
-        'Dose updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}',
+        'Amount updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}',
       );
     }
   }

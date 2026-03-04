@@ -333,7 +333,7 @@ class _NextDoseCardState extends State<NextDoseCard>
       height: 72,
       child: Center(
         child: Text(
-          'No doses scheduled',
+          'Nothing scheduled',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -784,7 +784,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           _calculateDosesForWeek(_selectedDate);
           _updateDayDoses();
         });
-        showAppSnackBar(context, 'Dose marked as taken');
+        showAppSnackBar(context, 'Entry recorded');
       },
       onSnooze: (request) async {
         final logId = DoseLogIds.occurrenceId(
@@ -842,8 +842,8 @@ class _NextDoseCardState extends State<NextDoseCard>
             request.actionTime.day == now.day;
         final time = DateTimeFormatter.formatTime(context, request.actionTime);
         final label = sameDay
-            ? 'Dose snoozed until $time'
-            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} | $time';
+            ? 'Reminder snoozed until $time'
+            : 'Reminder snoozed until ${MaterialLocalizations.of(context).formatMediumDate(request.actionTime)} | $time';
         showAppSnackBar(context, label);
       },
       onSkip: (request) async {
@@ -876,7 +876,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           _calculateDosesForWeek(_selectedDate);
           _updateDayDoses();
         });
-        showAppSnackBar(context, 'Dose skipped');
+        showAppSnackBar(context, 'Entry skipped');
       },
       onDelete: (request) async {
         final baseId = DoseLogIds.occurrenceId(
@@ -930,7 +930,7 @@ class _NextDoseCardState extends State<NextDoseCard>
           _calculateDosesForWeek(_selectedDate);
           _updateDayDoses();
         });
-        showAppSnackBar(context, 'Dose log deleted');
+        showAppSnackBar(context, 'Entry removed');
       },
     );
   }

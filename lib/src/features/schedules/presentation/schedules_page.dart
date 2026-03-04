@@ -63,7 +63,7 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
           title: const Text('Schedules'),
           content: const Text(
             'This is where your schedules are created and managed.\n\n'
-            'A schedule defines when and how often doses of a medication are taken. '
+            'A schedule defines when and how often entries are tracked for a medication. '
             'Each schedule must be attached to a medication.',
           ),
           actions: [

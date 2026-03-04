@@ -50,7 +50,7 @@ class AddScheduleWizardPage extends ScheduleWizardBase {
 
   @override
   List<String> get stepLabels => [
-    'MEDICATION & DOSE',
+    'MEDICATION & AMOUNT',
     'SCHEDULE PATTERN',
     'REVIEW & CONFIRM',
   ];
@@ -367,7 +367,7 @@ class _AddScheduleWizardPageState
                       med.form != MedicationForm.multiDoseVial &&
                       _doseValue.text.isNotEmpty)
                     Text(
-                      'Dose: ${_doseMetricsSummaryLabel(separator: ' = ')}',
+                      'Amount: ${_doseMetricsSummaryLabel(separator: ' = ')}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: headerFg.withValues(alpha: 0.85),
                       ),
@@ -544,7 +544,7 @@ class _AddScheduleWizardPageState
         ], titleSpacing: kSpacingS),
         if (_selectedMed != null) ...[
           const SizedBox(height: 16),
-          _buildSection(context, 'Configure Dose', [_buildDoseConfiguration()]),
+          _buildSection(context, 'Configure Amount', [_buildDoseConfiguration()]),
         ],
       ],
     );
@@ -865,7 +865,7 @@ class _AddScheduleWizardPageState
         const SizedBox(height: kSpacingS),
         if (_selectedMed!.form == MedicationForm.multiDoseVial)
           _helperBelowLeft(
-            'Enter the dose by strength, volume (mL), or syringe units. The app will calculate the other values automatically based on the vial concentration and syringe size.',
+            'Enter the amount by strength, volume (mL), or syringe units. The app will calculate the other values automatically based on the vial concentration and syringe size.',
           ),
       ],
     );
@@ -1307,7 +1307,7 @@ class _AddScheduleWizardPageState
               }),
             ),
             const SizedBox(height: kSpacingS),
-            _helperBelowLeft('Choose the days of the week when doses occur.'),
+            _helperBelowLeft('Choose the days of the week for scheduled entries.'),
           ],
         );
 
@@ -1341,7 +1341,7 @@ class _AddScheduleWizardPageState
             ),
             const SizedBox(height: kSpacingS),
             Text(
-              'Dose for $daysOnValue days, then pause for $daysOffValue days. This cycle repeats.',
+              'Active for $daysOnValue days, then pause for $daysOffValue days. This cycle repeats.',
               style: helperTextStyle(context),
             ),
           ],
@@ -1376,7 +1376,7 @@ class _AddScheduleWizardPageState
               }),
             ),
             const SizedBox(height: kSpacingS),
-            _helperBelowLeft('Select the day numbers (1–31) when doses occur.'),
+            _helperBelowLeft('Select the day numbers (1–31) for scheduled entries.'),
             if (showMissingDayOption) ...[
               const SizedBox(height: kSpacingS),
               LabelFieldRow(

@@ -95,7 +95,7 @@ class _InventoryPageState extends State<InventoryPage> {
                           ),
                           buildDetailInfoRow(
                             context,
-                            label: 'Used (taken doses)',
+                            label: 'Used (recorded)',
                             value: takenDoses.toString(),
                           ),
                           buildHelperText(

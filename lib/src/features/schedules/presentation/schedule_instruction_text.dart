@@ -13,7 +13,7 @@ String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
   final type = _scheduleTypeLabel(schedule);
   final time = _timesLabel(context, schedule);
 
-  return 'Take $dose of $medName on $type at $time';
+  return '$dose of $medName — $type at $time';
 }
 
 String scheduleDoseSummaryLabel(Schedule schedule) {

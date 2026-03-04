@@ -197,7 +197,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             return AlertDialog(
               titleTextStyle: dialogTitleTextStyle(dialogContext),
               contentTextStyle: dialogContentTextStyle(dialogContext),
-              title: const Text('Dose'),
+              title: const Text('Amount'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -347,7 +347,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         displayUnitCode: displayUnitCode,
         inputModeCode: inputModeCode,
       ),
-      successMessage: 'Dose updated',
+      successMessage: 'Entry updated',
     );
   }
 
@@ -1023,7 +1023,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     if (result['delete'] == true && existingLog != null) {
       await _doseLogRepo.delete(existingLog.id);
       if (!mounted) return;
-      showAppSnackBar(context, 'Dose log removed');
+      showAppSnackBar(context, 'Entry removed');
       setState(() {});
       return;
     }
@@ -1063,7 +1063,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         ? 'skipped'
         : 'snoozed for 15 minutes';
 
-    showAppSnackBar(context, 'Dose $actionText');
+    showAppSnackBar(context, 'Entry $actionText');
 
     setState(() {});
   }
@@ -1379,7 +1379,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       ),
       buildDetailInfoRow(
         context,
-        label: 'Dose',
+        label: 'Amount',
         value: _getDoseDisplay(s),
         onTap: () => _editScheduleDose(context, s),
       ),
@@ -1480,7 +1480,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       child: SectionFormCard(
         neutral: true,
         frameless: false,
-        title: 'Next Dose',
+        title: 'Next Scheduled',
         children: [
           buildDetailInfoRow(
             context,
@@ -1602,7 +1602,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       padding: const EdgeInsets.only(bottom: kSpacingS),
       child: SectionFormCard(
         neutral: true,
-        title: 'Dose Timeline',
+        title: 'Activity Timeline',
         children: [
           // Scrollable timeline
           SizedBox(
@@ -2178,9 +2178,9 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
 
   String get _actionLabel {
     return switch (widget.action) {
-      DoseAction.logged => 'Log Dose',
-      DoseAction.snoozed => 'Snooze Dose',
-      DoseAction.skipped => 'Skip Dose',
+      DoseAction.logged => 'Log Entry',
+      DoseAction.snoozed => 'Snooze Reminder',
+      DoseAction.skipped => 'Skip Entry',
     };
   }
 
@@ -2190,7 +2190,7 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
     return AlertDialog(
       titleTextStyle: dialogTitleTextStyle(context),
       contentTextStyle: dialogContentTextStyle(context),
-      title: Text(widget.existingLog != null ? 'Edit Dose' : _actionLabel),
+      title: Text(widget.existingLog != null ? 'Edit Entry' : _actionLabel),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

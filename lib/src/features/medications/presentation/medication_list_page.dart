@@ -250,9 +250,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           title: const Text('Medications'),
           content: const Text(
             'This is where your medications are saved and tracked.\n\n'
-            'A medication is the core data point — doses are scheduled against a medication. '
+            'A medication is the core data point — entries are scheduled against a medication. '
             'Multiple schedules can be assigned to a single medication.\n\n'
-            'Deleting a medication will remove all linked schedules and any future doses assigned to it.',
+            'Deleting a medication will remove all linked schedules and any future entries assigned to it.',
           ),
           actions: [
             TextButton(
@@ -597,7 +597,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 ),
                 const PopupMenuItem(
                   value: _SortBy.nextDose,
-                  child: Text('Sort by next dose'),
+                  child: Text('Sort by next entry'),
                 ),
                 const PopupMenuItem(
                   value: _SortBy.mostUsed,

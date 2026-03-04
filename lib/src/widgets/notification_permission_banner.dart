@@ -92,9 +92,9 @@ class _NotificationPermissionBannerState
     final isExact = _issue == _BannerIssue.noExactAlarm;
 
     final message = isExact
-        ? 'Scheduled dose reminders need the "Schedule exact alarms" '
+        ? 'Scheduled reminders need the "Schedule exact alarms" '
             'permission to fire on time.'
-        : 'Notification permission is off — dose reminders cannot be '
+        : 'Notification permission is off — schedule reminders cannot be '
             'delivered.';
     final actionLabel = isExact ? 'Enable Alarms' : 'Allow Notifications';
 
