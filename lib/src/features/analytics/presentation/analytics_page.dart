@@ -1,3 +1,6 @@
+// Dart imports:
+import 'dart:io';
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +8,8 @@ import 'package:flutter/services.dart';
 // Package imports:
 import 'package:fl_chart/fl_chart.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -42,6 +47,22 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
     showAppSnackBar(context, successMessage);
+  }
+
+  Future<void> _shareExport(
+    String content,
+    String filename,
+    String subject,
+  ) async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/$filename');
+      await file.writeAsString(content);
+      await Share.shareXFiles([XFile(file.path)], subject: subject);
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnackBar(context, 'Export failed: $e');
+    }
   }
 
   static String _formLabel(MedicationForm form) => switch (form) {
@@ -408,6 +429,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     required bool enabled,
     required VoidCallback? onCsv,
     required VoidCallback? onHtml,
+    VoidCallback? onShareCsv,
+    VoidCallback? onShareHtml,
   }) {
     return Row(
       children: [
@@ -428,6 +451,18 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               onPressed: enabled ? onHtml : null,
               child: const Text('Copy HTML'),
             ),
+            if (onShareCsv != null)
+              MenuItemButton(
+                leadingIcon: const Icon(Icons.share_outlined),
+                onPressed: enabled ? onShareCsv : null,
+                child: const Text('Share CSV'),
+              ),
+            if (onShareHtml != null)
+              MenuItemButton(
+                leadingIcon: const Icon(Icons.share_outlined),
+                onPressed: enabled ? onShareHtml : null,
+                child: const Text('Share HTML'),
+              ),
           ],
           builder: (ctx, controller, _) => OutlinedButton.icon(
             onPressed: enabled
@@ -912,6 +947,22 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   );
                                   await _copyExport(html, 'Summary HTML copied');
                                 },
+                                onShareCsv: () => _shareExport(
+                                  summaryCsv,
+                                  'skedux_summary.csv',
+                                  'Skedux Analytics Summary',
+                                ),
+                                onShareHtml: () async {
+                                  final html = _csv.csvToHtmlDocument(
+                                    title: 'Analytics Summary',
+                                    csv: summaryCsv,
+                                  );
+                                  await _shareExport(
+                                    html,
+                                    'skedux_summary.html',
+                                    'Skedux Analytics Summary',
+                                  );
+                                },
                               ),
                               const Divider(height: kSpacingL),
                               _exportButton(
@@ -936,6 +987,26 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     'Medications HTML copied',
                                   );
                                 },
+                                onShareCsv: () async {
+                                  final csv = _csv.medicationsToCsv(medItems);
+                                  await _shareExport(
+                                    csv,
+                                    'skedux_medications.csv',
+                                    'Skedux Medications',
+                                  );
+                                },
+                                onShareHtml: () async {
+                                  final csv = _csv.medicationsToCsv(medItems);
+                                  final html = _csv.csvToHtmlDocument(
+                                    title: 'Medications',
+                                    csv: csv,
+                                  );
+                                  await _shareExport(
+                                    html,
+                                    'skedux_medications.html',
+                                    'Skedux Medications',
+                                  );
+                                },
                               ),
                               const Divider(height: kSpacingL),
                               _exportButton(
@@ -958,6 +1029,26 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   await _copyExport(
                                     html,
                                     'Schedules HTML copied',
+                                  );
+                                },
+                                onShareCsv: () async {
+                                  final csv = _csv.schedulesToCsv(scheduleItems);
+                                  await _shareExport(
+                                    csv,
+                                    'skedux_schedules.csv',
+                                    'Skedux Schedules',
+                                  );
+                                },
+                                onShareHtml: () async {
+                                  final csv = _csv.schedulesToCsv(scheduleItems);
+                                  final html = _csv.csvToHtmlDocument(
+                                    title: 'Schedules',
+                                    csv: csv,
+                                  );
+                                  await _shareExport(
+                                    html,
+                                    'skedux_schedules.html',
+                                    'Skedux Schedules',
                                   );
                                 },
                               ),
@@ -986,6 +1077,32 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   await _copyExport(
                                     html,
                                     'Dose Logs HTML copied',
+                                  );
+                                },
+                                onShareCsv: () async {
+                                  final csv = _csv.doseLogsToCsv(
+                                    logItems,
+                                    range: range,
+                                  );
+                                  await _shareExport(
+                                    csv,
+                                    'skedux_dose_logs.csv',
+                                    'Skedux Dose Logs',
+                                  );
+                                },
+                                onShareHtml: () async {
+                                  final csv = _csv.doseLogsToCsv(
+                                    logItems,
+                                    range: range,
+                                  );
+                                  final html = _csv.csvToHtmlDocument(
+                                    title: 'Dose Logs',
+                                    csv: csv,
+                                  );
+                                  await _shareExport(
+                                    html,
+                                    'skedux_dose_logs.html',
+                                    'Skedux Dose Logs',
                                   );
                                 },
                               ),
@@ -1017,6 +1134,32 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   await _copyExport(
                                     html,
                                     'Inventory Logs HTML copied',
+                                  );
+                                },
+                                onShareCsv: () async {
+                                  final csv = _csv.inventoryLogsToCsv(
+                                    inventoryItems,
+                                    range: range,
+                                  );
+                                  await _shareExport(
+                                    csv,
+                                    'skedux_inventory_logs.csv',
+                                    'Skedux Inventory Logs',
+                                  );
+                                },
+                                onShareHtml: () async {
+                                  final csv = _csv.inventoryLogsToCsv(
+                                    inventoryItems,
+                                    range: range,
+                                  );
+                                  final html = _csv.csvToHtmlDocument(
+                                    title: 'Inventory Logs',
+                                    csv: csv,
+                                  );
+                                  await _shareExport(
+                                    html,
+                                    'skedux_inventory_logs.html',
+                                    'Skedux Inventory Logs',
                                   );
                                 },
                               ),
