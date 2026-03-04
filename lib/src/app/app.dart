@@ -439,7 +439,7 @@ class DosifiApp extends ConsumerWidget {
 
     final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
-      title: 'Dosifi v5',
+      title: 'Skedux',
       theme: light,
       darkTheme: dark,
       themeMode: themeMode,

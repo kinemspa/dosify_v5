@@ -1150,7 +1150,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               width: kSettingsAboutTileLogoSize,
               filterQuality: FilterQuality.high,
             ),
-            title: const Text('About Dosifi'),
+            title: const Text('About Skedux'),
             subtitle: const Text('App version and licenses'),
             trailing: const Icon(Icons.chevron_right),
             onTap: showAbout,

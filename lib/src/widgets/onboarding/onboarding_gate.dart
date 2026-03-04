@@ -10,7 +10,7 @@ import 'package:dosifi_v5/src/core/ui/onboarding_settings.dart';
 
 const _tips = <String, _CoachStep>{
   '/': _CoachStep(
-    title: 'Welcome to Dosifi',
+    title: 'Welcome to Skedux',
     message:
         'Dosifi helps you organise medications, schedules, and track activity '
         'for personal reference. All data stays on your device.',
