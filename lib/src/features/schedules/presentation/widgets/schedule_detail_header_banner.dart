@@ -1,13 +1,13 @@
 ﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/widgets/detail_page_scaffold.dart';
+import 'package:skedux/src/widgets/schedule_status_chip.dart';
 
 class ScheduleDetailHeaderBanner extends StatelessWidget {
   const ScheduleDetailHeaderBanner({

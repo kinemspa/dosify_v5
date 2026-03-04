@@ -2,10 +2,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/entry_calendar_widget.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/calendar/calendar_header.dart';
+import 'package:skedux/src/widgets/calendar/entry_calendar_widget.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 enum CalendarCardScopeType { all, medication, schedule }
 

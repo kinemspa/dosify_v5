@@ -1,12 +1,12 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/inventory_log.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/reports/domain/csv_export_service.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
 
 void main() {
   const csv = CsvExportService();

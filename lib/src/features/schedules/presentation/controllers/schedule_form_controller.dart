@@ -2,12 +2,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart'; // For EntryUnit/Mode enums
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/features/schedules/presentation/schedule_mode.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart'; // For EntryUnit/Mode enums
 
 part 'schedule_form_controller.freezed.dart';
 

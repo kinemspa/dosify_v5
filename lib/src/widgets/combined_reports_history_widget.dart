@@ -5,21 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
-import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/entry_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
-import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/core/notifications/low_stock_notifier.dart';
+import 'package:skedux/src/features/medications/domain/inventory_log.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/features/schedules/data/entry_log_repository.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/entry_action_sheet.dart';
+import 'package:skedux/src/widgets/unified_empty_state.dart';
+import 'package:skedux/src/widgets/unified_status_badge.dart';
 
 sealed class _CombinedHistoryItem {
   const _CombinedHistoryItem({

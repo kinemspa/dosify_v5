@@ -11,8 +11,8 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 // Project imports:
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/core/design_tokens_radius.dart';
+import 'package:skedux/src/features/medications/presentation/ui_consts.dart';
+import 'package:skedux/src/core/design_tokens_radius.dart';
 
 // ============================================================================
 // SPACING SCALE
@@ -223,10 +223,10 @@ const EdgeInsets kScheduleWizardSummaryPatternPadding = EdgeInsets.only(
 );
 
 const String kPrimaryLogoAssetPath = 'assets/logo/logo_002_primary.png';
-const String kWhiteLogoAssetPath = 'assets/logo/logo_001_white.png';
+const String kWhiteLogoAssetPath = 'assets/logo/logo_002_white.png';
 const String kSplashLogoAssetPath = kWhiteLogoAssetPath;
 const String kAndroidLegacyIconAssetPath =
-    'assets/logo/logo_001_android_icon.png';
+    'assets/logo/logo_002_android_icon.png';
 const String kPrimaryBrandTagline = 'Track Smarter Every Day';
 
 /// How long the branded launch overlay remains visible AFTER the tagline

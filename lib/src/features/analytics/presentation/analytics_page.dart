@@ -12,23 +12,23 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
-import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
-import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/report_time_range_selector_row.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/inventory_log.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/supplies/domain/stock_movement.dart';
+import 'package:skedux/src/features/supplies/domain/supply.dart';
+import 'package:skedux/src/features/medications/domain/saved_reconstitution_calculation.dart';
+import 'package:skedux/src/features/reports/domain/csv_export_service.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/detail_page_scaffold.dart';
+import 'package:skedux/src/widgets/report_time_range_selector_row.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});

@@ -1,11 +1,11 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/presentation/ui_consts.dart';
+import 'package:skedux/src/widgets/field36.dart';
 
 /// Unified form building blocks to guarantee identical look & feel across screens.
 ///

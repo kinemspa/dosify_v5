@@ -1,6 +1,6 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dosifi_v5/src/features/schedules/domain/entry_value_formatter.dart';
+import 'package:skedux/src/features/schedules/domain/entry_value_formatter.dart';
 
 void main() {
   group('EntryValueFormatter', () {

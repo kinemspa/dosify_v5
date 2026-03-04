@@ -1,8 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
 
 String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
   final entry = _entryLabel(schedule);

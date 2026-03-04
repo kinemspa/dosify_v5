@@ -1,28 +1,28 @@
-﻿import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
-import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
-import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
-import 'package:dosifi_v5/src/core/utils/format.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
-import 'package:dosifi_v5/src/widgets/large_card.dart';
-import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
-import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
+﻿import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/monetization/billing_service.dart';
+import 'package:skedux/src/core/monetization/entitlement_service.dart';
+import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
+import 'package:skedux/src/core/utils/format.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/widgets/ads/anchored_ad_banner.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/glass_card_surface.dart';
+import 'package:skedux/src/widgets/large_card.dart';
+import 'package:skedux/src/widgets/compact_storage_line.dart';
+import 'package:skedux/src/widgets/stock_donut_gauge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:dosifi_v5/src/features/medications/presentation/medication_providers.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_providers.dart';
+import 'package:skedux/src/features/medications/presentation/medication_providers.dart';
+import 'package:skedux/src/features/schedules/presentation/schedule_providers.dart';
 
 enum _MedView { list, compact, large }
 

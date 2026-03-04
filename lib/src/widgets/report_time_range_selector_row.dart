@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 class ReportTimeRangeSelectorRow extends StatelessWidget {
   const ReportTimeRangeSelectorRow({

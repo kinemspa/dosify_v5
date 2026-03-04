@@ -1,6 +1,6 @@
-﻿import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/entry_calendar_widget.dart';
+﻿import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/calendar/calendar_header.dart';
+import 'package:skedux/src/widgets/calendar/entry_calendar_widget.dart';
 import 'package:flutter/material.dart';
 
 /// Full-screen calendar page.

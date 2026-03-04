@@ -1,15 +1,15 @@
 ﻿// ignore_for_file: unused_element, unused_local_variable
 
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/services/medication_stock_service.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/controllers/medication_detail_controller.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
-import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/services/medication_stock_service.dart';
+import 'package:skedux/src/features/medications/presentation/controllers/medication_detail_controller.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/widgets/compact_storage_line.dart';
+import 'package:skedux/src/widgets/stock_donut_gauge.dart';
+import 'package:skedux/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';

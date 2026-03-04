@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
 
 /// Which permission issue is detected.
 enum _BannerIssue { noPermission, noExactAlarm }

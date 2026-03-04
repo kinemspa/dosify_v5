@@ -6,14 +6,14 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_instruction_text.dart';
-import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
-import 'package:dosifi_v5/src/widgets/large_card.dart';
-import 'package:dosifi_v5/src/widgets/next_entry_row.dart';
-import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/features/schedules/presentation/schedule_instruction_text.dart';
+import 'package:skedux/src/widgets/glass_card_surface.dart';
+import 'package:skedux/src/widgets/large_card.dart';
+import 'package:skedux/src/widgets/next_entry_row.dart';
+import 'package:skedux/src/widgets/schedule_status_chip.dart';
 
 class ScheduleListCard extends StatelessWidget {
   const ScheduleListCard({

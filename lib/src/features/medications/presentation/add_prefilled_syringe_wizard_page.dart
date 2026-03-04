@@ -1,10 +1,10 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/add_vial_wizard_page.dart';
-export 'package:dosifi_v5/src/features/medications/presentation/add_vial_wizard_page.dart' show VialMedType;
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/add_vial_wizard_page.dart';
+export 'package:skedux/src/features/medications/presentation/add_vial_wizard_page.dart' show VialMedType;
 
 class AddPrefilledSyringeWizardPage extends StatelessWidget {
   const AddPrefilledSyringeWizardPage({

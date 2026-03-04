@@ -13,7 +13,7 @@ Summary
 Environment (reference)
 - Flutter SDK: 3.24.x on Windows (Dart 3.8.x)
 - Android: Emulator API 34 (x86_64) and Samsung SM S906E (Android 15, API 35)
-- App package: com.dosifi.app
+- App package: com.skedux.app
 - Plugin: flutter_local_notifications ^17.2.x
 - Time zone: Australia/Sydney (UTC+10)
 

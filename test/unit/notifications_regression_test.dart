@@ -1,11 +1,11 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log_ids.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
 
 void main() {
   test('EntryLogIds prefers base id over legacy snooze', () {

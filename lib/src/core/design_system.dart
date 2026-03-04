@@ -1,4 +1,4 @@
-/// ============================================================================
+﻿/// ============================================================================
 /// DOSIFI V5 - UNIVERSAL DESIGN SYSTEM
 /// ============================================================================
 ///
@@ -21,8 +21,8 @@
 /// ============================================================================
 
 // Re-export all sub-modules so existing import 'design_system.dart' still works:
-export 'package:dosifi_v5/src/core/design_tokens_spacing.dart';
-export 'package:dosifi_v5/src/core/design_tokens_opacity.dart';
-export 'package:dosifi_v5/src/core/design_tokens_radius.dart';
-export 'package:dosifi_v5/src/core/design_tokens_typography.dart';
-export 'package:dosifi_v5/src/core/design_builders.dart';
+export 'package:skedux/src/core/design_tokens_spacing.dart';
+export 'package:skedux/src/core/design_tokens_opacity.dart';
+export 'package:skedux/src/core/design_tokens_radius.dart';
+export 'package:skedux/src/core/design_tokens_typography.dart';
+export 'package:skedux/src/core/design_builders.dart';

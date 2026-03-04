@@ -1,11 +1,11 @@
 ﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/utils/format.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-// import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart'; // unused
+import 'package:skedux/src/core/utils/format.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+// import 'package:skedux/src/features/schedules/domain/entry_log.dart'; // unused
 
 /// Centralized helpers for displaying medication information.
 class MedicationDisplayHelpers {

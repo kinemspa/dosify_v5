@@ -2,16 +2,16 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/widgets/entry_status_ui.dart';
-import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/widgets/entry_status_ui.dart';
+import 'package:skedux/src/widgets/white_syringe_gauge.dart';
 
 class EntryDialogEntryPreview extends StatelessWidget {
   const EntryDialogEntryPreview({

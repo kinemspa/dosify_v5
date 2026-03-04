@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:io';
 
 import 'package:android_intent_plus/android_intent.dart';
@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
-import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
+import 'package:skedux/src/core/monetization/entitlement_service.dart';
+import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
 
 const String kProLifetimeProductId = 'dosifi_pro_lifetime';
 

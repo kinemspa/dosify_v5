@@ -1,8 +1,8 @@
-import 'package:hive_flutter/hive_flutter.dart';
+﻿import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/core/notifications/expiry_notification_settings.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
 
 class ExpiryNotificationScheduler {
   const ExpiryNotificationScheduler._();

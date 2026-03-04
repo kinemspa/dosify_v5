@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
 
 /// Service for calculating entry occurrences for calendar views
 ///

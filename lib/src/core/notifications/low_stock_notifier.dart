@@ -1,13 +1,13 @@
-// Flutter/Dart imports:
+﻿// Flutter/Dart imports:
 import 'dart:async';
 
 // Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
 
 class LowStockNotifier {
   const LowStockNotifier._();

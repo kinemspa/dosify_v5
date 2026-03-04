@@ -1,6 +1,6 @@
-import 'dart:async';
+﻿import 'dart:async';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 
 OverlayEntry? _activeSnackBarEntry;

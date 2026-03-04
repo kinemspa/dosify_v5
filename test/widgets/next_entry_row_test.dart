@@ -1,8 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dosifi_v5/src/widgets/next_entry_row.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/widgets/next_entry_row.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
 
 void main() {
   testWidgets('NextEntryRow does not overflow at small width', (

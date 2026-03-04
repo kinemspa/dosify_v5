@@ -1,6 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 
 /// Base large card used across medications, schedules, and entries.
 class LargeCard extends StatelessWidget {

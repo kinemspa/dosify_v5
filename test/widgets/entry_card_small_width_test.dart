@@ -2,9 +2,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/widgets/entry_card.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/widgets/entry_card.dart';
 
 /// Test for EntryCard at very small widths to ensure no overflow.
 /// This is a regression test to prevent layout issues on small screens.

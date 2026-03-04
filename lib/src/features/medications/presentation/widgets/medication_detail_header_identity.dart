@@ -1,5 +1,5 @@
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/status_pill.dart';
+﻿import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/status_pill.dart';
 import 'package:flutter/material.dart';
 
 class MedicationDetailHeaderIdentity extends StatelessWidget {

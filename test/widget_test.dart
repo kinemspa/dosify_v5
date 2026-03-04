@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/app/app.dart';
+import 'package:skedux/src/app/app.dart';
 
 void main() {
   testWidgets('App builds without throwing and renders MaterialApp', (

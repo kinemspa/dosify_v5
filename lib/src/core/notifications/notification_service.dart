@@ -2,10 +2,10 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/notifications/notification_channel_service.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_scheduler.dart';
+import 'package:skedux/src/core/notifications/notification_channel_service.dart';
+import 'package:skedux/src/core/notifications/notification_scheduler.dart';
 
-export 'package:dosifi_v5/src/core/notifications/notification_channel_service.dart'
+export 'package:skedux/src/core/notifications/notification_channel_service.dart'
     show dosifiNotificationTapBackground;
 
 /// Thin public facade over [NotificationChannelService] and

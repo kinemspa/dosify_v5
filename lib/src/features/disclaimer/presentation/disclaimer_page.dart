@@ -1,10 +1,10 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/disclaimer/data/disclaimer_preferences.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/disclaimer/data/disclaimer_preferences.dart';
 
 /// Full-screen disclaimer gate shown on first launch.
 ///

@@ -5,14 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/hive/hive_box_safe_write.dart';
-import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
+import 'package:skedux/src/core/hive/hive_box_safe_write.dart';
+import 'package:skedux/src/core/monetization/entitlement_service.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Repository for medication data access

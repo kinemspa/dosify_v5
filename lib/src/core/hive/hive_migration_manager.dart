@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/foundation.dart';
 
 // Package imports:
@@ -6,7 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
 
 /// Manages Hive database schema migrations to ensure backward compatibility
 /// when adding new fields to existing models.

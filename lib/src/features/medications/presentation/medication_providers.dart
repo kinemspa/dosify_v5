@@ -1,11 +1,11 @@
-// Package imports:
+﻿// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/hive/hive_watch.dart';
-import 'package:dosifi_v5/src/features/medications/data/medication_repository.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/core/hive/hive_watch.dart';
+import 'package:skedux/src/features/medications/data/medication_repository.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
 
 final medicationsBoxProvider = Provider<Box<Medication>>((ref) {
   final box = Hive.box<Medication>('medications');

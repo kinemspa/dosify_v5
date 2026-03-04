@@ -2,9 +2,9 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/hive/hive_box_safe_write.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
+import 'package:skedux/src/core/hive/hive_box_safe_write.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log_ids.dart';
 
 class EntryLogRepository {
   EntryLogRepository(this._box);

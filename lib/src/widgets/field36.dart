@@ -1,8 +1,8 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
+import 'package:skedux/src/features/medications/presentation/ui_consts.dart';
 
 class Field36 extends StatelessWidget {
   const Field36({required this.child, super.key, this.width});

@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/app/router.dart';
-import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/branded_launch_gate.dart';
+import 'package:skedux/src/app/router.dart';
+import 'package:skedux/src/app/theme_mode_controller.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/branded_launch_gate.dart';
 
 class DosifiApp extends ConsumerWidget {
   const DosifiApp({super.key});

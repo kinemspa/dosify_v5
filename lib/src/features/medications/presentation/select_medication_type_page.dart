@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -6,9 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/selection_cards.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/selection_cards.dart';
 
 class SelectMedicationTypePage extends StatelessWidget {
   const SelectMedicationTypePage({super.key});

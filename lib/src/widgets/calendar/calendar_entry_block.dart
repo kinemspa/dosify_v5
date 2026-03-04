@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/widgets/entry_status_ui.dart';
-import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/widgets/entry_status_ui.dart';
+import 'package:skedux/src/widgets/schedule_status_badge.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// Displays a entry block in calendar views

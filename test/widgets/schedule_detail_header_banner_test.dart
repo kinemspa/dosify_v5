@@ -2,9 +2,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
 
 ThemeData _testTheme() {
   const primarySeed = kDetailHeaderGradientStart;

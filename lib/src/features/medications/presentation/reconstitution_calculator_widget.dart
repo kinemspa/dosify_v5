@@ -6,14 +6,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_helpers.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:skedux/src/features/medications/presentation/reconstitution_calculator_helpers.dart';
+import 'package:skedux/src/features/medications/presentation/ui_consts.dart';
+import 'package:skedux/src/widgets/field36.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
+import 'package:skedux/src/widgets/white_syringe_gauge.dart';
 
 /// Legacy local stepper replaced by shared StepperRow36 for consistency.
 

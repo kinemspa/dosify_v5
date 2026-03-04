@@ -8,18 +8,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/app/app.dart';
-import 'package:dosifi_v5/src/app/notification_deep_link_handler.dart';
-import 'package:dosifi_v5/src/app/router.dart' show disclaimerNotifier;
-import 'package:dosifi_v5/src/core/hive/hive_bootstrap.dart';
-import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
-import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
-import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
-import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/app/app.dart';
+import 'package:skedux/src/app/notification_deep_link_handler.dart';
+import 'package:skedux/src/app/router.dart' show disclaimerNotifier;
+import 'package:skedux/src/core/hive/hive_bootstrap.dart';
+import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
+import 'package:skedux/src/core/notifications/expiry_notification_scheduler.dart';
+import 'package:skedux/src/core/notifications/expiry_notification_settings.dart';
+import 'package:skedux/src/core/notifications/snooze_settings.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/core/ui/experimental_ui_settings.dart';
+import 'package:skedux/src/core/utils/datetime_format_settings.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
 
 import 'package:mcp_toolkit/mcp_toolkit.dart'; // NEW: For MCP bridge to enable inspections/screenshots
 

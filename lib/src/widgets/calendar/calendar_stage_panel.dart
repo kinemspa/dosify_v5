@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
-import 'package:dosifi_v5/src/widgets/entry_card.dart';
-import 'package:dosifi_v5/src/widgets/entry_summary_row.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/widgets/calendar/calendar_shared.dart';
+import 'package:skedux/src/widgets/entry_card.dart';
+import 'package:skedux/src/widgets/entry_summary_row.dart';
 
 /// Displays a scrollable list of entries for a single day, grouped by hour.
 ///

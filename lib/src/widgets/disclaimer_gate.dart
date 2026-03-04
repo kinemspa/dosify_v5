@@ -1,12 +1,12 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 // Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/legal/disclaimer_settings.dart';
-import 'package:dosifi_v5/src/core/legal/disclaimer_strings.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/legal/disclaimer_settings.dart';
+import 'package:skedux/src/core/legal/disclaimer_strings.dart';
 
 /// Shows a mandatory disclaimer acceptance dialog on first launch.
 ///

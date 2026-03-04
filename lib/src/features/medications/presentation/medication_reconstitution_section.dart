@@ -1,12 +1,12 @@
 ﻿// Reconstitution section extracted from medication_detail_page.dart (#166).
 import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
-import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/widgets/glass_card_surface.dart';
+import 'package:skedux/src/widgets/reconstitution_summary_card.dart';
 
 // ---------------------------------------------------------------------------
 // Private helper functions

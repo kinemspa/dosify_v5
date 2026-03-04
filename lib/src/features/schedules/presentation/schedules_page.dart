@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -7,14 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_list_card.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_providers.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/widgets/ads/anchored_ad_banner.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/schedule_status_chip.dart';
+import 'package:skedux/src/features/schedules/presentation/widgets/schedule_list_card.dart';
+import 'package:skedux/src/features/schedules/presentation/schedule_providers.dart';
 
 enum _SchedView { list, compact, large }
 

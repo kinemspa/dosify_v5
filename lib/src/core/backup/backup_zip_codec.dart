@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -8,9 +8,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:dosifi_v5/src/core/backup/backup_constants.dart';
-import 'package:dosifi_v5/src/core/backup/backup_models.dart';
-import 'package:dosifi_v5/src/core/hive/hive_encryption_key_service.dart';
+import 'package:skedux/src/core/backup/backup_constants.dart';
+import 'package:skedux/src/core/backup/backup_models.dart';
+import 'package:skedux/src/core/hive/hive_encryption_key_service.dart';
 
 class BackupZipCodec {
   const BackupZipCodec();

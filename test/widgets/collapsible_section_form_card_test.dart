@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 void main() {
   testWidgets('CollapsibleSectionFormCard expands and collapses', (

@@ -11,26 +11,26 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/app/theme_mode_controller.dart';
-import 'package:dosifi_v5/src/core/backup/backup_models.dart';
-import 'package:dosifi_v5/src/core/backup/google_drive_backup_service.dart';
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/legal/disclaimer_settings.dart';
-import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
-import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
-import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
-import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
-import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
-import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
-import 'package:dosifi_v5/src/core/ui/experimental_ui_settings.dart';
-import 'package:dosifi_v5/src/core/ui/onboarding_settings.dart';
-import 'package:dosifi_v5/src/core/utils/developer_options.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
-import 'package:dosifi_v5/src/features/settings/data/test_data_seed_service.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/app/theme_mode_controller.dart';
+import 'package:skedux/src/core/backup/backup_models.dart';
+import 'package:skedux/src/core/backup/google_drive_backup_service.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/legal/disclaimer_settings.dart';
+import 'package:skedux/src/core/monetization/billing_service.dart';
+import 'package:skedux/src/core/monetization/entitlement_service.dart';
+import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
+import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
+import 'package:skedux/src/core/notifications/expiry_notification_scheduler.dart';
+import 'package:skedux/src/core/notifications/expiry_notification_settings.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/core/notifications/snooze_settings.dart';
+import 'package:skedux/src/core/ui/experimental_ui_settings.dart';
+import 'package:skedux/src/core/ui/onboarding_settings.dart';
+import 'package:skedux/src/core/utils/developer_options.dart';
+import 'package:skedux/src/core/utils/datetime_format_settings.dart';
+import 'package:skedux/src/features/settings/data/test_data_seed_service.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 
 /// Static Legal page containing Privacy Policy and Terms of Use.
 ///

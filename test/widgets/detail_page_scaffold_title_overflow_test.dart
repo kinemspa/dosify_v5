@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/detail_page_scaffold.dart';
 
 ThemeData _testTheme() {
   const primarySeed = kDetailHeaderGradientStart;

@@ -2,15 +2,15 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/legal/disclaimer_strings.dart';
-import 'package:dosifi_v5/src/core/utils/id.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
-import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/legal/disclaimer_strings.dart';
+import 'package:skedux/src/core/utils/id.dart';
+import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:skedux/src/features/medications/domain/saved_reconstitution_calculation.dart';
+import 'package:skedux/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/saved_reconstitution_sheet.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
 
 enum SyringeSizeMl { ml0_3, ml0_5, ml1, ml3, ml5 }
 

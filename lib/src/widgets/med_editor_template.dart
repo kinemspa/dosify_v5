@@ -1,8 +1,8 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 /// A reusable editor template that mirrors the Add Tablet screen layout exactly.
 ///

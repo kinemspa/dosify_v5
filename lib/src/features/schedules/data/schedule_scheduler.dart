@@ -5,10 +5,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_entry_metrics.dart';
+import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_entry_metrics.dart';
 
 /// Schedules notifications for registered [Schedule] entries and exposes helpers
 /// for deterministic stable slot ID generation used across the app.

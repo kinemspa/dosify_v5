@@ -33,8 +33,8 @@ Design tokens
 - Secondary: #EC873F
 
 Android identifiers
-- applicationId: com.dosifi.app
-- namespace: com.dosifi.dosifi_v5
+- applicationId: com.skedux.app
+- namespace: com.skedux.app
 - minSdk: 24, targetSdk: 35
 - Permissions: POST_NOTIFICATIONS, SCHEDULE_EXACT_ALARM, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS (see android/app/src/main/AndroidManifest.xml)
 

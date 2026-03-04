@@ -1,10 +1,10 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/widgets/entry_action_legend_row.dart';
-import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/widgets/entry_action_legend_row.dart';
+import 'package:skedux/src/widgets/unified_status_badge.dart';
 
 void main() {
   testWidgets('EntryActionLegendRow renders Taken/Skipped/Snoozed with DS colors', (

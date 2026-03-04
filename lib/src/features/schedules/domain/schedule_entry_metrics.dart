@@ -1,4 +1,4 @@
-﻿import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+﻿import 'package:skedux/src/features/schedules/domain/schedule.dart';
 
 class ScheduleEntryMetrics {
   const ScheduleEntryMetrics._();

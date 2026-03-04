@@ -1,12 +1,12 @@
 ﻿// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
 
 /// Debug page for notification testing and diagnostics
 class DebugPage extends StatelessWidget {

@@ -1,6 +1,6 @@
-﻿import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+﻿import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
 
 /// Service for calculating medication stock levels and projections
 class MedicationStockService {

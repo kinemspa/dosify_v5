@@ -1,20 +1,20 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
-import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_entry_metrics.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/entry_action_sheet.dart';
+import 'package:skedux/src/core/notifications/low_stock_notifier.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:skedux/src/features/schedules/data/entry_log_repository.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log_ids.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_entry_metrics.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/entry_action_sheet.dart';
 
 Future<void> showEntryActionSheetFromModels(
   BuildContext context, {

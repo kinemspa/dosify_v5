@@ -1,11 +1,11 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 
 /// Simplified, unified app header with clean design
 /// - Uses consistent gradient colors with medication detail page

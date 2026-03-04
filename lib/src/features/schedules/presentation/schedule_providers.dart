@@ -1,9 +1,9 @@
 ﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:dosifi_v5/src/core/hive/hive_watch.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/core/hive/hive_watch.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
 
 final schedulesBoxProvider = Provider<Box<Schedule>>((ref) {
   return Hive.box<Schedule>('schedules');

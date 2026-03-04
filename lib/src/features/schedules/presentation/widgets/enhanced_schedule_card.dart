@@ -9,29 +9,29 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_entry_metrics.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
-import 'package:dosifi_v5/src/widgets/entry_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/entry_card.dart';
-import 'package:dosifi_v5/src/widgets/next_entry_row.dart';
-import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
-import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/core/notifications/low_stock_notifier.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log_ids.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/data/entry_log_repository.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_entry_metrics.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/widgets/confirm_schedule_edit_dialog.dart';
+import 'package:skedux/src/widgets/entry_action_sheet.dart';
+import 'package:skedux/src/widgets/entry_card.dart';
+import 'package:skedux/src/widgets/next_entry_row.dart';
+import 'package:skedux/src/widgets/schedule_status_chip.dart';
+import 'package:skedux/src/widgets/schedule_pause_dialog.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/features/schedules/presentation/schedule_status_ui.dart';
 
 /// Enhanced expandable schedule card for medication detail page
 /// Shows schedule summary by default, expands to show full details

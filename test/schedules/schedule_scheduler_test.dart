@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
 
 void main() {
   test('slotIdFor is deterministic and unique per occurrence', () {

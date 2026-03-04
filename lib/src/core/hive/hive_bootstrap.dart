@@ -6,17 +6,17 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/hive/hive_encryption_key_service.dart';
-import 'package:dosifi_v5/src/core/hive/hive_migration_manager.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_status_change_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
+import 'package:skedux/src/core/hive/hive_encryption_key_service.dart';
+import 'package:skedux/src/core/hive/hive_migration_manager.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/inventory_log.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/saved_reconstitution_calculation.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/entry_status_change_log.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/supplies/domain/stock_movement.dart';
+import 'package:skedux/src/features/supplies/domain/supply.dart';
 
 class HiveBootstrap {
   // All box names in dependency order.

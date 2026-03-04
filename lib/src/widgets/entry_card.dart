@@ -2,12 +2,12 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_value_formatter.dart';
-import 'package:dosifi_v5/src/widgets/entry_status_badge.dart';
-import 'package:dosifi_v5/src/widgets/entry_status_ui.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/entry_value_formatter.dart';
+import 'package:skedux/src/widgets/entry_status_badge.dart';
+import 'package:skedux/src/widgets/entry_status_ui.dart';
 
 class EntryCard extends StatelessWidget {
   const EntryCard({

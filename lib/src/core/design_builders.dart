@@ -12,11 +12,11 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 // Project imports:
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/core/design_tokens_opacity.dart';
-import 'package:dosifi_v5/src/core/design_tokens_radius.dart';
-import 'package:dosifi_v5/src/core/design_tokens_spacing.dart';
-import 'package:dosifi_v5/src/core/design_tokens_typography.dart';
+import 'package:skedux/src/features/medications/presentation/ui_consts.dart';
+import 'package:skedux/src/core/design_tokens_opacity.dart';
+import 'package:skedux/src/core/design_tokens_radius.dart';
+import 'package:skedux/src/core/design_tokens_spacing.dart';
+import 'package:skedux/src/core/design_tokens_typography.dart';
 
 // ============================================================================
 // CARD DECORATION BUILDERS

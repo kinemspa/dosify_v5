@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 
 const String _primaryLogoPath = 'assets/logo/logo_002_primary.png';
-const String _whiteLogoPath = 'assets/logo/logo_001_white.png';
-const String _androidIconPath = 'assets/logo/logo_001_android_icon.png';
+const String _whiteLogoPath = 'assets/logo/logo_002_white.png';
+const String _androidIconPath = 'assets/logo/logo_002_android_icon.png';
 const String _androidAdaptiveForegroundPath =
-  'assets/logo/logo_001_white_adaptive_fg.png';
-const String _splashLogoPath = 'assets/logo/logo_001_white_splash.png';
+  'assets/logo/logo_002_white_adaptive_fg.png';
+const String _splashLogoPath = 'assets/logo/logo_002_white_splash.png';
 const String _androidNotificationLargeIconPath =
   'android/app/src/main/res/drawable/ic_notification_large.png';
 

@@ -11,9 +11,9 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 // Project imports:
-import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/medications/domain/inventory_log.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
 
 // ============================================================================
 // OPACITY SCALE

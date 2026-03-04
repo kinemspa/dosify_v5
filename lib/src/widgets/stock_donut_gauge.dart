@@ -1,6 +1,6 @@
 ﻿import 'dart:math' as math;
 
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 
 /// Circular stock donut gauge with a subtle glass effect.

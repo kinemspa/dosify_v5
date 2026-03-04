@@ -1,8 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
 
 List<Widget> buildEntryCardInventoryMetaLines(
   BuildContext context, {

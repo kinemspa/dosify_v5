@@ -10,27 +10,27 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
-import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/cards/today_entries_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
-import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
-import 'package:dosifi_v5/src/widgets/unified_tinted_card_surface.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/features/schedules/data/entry_log_repository.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log_ids.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
+import 'package:skedux/src/features/schedules/presentation/schedule_status_ui.dart';
+import 'package:skedux/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
+import 'package:skedux/src/widgets/detail_page_scaffold.dart';
+import 'package:skedux/src/widgets/cards/today_entries_card.dart';
+import 'package:skedux/src/widgets/cards/activity_card.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/schedule_pause_dialog.dart';
+import 'package:skedux/src/widgets/unified_status_badge.dart';
+import 'package:skedux/src/widgets/unified_tinted_card_surface.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 class ScheduleDetailPage extends StatefulWidget {
   const ScheduleDetailPage({required this.scheduleId, super.key});

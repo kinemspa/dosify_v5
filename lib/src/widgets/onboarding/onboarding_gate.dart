@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/ui/onboarding_settings.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/ui/onboarding_settings.dart';
 
 // ── Per-screen tip definitions ───────────────────────────────────────────────
 

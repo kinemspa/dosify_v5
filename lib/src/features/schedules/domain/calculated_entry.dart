@@ -1,6 +1,6 @@
 ﻿// Project imports:
-import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
 
 /// Represents a calculated entry occurrence for calendar display
 class CalculatedEntry {

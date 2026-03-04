@@ -1,11 +1,11 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:intl/intl.dart' as intl;
 
 // Project imports:
-import 'package:dosifi_v5/src/core/utils/datetime_format_settings.dart';
+import 'package:skedux/src/core/utils/datetime_format_settings.dart';
 
 /// Centralized date/time formatting utility that respects user preferences.
 ///

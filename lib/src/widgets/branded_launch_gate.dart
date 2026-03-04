@@ -1,8 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 
 /// Branded launch gate that shows a primary-colour splash with logo and
 /// animated tagline.  Displayed once per cold-start, then fades away.

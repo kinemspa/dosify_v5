@@ -1,9 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dosifi_v5/src/widgets/entry_input_field.dart';
-import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
+import 'package:skedux/src/widgets/entry_input_field.dart';
+import 'package:skedux/src/widgets/white_syringe_gauge.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
 
 void main() {
   group('EntryInputField - Tablets', () {

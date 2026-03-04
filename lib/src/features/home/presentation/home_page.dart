@@ -10,16 +10,16 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/widgets/ads/anchored_ad_banner.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/today_entries_card.dart';
-import 'package:dosifi_v5/src/widgets/notification_permission_banner.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/widgets/ads/anchored_ad_banner.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/cards/activity_card.dart';
+import 'package:skedux/src/widgets/cards/calendar_card.dart';
+import 'package:skedux/src/widgets/cards/today_entries_card.dart';
+import 'package:skedux/src/widgets/notification_permission_banner.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

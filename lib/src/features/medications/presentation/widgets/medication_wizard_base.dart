@@ -1,13 +1,13 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/widgets/wizard_navigation_bar.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/widgets/wizard_navigation_bar.dart';
 
 /// Base class for medication wizard pages.
 /// Provides common wizard functionality: step indicator, navigation, validation.

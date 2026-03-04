@@ -32,7 +32,7 @@ class NotificationChannelService {
   static final FlutterLocalNotificationsPlugin plugin =
       FlutterLocalNotificationsPlugin();
 
-  static const MethodChannel platform = MethodChannel('dosifi/notifications');
+  static const MethodChannel platform = MethodChannel('skedux/notifications');
 
   static void _log(String msg) => debugPrint('[NotificationService] $msg');
 

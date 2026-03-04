@@ -1,8 +1,8 @@
-﻿import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+﻿import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
 import 'package:intl/intl.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_entry_block.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
+import 'package:skedux/src/widgets/calendar/calendar_entry_block.dart';
+import 'package:skedux/src/widgets/calendar/calendar_shared.dart';
 import 'package:flutter/material.dart';
 
 /// A day view showing an hourly timeline with entry blocks.

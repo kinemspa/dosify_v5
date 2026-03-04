@@ -1,13 +1,13 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/widgets/combined_reports_history_widget.dart';
-import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/widgets/combined_reports_history_widget.dart';
+import 'package:skedux/src/widgets/unified_empty_state.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 class ActivityCard extends StatefulWidget {
   const ActivityCard({

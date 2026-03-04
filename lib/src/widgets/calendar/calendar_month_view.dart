@@ -1,6 +1,6 @@
-﻿import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_day_cell.dart';
-import 'package:dosifi_v5/src/core/design_system.dart';
+﻿import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/widgets/calendar/calendar_day_cell.dart';
+import 'package:skedux/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 
 /// A month view showing a calendar grid with entries.

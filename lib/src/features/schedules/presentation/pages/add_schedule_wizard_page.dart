@@ -7,22 +7,22 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/core/utils/format.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
-import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_wizard_base.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/entry_input_field.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/core/utils/format.dart';
+import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/presentation/schedule_mode.dart';
+import 'package:skedux/src/features/schedules/presentation/widgets/schedule_wizard_base.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/widgets/entry_input_field.dart';
+import 'package:skedux/src/widgets/field36.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 enum _StartFromMode { now, date }
 

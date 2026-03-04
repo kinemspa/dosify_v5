@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
 
 String scheduleStatusLabel(Schedule s) {
   return switch (s.status) {

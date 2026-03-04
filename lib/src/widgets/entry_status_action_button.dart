@@ -1,9 +1,9 @@
 ﻿import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
-import 'package:dosifi_v5/src/widgets/entry_status_badge.dart';
-import 'package:dosifi_v5/src/widgets/entry_status_ui.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/widgets/entry_status_badge.dart';
+import 'package:skedux/src/widgets/entry_status_ui.dart';
 
 class EntryStatusActionButton extends StatelessWidget {
   const EntryStatusActionButton({

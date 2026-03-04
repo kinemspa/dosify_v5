@@ -1,6 +1,6 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
 
 void main() {
   group('ScheduleOccurrenceService', () {

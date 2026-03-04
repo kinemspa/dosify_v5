@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/monetization/ad_service.dart';
-import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/monetization/ad_service.dart';
+import 'package:skedux/src/core/monetization/entitlement_service.dart';
 
 class AnchoredAdBanner extends ConsumerStatefulWidget {
   const AnchoredAdBanner({super.key});

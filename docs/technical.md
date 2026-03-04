@@ -106,8 +106,8 @@ Build & tooling
 - Format: dart format .
 
 Android specifics
-- applicationId: com.dosifi.app
-- namespace: com.dosifi.dosifi_v5
+- applicationId: com.skedux.app
+- namespace: com.skedux.app
 - compileSdk/targetSdk as in android/app/build.gradle.kts
 
 Notifications (architecture and delivery)

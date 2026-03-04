@@ -1,12 +1,12 @@
-// Backup/sealed-stock section extracted from medication_detail_page.dart (#166).
+﻿// Backup/sealed-stock section extracted from medication_detail_page.dart (#166).
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_sealed_vials_editor_card.dart';
-import 'package:dosifi_v5/src/widgets/status_pill.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/widgets/medication_sealed_vials_editor_card.dart';
+import 'package:skedux/src/widgets/status_pill.dart';
 
 // ---------------------------------------------------------------------------
 // Private helper functions

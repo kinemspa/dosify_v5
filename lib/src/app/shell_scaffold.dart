@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -7,8 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/app/nav_items.dart';
-import 'package:dosifi_v5/src/widgets/onboarding/onboarding_gate.dart';
+import 'package:skedux/src/app/nav_items.dart';
+import 'package:skedux/src/widgets/onboarding/onboarding_gate.dart';
 
 final bottomNavIdsProvider =
     StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {

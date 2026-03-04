@@ -1,12 +1,12 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
 
-import 'package:dosifi_v5/src/core/backup/backup_zip_codec.dart';
-import 'package:dosifi_v5/src/core/backup/backup_models.dart';
+import 'package:skedux/src/core/backup/backup_zip_codec.dart';
+import 'package:skedux/src/core/backup/backup_models.dart';
 
 class GoogleDriveBackupService {
   GoogleDriveBackupService({BackupZipCodec? codec, GoogleSignIn? googleSignIn})

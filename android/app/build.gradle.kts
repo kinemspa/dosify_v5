@@ -9,7 +9,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 android {
-    namespace = "com.dosifi.dosifi_v5"
+    namespace = "com.skedux.app"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         // Application ID used by Play Store / device install identification.
-        applicationId = "com.dosifi.app"
+        applicationId = "com.skedux.app"
         // SDK targets for Android.
         minSdk = 24
         targetSdk = 36

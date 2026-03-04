@@ -1,11 +1,11 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
-import 'package:dosifi_v5/src/features/supplies/data/supply_repository.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
+import 'package:skedux/src/features/supplies/data/supply_repository.dart';
+import 'package:skedux/src/features/supplies/domain/stock_movement.dart';
+import 'package:skedux/src/features/supplies/domain/supply.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

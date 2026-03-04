@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
-import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
+import 'package:skedux/src/widgets/white_syringe_gauge.dart';
 
 /// Centralized reconstitution summary card widget
 /// Used in both medication detail page and MDV wizard

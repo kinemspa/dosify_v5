@@ -1,8 +1,8 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 
 /// Syringe gauge widget used for reconstitution visualization
 /// Shows a horizontal line with unit markers and thick fill line

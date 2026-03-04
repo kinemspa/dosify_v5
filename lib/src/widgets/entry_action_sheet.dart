@@ -1,35 +1,35 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
-import 'package:dosifi_v5/src/core/notifications/low_stock_notifier.dart';
-import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
-import 'package:dosifi_v5/src/widgets/entry_action/entry_partial_entry_sheet.dart';
-import 'package:dosifi_v5/src/widgets/entry_action/entry_syringe_picker_sheet.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/core/utils/datetime_formatter.dart';
+import 'package:skedux/src/core/notifications/low_stock_notifier.dart';
+import 'package:skedux/src/core/notifications/snooze_settings.dart';
+import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/inventory_log.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:skedux/src/widgets/entry_action/entry_partial_entry_sheet.dart';
+import 'package:skedux/src/widgets/entry_action/entry_syringe_picker_sheet.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
+import 'package:skedux/src/features/schedules/data/entry_log_repository.dart';
+import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
 
-import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_status_change_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/entry_value_formatter.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
-import 'package:dosifi_v5/src/widgets/entry_card.dart';
-import 'package:dosifi_v5/src/widgets/entry_card_meta_lines.dart';
-import 'package:dosifi_v5/src/widgets/entry_dialog_entry_preview.dart';
-import 'package:dosifi_v5/src/widgets/entry_status_ui.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/entry_action/entry_syringe_gauge.dart';
-import 'package:dosifi_v5/src/widgets/entry_action/entry_time_fields.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
+import 'package:skedux/src/features/schedules/domain/entry_log.dart';
+import 'package:skedux/src/features/schedules/domain/entry_status_change_log.dart';
+import 'package:skedux/src/features/schedules/domain/entry_value_formatter.dart';
+import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/features/schedules/domain/schedule_occurrence_service.dart';
+import 'package:skedux/src/widgets/entry_card.dart';
+import 'package:skedux/src/widgets/entry_card_meta_lines.dart';
+import 'package:skedux/src/widgets/entry_dialog_entry_preview.dart';
+import 'package:skedux/src/widgets/entry_status_ui.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
+import 'package:skedux/src/widgets/entry_action/entry_syringe_gauge.dart';
+import 'package:skedux/src/widgets/entry_action/entry_time_fields.dart';
 
 
 enum _EntryStatusOption { scheduled, logged, snoozed, skipped, delete }

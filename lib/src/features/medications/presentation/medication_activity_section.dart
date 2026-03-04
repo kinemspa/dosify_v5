@@ -1,9 +1,9 @@
-// Activity section extracted from medication_detail_page.dart (#166).
+﻿// Activity section extracted from medication_detail_page.dart (#166).
 import 'package:flutter/material.dart';
 
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/reports/domain/report_time_range.dart';
+import 'package:skedux/src/widgets/cards/activity_card.dart';
 
 // ---------------------------------------------------------------------------
 // Public widget

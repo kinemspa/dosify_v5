@@ -1,11 +1,11 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:skedux/src/core/design_system.dart';
 
 /// Centralized detail page scaffold used by ALL detail pages (medications, schedules, etc.)
 /// This ensures 100% consistent styling across all detail views

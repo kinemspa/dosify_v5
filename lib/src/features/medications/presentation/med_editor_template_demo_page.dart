@@ -2,14 +2,14 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/ui_consts.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/med_editor_template.dart';
-import 'package:dosifi_v5/src/widgets/summary_header_card.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/presentation/ui_consts.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/field36.dart';
+import 'package:skedux/src/widgets/med_editor_template.dart';
+import 'package:skedux/src/widgets/summary_header_card.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 class EditorTemplatePreviewPage extends StatefulWidget {
   const EditorTemplatePreviewPage({super.key});

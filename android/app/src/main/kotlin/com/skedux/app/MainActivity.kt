@@ -1,4 +1,4 @@
-package com.dosifi.dosifi_v5
+package com.skedux.app
 
 import android.app.AlarmManager
 import android.app.NotificationManager
@@ -11,7 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "dosifi/notifications").setMethodCallHandler { call, result ->
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "skedux/notifications").setMethodCallHandler { call, result ->
             when (call.method) {
                 "canScheduleExactAlarms" -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

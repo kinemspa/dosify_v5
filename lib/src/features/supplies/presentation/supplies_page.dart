@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -8,17 +8,17 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/notifications/supply_low_stock_notifier.dart';
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/core/utils/id.dart';
-import 'package:dosifi_v5/src/features/supplies/data/supply_repository.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
-import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/large_card.dart';
-import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/notifications/supply_low_stock_notifier.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/utils/id.dart';
+import 'package:skedux/src/features/supplies/data/supply_repository.dart';
+import 'package:skedux/src/features/supplies/domain/stock_movement.dart';
+import 'package:skedux/src/features/supplies/domain/supply.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/field36.dart';
+import 'package:skedux/src/widgets/large_card.dart';
+import 'package:skedux/src/widgets/unified_empty_state.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 class SuppliesPage extends StatefulWidget {
   const SuppliesPage({super.key});

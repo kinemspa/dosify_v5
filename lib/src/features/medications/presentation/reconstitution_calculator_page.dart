@@ -2,17 +2,17 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/core/utils/id.dart';
-import 'package:dosifi_v5/src/features/medications/data/saved_reconstitution_repository.dart';
-import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
-import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/field36.dart';
-import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/core/utils/id.dart';
+import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
+import 'package:skedux/src/features/medications/domain/saved_reconstitution_calculation.dart';
+import 'package:skedux/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
+import 'package:skedux/src/features/medications/presentation/reconstitution_calculator_widget.dart';
+import 'package:skedux/src/widgets/app_header.dart';
+import 'package:skedux/src/widgets/field36.dart';
+import 'package:skedux/src/widgets/saved_reconstitution_sheet.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
 
 class ReconstitutionCalculatorPage extends StatefulWidget {
   const ReconstitutionCalculatorPage({

@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/app/nav_items.dart';
+import 'package:skedux/src/app/nav_items.dart';
 
 final bottomNavIdsProvider =
     StateNotifierProvider<BottomNavIdsController, List<String>>((ref) {

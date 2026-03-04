@@ -8,20 +8,20 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/app/app_navigator.dart';
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/core/utils/format.dart';
-import 'package:dosifi_v5/src/core/utils/id.dart';
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
-import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/domain/unit_converters.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/medication_providers.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_wizard_base.dart';
-import 'package:dosifi_v5/src/widgets/missing_required_fields_card.dart';
-import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
-import 'package:dosifi_v5/src/widgets/unified_form.dart';
-import 'package:dosifi_v5/src/widgets/wizard_text_field36.dart';
+import 'package:skedux/src/app/app_navigator.dart';
+import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
+import 'package:skedux/src/core/utils/format.dart';
+import 'package:skedux/src/core/utils/id.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/unit_converters.dart';
+import 'package:skedux/src/features/medications/presentation/medication_providers.dart';
+import 'package:skedux/src/features/medications/presentation/widgets/medication_wizard_base.dart';
+import 'package:skedux/src/widgets/missing_required_fields_card.dart';
+import 'package:skedux/src/widgets/smart_expiry_picker.dart';
+import 'package:skedux/src/widgets/unified_form.dart';
+import 'package:skedux/src/widgets/wizard_text_field36.dart';
 
 // ---------------------------------------------------------------------------
 // VialMedType — differentiates single entry vial vs pre-filled syringe
