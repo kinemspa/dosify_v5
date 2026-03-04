@@ -283,8 +283,15 @@ class _MedicationInventoryTableRow extends StatelessWidget {
   final Medication medication;
   final List<Schedule> linkedSchedules;
 
+  static const _monthAbbr = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  // Compact, locale-independent format: "Feb 4" — keeps the expiry column
+  // readable on narrow screens without wrapping.
   String _formatShortDate(BuildContext context, DateTime date) {
-    return MaterialLocalizations.of(context).formatShortDate(date);
+    return '${_monthAbbr[date.month - 1]} ${date.day}';
   }
 
   String _formatExpiryCell(BuildContext context) {

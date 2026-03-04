@@ -1349,14 +1349,19 @@ class _DoseCalendarWidgetState extends State<DoseCalendarWidget> {
     Widget buildHandle(BuildContext context) {
       final theme = Theme.of(context);
       final cs = theme.colorScheme;
-      return Center(
-        child: Container(
-          width: kBottomSheetHandleWidth,
-          height: kBottomSheetHandleHeight,
-          margin: kCalendarSelectedDayStageHandleMargin,
-          decoration: BoxDecoration(
-            color: cs.onSurface.withValues(alpha: kOpacityVeryLow),
-            borderRadius: BorderRadius.circular(kBottomSheetHandleRadius),
+      // Wrap in a full-width 48dp touch target so dragging from the very top
+      // edge of the stage (including the drag icon area) always registers.
+      return SizedBox(
+        height: kMinInteractiveDimension,
+        width: double.infinity,
+        child: Center(
+          child: Container(
+            width: kBottomSheetHandleWidth,
+            height: kBottomSheetHandleHeight,
+            decoration: BoxDecoration(
+              color: cs.onSurface.withValues(alpha: kOpacityVeryLow),
+              borderRadius: BorderRadius.circular(kBottomSheetHandleRadius),
+            ),
           ),
         ),
       );

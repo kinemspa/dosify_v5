@@ -747,9 +747,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             title: 'Daily Dose Activity',
                             neutral: true,
                             children: [
-                              buildHelperText(
-                                context,
-                                'Logged doses per day — last $trendDays days.',
+                              Center(
+                                child: buildHelperText(
+                                  context,
+                                  'Logged doses per day — last $trendDays days.',
+                                ),
                               ),
                               const SizedBox(height: kSpacingM),
                               _buildDailyTrendChart(
@@ -766,9 +768,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             title: 'Activity by Medication',
                             neutral: true,
                             children: [
-                              buildHelperText(
-                                context,
-                                'Top ${topActivity.take(8).length} medications by dose actions in selected range.',
+                              Center(
+                                child: buildHelperText(
+                                  context,
+                                  'Top ${topActivity.take(8).length} medications by dose actions in selected range.',
+                                ),
                               ),
                               const SizedBox(height: kSpacingM),
                               _buildTopMedsChart(
@@ -1050,33 +1054,29 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         ),
         decoration: buildStandardCardDecoration(context: context),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                Icon(
-                  icon,
-                  size: kIconSizeSmall,
-                  color: cs.onSurfaceVariant,
-                ),
-                const SizedBox(width: kSpacingXS),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: helperTextStyle(context),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+            Icon(
+              icon,
+              size: kIconSizeLarge,
+              color: valueColor ?? cs.primary,
+            ),
+            const SizedBox(height: kSpacingXS),
+            Text(
+              label,
+              style: helperTextStyle(context),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: kSpacingXS),
             Text(
               value,
               style: bodyTextStyle(context)?.copyWith(
-                fontWeight: kFontWeightSemiBold,
-                fontSize: kFontSizeLarge,
-                color: valueColor,
+                fontWeight: kFontWeightBold,
+                fontSize: kFontSizeXLarge,
+                color: valueColor ?? cs.primary,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
