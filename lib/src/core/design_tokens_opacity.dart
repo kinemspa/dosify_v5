@@ -12,8 +12,8 @@
 import 'package:flutter/material.dart';
 // Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 
 // ============================================================================
 // OPACITY SCALE
@@ -68,10 +68,10 @@ const double kCardShadowOpacity = 0.04;
 const double kCardShadowBlurRadius = 6.0;
 const Offset kCardShadowOffset = Offset(0, 2);
 
-/// Dose item card shadow.
-const double kDoseCardShadowOpacity = 0.06;
-const double kDoseCardShadowBlurRadius = 6.0;
-const Offset kDoseCardShadowOffset = Offset(0, 2);
+/// Entry item card shadow.
+const double kEntryCardShadowOpacity = 0.06;
+const double kEntryCardShadowBlurRadius = 6.0;
+const Offset kEntryCardShadowOffset = Offset(0, 2);
 
 // ============================================================================
 // RECONSTITUTION CALCULATOR OPACITIES
@@ -104,66 +104,66 @@ const double kDetailHeaderCollapsedHeight = 48;
 
 /// Semantic status colors ΓÇö light-mode base values (use adaptive helpers in widgets).
 ///
-/// Prefer the adaptive helper functions (e.g. [kDoseStatusTakenGreenAdaptive])
+/// Prefer the adaptive helper functions (e.g. [kEntryStatusTakenGreenAdaptive])
 /// when you have a [BuildContext], so colors remain legible in dark mode.
-const Color kDoseStatusTakenGreen = Color(0xFF2E7D32);        // Green 800 (light mode)
-const Color kDoseStatusTakenGreenDark = Color(0xFF81C784);    // Green 300 (dark mode)
-const Color kDoseStatusSkippedRed = Color(0xFFD32F2F);        // Red 700 (light mode)
-const Color kDoseStatusSkippedRedDark = Color(0xFFEF9A9A);    // Red 200 (dark mode)
-const Color kDoseStatusSnoozedOrange = Color(0xFFF57C00);     // Orange 700 (light mode)
-const Color kDoseStatusSnoozedOrangeDark = Color(0xFFFFB74D); // Orange 300 (dark mode)
-const Color kDoseStatusOverdueAmber = Color(0xFFF9A825);      // Amber (both modes)
-const Color kDoseStatusMissedDarkRed = Color(0xFFB71C1C);     // Red 900 (light mode)
-const Color kDoseStatusMissedDarkRedDark = Color(0xFFEF9A9A); // Red 200 (dark mode)
+const Color kEntryStatusTakenGreen = Color(0xFF2E7D32);        // Green 800 (light mode)
+const Color kEntryStatusTakenGreenDark = Color(0xFF81C784);    // Green 300 (dark mode)
+const Color kEntryStatusSkippedRed = Color(0xFFD32F2F);        // Red 700 (light mode)
+const Color kEntryStatusSkippedRedDark = Color(0xFFEF9A9A);    // Red 200 (dark mode)
+const Color kEntryStatusSnoozedOrange = Color(0xFFF57C00);     // Orange 700 (light mode)
+const Color kEntryStatusSnoozedOrangeDark = Color(0xFFFFB74D); // Orange 300 (dark mode)
+const Color kEntryStatusOverdueAmber = Color(0xFFF9A825);      // Amber (both modes)
+const Color kEntryStatusMissedDarkRed = Color(0xFFB71C1C);     // Red 900 (light mode)
+const Color kEntryStatusMissedDarkRedDark = Color(0xFFEF9A9A); // Red 200 (dark mode)
 
-/// Adaptive dose status color helpers ΓÇö always use these in widgets.
+/// Adaptive entry status color helpers ΓÇö always use these in widgets.
 /// Returns a lighter shade in dark mode for sufficient contrast.
-Color kDoseStatusTakenGreenAdaptive(BuildContext context) {
+Color kEntryStatusTakenGreenAdaptive(BuildContext context) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  return isDark ? kDoseStatusTakenGreenDark : kDoseStatusTakenGreen;
+  return isDark ? kEntryStatusTakenGreenDark : kEntryStatusTakenGreen;
 }
 
-Color kDoseStatusSkippedRedAdaptive(BuildContext context) {
+Color kEntryStatusSkippedRedAdaptive(BuildContext context) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  return isDark ? kDoseStatusSkippedRedDark : kDoseStatusSkippedRed;
+  return isDark ? kEntryStatusSkippedRedDark : kEntryStatusSkippedRed;
 }
 
-Color kDoseStatusSnoozedOrangeAdaptive(BuildContext context) {
+Color kEntryStatusSnoozedOrangeAdaptive(BuildContext context) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  return isDark ? kDoseStatusSnoozedOrangeDark : kDoseStatusSnoozedOrange;
+  return isDark ? kEntryStatusSnoozedOrangeDark : kEntryStatusSnoozedOrange;
 }
 
-Color kDoseStatusMissedDarkRedAdaptive(BuildContext context) {
+Color kEntryStatusMissedDarkRedAdaptive(BuildContext context) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  return isDark ? kDoseStatusMissedDarkRedDark : kDoseStatusMissedDarkRed;
+  return isDark ? kEntryStatusMissedDarkRedDark : kEntryStatusMissedDarkRed;
 }
 
 /// Adherence rate colors ΓÇö adaptive for dark mode.
 Color kAdherenceGoodColor(BuildContext context) =>
-    kDoseStatusTakenGreenAdaptive(context);
+    kEntryStatusTakenGreenAdaptive(context);
 Color kAdherenceWarningColor(BuildContext context) =>
-    kDoseStatusSnoozedOrangeAdaptive(context);
+    kEntryStatusSnoozedOrangeAdaptive(context);
 Color kAdherencePoorColor(BuildContext context) =>
-    kDoseStatusSkippedRedAdaptive(context);
+    kEntryStatusSkippedRedAdaptive(context);
 
-/// Single source of truth for dose status labels.
-String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
+/// Single source of truth for entry status labels.
+String entryStatusLabelText(EntryStatus status, {required bool disabled}) {
   if (disabled) return 'DISABLED';
 
   return switch (status) {
-    DoseStatus.logged => 'LOGGED',
-    DoseStatus.skipped => 'SKIPPED',
-    DoseStatus.snoozed => 'SNOOZED',
-    DoseStatus.due => 'OVERDUE',
-    DoseStatus.overdue => 'MISSED',
-    DoseStatus.pending => 'PENDING',
+    EntryStatus.logged => 'LOGGED',
+    EntryStatus.skipped => 'SKIPPED',
+    EntryStatus.snoozed => 'SNOOZED',
+    EntryStatus.due => 'OVERDUE',
+    EntryStatus.overdue => 'MISSED',
+    EntryStatus.pending => 'PENDING',
   };
 }
 
-/// Single source of truth for dose status visuals.
-({Color color, IconData icon}) doseStatusVisualSpec(
+/// Single source of truth for entry status visuals.
+({Color color, IconData icon}) entryStatusVisualSpec(
   BuildContext context,
-  DoseStatus status, {
+  EntryStatus status, {
   required bool disabled,
 }) {
   final cs = Theme.of(context).colorScheme;
@@ -176,49 +176,49 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
   }
 
   return switch (status) {
-    DoseStatus.logged => (
-      color: kDoseStatusTakenGreenAdaptive(context),
+    EntryStatus.logged => (
+      color: kEntryStatusTakenGreenAdaptive(context),
       icon: Icons.check_rounded,
     ),
-    DoseStatus.skipped => (
-      color: kDoseStatusSkippedRedAdaptive(context),
+    EntryStatus.skipped => (
+      color: kEntryStatusSkippedRedAdaptive(context),
       icon: Icons.block_rounded,
     ),
-    DoseStatus.snoozed => (
-      color: kDoseStatusSnoozedOrangeAdaptive(context),
+    EntryStatus.snoozed => (
+      color: kEntryStatusSnoozedOrangeAdaptive(context),
       icon: Icons.snooze_rounded,
     ),
-    DoseStatus.due => (
-      color: kDoseStatusOverdueAmber,
+    EntryStatus.due => (
+      color: kEntryStatusOverdueAmber,
       icon: Icons.schedule_rounded,
     ),
-    DoseStatus.overdue => (
-      color: kDoseStatusMissedDarkRedAdaptive(context),
+    EntryStatus.overdue => (
+      color: kEntryStatusMissedDarkRedAdaptive(context),
       icon: Icons.warning_rounded,
     ),
-    DoseStatus.pending => (
+    EntryStatus.pending => (
       color: cs.primary,
       icon: Icons.notifications_rounded,
     ),
   };
 }
 
-/// Single source of truth for dose action visuals.
-({Color color, IconData icon}) doseActionVisualSpec(
+/// Single source of truth for entry action visuals.
+({Color color, IconData icon}) entryActionVisualSpec(
   BuildContext context,
-  DoseAction action,
+  EntryAction action,
 ) {
   return switch (action) {
-    DoseAction.logged => (
-      color: kDoseStatusTakenGreenAdaptive(context),
+    EntryAction.logged => (
+      color: kEntryStatusTakenGreenAdaptive(context),
       icon: Icons.check_rounded,
     ),
-    DoseAction.skipped => (
-      color: kDoseStatusSkippedRedAdaptive(context),
+    EntryAction.skipped => (
+      color: kEntryStatusSkippedRedAdaptive(context),
       icon: Icons.block_rounded,
     ),
-    DoseAction.snoozed => (
-      color: kDoseStatusSnoozedOrangeAdaptive(context),
+    EntryAction.snoozed => (
+      color: kEntryStatusSnoozedOrangeAdaptive(context),
       icon: Icons.snooze_rounded,
     ),
   };
@@ -233,19 +233,19 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
 
   return switch (changeType) {
     InventoryChangeType.refillAdd => (
-      color: kDoseStatusTakenGreenAdaptive(context),
+      color: kEntryStatusTakenGreenAdaptive(context),
       icon: Icons.add_circle_rounded,
     ),
     InventoryChangeType.refillToMax => (
-      color: kDoseStatusTakenGreenAdaptive(context),
+      color: kEntryStatusTakenGreenAdaptive(context),
       icon: Icons.trending_up_rounded,
     ),
-    InventoryChangeType.doseDeducted => (
-      color: kDoseStatusSnoozedOrangeAdaptive(context),
+    InventoryChangeType.entryDeducted => (
+      color: kEntryStatusSnoozedOrangeAdaptive(context),
       icon: Icons.remove_circle_rounded,
     ),
-    InventoryChangeType.adHocDose => (
-      color: kDoseStatusSnoozedOrangeAdaptive(context),
+    InventoryChangeType.adHocEntry => (
+      color: kEntryStatusSnoozedOrangeAdaptive(context),
       icon: Icons.remove_circle_outline_rounded,
     ),
     InventoryChangeType.manualAdjustment => (
@@ -257,11 +257,11 @@ String doseStatusLabelText(DoseStatus status, {required bool disabled}) {
       icon: Icons.science_rounded,
     ),
     InventoryChangeType.vialRestocked => (
-      color: kDoseStatusTakenGreenAdaptive(context),
+      color: kEntryStatusTakenGreenAdaptive(context),
       icon: Icons.inventory_2_rounded,
     ),
     InventoryChangeType.expired => (
-      color: kDoseStatusSkippedRedAdaptive(context),
+      color: kEntryStatusSkippedRedAdaptive(context),
       icon: Icons.delete_forever_rounded,
     ),
   };

@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -24,7 +24,7 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/wizard_text_field36.dart';
 
 // ---------------------------------------------------------------------------
-// VialMedType — differentiates single dose vial vs pre-filled syringe
+// VialMedType — differentiates single entry vial vs pre-filled syringe
 // ---------------------------------------------------------------------------
 
 enum VialMedType { singleDoseVial, prefilledSyringe }
@@ -52,9 +52,9 @@ extension VialMedTypeConfig on VialMedType {
     VialMedType.prefilledSyringe => 'syringes',
   };
 
-  /// Display name, e.g. "Single Dose Vial" or "Pre-filled Syringe".
+  /// Display name, e.g. "Single Entry Vial" or "Pre-filled Syringe".
   String get displayName => switch (this) {
-    VialMedType.singleDoseVial => 'Single Dose Vial',
+    VialMedType.singleDoseVial => 'Single Entry Vial',
     VialMedType.prefilledSyringe => 'Pre-filled Syringe',
   };
 
@@ -72,11 +72,11 @@ extension VialMedTypeConfig on VialMedType {
 }
 
 // ---------------------------------------------------------------------------
-// AddVialWizardPage — shared wizard for single dose vials & pre-filled syringes
+// AddVialWizardPage — shared wizard for single entry vials & pre-filled syringes
 // ---------------------------------------------------------------------------
 
 /// Wizard-style add/edit screen for injectable vial medications
-/// (single dose vials and pre-filled syringes).
+/// (single entry vials and pre-filled syringes).
 class AddVialWizardPage extends MedicationWizardBase {
   const AddVialWizardPage({
     required this.vialMedType,
@@ -155,7 +155,7 @@ class _AddVialWizardPageState
       _descriptionCtrl.text = m.description ?? '';
       _concentrationValueCtrl.text = m.strengthValue.toString();
       _concentrationUnit = m.strengthUnit;
-      _volumeValueCtrl.text = m.volumePerDose?.toString() ?? '0';
+      _volumeValueCtrl.text = m.volumePerEntry?.toString() ?? '0';
       _volumeUnit = m.volumeUnit ?? VolumeUnit.ml;
       _stockValueCtrl.text = m.stockValue.toString();
       _lowStockEnabled = m.lowStockEnabled;
@@ -921,7 +921,7 @@ class _AddVialWizardPageState
             : _descriptionCtrl.text.trim(),
         strengthValue: concentration,
         strengthUnit: _concentrationUnit,
-        volumePerDose: volume,
+        volumePerEntry: volume,
         volumeUnit: _volumeUnit,
         stockValue: stock,
         stockUnit: _type.stockUnit,

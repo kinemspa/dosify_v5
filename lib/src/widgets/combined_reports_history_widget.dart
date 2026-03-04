@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -12,12 +12,12 @@ import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/entry_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/unified_empty_state.dart';
 import 'package:dosifi_v5/src/widgets/unified_status_badge.dart';
 
@@ -35,15 +35,15 @@ sealed class _CombinedHistoryItem {
   ({IconData icon, Color color}) visualSpec(BuildContext context);
 }
 
-class _DoseHistoryItem extends _CombinedHistoryItem {
-  _DoseHistoryItem({required this.log})
+class _EntryHistoryItem extends _CombinedHistoryItem {
+  _EntryHistoryItem({required this.log})
     : super(time: log.actionTime, medicationName: log.medicationName);
 
-  final DoseLog log;
+  final EntryLog log;
 
   @override
   ({IconData icon, Color color}) visualSpec(BuildContext context) {
-    final spec = doseActionVisualSpec(context, log.action);
+    final spec = entryActionVisualSpec(context, log.action);
     return (icon: spec.icon, color: spec.color);
   }
 
@@ -55,9 +55,9 @@ class _DoseHistoryItem extends _CombinedHistoryItem {
   @override
   Widget buildTitle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final displayValue = log.actualDoseValue ?? log.doseValue;
-    final displayUnit = log.actualDoseUnit ?? log.doseUnit;
-    final spec = doseActionVisualSpec(context, log.action);
+    final displayValue = log.actualEntryValue ?? log.entryValue;
+    final displayUnit = log.actualEntryUnit ?? log.entryUnit;
+    final spec = entryActionVisualSpec(context, log.action);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,8 +111,8 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
       InventoryChangeType.vialOpened => 'Vial Opened',
       InventoryChangeType.manualAdjustment => 'Adjustment',
       InventoryChangeType.expired => 'Expired',
-      InventoryChangeType.doseDeducted => 'Dose',
-      InventoryChangeType.adHocDose => 'Ad-hoc Dose',
+      InventoryChangeType.entryDeducted => 'Entry',
+      InventoryChangeType.adHocEntry => 'Ad-hoc Entry',
     };
   }
 
@@ -212,27 +212,27 @@ class _CombinedReportsHistoryWidgetState
     }
   }
 
-  Future<void> _showDoseLogEditor(BuildContext context, DoseLog log) {
-    final logBox = Hive.box<DoseLog>('dose_logs');
-    final doseLogRepo = DoseLogRepository(logBox);
+  Future<void> _showEntryLogEditor(BuildContext context, EntryLog log) {
+    final logBox = Hive.box<EntryLog>('entry_logs');
+    final entryLogRepo = EntryLogRepository(logBox);
 
-    final dose = CalculatedDose(
+    final entry = CalculatedEntry(
       scheduleId: log.scheduleId,
       scheduleName: log.scheduleName,
       medicationName: log.medicationName,
       scheduledTime: log.scheduledTime,
-      doseValue: log.doseValue,
-      doseUnit: log.doseUnit,
+      entryValue: log.entryValue,
+      entryUnit: log.entryUnit,
       existingLog: log,
     );
 
     if (log.scheduleId == 'ad_hoc') {
-      return DoseActionSheet.show(
+      return EntryActionSheet.show(
         context,
-        dose: dose,
-        initialStatus: DoseStatus.logged,
+        entry: entry,
+        initialStatus: EntryStatus.logged,
         onMarkLogged: (_) async {
-          // Ad-hoc persistence is handled inside DoseActionSheet.
+          // Ad-hoc persistence is handled inside EntryActionSheet.
         },
         onSnooze: (_) async {
           // Not applicable for ad-hoc entries.
@@ -244,18 +244,18 @@ class _CombinedReportsHistoryWidgetState
           final latest = logBox.get(log.id);
           if (latest == null) return;
 
-          if (latest.action == DoseAction.logged) {
+          if (latest.action == EntryAction.logged) {
             final medBox = Hive.box<Medication>('medications');
             final currentMed = medBox.get(latest.medicationId);
             if (currentMed != null) {
-              final value = latest.actualDoseValue ?? latest.doseValue;
-              final unit = latest.actualDoseUnit ?? latest.doseUnit;
+              final value = latest.actualEntryValue ?? latest.entryValue;
+              final unit = latest.actualEntryUnit ?? latest.entryUnit;
               final delta = MedicationStockAdjustment.tryCalculateStockDelta(
                 medication: currentMed,
                 schedule: null,
-                doseValue: value,
-                doseUnit: unit,
-                preferDoseValue: true,
+                entryValue: value,
+                entryUnit: unit,
+                preferEntryValue: true,
               );
               if (delta != null && delta > 0) {
                 final restored = MedicationStockAdjustment.restore(
@@ -272,43 +272,43 @@ class _CombinedReportsHistoryWidgetState
           }
 
           await Hive.box<InventoryLog>('inventory_logs').delete(latest.id);
-          await doseLogRepo.delete(latest.id);
+          await entryLogRepo.delete(latest.id);
 
           if (context.mounted) {
-            showAppSnackBar(context, 'Dose log removed');
+            showAppSnackBar(context, 'Entry log removed');
           }
         },
       );
     }
 
-    return DoseActionSheet.show(
+    return EntryActionSheet.show(
       context,
-      dose: dose,
+      entry: entry,
       onMarkLogged: (request) async {
         final trimmed = request.notes?.trim();
         final latest = logBox.get(log.id) ?? log;
 
-        if (latest.action != DoseAction.logged) {
+        if (latest.action != EntryAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
           if (currentMed != null) {
-            final effectiveDoseValue =
-                request.actualDoseValue ??
-                latest.actualDoseValue ??
-                latest.doseValue;
-            final effectiveDoseUnit =
-                request.actualDoseUnit ??
-                latest.actualDoseUnit ??
-                latest.doseUnit;
+            final effectiveEntryValue =
+                request.actualEntryValue ??
+                latest.actualEntryValue ??
+                latest.entryValue;
+            final effectiveEntryUnit =
+                request.actualEntryUnit ??
+                latest.actualEntryUnit ??
+                latest.entryUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
               schedule: schedule,
-              doseValue: effectiveDoseValue,
-              doseUnit: effectiveDoseUnit,
-              preferDoseValue:
-                  request.actualDoseValue != null ||
-                  latest.actualDoseValue != null,
+              entryValue: effectiveEntryValue,
+              entryUnit: effectiveEntryUnit,
+              preferEntryValue:
+                  request.actualEntryValue != null ||
+                  latest.actualEntryValue != null,
             );
             if (delta != null) {
               final updatedMed = MedicationStockAdjustment.deduct(
@@ -324,7 +324,7 @@ class _CombinedReportsHistoryWidgetState
           }
         }
 
-        final updated = DoseLog(
+        final updated = EntryLog(
           id: log.id,
           scheduleId: log.scheduleId,
           scheduleName: log.scheduleName,
@@ -332,37 +332,37 @@ class _CombinedReportsHistoryWidgetState
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
           actionTime: request.actionTime,
-          doseValue: latest.doseValue,
-          doseUnit: latest.doseUnit,
-          action: DoseAction.logged,
-          actualDoseValue: request.actualDoseValue ?? latest.actualDoseValue,
-          actualDoseUnit: request.actualDoseUnit ?? latest.actualDoseUnit,
+          entryValue: latest.entryValue,
+          entryUnit: latest.entryUnit,
+          action: EntryAction.logged,
+          actualEntryValue: request.actualEntryValue ?? latest.actualEntryValue,
+          actualEntryUnit: request.actualEntryUnit ?? latest.actualEntryUnit,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
-        await doseLogRepo.upsert(updated);
+        await entryLogRepo.upsert(updated);
 
         if (context.mounted) {
-          showAppSnackBar(context, 'Dose updated');
+          showAppSnackBar(context, 'Entry updated');
         }
       },
       onSnooze: (request) async {
         final trimmed = request.notes?.trim();
         final latest = logBox.get(log.id) ?? log;
 
-        if (latest.action == DoseAction.logged) {
+        if (latest.action == EntryAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
           if (currentMed != null) {
-            final oldDoseValue = latest.actualDoseValue ?? latest.doseValue;
-            final oldDoseUnit = latest.actualDoseUnit ?? latest.doseUnit;
+            final oldEntryValue = latest.actualEntryValue ?? latest.entryValue;
+            final oldEntryUnit = latest.actualEntryUnit ?? latest.entryUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
               schedule: schedule,
-              doseValue: oldDoseValue,
-              doseUnit: oldDoseUnit,
-              preferDoseValue: latest.actualDoseValue != null,
+              entryValue: oldEntryValue,
+              entryUnit: oldEntryUnit,
+              preferEntryValue: latest.actualEntryValue != null,
             );
             if (delta != null) {
               final updatedMed = MedicationStockAdjustment.restore(
@@ -378,7 +378,7 @@ class _CombinedReportsHistoryWidgetState
           }
         }
 
-        final updated = DoseLog(
+        final updated = EntryLog(
           id: log.id,
           scheduleId: log.scheduleId,
           scheduleName: log.scheduleName,
@@ -386,37 +386,37 @@ class _CombinedReportsHistoryWidgetState
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
           actionTime: request.actionTime,
-          doseValue: latest.doseValue,
-          doseUnit: latest.doseUnit,
-          action: DoseAction.snoozed,
-          actualDoseValue: request.actualDoseValue ?? latest.actualDoseValue,
-          actualDoseUnit: request.actualDoseUnit ?? latest.actualDoseUnit,
+          entryValue: latest.entryValue,
+          entryUnit: latest.entryUnit,
+          action: EntryAction.snoozed,
+          actualEntryValue: request.actualEntryValue ?? latest.actualEntryValue,
+          actualEntryUnit: request.actualEntryUnit ?? latest.actualEntryUnit,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
-        await doseLogRepo.upsert(updated);
+        await entryLogRepo.upsert(updated);
 
         if (context.mounted) {
-          showAppSnackBar(context, 'Dose updated');
+          showAppSnackBar(context, 'Entry updated');
         }
       },
       onSkip: (request) async {
         final trimmed = request.notes?.trim();
         final latest = logBox.get(log.id) ?? log;
 
-        if (latest.action == DoseAction.logged) {
+        if (latest.action == EntryAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
           if (currentMed != null) {
-            final oldDoseValue = latest.actualDoseValue ?? latest.doseValue;
-            final oldDoseUnit = latest.actualDoseUnit ?? latest.doseUnit;
+            final oldEntryValue = latest.actualEntryValue ?? latest.entryValue;
+            final oldEntryUnit = latest.actualEntryUnit ?? latest.entryUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
               schedule: schedule,
-              doseValue: oldDoseValue,
-              doseUnit: oldDoseUnit,
-              preferDoseValue: latest.actualDoseValue != null,
+              entryValue: oldEntryValue,
+              entryUnit: oldEntryUnit,
+              preferEntryValue: latest.actualEntryValue != null,
             );
             if (delta != null) {
               await medBox.put(
@@ -430,7 +430,7 @@ class _CombinedReportsHistoryWidgetState
           }
         }
 
-        final updated = DoseLog(
+        final updated = EntryLog(
           id: log.id,
           scheduleId: log.scheduleId,
           scheduleName: log.scheduleName,
@@ -438,35 +438,35 @@ class _CombinedReportsHistoryWidgetState
           medicationName: log.medicationName,
           scheduledTime: log.scheduledTime,
           actionTime: request.actionTime,
-          doseValue: latest.doseValue,
-          doseUnit: latest.doseUnit,
-          action: DoseAction.skipped,
-          actualDoseValue: request.actualDoseValue ?? latest.actualDoseValue,
-          actualDoseUnit: request.actualDoseUnit ?? latest.actualDoseUnit,
+          entryValue: latest.entryValue,
+          entryUnit: latest.entryUnit,
+          action: EntryAction.skipped,
+          actualEntryValue: request.actualEntryValue ?? latest.actualEntryValue,
+          actualEntryUnit: request.actualEntryUnit ?? latest.actualEntryUnit,
           notes: (trimmed == null || trimmed.isEmpty) ? null : trimmed,
         );
 
-        await doseLogRepo.upsert(updated);
+        await entryLogRepo.upsert(updated);
 
         if (context.mounted) {
-          showAppSnackBar(context, 'Dose updated');
+          showAppSnackBar(context, 'Entry updated');
         }
       },
       onDelete: (_) async {
         final latest = logBox.get(log.id) ?? log;
-        if (latest.action == DoseAction.logged) {
+        if (latest.action == EntryAction.logged) {
           final schedule = Hive.box<Schedule>('schedules').get(log.scheduleId);
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(log.medicationId);
           if (currentMed != null) {
-            final oldDoseValue = latest.actualDoseValue ?? latest.doseValue;
-            final oldDoseUnit = latest.actualDoseUnit ?? latest.doseUnit;
+            final oldEntryValue = latest.actualEntryValue ?? latest.entryValue;
+            final oldEntryUnit = latest.actualEntryUnit ?? latest.entryUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
               schedule: schedule,
-              doseValue: oldDoseValue,
-              doseUnit: oldDoseUnit,
-              preferDoseValue: latest.actualDoseValue != null,
+              entryValue: oldEntryValue,
+              entryUnit: oldEntryUnit,
+              preferEntryValue: latest.actualEntryValue != null,
             );
             if (delta != null) {
               await medBox.put(
@@ -480,10 +480,10 @@ class _CombinedReportsHistoryWidgetState
           }
         }
 
-        await doseLogRepo.delete(log.id);
+        await entryLogRepo.delete(log.id);
 
         if (context.mounted) {
-          showAppSnackBar(context, 'Dose log removed');
+          showAppSnackBar(context, 'Entry log removed');
         }
       },
     );
@@ -540,7 +540,7 @@ class _CombinedReportsHistoryWidgetState
     Widget buildTimeLabel(DateTime localTime) {
       final text = DateTimeFormatter.formatTimeCompact(context, localTime);
       return SizedBox(
-        width: kNextDoseDateCircleSizeLarge,
+        width: kNextEntryDateCircleSizeLarge,
         child: Text(
           text,
           style: smallHelperTextStyle(
@@ -554,19 +554,19 @@ class _CombinedReportsHistoryWidgetState
       );
     }
 
-    String doseActionBadgeLabel(DoseAction action) {
+    String entryActionBadgeLabel(EntryAction action) {
       return switch (action) {
-        DoseAction.logged => 'LOGGED',
-        DoseAction.skipped => 'SKIPPED',
-        DoseAction.snoozed => 'SNOOZED',
+        EntryAction.logged => 'LOGGED',
+        EntryAction.skipped => 'SKIPPED',
+        EntryAction.snoozed => 'SNOOZED',
       };
     }
 
-    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+    final entryLogBox = Hive.box<EntryLog>('entry_logs');
     final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
 
     return ValueListenableBuilder(
-      valueListenable: doseLogBox.listenable(),
+      valueListenable: entryLogBox.listenable(),
       builder: (context, _, __) {
         return ValueListenableBuilder(
           valueListenable: inventoryLogBox.listenable(),
@@ -576,7 +576,7 @@ class _CombinedReportsHistoryWidgetState
             final hasScheduleFilter =
               includedSchedules != null && includedSchedules.isNotEmpty;
 
-            final doseLogs = doseLogBox.values
+            final entryLogs = entryLogBox.values
                 .where((l) => included.contains(l.medicationId))
               .where(
                 (l) =>
@@ -585,23 +585,23 @@ class _CombinedReportsHistoryWidgetState
                 .where((l) => range == null || range.contains(l.actionTime))
                 .toList(growable: false);
 
-            final doseLogIds = doseLogs.map((l) => l.id).toSet();
+            final entryLogIds = entryLogs.map((l) => l.id).toSet();
 
             final inventoryLogs = inventoryLogBox.values
                 .where((l) => included.contains(l.medicationId))
                 .where((l) => range == null || range.contains(l.timestamp))
-              .where((l) => !hasScheduleFilter || doseLogIds.contains(l.id))
-                // Ad-hoc doses create both an InventoryLog and a DoseLog with the same id.
-                // Prefer the DoseLog entry since it supports edits.
+              .where((l) => !hasScheduleFilter || entryLogIds.contains(l.id))
+                // Ad-hoc entries create both an InventoryLog and a EntryLog with the same id.
+                // Prefer the EntryLog entry since it supports edits.
                 .where(
                   (l) =>
-                      !(l.changeType == InventoryChangeType.adHocDose &&
-                          doseLogIds.contains(l.id)),
+                      !(l.changeType == InventoryChangeType.adHocEntry &&
+                          entryLogIds.contains(l.id)),
                 )
                 .toList(growable: false);
 
             final items = <_CombinedHistoryItem>[
-              for (final log in doseLogs) _DoseHistoryItem(log: log),
+              for (final log in entryLogs) _EntryHistoryItem(log: log),
               for (final log in inventoryLogs) _InventoryHistoryItem(log: log),
             ]..sort((a, b) => b.time.compareTo(a.time));
 
@@ -651,8 +651,8 @@ class _CombinedReportsHistoryWidgetState
                       final showDayLabel = previousDay != currentDay;
 
                       Future<void> onTap() {
-                        if (item is _DoseHistoryItem) {
-                          return _showDoseLogEditor(context, item.log);
+                        if (item is _EntryHistoryItem) {
+                          return _showEntryLogEditor(context, item.log);
                         }
 
                         _showInventoryInfo(context);
@@ -686,9 +686,9 @@ class _CombinedReportsHistoryWidgetState
                                       const SizedBox(width: kSpacingS),
                                       Expanded(child: item.buildTitle(context)),
                                       const SizedBox(width: kSpacingS),
-                                      if (item is _DoseHistoryItem)
+                                      if (item is _EntryHistoryItem)
                                         UnifiedStatusBadge(
-                                          label: doseActionBadgeLabel(
+                                          label: entryActionBadgeLabel(
                                             item.log.action,
                                           ),
                                           icon: spec.icon,

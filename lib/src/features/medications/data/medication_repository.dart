@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 // Package imports:
 import 'package:flutter/foundation.dart';
@@ -72,7 +72,7 @@ class MedicationRepository {
   Future<void> delete(String id) async {
     // IMPORTANT:
     // Deleting a medication must remove associated schedules and cancel their
-    // notifications, while preserving historical data like dose logs.
+    // notifications, while preserving historical data like entry logs.
     final scheduleBox = Hive.box<Schedule>('schedules');
     final linkedSchedules = scheduleBox.values
         .where((s) => s.medicationId == id)

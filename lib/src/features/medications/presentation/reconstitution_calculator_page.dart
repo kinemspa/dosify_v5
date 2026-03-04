@@ -19,16 +19,16 @@ class ReconstitutionCalculatorPage extends StatefulWidget {
     required this.initialStrengthValue,
     required this.unitLabel,
     super.key,
-    this.initialDoseValue,
-    this.initialDoseUnit,
+    this.initialEntryValue,
+    this.initialEntryUnit,
     this.initialSyringeSize,
     this.initialVialSize,
   });
 
   final double initialStrengthValue;
   final String unitLabel; // This becomes the initial unit
-  final double? initialDoseValue;
-  final String? initialDoseUnit;
+  final double? initialEntryValue;
+  final String? initialEntryUnit;
   final SyringeSizeMl? initialSyringeSize;
   final double? initialVialSize;
 
@@ -50,8 +50,8 @@ class _ReconstitutionCalculatorPageState
   String? _loadedSavedId;
   bool _showLoadSaveOptions = false;
 
-  double? _initialDoseValue;
-  String? _initialDoseUnit;
+  double? _initialEntryValue;
+  String? _initialEntryUnit;
   SyringeSizeMl? _initialSyringeSize;
   double? _initialVialSize;
   String? _initialDiluentName;
@@ -67,10 +67,10 @@ class _ReconstitutionCalculatorPageState
         sameDouble(a.solventVolumeMl, b.solventVolumeMl) &&
         sameDouble(a.calculatedUnits, b.calculatedUnits) &&
         sameDouble(a.syringeSizeMl, b.syringeSizeMl) &&
-        sameDouble(a.calculatedDose, b.calculatedDose) &&
+        sameDouble(a.calculatedEntry, b.calculatedEntry) &&
         sameDouble(a.maxVialSizeMl, b.maxVialSizeMl) &&
         a.diluentName == b.diluentName &&
-        a.doseUnit == b.doseUnit;
+        a.entryUnit == b.entryUnit;
   }
 
   void _onCalculation(ReconstitutionResult result, bool isValid) {
@@ -84,8 +84,8 @@ class _ReconstitutionCalculatorPageState
       _lastResult = result;
       _canSave = isValid;
 
-      _initialDoseValue = result.calculatedDose;
-      _initialDoseUnit = result.doseUnit;
+      _initialEntryValue = result.calculatedEntry;
+      _initialEntryUnit = result.entryUnit;
       _initialSyringeSize = _syringeFromMl(result.syringeSizeMl);
       _initialVialSize = result.solventVolumeMl;
       _initialDiluentName = result.diluentName;
@@ -107,8 +107,8 @@ class _ReconstitutionCalculatorPageState
     // Initialize unit from unitLabel, default to mg if invalid
     _selectedUnit = _parseUnitFromLabel(widget.unitLabel);
 
-    _initialDoseValue = widget.initialDoseValue;
-    _initialDoseUnit = widget.initialDoseUnit;
+    _initialEntryValue = widget.initialEntryValue;
+    _initialEntryUnit = widget.initialEntryUnit;
     _initialSyringeSize = widget.initialSyringeSize;
     _initialVialSize = widget.initialVialSize;
   }
@@ -143,8 +143,8 @@ class _ReconstitutionCalculatorPageState
           ? item.strengthValue.toInt().toString()
           : item.strengthValue.toStringAsFixed(2);
 
-      _initialDoseValue = item.calculatedDose;
-      _initialDoseUnit = item.doseUnit;
+      _initialEntryValue = item.calculatedEntry;
+      _initialEntryUnit = item.entryUnit;
       _initialSyringeSize = _syringeFromMl(item.syringeSizeMl);
       _initialVialSize = item.solventVolumeMl;
       _initialDiluentName = item.diluentName;
@@ -155,8 +155,8 @@ class _ReconstitutionCalculatorPageState
         calculatedUnits: item.calculatedUnits,
         syringeSizeMl: item.syringeSizeMl,
         diluentName: item.diluentName,
-        calculatedDose: item.calculatedDose,
-        doseUnit: item.doseUnit,
+        calculatedEntry: item.calculatedEntry,
+        entryUnit: item.entryUnit,
         maxVialSizeMl: item.maxVialSizeMl,
       );
       _canSave = true;
@@ -169,8 +169,8 @@ class _ReconstitutionCalculatorPageState
       _lastResult = null;
       _canSave = false;
 
-      _initialDoseValue = widget.initialDoseValue;
-      _initialDoseUnit = widget.initialDoseUnit;
+      _initialEntryValue = widget.initialEntryValue;
+      _initialEntryUnit = widget.initialEntryUnit;
       _initialSyringeSize = widget.initialSyringeSize;
       _initialVialSize = widget.initialVialSize;
       _initialDiluentName = null;
@@ -283,13 +283,13 @@ class _ReconstitutionCalculatorPageState
         : 'Reconstitution';
 
     final parts = <String>[baseName];
-    final dose = _lastResult!.calculatedDose;
-    final doseUnit = _lastResult!.doseUnit;
-    if (dose != null &&
-        dose > 0 &&
-        doseUnit != null &&
-        doseUnit.trim().isNotEmpty) {
-      parts.add('${_formatNoTrailing(dose)} ${doseUnit.trim()}');
+    final entry = _lastResult!.calculatedEntry;
+    final entryUnit = _lastResult!.entryUnit;
+    if (entry != null &&
+        entry > 0 &&
+        entryUnit != null &&
+        entryUnit.trim().isNotEmpty) {
+      parts.add('${_formatNoTrailing(entry)} ${entryUnit.trim()}');
     }
     parts.add('${_formatNoTrailing(_lastResult!.solventVolumeMl)} mL');
 
@@ -314,8 +314,8 @@ class _ReconstitutionCalculatorPageState
       calculatedUnits: _lastResult!.calculatedUnits,
       syringeSizeMl: _lastResult!.syringeSizeMl,
       diluentName: _lastResult!.diluentName,
-      calculatedDose: _lastResult!.calculatedDose,
-      doseUnit: _lastResult!.doseUnit,
+      calculatedEntry: _lastResult!.calculatedEntry,
+      entryUnit: _lastResult!.entryUnit,
       maxVialSizeMl: _lastResult!.maxVialSizeMl,
       createdAt: _loadedSavedId == null ? now : null,
       updatedAt: now,
@@ -706,8 +706,8 @@ class _ReconstitutionCalculatorPageState
                   unitLabel: _selectedUnit,
                   medicationName: medName.isNotEmpty ? medName : null,
                   initialDiluentName: _initialDiluentName,
-                  initialDoseValue: _initialDoseValue,
-                  initialDoseUnit: _initialDoseUnit,
+                  initialEntryValue: _initialEntryValue,
+                  initialEntryUnit: _initialEntryUnit,
                   initialSyringeSize: _initialSyringeSize,
                   initialVialSize: _initialVialSize,
                   onCalculate: _onCalculation,

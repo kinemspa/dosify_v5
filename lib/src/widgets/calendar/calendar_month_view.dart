@@ -1,11 +1,11 @@
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+﻿import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_day_cell.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 
-/// A month view showing a calendar grid with doses.
+/// A month view showing a calendar grid with entries.
 ///
-/// Displays a traditional calendar grid (6 weeks) with day cells showing dose indicators.
+/// Displays a traditional calendar grid (6 weeks) with day cells showing entry indicators.
 /// Features:
 /// - 6-week grid (ensures all dates visible)
 /// - Day headers (Sun-Sat or Mon-Sun configurable)
@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 class CalendarMonthView extends StatelessWidget {
   const CalendarMonthView({
     required this.month,
-    required this.doses,
+    required this.entries,
     this.onDayTap,
     this.onDateChanged,
     this.selectedDate,
@@ -26,7 +26,7 @@ class CalendarMonthView extends StatelessWidget {
   });
 
   final DateTime month;
-  final List<CalculatedDose> doses;
+  final List<CalculatedEntry> entries;
   final void Function(DateTime date)? onDayTap;
   final void Function(DateTime date)? onDateChanged;
   final DateTime? selectedDate;
@@ -83,11 +83,11 @@ class CalendarMonthView extends StatelessWidget {
     return date.year == month.year && date.month == month.month;
   }
 
-  List<CalculatedDose> _getDosesForDay(DateTime day) {
-    return doses.where((dose) {
-      return dose.scheduledTime.year == day.year &&
-          dose.scheduledTime.month == day.month &&
-          dose.scheduledTime.day == day.day;
+  List<CalculatedEntry> _getEntriesForDay(DateTime day) {
+    return entries.where((entry) {
+      return entry.scheduledTime.year == day.year &&
+          entry.scheduledTime.month == day.month &&
+          entry.scheduledTime.day == day.day;
     }).toList();
   }
 
@@ -135,7 +135,7 @@ class CalendarMonthView extends StatelessWidget {
               itemCount: datesToDisplay.length,
               itemBuilder: (context, index) {
                 final date = datesToDisplay[index];
-                final dayDoses = _getDosesForDay(date);
+                final dayEntries = _getEntriesForDay(date);
                 final isToday = _isToday(date);
                 final isCurrentMonth = _isCurrentMonth(date);
                 final isSelected =
@@ -146,7 +146,7 @@ class CalendarMonthView extends StatelessWidget {
 
                 return CalendarDayCell(
                   date: date,
-                  doses: dayDoses,
+                  entries: dayEntries,
                   isCurrentMonth: isCurrentMonth,
                   isToday: isToday,
                   isSelected: isSelected,

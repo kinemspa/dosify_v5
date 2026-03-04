@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +11,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_detail_page.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 ThemeData _testTheme() {
@@ -70,11 +70,11 @@ void _registerHiveAdaptersIfNeeded() {
   if (!Hive.isAdapterRegistered(ScheduleAdapter().typeId)) {
     Hive.registerAdapter(ScheduleAdapter());
   }
-  if (!Hive.isAdapterRegistered(DoseActionAdapter().typeId)) {
-    Hive.registerAdapter(DoseActionAdapter());
+  if (!Hive.isAdapterRegistered(EntryActionAdapter().typeId)) {
+    Hive.registerAdapter(EntryActionAdapter());
   }
-  if (!Hive.isAdapterRegistered(DoseLogAdapter().typeId)) {
-    Hive.registerAdapter(DoseLogAdapter());
+  if (!Hive.isAdapterRegistered(EntryLogAdapter().typeId)) {
+    Hive.registerAdapter(EntryLogAdapter());
   }
   if (!Hive.isAdapterRegistered(InventoryChangeTypeAdapter().typeId)) {
     Hive.registerAdapter(InventoryChangeTypeAdapter());
@@ -99,7 +99,7 @@ void main() {
 
     await Hive.openBox<Medication>('medications');
     await Hive.openBox<Schedule>('schedules');
-    await Hive.openBox<DoseLog>('dose_logs');
+    await Hive.openBox<EntryLog>('entry_logs');
     await Hive.openBox<InventoryLog>('inventory_logs');
   });
 
@@ -128,10 +128,10 @@ void main() {
 
       final schedule = Schedule(
         id: 's_1',
-        name: 'Morning dose',
+        name: 'Morning entry',
         medicationName: med.name,
-        doseValue: 1,
-        doseUnit: 'tablet',
+        entryValue: 1,
+        entryUnit: 'tablet',
         minutesOfDay: 8 * 60,
         daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
         medicationId: med.id,

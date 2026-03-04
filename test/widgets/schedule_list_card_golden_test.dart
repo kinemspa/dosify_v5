@@ -1,4 +1,4 @@
-@Tags(['golden'])
+﻿@Tags(['golden'])
 library;
 
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_l
 
 ThemeData _goldenTheme() {
   const primarySeed = kDetailHeaderGradientStart;
-  const secondarySeed = kDoseStatusSnoozedOrange;
+  const secondarySeed = kEntryStatusSnoozedOrange;
 
   final scheme = ColorScheme.fromSeed(
     seedColor: primarySeed,
@@ -58,8 +58,8 @@ Schedule _testSchedule() {
     id: 's1',
     name: 'Very Long Schedule Name That Should Ellipsize',
     medicationName: 'Very Long Medication Name That Should Ellipsize',
-    doseValue: 1,
-    doseUnit: 'tablet',
+    entryValue: 1,
+    entryUnit: 'tablet',
     minutesOfDay: 9 * 60,
     daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
     active: false,

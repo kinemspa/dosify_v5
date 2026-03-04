@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -40,7 +40,7 @@ class _LegalContent extends StatelessWidget {
         const SizedBox(height: kSpacingM),
         _Para(
           'Dosifi stores all data you enter — including compound names, '
-          'reconstitution calculations, schedules, and dose logs — locally '
+          'reconstitution calculations, schedules, and entry logs — locally '
           'on your device inside an encrypted Hive database. No data is '
           'transmitted to any Dosifi server.',
         ),

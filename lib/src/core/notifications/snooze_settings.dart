@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @immutable
 class SnoozeConfig {
   const SnoozeConfig({required this.defaultSnoozePercent});
 
-  /// Percentage (0..100) of the available window until the next scheduled dose
+  /// Percentage (0..100) of the available window until the next scheduled entry
   /// (minus a small safety buffer) that should be used as the default snooze.
   final int defaultSnoozePercent;
 
@@ -20,7 +20,7 @@ class SnoozeSettings {
   const SnoozeSettings._();
 
   static const String _prefsKeyDefaultSnoozePercent =
-      'dose_snooze.default_percent_v1';
+      'entry_snooze.default_percent_v1';
 
   static const int defaultDefaultSnoozePercent = 65;
 

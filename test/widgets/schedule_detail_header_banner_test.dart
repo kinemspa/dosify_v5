@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 
@@ -74,20 +74,20 @@ void main() {
       id: 's1',
       name: 'Very Long Schedule Name That Should Ellipsize Safely',
       medicationName: 'Medication Name That Is Also Quite Long',
-      doseValue: 0.75,
-      doseUnit: 'mL',
+      entryValue: 0.75,
+      entryUnit: 'mL',
       minutesOfDay: 8 * 60 + 30,
       daysOfWeek: const [1, 3, 5],
     );
 
-    final nextDose = DateTime.now().add(const Duration(hours: 2));
+    final nextEntry = DateTime.now().add(const Duration(hours: 2));
 
     final errors = await _captureFlutterErrors(() async {
       await tester.pumpWidget(
         _wrapCompact(
           ScheduleDetailHeaderBanner(
             schedule: schedule,
-            nextDose: nextDose,
+            nextEntry: nextEntry,
             title: schedule.name,
             onPauseResumePressed: () {},
           ),
@@ -111,8 +111,8 @@ void main() {
       id: 's2',
       name: 'Paused Schedule',
       medicationName: 'Test Medication',
-      doseValue: 1,
-      doseUnit: 'tablet',
+      entryValue: 1,
+      entryUnit: 'tablet',
       minutesOfDay: 9 * 60,
       daysOfWeek: const [2, 4, 6],
       active: false,
@@ -123,7 +123,7 @@ void main() {
       _wrapCompact(
         ScheduleDetailHeaderBanner(
           schedule: schedule,
-          nextDose: null,
+          nextEntry: null,
           title: schedule.name,
           onPauseResumePressed: () {},
         ),

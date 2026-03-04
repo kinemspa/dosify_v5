@@ -1,14 +1,14 @@
-// Package imports:
+﻿// Package imports:
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_dose_metrics.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_entry_metrics.dart';
 
 /// Schedules notifications for registered [Schedule] entries and exposes helpers
 /// for deterministic stable slot ID generation used across the app.
@@ -75,13 +75,13 @@ class ScheduleScheduler {
     return _stableHash31(key);
   }
 
-  /// Public API: deterministic id for a single dose occurrence by scheduled time.
+  /// Public API: deterministic id for a single entry occurrence by scheduled time.
   ///
   /// This is used by the UI and snooze behavior to reliably cancel/reschedule
   /// the exact notification instance for an occurrence.
-  static int doseNotificationIdFor(String scheduleId, DateTime scheduledTime) {
+  static int entryNotificationIdFor(String scheduleId, DateTime scheduledTime) {
     return _stableHash31(
-      'dose|$scheduleId|${scheduledTime.millisecondsSinceEpoch}',
+      'entry|$scheduleId|${scheduledTime.millisecondsSinceEpoch}',
     );
   }
 
@@ -94,7 +94,7 @@ class ScheduleScheduler {
   }) {
     final normalizedIndex = reminderIndex.clamp(1, _maxOverdueReminderSlots);
     return _stableHash31(
-      'dose_overdue|$scheduleId|${scheduledTime.millisecondsSinceEpoch}|r:$normalizedIndex',
+      'entry_overdue|$scheduleId|${scheduledTime.millisecondsSinceEpoch}|r:$normalizedIndex',
     );
   }
 
@@ -190,19 +190,19 @@ class ScheduleScheduler {
       return '$h:$mm $ap';
     }
 
-    Future<void> scheduleDoseNotification({
+    Future<void> scheduleEntryNotification({
       required int id,
       required DateTime when,
       required String payload,
       String? groupKey,
     }) async {
       final title = s.medicationName;
-      final metrics = ScheduleDoseMetrics.format(s);
+      final metrics = ScheduleEntryMetrics.format(s);
       final dueAt = formatHm(when);
       final body = '$metrics | $dueAt';
       final expandedLines = <String>[metrics, 'Due $dueAt'];
 
-      final missedAt = DoseTimingSettings.missedAt(
+      final missedAt = EntryTimingSettings.missedAt(
         schedule: s,
         scheduledTime: when,
       );
@@ -218,13 +218,13 @@ class ScheduleScheduler {
         body: body,
         groupKey: groupKey,
         payload: payload,
-        actions: NotificationService.upcomingDoseActions,
+        actions: NotificationService.upcomingEntryActions,
         expandedLines: expandedLines,
         timeoutAfterMs: timeoutAfterMs,
       );
 
       // Schedule multiple follow-up reminders based on settings
-      final reminders = DoseTimingSettings.overdueRemindersAt(
+      final reminders = EntryTimingSettings.overdueRemindersAt(
         schedule: s,
         scheduledTime: when,
       );
@@ -250,7 +250,7 @@ class ScheduleScheduler {
           body: '$metrics | due $dueAt',
           groupKey: groupKey,
           payload: payload,
-          actions: NotificationService.upcomingDoseActions,
+          actions: NotificationService.upcomingEntryActions,
           expandedLines: <String>[metrics, 'Due $dueAt'],
           timeoutAfterMs: reminderTimeoutMs,
         );
@@ -285,11 +285,11 @@ class ScheduleScheduler {
           );
           if (!dt.isAfter(now)) continue;
           if (!_withinBounds(s, dt)) continue;
-          final id = doseNotificationIdFor(s.id, dt);
-          await scheduleDoseNotification(
+          final id = entryNotificationIdFor(s.id, dt);
+          await scheduleEntryNotification(
             id: id,
             when: dt,
-            payload: 'dose:${s.id}:${dt.millisecondsSinceEpoch}',
+            payload: 'entry:${s.id}:${dt.millisecondsSinceEpoch}',
           );
         }
         day = day.add(Duration(days: n));
@@ -321,13 +321,13 @@ class ScheduleScheduler {
             );
             final dtLocal = dtUtc.toLocal();
             if (dtLocal.isAfter(now) && _withinBounds(s, dtLocal)) {
-              final groupKey = _doseGroupKey(dtLocal);
-              final id = doseNotificationIdFor(s.id, dtLocal);
-              await scheduleDoseNotification(
+              final groupKey = _entryGroupKey(dtLocal);
+              final id = entryNotificationIdFor(s.id, dtLocal);
+              await scheduleEntryNotification(
                 id: id,
                 when: dtLocal,
                 groupKey: groupKey,
-                payload: 'dose:${s.id}:${dtLocal.millisecondsSinceEpoch}',
+                payload: 'entry:${s.id}:${dtLocal.millisecondsSinceEpoch}',
               );
             }
           }
@@ -343,13 +343,13 @@ class ScheduleScheduler {
               mLocal % 60,
             );
             if (dt.isAfter(now) && _withinBounds(s, dt)) {
-              final groupKey = _doseGroupKey(dt);
-              final id = doseNotificationIdFor(s.id, dt);
-              await scheduleDoseNotification(
+              final groupKey = _entryGroupKey(dt);
+              final id = entryNotificationIdFor(s.id, dt);
+              await scheduleEntryNotification(
                 id: id,
                 when: dt,
                 groupKey: groupKey,
-                payload: 'dose:${s.id}:${dt.millisecondsSinceEpoch}',
+                payload: 'entry:${s.id}:${dt.millisecondsSinceEpoch}',
               );
             }
           }
@@ -358,26 +358,26 @@ class ScheduleScheduler {
     }
   }
 
-  static String _doseGroupKey(DateTime dt) {
+  static String _entryGroupKey(DateTime dt) {
     final y = dt.year.toString().padLeft(4, '0');
     final m = dt.month.toString().padLeft(2, '0');
     final d = dt.day.toString().padLeft(2, '0');
     final hh = dt.hour.toString().padLeft(2, '0');
     final mm = dt.minute.toString().padLeft(2, '0');
-    return 'upcoming_dose|$y$m$d|$hh$mm';
+    return 'upcoming_entry|$y$m$d|$hh$mm';
   }
 
   /// Public wrapper for group key generation (used for regression tests).
-  static String doseGroupKeyFor(DateTime localDateTime) =>
-      _doseGroupKey(localDateTime);
+  static String entryGroupKeyFor(DateTime localDateTime) =>
+      _entryGroupKey(localDateTime);
 
   /// Public API: deterministic notification ID for the Android group summary
-  /// notification associated with a given dose time-slot.  Pass the dose's
+  /// notification associated with a given entry time-slot.  Pass the entry's
   /// *local* DateTime.  Used by the action-sheet to cancel the summary when
-  /// the last (or only) dose in a group is acted on.
-  static int doseSummaryNotificationIdFor(DateTime localDateTime) {
-    final groupKey = _doseGroupKey(localDateTime);
-    return _stableHash31('dose_summary|$groupKey');
+  /// the last (or only) entry in a group is acted on.
+  static int entrySummaryNotificationIdFor(DateTime localDateTime) {
+    final groupKey = _entryGroupKey(localDateTime);
+    return _stableHash31('entry_summary|$groupKey');
   }
 
   /// Cancel scheduled notifications for a schedule (best-effort)
@@ -404,7 +404,7 @@ class ScheduleScheduler {
             );
             // New scheme
             await NotificationService.cancel(
-              doseNotificationIdFor(existing.id, dt),
+              entryNotificationIdFor(existing.id, dt),
             );
             for (final overdueId in overdueNotificationIdsFor(existing.id, dt)) {
               await NotificationService.cancel(overdueId);
@@ -420,7 +420,7 @@ class ScheduleScheduler {
             await NotificationService.cancel(legacyId);
 
             final legacyOverdueId = _stableHash31(
-              'dose_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
+              'entry_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
             );
             await NotificationService.cancel(legacyOverdueId);
           }
@@ -453,7 +453,7 @@ class ScheduleScheduler {
 
                 // New scheme
                 await NotificationService.cancel(
-                  doseNotificationIdFor(existing.id, dtLocal),
+                  entryNotificationIdFor(existing.id, dtLocal),
                 );
                 for (final overdueId in overdueNotificationIdsFor(
                   existing.id,
@@ -472,7 +472,7 @@ class ScheduleScheduler {
                 await NotificationService.cancel(legacyId);
 
                 final legacyOverdueId = _stableHash31(
-                  'dose_overdue|${existing.id}|${dtLocal.millisecondsSinceEpoch}',
+                  'entry_overdue|${existing.id}|${dtLocal.millisecondsSinceEpoch}',
                 );
                 await NotificationService.cancel(legacyOverdueId);
               }
@@ -490,7 +490,7 @@ class ScheduleScheduler {
 
                 // New scheme
                 await NotificationService.cancel(
-                  doseNotificationIdFor(existing.id, dt),
+                  entryNotificationIdFor(existing.id, dt),
                 );
                 for (final overdueId in overdueNotificationIdsFor(
                   existing.id,
@@ -509,7 +509,7 @@ class ScheduleScheduler {
                 await NotificationService.cancel(legacyId);
 
                 final legacyOverdueId = _stableHash31(
-                  'dose_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
+                  'entry_overdue|${existing.id}|${dt.millisecondsSinceEpoch}',
                 );
                 await NotificationService.cancel(legacyOverdueId);
               }

@@ -1,4 +1,4 @@
-/// ============================================================================
+﻿/// ============================================================================
 /// DESIGN BUILDERS — BOX DECORATIONS, INPUT DECORATIONS, HELPER WIDGETS
 /// ============================================================================
 ///
@@ -74,8 +74,8 @@ BoxDecoration buildStandardCardDecoration({
   );
 }
 
-/// Dose card styling for light background separation.
-BoxDecoration buildDoseCardDecoration({
+/// Entry card styling for light background separation.
+BoxDecoration buildEntryCardDecoration({
   required BuildContext context,
   required double borderRadius,
 }) {
@@ -89,9 +89,9 @@ BoxDecoration buildDoseCardDecoration({
       BoxShadow(
         color: Theme.of(
           context,
-        ).colorScheme.shadow.withValues(alpha: kDoseCardShadowOpacity),
-        blurRadius: kDoseCardShadowBlurRadius,
-        offset: kDoseCardShadowOffset,
+        ).colorScheme.shadow.withValues(alpha: kEntryCardShadowOpacity),
+        blurRadius: kEntryCardShadowBlurRadius,
+        offset: kEntryCardShadowOffset,
       ),
     ],
   );

@@ -5,7 +5,7 @@ import 'package:dosifi_v5/src/features/medications/presentation/medication_displ
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/services/medication_stock_service.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/controllers/medication_detail_controller.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/compact_storage_line.dart';
 import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
@@ -19,7 +19,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
     required this.medication,
     required this.onRefill,
     this.onRestock,
-    this.onAdHocDose,
+    this.onAdHocEntry,
     this.hasSchedules = false,
     this.crossAxisAlignment = CrossAxisAlignment.stretch,
     this.foregroundColor,
@@ -29,7 +29,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
   final Medication medication;
   final VoidCallback onRefill;
   final VoidCallback? onRestock;
-  final VoidCallback? onAdHocDose;
+  final VoidCallback? onAdHocEntry;
   final bool hasSchedules;
   final CrossAxisAlignment crossAxisAlignment;
   final Color? foregroundColor;
@@ -266,10 +266,10 @@ class MedicationHeaderWidget extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (onAdHocDose != null) ...[
+              if (onAdHocEntry != null) ...[
                 Flexible(
                   child: OutlinedButton.icon(
-                    onPressed: onAdHocDose,
+                    onPressed: onAdHocEntry,
                     style: headerActionButtonStyle,
                     icon: Icon(
                       Icons.medication_rounded,
@@ -361,12 +361,12 @@ class MedicationHeaderWidget extends ConsumerWidget {
     return value.toStringAsFixed(1);
   }
 
-  /// Calculate real adherence data for last 7 days from DoseLog
+  /// Calculate real adherence data for last 7 days from EntryLog
   /// Returns list of 7 values (0.0 to 1.0) representing adherence per day
-  /// -1.0 means no doses scheduled that day
+  /// -1.0 means no entries scheduled that day
   List<double> _calculateAdherenceData(String medicationId) {
     final now = DateTime.now();
-    final doseLogBox = Hive.box<DoseLog>('dose_logs');
+    final entryLogBox = Hive.box<EntryLog>('entry_logs');
     final scheduleBox = Hive.box<Schedule>('schedules');
 
     // Get schedules for this medication
@@ -388,9 +388,9 @@ class MedicationHeaderWidget extends ConsumerWidget {
       ).subtract(Duration(days: i));
       final dayEnd = day.add(const Duration(days: 1));
 
-      // Count expected doses for this day
-      int expectedDoses = 0;
-      int takenDoses = 0;
+      // Count expected entries for this day
+      int expectedEntries = 0;
+      int takenEntries = 0;
 
       for (final schedule in schedules) {
         // Check if schedule is active on this day
@@ -398,11 +398,11 @@ class MedicationHeaderWidget extends ConsumerWidget {
 
         // Count times per day - use timesOfDay if available, otherwise 1
         final int timesPerDay = schedule.timesOfDay?.length ?? 1;
-        expectedDoses += timesPerDay;
+        expectedEntries += timesPerDay;
       }
 
-      // Count taken doses from logs for this medication and day
-      final dayLogs = doseLogBox.values.where(
+      // Count taken entries from logs for this medication and day
+      final dayLogs = entryLogBox.values.where(
         (log) =>
             log.medicationId == medicationId &&
             log.scheduledTime.isAfter(
@@ -411,14 +411,14 @@ class MedicationHeaderWidget extends ConsumerWidget {
             log.scheduledTime.isBefore(dayEnd),
       );
 
-      takenDoses = dayLogs
-          .where((log) => log.action == DoseAction.logged)
+      takenEntries = dayLogs
+          .where((log) => log.action == EntryAction.logged)
           .length;
 
-      if (expectedDoses == 0) {
-        adherenceData.add(-1.0); // No doses scheduled
+      if (expectedEntries == 0) {
+        adherenceData.add(-1.0); // No entries scheduled
       } else {
-        adherenceData.add((takenDoses / expectedDoses).clamp(0.0, 1.0));
+        adherenceData.add((takenEntries / expectedEntries).clamp(0.0, 1.0));
       }
     }
 

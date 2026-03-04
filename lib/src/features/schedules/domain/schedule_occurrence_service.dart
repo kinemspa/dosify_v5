@@ -1,4 +1,4 @@
-import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
+﻿import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 /// Service for calculating schedule occurrences
 class ScheduleOccurrenceService {
@@ -180,7 +180,7 @@ class ScheduleOccurrenceService {
     return occurrences;
   }
 
-  /// Returns the 1-based occurrence number for a given scheduled dose time.
+  /// Returns the 1-based occurrence number for a given scheduled entry time.
   ///
   /// The numbering starts at 1 per schedule, based on all scheduled occurrences
   /// from the schedule's effective start to the provided [occurrence]

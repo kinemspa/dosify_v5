@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,12 +15,12 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_wizard_base.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/dose_input_field.dart';
+import 'package:dosifi_v5/src/widgets/entry_input_field.dart';
 import 'package:dosifi_v5/src/widgets/field36.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
@@ -65,13 +65,13 @@ class _AddScheduleWizardPageState
 
   Schedule? get _initial => widget.initial ?? _resolvedInitial;
 
-  // Step 1: Medication & Dose
+  // Step 1: Medication & Entry
   Medication? _selectedMed;
   String? _medicationId;
-  final _doseValue = TextEditingController();
-  final _doseUnit = TextEditingController();
+  final _entryValue = TextEditingController();
+  final _entryUnit = TextEditingController();
   SyringeType? _selectedSyringeType;
-  DoseCalculationResult? _doseResult;
+  EntryCalculationResult? _entryResult;
 
   SyringeType _normalizeSyringeType(SyringeType type) {
     // The 10mL syringe is no longer offered; normalize legacy selections.
@@ -150,8 +150,8 @@ class _AddScheduleWizardPageState
   @override
   void dispose() {
     _name.removeListener(_onNameChanged);
-    _doseValue.dispose();
-    _doseUnit.dispose();
+    _entryValue.dispose();
+    _entryUnit.dispose();
     _daysOn.dispose();
     _daysOff.dispose();
     _name.dispose();
@@ -163,8 +163,8 @@ class _AddScheduleWizardPageState
     _name.text = s.name;
     _active = s.active;
 
-    _doseValue.text = s.doseValue.toString();
-    _doseUnit.text = s.doseUnit;
+    _entryValue.text = s.entryValue.toString();
+    _entryUnit.text = s.entryUnit;
     _medicationId = s.medicationId;
 
     final meds = Hive.box<Medication>('medications').values;
@@ -255,14 +255,14 @@ class _AddScheduleWizardPageState
   @override
   String getStepLabel(int step) => widget.stepLabels[step];
 
-  bool _hasPositiveDoseFromResult(DoseCalculationResult result) {
+  bool _hasPositiveEntryFromResult(EntryCalculationResult result) {
     final values = <double>[
-      (result.doseTabletQuarters ?? 0) / 4.0,
-      (result.doseCapsules ?? 0).toDouble(),
-      (result.doseSyringes ?? 0).toDouble(),
-      (result.doseVials ?? 0).toDouble(),
-      (result.doseMassMcg ?? 0).toDouble(),
-      (result.doseVolumeMicroliter ?? 0).toDouble(),
+      (result.entryTabletQuarters ?? 0) / 4.0,
+      (result.entryCapsules ?? 0).toDouble(),
+      (result.entrySyringes ?? 0).toDouble(),
+      (result.entryVials ?? 0).toDouble(),
+      (result.entryMassMcg ?? 0).toDouble(),
+      (result.entryVolumeMicroliter ?? 0).toDouble(),
       (result.syringeUnits ?? 0).toDouble(),
     ];
     return values.any((v) => v > 0.000001);
@@ -274,16 +274,16 @@ class _AddScheduleWizardPageState
       case 0:
         if (_selectedMed == null) return false;
 
-        // Prefer typed dose result from DoseInputField (especially important for MDV).
-        final result = _doseResult;
+        // Prefer typed entry result from EntryInputField (especially important for MDV).
+        final result = _entryResult;
         if (result != null && result.success && !result.hasError) {
-          return _hasPositiveDoseFromResult(result);
+          return _hasPositiveEntryFromResult(result);
         }
 
-        // Backward-compatible fallback for legacy dose fields.
-        return _doseValue.text.trim().isNotEmpty &&
-            _doseUnit.text.trim().isNotEmpty &&
-            (double.tryParse(_doseValue.text.trim()) ?? 0) > 0;
+        // Backward-compatible fallback for legacy entry fields.
+        return _entryValue.text.trim().isNotEmpty &&
+            _entryUnit.text.trim().isNotEmpty &&
+            (double.tryParse(_entryValue.text.trim()) ?? 0) > 0;
       case 1:
         if (_times.isEmpty) return false;
         if (_mode == ScheduleMode.daysOfWeek && _days.isEmpty) return false;
@@ -306,7 +306,7 @@ class _AddScheduleWizardPageState
   Widget buildStepContent(int step) {
     switch (step) {
       case 0:
-        return _buildMedicationDoseStep();
+        return _buildMedicationEntryStep();
       case 1:
         return _buildSchedulePatternStep();
       case 2:
@@ -365,9 +365,9 @@ class _AddScheduleWizardPageState
                     ),
                   if (med != null &&
                       med.form != MedicationForm.multiDoseVial &&
-                      _doseValue.text.isNotEmpty)
+                      _entryValue.text.isNotEmpty)
                     Text(
-                      'Amount: ${_doseMetricsSummaryLabel(separator: ' = ')}',
+                      'Amount: ${_entryMetricsSummaryLabel(separator: ' = ')}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: headerFg.withValues(alpha: 0.85),
                       ),
@@ -431,10 +431,10 @@ class _AddScheduleWizardPageState
     return formatted;
   }
 
-  String _doseSummaryLabel() {
-    final rawValue = double.tryParse(_doseValue.text.trim());
+  String _entrySummaryLabel() {
+    final rawValue = double.tryParse(_entryValue.text.trim());
     final value = rawValue ?? 0;
-    final unit = _doseUnit.text.trim();
+    final unit = _entryUnit.text.trim();
     if (unit.isEmpty) return fmt2(value);
 
     String singularize(String plural) {
@@ -455,25 +455,25 @@ class _AddScheduleWizardPageState
     return '$prettyValue $prettyUnit';
   }
 
-  String _doseMetricsSummaryLabel({String separator = ' | '}) {
+  String _entryMetricsSummaryLabel({String separator = ' | '}) {
     final med = _selectedMed;
-    final r = _doseResult;
+    final r = _entryResult;
     if (med == null || r == null || r.hasError) {
-      return _doseSummaryLabel();
+      return _entrySummaryLabel();
     }
 
-    final summary = MedicationDisplayHelpers.doseMetricsSummary(
+    final summary = MedicationDisplayHelpers.entryMetricsSummary(
       med,
-      doseTabletQuarters: r.doseTabletQuarters,
-      doseCapsules: r.doseCapsules,
-      doseSyringes: r.doseSyringes,
-      doseVials: r.doseVials,
-      doseMassMcg: r.doseMassMcg,
-      doseVolumeMicroliter: r.doseVolumeMicroliter,
+      entryTabletQuarters: r.entryTabletQuarters,
+      entryCapsules: r.entryCapsules,
+      entrySyringes: r.entrySyringes,
+      entryVials: r.entryVials,
+      entryMassMcg: r.entryMassMcg,
+      entryVolumeMicroliter: r.entryVolumeMicroliter,
       syringeUnits: r.syringeUnits,
       separator: separator,
     );
-    if (summary.isEmpty) return _doseSummaryLabel();
+    if (summary.isEmpty) return _entrySummaryLabel();
     return summary;
   }
 
@@ -530,7 +530,7 @@ class _AddScheduleWizardPageState
 
   // ==================== STEP 1: MEDICATION & DOSE ====================
 
-  Widget _buildMedicationDoseStep() {
+  Widget _buildMedicationEntryStep() {
     return Column(
       children: [
         _buildSection(context, 'Select Medication', [
@@ -544,7 +544,7 @@ class _AddScheduleWizardPageState
         ], titleSpacing: kSpacingS),
         if (_selectedMed != null) ...[
           const SizedBox(height: 16),
-          _buildSection(context, 'Configure Amount', [_buildDoseConfiguration()]),
+          _buildSection(context, 'Configure Amount', [_buildEntryConfiguration()]),
         ],
       ],
     );
@@ -578,9 +578,9 @@ class _AddScheduleWizardPageState
             onTap: () => setState(() {
               _selectedMed = null;
               _medicationId = null;
-              _doseValue.clear();
-              _doseUnit.clear();
-              _doseResult = null;
+              _entryValue.clear();
+              _entryUnit.clear();
+              _entryResult = null;
               _maybeAutoName();
             }),
           );
@@ -646,170 +646,170 @@ class _AddScheduleWizardPageState
       // Set defaults based on form
       switch (med.form) {
         case MedicationForm.tablet:
-          _doseUnit.text = 'tablets';
-          if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
+          _entryUnit.text = 'tablets';
+          if (_entryValue.text.trim().isEmpty) _entryValue.text = '1';
         case MedicationForm.capsule:
-          _doseUnit.text = 'capsules';
-          if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
+          _entryUnit.text = 'capsules';
+          if (_entryValue.text.trim().isEmpty) _entryValue.text = '1';
         case MedicationForm.prefilledSyringe:
-          _doseUnit.text = 'syringes';
-          if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
+          _entryUnit.text = 'syringes';
+          if (_entryValue.text.trim().isEmpty) _entryValue.text = '1';
         case MedicationForm.singleDoseVial:
-          _doseUnit.text = 'vials';
-          if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
+          _entryUnit.text = 'vials';
+          if (_entryValue.text.trim().isEmpty) _entryValue.text = '1';
         case MedicationForm.multiDoseVial:
           final savedRecon = SavedReconstitutionRepository().ownedForMedication(
             med.id,
           );
 
-          if (_doseValue.text.trim().isEmpty) {
-            final dose = savedRecon?.calculatedDose;
-            final unit = savedRecon?.doseUnit;
-            if (dose != null &&
-                dose > 0 &&
+          if (_entryValue.text.trim().isEmpty) {
+            final entry = savedRecon?.calculatedEntry;
+            final unit = savedRecon?.entryUnit;
+            if (entry != null &&
+                entry > 0 &&
                 unit != null &&
                 unit.trim().isNotEmpty) {
-              _doseValue.text = fmt2(dose);
-              _doseUnit.text = unit.trim();
+              _entryValue.text = fmt2(entry);
+              _entryUnit.text = unit.trim();
               break;
             }
 
-            // Fallback: infer dose amount from saved concentration + dose volume.
+            // Fallback: infer entry amount from saved concentration + entry volume.
             final perMl = med.perMlValue;
-            final volumeMl = med.volumePerDose;
+            final volumeMl = med.volumePerEntry;
             if (perMl != null &&
                 volumeMl != null &&
                 perMl > 0 &&
                 volumeMl > 0) {
-              _doseValue.text = fmt2(perMl * volumeMl);
+              _entryValue.text = fmt2(perMl * volumeMl);
               final u = med.strengthUnit;
               if (u == Unit.mcg) {
-                _doseUnit.text = 'mcg';
+                _entryUnit.text = 'mcg';
               } else if (u == Unit.mg) {
-                _doseUnit.text = 'mg';
+                _entryUnit.text = 'mg';
               } else if (u == Unit.g) {
-                _doseUnit.text = 'g';
+                _entryUnit.text = 'g';
               } else if (u == Unit.units) {
-                _doseUnit.text = 'units';
+                _entryUnit.text = 'units';
               } else {
-                _doseUnit.text = 'mg';
+                _entryUnit.text = 'mg';
               }
               break;
             }
           }
 
-          if (_doseUnit.text.trim().isEmpty) {
+          if (_entryUnit.text.trim().isEmpty) {
             final u = med.strengthUnit;
             if (u == Unit.units) {
-              _doseUnit.text = 'units';
+              _entryUnit.text = 'units';
             } else if (u == Unit.mcg) {
-              _doseUnit.text = 'mcg';
+              _entryUnit.text = 'mcg';
             } else if (u == Unit.g) {
-              _doseUnit.text = 'g';
+              _entryUnit.text = 'g';
             } else {
-              _doseUnit.text = 'mg';
+              _entryUnit.text = 'mg';
             }
           }
 
-          if (_doseValue.text.trim().isEmpty) _doseValue.text = '1';
+          if (_entryValue.text.trim().isEmpty) _entryValue.text = '1';
       }
       _maybeAutoName();
     });
   }
 
-  void _syncLegacyDoseFieldsFromResult(DoseCalculationResult result) {
+  void _syncLegacyEntryFieldsFromResult(EntryCalculationResult result) {
     if (!result.success) return;
 
-    // MDV needs explicit sync because DoseInputField doesn't use legacy controllers.
+    // MDV needs explicit sync because EntryInputField doesn't use legacy controllers.
     if (_selectedMed?.form == MedicationForm.multiDoseVial) {
       if (result.syringeUnits != null) {
-        _doseValue.text = fmt2(result.syringeUnits!);
-        _doseUnit.text = 'units';
+        _entryValue.text = fmt2(result.syringeUnits!);
+        _entryUnit.text = 'units';
         return;
       }
 
-      if (result.doseVolumeMicroliter != null) {
-        _doseValue.text = fmt2(result.doseVolumeMicroliter! / 1000);
-        _doseUnit.text = 'ml';
+      if (result.entryVolumeMicroliter != null) {
+        _entryValue.text = fmt2(result.entryVolumeMicroliter! / 1000);
+        _entryUnit.text = 'ml';
         return;
       }
 
-      if (result.doseMassMcg != null) {
-        final raw = result.doseMassMcg!;
+      if (result.entryMassMcg != null) {
+        final raw = result.entryMassMcg!;
         final strengthUnit = (_getStrengthUnit() ?? 'mg').toLowerCase();
         if (strengthUnit == 'units') {
-          _doseValue.text = fmt2(raw);
-          _doseUnit.text = 'units';
+          _entryValue.text = fmt2(raw);
+          _entryUnit.text = 'units';
           return;
         }
         if (strengthUnit == 'mg') {
-          _doseValue.text = fmt2(raw / 1000);
-          _doseUnit.text = 'mg';
+          _entryValue.text = fmt2(raw / 1000);
+          _entryUnit.text = 'mg';
           return;
         }
         if (strengthUnit == 'g') {
-          _doseValue.text = fmt2(raw / 1000000);
-          _doseUnit.text = 'g';
+          _entryValue.text = fmt2(raw / 1000000);
+          _entryUnit.text = 'g';
           return;
         }
-        _doseValue.text = fmt2(raw);
-        _doseUnit.text = 'mcg';
+        _entryValue.text = fmt2(raw);
+        _entryUnit.text = 'mcg';
         return;
       }
     }
 
-    if (result.doseTabletQuarters != null) {
-      final tabletCount = result.doseTabletQuarters! / 4;
-      _doseValue.text = fmt2(tabletCount);
-      _doseUnit.text = 'tablets';
+    if (result.entryTabletQuarters != null) {
+      final tabletCount = result.entryTabletQuarters! / 4;
+      _entryValue.text = fmt2(tabletCount);
+      _entryUnit.text = 'tablets';
       return;
     }
 
-    if (result.doseCapsules != null) {
-      _doseValue.text = result.doseCapsules!.toString();
-      _doseUnit.text = 'capsules';
+    if (result.entryCapsules != null) {
+      _entryValue.text = result.entryCapsules!.toString();
+      _entryUnit.text = 'capsules';
       return;
     }
 
-    if (result.doseSyringes != null) {
-      _doseValue.text = result.doseSyringes!.toString();
-      _doseUnit.text = 'syringes';
+    if (result.entrySyringes != null) {
+      _entryValue.text = result.entrySyringes!.toString();
+      _entryUnit.text = 'syringes';
       return;
     }
 
-    if (result.doseVials != null) {
-      _doseValue.text = result.doseVials!.toString();
-      _doseUnit.text = 'vials';
+    if (result.entryVials != null) {
+      _entryValue.text = result.entryVials!.toString();
+      _entryUnit.text = 'vials';
       return;
     }
 
-    if (result.doseVolumeMicroliter != null) {
+    if (result.entryVolumeMicroliter != null) {
       // Keep existing unit choice when possible.
-      if (_doseUnit.text.trim().toLowerCase() == 'ml') {
-        _doseValue.text = fmt2(result.doseVolumeMicroliter! / 1000);
+      if (_entryUnit.text.trim().toLowerCase() == 'ml') {
+        _entryValue.text = fmt2(result.entryVolumeMicroliter! / 1000);
         return;
       }
     }
 
-    if (result.doseMassMcg != null) {
-      final unit = _doseUnit.text.trim().toLowerCase();
-      final mcg = result.doseMassMcg!;
+    if (result.entryMassMcg != null) {
+      final unit = _entryUnit.text.trim().toLowerCase();
+      final mcg = result.entryMassMcg!;
       if (unit == 'mg') {
-        _doseValue.text = fmt2(mcg / 1000);
+        _entryValue.text = fmt2(mcg / 1000);
         return;
       }
       if (unit == 'g') {
-        _doseValue.text = fmt2(mcg / 1000000);
+        _entryValue.text = fmt2(mcg / 1000000);
         return;
       }
-      _doseValue.text = fmt2(mcg);
-      if (_doseUnit.text.trim().isEmpty) {
-        _doseUnit.text = 'mcg';
+      _entryValue.text = fmt2(mcg);
+      if (_entryUnit.text.trim().isEmpty) {
+        _entryUnit.text = 'mcg';
       }
     }
   }
 
-  Widget _buildDoseConfiguration() {
+  Widget _buildEntryConfiguration() {
     return Column(
       children: [
         if (_selectedMed!.form == MedicationForm.multiDoseVial) ...[
@@ -837,7 +837,7 @@ class _AddScheduleWizardPageState
           _helperBelowLeft('Select the syringe size used for administration.'),
           const SizedBox(height: kSpacingS),
         ],
-        DoseInputField(
+        EntryInputField(
           medicationForm: _selectedMed!.form,
           strengthPerUnitMcg: _getStrengthPerUnitMcg() ?? 0,
           volumePerUnitMicroliter: _getVolumePerUnitMicroliter(),
@@ -851,13 +851,13 @@ class _AddScheduleWizardPageState
           initialInjectionCount: _getInitialInjectionCount(),
           onStrengthUnitChanged: (unit) {
             setState(() {
-              _doseUnit.text = unit;
+              _entryUnit.text = unit;
             });
           },
-          onDoseChanged: (result) {
+          onEntryChanged: (result) {
             setState(() {
-              _doseResult = result;
-              _syncLegacyDoseFieldsFromResult(result);
+              _entryResult = result;
+              _syncLegacyEntryFieldsFromResult(result);
               _maybeAutoName();
             });
           },
@@ -1126,7 +1126,7 @@ class _AddScheduleWizardPageState
     );
   }
 
-  // ==================== DOSE HELPERS (DoseInputField) ====================
+  // ==================== DOSE HELPERS (EntryInputField) ====================
 
   double? _getStrengthPerUnitMcg() {
     final med = _selectedMed;
@@ -1153,8 +1153,8 @@ class _AddScheduleWizardPageState
     final med = _selectedMed;
     if (med == null) return null;
 
-    if (med.volumePerDose != null) {
-      final volume = med.volumePerDose!;
+    if (med.volumePerEntry != null) {
+      final volume = med.volumePerEntry!;
       return switch (med.volumeUnit) {
         VolumeUnit.ml => volume * 1000,
         VolumeUnit.l => volume * 1000000,
@@ -1225,13 +1225,13 @@ class _AddScheduleWizardPageState
     // Default behavior:
     // - Prefer a saved, user-appropriate dosing volume (from reconstitution)
     // - Otherwise default to a 1mL syringe
-    final doseVolumeMl = med.volumePerDose;
-    if (doseVolumeMl != null && doseVolumeMl > 0) {
-      if (doseVolumeMl <= 0.3) return SyringeType.ml_0_3;
-      if (doseVolumeMl <= 0.5) return SyringeType.ml_0_5;
-      if (doseVolumeMl <= 1.0) return SyringeType.ml_1_0;
-      if (doseVolumeMl <= 3.0) return SyringeType.ml_3_0;
-      if (doseVolumeMl <= 5.0) return SyringeType.ml_5_0;
+    final entryVolumeMl = med.volumePerEntry;
+    if (entryVolumeMl != null && entryVolumeMl > 0) {
+      if (entryVolumeMl <= 0.3) return SyringeType.ml_0_3;
+      if (entryVolumeMl <= 0.5) return SyringeType.ml_0_5;
+      if (entryVolumeMl <= 1.0) return SyringeType.ml_1_0;
+      if (entryVolumeMl <= 3.0) return SyringeType.ml_3_0;
+      if (entryVolumeMl <= 5.0) return SyringeType.ml_5_0;
       return SyringeType.ml_5_0;
     }
 
@@ -1240,25 +1240,25 @@ class _AddScheduleWizardPageState
 
   double? _getInitialStrengthMcg() {
     if (_initial == null) return null;
-    return _initial!.doseMassMcg?.toDouble();
+    return _initial!.entryMassMcg?.toDouble();
   }
 
   double? _getInitialTabletCount() {
     if (_initial == null) return null;
-    if (_initial!.doseTabletQuarters != null) {
-      return _initial!.doseTabletQuarters! / 4.0;
+    if (_initial!.entryTabletQuarters != null) {
+      return _initial!.entryTabletQuarters! / 4.0;
     }
     return null;
   }
 
   int? _getInitialCapsuleCount() {
     if (_initial == null) return null;
-    return _initial!.doseCapsules;
+    return _initial!.entryCapsules;
   }
 
   int? _getInitialInjectionCount() {
     if (_initial == null) return null;
-    return _initial!.doseSyringes;
+    return _initial!.entrySyringes;
   }
 
   String _modeLabel(ScheduleMode m) => switch (m) {
@@ -1512,7 +1512,7 @@ class _AddScheduleWizardPageState
         ),
         const SizedBox(height: kSpacingS),
         Text(
-          'Auto-filled based on the dose. You can rename it.',
+          'Auto-filled based on the entry. You can rename it.',
           style: helperTextStyle(context),
         ),
       ],
@@ -1526,17 +1526,17 @@ class _AddScheduleWizardPageState
       return;
     }
 
-    final dose = _autoNameDoseSegment();
+    final entry = _autoNameEntrySegment();
 
-    _name.text = dose;
+    _name.text = entry;
   }
 
-  String _autoNameDoseSegment() {
-    // Prefer typed dose result when available.
-    final r = _doseResult;
+  String _autoNameEntrySegment() {
+    // Prefer typed entry result when available.
+    final r = _entryResult;
     if (r != null && !r.hasError) {
-      if (r.doseTabletQuarters != null) {
-        final quarters = r.doseTabletQuarters!;
+      if (r.entryTabletQuarters != null) {
+        final quarters = r.entryTabletQuarters!;
         final tablets = quarters / 4.0;
         String count;
         if (quarters == 1) {
@@ -1554,18 +1554,18 @@ class _AddScheduleWizardPageState
         return '$count $label';
       }
 
-      if (r.doseCapsules != null) {
-        final n = r.doseCapsules!;
+      if (r.entryCapsules != null) {
+        final n = r.entryCapsules!;
         return '$n ${n == 1 ? 'Capsule' : 'Capsules'}';
       }
 
-      if (r.doseSyringes != null) {
-        final n = r.doseSyringes!;
+      if (r.entrySyringes != null) {
+        final n = r.entrySyringes!;
         return '$n ${n == 1 ? 'Injection' : 'Injections'}';
       }
 
-      if (r.doseVials != null) {
-        final n = r.doseVials!;
+      if (r.entryVials != null) {
+        final n = r.entryVials!;
         return '$n ${n == 1 ? 'Vial' : 'Vials'}';
       }
 
@@ -1575,15 +1575,15 @@ class _AddScheduleWizardPageState
         return '${fmt2(u)} ${u == 1 ? 'Unit' : 'Units'}';
       }
 
-      if (r.doseMassMcg != null) {
-        // Fall back to the user-facing dose label for strength-based entries.
-        return _doseSummaryLabel();
+      if (r.entryMassMcg != null) {
+        // Fall back to the user-facing entry label for strength-based entries.
+        return _entrySummaryLabel();
       }
     }
 
     // Fall back to legacy fields.
-    final value = _doseValue.text.trim();
-    final unit = _doseUnit.text.trim();
+    final value = _entryValue.text.trim();
+    final unit = _entryUnit.text.trim();
     if (value.isEmpty) return '';
     if (unit.isEmpty) return value;
     return '$value $unit';
@@ -1684,7 +1684,7 @@ class _AddScheduleWizardPageState
                 Navigator.of(context).pop();
                 if (!enabled) {
                   await NotificationService.openChannelSettings(
-                    'upcoming_dose',
+                    'upcoming_entry',
                   );
                 }
                 if (!canExact) {
@@ -1743,59 +1743,59 @@ class _AddScheduleWizardPageState
     final timesUtc = minutesList.map(computeUtcMinutes).toList();
     final daysUtc = computeUtcDays(effectiveDays, minutesList.first);
 
-    // Compute typed dose fields
-    int? doseUnitCode;
-    int? doseMassMcg;
-    int? doseVolumeMicroliter;
-    int? doseTabletQuarters;
-    int? doseCapsules;
-    int? doseSyringes;
-    int? doseVials;
-    int? doseIU;
+    // Compute typed entry fields
+    int? entryUnitCode;
+    int? entryMassMcg;
+    int? entryVolumeMicroliter;
+    int? entryTabletQuarters;
+    int? entryCapsules;
+    int? entrySyringes;
+    int? entryVials;
+    int? entryIU;
     int? displayUnitCode;
     int? inputModeCode;
 
-    if (_doseResult != null) {
-      final result = _doseResult!;
-      doseMassMcg = result.doseMassMcg?.round();
-      doseVolumeMicroliter = result.doseVolumeMicroliter?.round();
-      doseTabletQuarters = result.doseTabletQuarters;
-      doseCapsules = result.doseCapsules;
-      doseSyringes = result.doseSyringes;
-      doseVials = result.doseVials;
+    if (_entryResult != null) {
+      final result = _entryResult!;
+      entryMassMcg = result.entryMassMcg?.round();
+      entryVolumeMicroliter = result.entryVolumeMicroliter?.round();
+      entryTabletQuarters = result.entryTabletQuarters;
+      entryCapsules = result.entryCapsules;
+      entrySyringes = result.entrySyringes;
+      entryVials = result.entryVials;
 
       // Parse display text to determine unit
       final displayText = result.displayText;
       if (displayText.contains('tablets')) {
-        doseUnitCode = DoseUnit.tablets.index;
-        displayUnitCode = DoseUnit.tablets.index;
-        inputModeCode = DoseInputMode.tablets.index;
+        entryUnitCode = EntryUnit.tablets.index;
+        displayUnitCode = EntryUnit.tablets.index;
+        inputModeCode = EntryInputMode.tablets.index;
       } else if (displayText.contains('capsules')) {
-        doseUnitCode = DoseUnit.capsules.index;
-        displayUnitCode = DoseUnit.capsules.index;
-        inputModeCode = DoseInputMode.capsules.index;
+        entryUnitCode = EntryUnit.capsules.index;
+        displayUnitCode = EntryUnit.capsules.index;
+        inputModeCode = EntryInputMode.capsules.index;
       } else if (displayText.contains('syringes')) {
-        doseUnitCode = DoseUnit.syringes.index;
-        displayUnitCode = DoseUnit.syringes.index;
+        entryUnitCode = EntryUnit.syringes.index;
+        displayUnitCode = EntryUnit.syringes.index;
       } else if (displayText.contains('vials')) {
-        doseUnitCode = DoseUnit.vials.index;
-        displayUnitCode = DoseUnit.vials.index;
+        entryUnitCode = EntryUnit.vials.index;
+        displayUnitCode = EntryUnit.vials.index;
       } else if (displayText.contains('mcg')) {
-        doseUnitCode = DoseUnit.mcg.index;
-        displayUnitCode = DoseUnit.mcg.index;
-        inputModeCode = DoseInputMode.mass.index;
+        entryUnitCode = EntryUnit.mcg.index;
+        displayUnitCode = EntryUnit.mcg.index;
+        inputModeCode = EntryInputMode.mass.index;
       } else if (displayText.contains('mg')) {
-        doseUnitCode = DoseUnit.mg.index;
-        displayUnitCode = DoseUnit.mg.index;
-        inputModeCode = DoseInputMode.mass.index;
+        entryUnitCode = EntryUnit.mg.index;
+        displayUnitCode = EntryUnit.mg.index;
+        inputModeCode = EntryInputMode.mass.index;
       } else if (displayText.contains('ml')) {
-        doseUnitCode = DoseUnit.ml.index;
-        displayUnitCode = DoseUnit.ml.index;
-        inputModeCode = DoseInputMode.volume.index;
+        entryUnitCode = EntryUnit.ml.index;
+        displayUnitCode = EntryUnit.ml.index;
+        inputModeCode = EntryInputMode.volume.index;
       } else if (displayText.contains('IU') || displayText.contains('units')) {
-        doseUnitCode = DoseUnit.iu.index;
-        displayUnitCode = DoseUnit.iu.index;
-        inputModeCode = DoseInputMode.iuUnits.index;
+        entryUnitCode = EntryUnit.iu.index;
+        displayUnitCode = EntryUnit.iu.index;
+        inputModeCode = EntryInputMode.iuUnits.index;
       }
     }
 
@@ -1803,8 +1803,8 @@ class _AddScheduleWizardPageState
       id: id,
       name: _name.text,
       medicationName: _selectedMed!.name,
-      doseValue: double.tryParse(_doseValue.text) ?? 0,
-      doseUnit: _doseUnit.text,
+      entryValue: double.tryParse(_entryValue.text) ?? 0,
+      entryUnit: _entryUnit.text,
       minutesOfDay: minutesList.first,
       daysOfWeek: effectiveDays.toList()..sort(),
       minutesOfDayUtc: minutesUtc,
@@ -1821,14 +1821,14 @@ class _AddScheduleWizardPageState
       daysOfMonth: _mode == ScheduleMode.daysOfMonth
           ? (_daysOfMonth.toList()..sort())
           : null,
-      doseUnitCode: doseUnitCode,
-      doseMassMcg: doseMassMcg,
-      doseVolumeMicroliter: doseVolumeMicroliter,
-      doseTabletQuarters: doseTabletQuarters,
-      doseCapsules: doseCapsules,
-      doseSyringes: doseSyringes,
-      doseVials: doseVials,
-      doseIU: doseIU,
+      entryUnitCode: entryUnitCode,
+      entryMassMcg: entryMassMcg,
+      entryVolumeMicroliter: entryVolumeMicroliter,
+      entryTabletQuarters: entryTabletQuarters,
+      entryCapsules: entryCapsules,
+      entrySyringes: entrySyringes,
+      entryVials: entryVials,
+      entryIU: entryIU,
       displayUnitCode: displayUnitCode,
       inputModeCode: inputModeCode,
       startAt: _effectiveStartAt(),

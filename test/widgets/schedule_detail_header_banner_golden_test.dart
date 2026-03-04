@@ -1,4 +1,4 @@
-@Tags(['golden'])
+﻿@Tags(['golden'])
 library;
 
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_d
 
 ThemeData _goldenTheme() {
   const primarySeed = kDetailHeaderGradientStart;
-  const secondarySeed = kDoseStatusSnoozedOrange;
+  const secondarySeed = kEntryStatusSnoozedOrange;
 
   final scheme = ColorScheme.fromSeed(seedColor: primarySeed).copyWith(
     primary: primarySeed,
@@ -54,14 +54,14 @@ Widget _wrapForGolden(
 Schedule _createTestSchedule({
   bool active = true,
   bool? pausedUntil,
-  String name = 'Morning Dose',
+  String name = 'Morning Entry',
 }) {
   return Schedule(
     id: 'test-schedule-1',
     name: name,
     medicationName: 'Test Medication',
-    doseValue: 1.0,
-    doseUnit: 'tablet',
+    entryValue: 1.0,
+    entryUnit: 'tablet',
     minutesOfDay: 540, // 9:00 AM
     daysOfWeek: const [1, 2, 3, 4, 5], // Mon-Fri
     medicationId: 'test-med-1',
@@ -76,17 +76,17 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ScheduleDetailHeaderBanner goldens', () {
-    testWidgets('active schedule with next dose - standard width',
+    testWidgets('active schedule with next entry - standard width',
         (tester) async {
       final schedule = _createTestSchedule(active: true);
-      final nextDose = DateTime.now().add(const Duration(hours: 2));
+      final nextEntry = DateTime.now().add(const Duration(hours: 2));
 
       await tester.pumpWidget(
         _wrapForGolden(
           ScheduleDetailHeaderBanner(
             schedule: schedule,
-            nextDose: nextDose,
-            title: 'Morning Dose',
+            nextEntry: nextEntry,
+            title: 'Morning Entry',
             onPauseResumePressed: () {},
           ),
         ),
@@ -107,13 +107,13 @@ void main() {
         active: true,
         pausedUntil: true,
       );
-      final nextDose = DateTime.now().add(const Duration(days: 3));
+      final nextEntry = DateTime.now().add(const Duration(days: 3));
 
       await tester.pumpWidget(
         _wrapForGolden(
           ScheduleDetailHeaderBanner(
             schedule: schedule,
-            nextDose: nextDose,
+            nextEntry: nextEntry,
             title: 'Paused Schedule',
             onPauseResumePressed: () {},
           ),
@@ -131,14 +131,14 @@ void main() {
       );
     });
 
-    testWidgets('inactive schedule - no next dose', (tester) async {
+    testWidgets('inactive schedule - no next entry', (tester) async {
       final schedule = _createTestSchedule(active: false);
 
       await tester.pumpWidget(
         _wrapForGolden(
           ScheduleDetailHeaderBanner(
             schedule: schedule,
-            nextDose: null,
+            nextEntry: null,
             title: 'Inactive Schedule',
             onPauseResumePressed: () {},
           ),
@@ -164,7 +164,7 @@ void main() {
         _wrapForGolden(
           ScheduleDetailHeaderBanner(
             schedule: schedule,
-            nextDose: null,
+            nextEntry: null,
             title: 'Completed Schedule',
             onPauseResumePressed: () {},
           ),
@@ -186,13 +186,13 @@ void main() {
         active: true,
         name: 'Very Long Medication Name That Should Wrap or Ellipsize',
       );
-      final nextDose = DateTime.now().add(const Duration(hours: 4));
+      final nextEntry = DateTime.now().add(const Duration(hours: 4));
 
       await tester.pumpWidget(
         _wrapForGolden(
           ScheduleDetailHeaderBanner(
             schedule: schedule,
-            nextDose: nextDose,
+            nextEntry: nextEntry,
             title: 'Very Long Medication Name That Should Wrap or Ellipsize',
             onPauseResumePressed: () {},
           ),

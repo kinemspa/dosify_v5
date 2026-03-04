@@ -1,8 +1,8 @@
-const kBackupHiveBoxNames = <String>[
+﻿const kBackupHiveBoxNames = <String>[
   'medications',
   'schedules',
-  'dose_logs',
-  'dose_status_change_logs',
+  'entry_logs',
+  'entry_status_change_logs',
   'supplies',
   'stock_movements',
   'inventory_logs',

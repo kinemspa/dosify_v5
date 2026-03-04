@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -18,7 +18,7 @@ import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/calendar_card.dart';
-import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/today_entries_card.dart';
 import 'package:dosifi_v5/src/widgets/notification_permission_banner.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -92,7 +92,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildHomeCards(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    // NOTE: Child cards (TodayDosesCard, CalendarCard, ActivityCard) each
+    // NOTE: Child cards (TodayEntriesCard, CalendarCard, ActivityCard) each
     // watch their own Hive box-change providers independently.  Watching
     // them *again* here caused a cascading rebuild storm (6-10× per Hive
     // write) that overwhelmed the emulator.  Removed to prevent that.
@@ -110,8 +110,8 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     final todayCard = Builder(
       builder: (context) {
-        return TodayDosesCard(
-          scope: const TodayDosesScope.all(),
+        return TodayEntriesCard(
+          scope: const TodayEntriesScope.all(),
           isExpanded: _isTodayExpanded,
           onExpandedChanged: (expanded) {
             if (!mounted) return;

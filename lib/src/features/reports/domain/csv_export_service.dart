@@ -1,7 +1,7 @@
-import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
+﻿import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 class CsvExportService {
@@ -155,8 +155,8 @@ class CsvExportService {
       'active',
       'startAtUtc',
       'endAtUtc',
-      'doseValue',
-      'doseUnit',
+      'entryValue',
+      'entryUnit',
       'daysOfWeek',
       'timesOfDay',
       'createdAtUtc',
@@ -172,8 +172,8 @@ class CsvExportService {
             escape(s.active.toString()),
             escape(s.startAt?.toUtc().toIso8601String() ?? ''),
             escape(s.endAt?.toUtc().toIso8601String() ?? ''),
-            escape(s.doseValue.toString()),
-            escape(s.doseUnit),
+            escape(s.entryValue.toString()),
+            escape(s.entryUnit),
             escape(s.daysOfWeek.join('|')),
             escape((s.timesOfDay ?? const <int>[]).join('|')),
             escape(s.createdAt.toUtc().toIso8601String()),
@@ -184,7 +184,7 @@ class CsvExportService {
     return '$header\n$rows\n';
   }
 
-  String doseLogsToCsv(Iterable<DoseLog> logs, {UtcTimeRange? range}) {
+  String entryLogsToCsv(Iterable<EntryLog> logs, {UtcTimeRange? range}) {
     final filtered = logs.where(
       (l) => range == null || range.contains(l.actionTime),
     );
@@ -202,10 +202,10 @@ class CsvExportService {
       'scheduledTimeUtc',
       'actionTimeUtc',
       'action',
-      'doseValue',
-      'doseUnit',
-      'actualDoseValue',
-      'actualDoseUnit',
+      'entryValue',
+      'entryUnit',
+      'actualEntryValue',
+      'actualEntryUnit',
       'notes',
     ].join(',');
 
@@ -218,10 +218,10 @@ class CsvExportService {
             escape(l.scheduledTime.toUtc().toIso8601String()),
             escape(l.actionTime.toUtc().toIso8601String()),
             escape(l.action.name),
-            escape(l.doseValue.toString()),
-            escape(l.doseUnit),
-            escape(l.actualDoseValue?.toString() ?? ''),
-            escape(l.actualDoseUnit ?? ''),
+            escape(l.entryValue.toString()),
+            escape(l.entryUnit),
+            escape(l.actualEntryValue?.toString() ?? ''),
+            escape(l.actualEntryUnit ?? ''),
             escape(l.notes ?? ''),
           ].join(',');
         })

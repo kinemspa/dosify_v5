@@ -1,4 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
+﻿// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'inventory_log.dart';
 
@@ -76,9 +76,9 @@ class InventoryChangeTypeAdapter extends TypeAdapter<InventoryChangeType> {
       case 1:
         return InventoryChangeType.refillToMax;
       case 2:
-        return InventoryChangeType.doseDeducted;
+        return InventoryChangeType.entryDeducted;
       case 3:
-        return InventoryChangeType.adHocDose;
+        return InventoryChangeType.adHocEntry;
       case 4:
         return InventoryChangeType.manualAdjustment;
       case 5:
@@ -101,10 +101,10 @@ class InventoryChangeTypeAdapter extends TypeAdapter<InventoryChangeType> {
       case InventoryChangeType.refillToMax:
         writer.writeByte(1);
         break;
-      case InventoryChangeType.doseDeducted:
+      case InventoryChangeType.entryDeducted:
         writer.writeByte(2);
         break;
-      case InventoryChangeType.adHocDose:
+      case InventoryChangeType.adHocEntry:
         writer.writeByte(3);
         break;
       case InventoryChangeType.manualAdjustment:

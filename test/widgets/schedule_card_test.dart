@@ -1,9 +1,9 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
@@ -15,21 +15,21 @@ void main() {
     // Initialize a temp Hive directory for tests
     final dir = Directory.systemTemp.createTempSync('dosifi_test_hive');
     Hive.init(dir.path);
-    if (!Hive.isAdapterRegistered(41)) Hive.registerAdapter(DoseLogAdapter());
+    if (!Hive.isAdapterRegistered(41)) Hive.registerAdapter(EntryLogAdapter());
     if (!Hive.isAdapterRegistered(42))
-      Hive.registerAdapter(DoseActionAdapter());
-    await Hive.openBox<DoseLog>('dose_logs');
+      Hive.registerAdapter(EntryActionAdapter());
+    await Hive.openBox<EntryLog>('entry_logs');
   });
 
   tearDown(() async {
-    await Hive.box<DoseLog>('dose_logs').clear();
-    await Hive.box<DoseLog>('dose_logs').close();
+    await Hive.box<EntryLog>('entry_logs').clear();
+    await Hive.box<EntryLog>('entry_logs').close();
     // Clean test overrides
     NotificationService.scheduleAtAlarmClockOverride = null;
     NotificationService.cancelOverride = null;
   });
 
-  testWidgets('snooze creates dose log and schedules one-off snooze', (
+  testWidgets('snooze creates entry log and schedules one-off snooze', (
     WidgetTester tester,
   ) async {
     final scheduledCalls = <Map<String, dynamic>>[];
@@ -39,7 +39,7 @@ void main() {
           DateTime when, {
           required String title,
           required String body,
-          String channelId = 'upcoming_dose',
+          String channelId = 'upcoming_entry',
         }) async {
           scheduledCalls.add({
             'id': id,
@@ -57,8 +57,8 @@ void main() {
       id: 's1',
       name: 'Test Schedule',
       medicationName: 'TestMed',
-      doseValue: 1.0,
-      doseUnit: 'tab',
+      entryValue: 1.0,
+      entryUnit: 'tab',
       minutesOfDay: minutes,
       daysOfWeek: [scheduledTime.weekday],
     );
@@ -95,11 +95,11 @@ void main() {
     });
     await tester.pump(); // process any pending UI rebuilds (snackbar)
 
-    // Verify DoseLog created
-    final box = Hive.box<DoseLog>('dose_logs');
+    // Verify EntryLog created
+    final box = Hive.box<EntryLog>('entry_logs');
     expect(box.length, 1);
     final log = box.values.first;
-    expect(log.action, DoseAction.snoozed);
+    expect(log.action, EntryAction.snoozed);
 
     // Verify notification scheduling occurred via override.
     // _snoozeSchedule uses title: s.medicationName and body: 'Snoozed'.
@@ -109,7 +109,7 @@ void main() {
     expect(call['body'], equals('Snoozed'));
   });
 
-  testWidgets('skip creates dose log and cancels scheduled notification', (
+  testWidgets('skip creates entry log and cancels scheduled notification', (
     WidgetTester tester,
   ) async {
     final canceled = <int>[];
@@ -125,8 +125,8 @@ void main() {
       id: 's2',
       name: 'Test Schedule 2',
       medicationName: 'TestMed',
-      doseValue: 2.0,
-      doseUnit: 'tab',
+      entryValue: 2.0,
+      entryUnit: 'tab',
       minutesOfDay: minutes,
       daysOfWeek: [scheduledTime.weekday],
     );
@@ -160,11 +160,11 @@ void main() {
     });
     await tester.pump(); // process any pending UI rebuilds (snackbar)
 
-    // Verify DoseLog created
-    final box = Hive.box<DoseLog>('dose_logs');
+    // Verify EntryLog created
+    final box = Hive.box<EntryLog>('entry_logs');
     expect(box.length, 1);
     final log = box.values.first;
-    expect(log.action, DoseAction.skipped);
+    expect(log.action, EntryAction.skipped);
 
     // Verify cancel called
     expect(canceled.length, greaterThanOrEqualTo(1));

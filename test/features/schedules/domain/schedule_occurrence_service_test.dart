@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 
@@ -11,8 +11,8 @@ void main() {
           id: '1',
           name: 'Daily Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 14 * 60, // 2:00 PM
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7], // Every day
         );
@@ -36,8 +36,8 @@ void main() {
           id: '1',
           name: 'Daily Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 14 * 60, // 2:00 PM
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7], // Every day
         );
@@ -58,8 +58,8 @@ void main() {
           id: '1',
           name: 'Weekly Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60, // 9:00 AM
           daysOfWeek: [3, 5], // Wednesday and Friday only
         );
@@ -81,8 +81,8 @@ void main() {
           id: '1',
           name: 'Multi-time Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60, // Legacy field
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
           timesOfDay: [9 * 60, 14 * 60, 20 * 60], // 9 AM, 2 PM, 8 PM
@@ -105,8 +105,8 @@ void main() {
           id: '1',
           name: 'Every 3 Days',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60, // 9:00 AM
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7], // Ignored for cyclic
           cycleEveryNDays: 3,
@@ -131,8 +131,8 @@ void main() {
           id: '1',
           name: 'Monthly Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60, // 9:00 AM
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7], // Ignored for monthly
           daysOfMonth: [1, 15], // 1st and 15th of each month
@@ -155,8 +155,8 @@ void main() {
           id: '1',
           name: 'Far Future',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60,
           daysOfWeek: [], // No days scheduled
         );
@@ -176,8 +176,8 @@ void main() {
           id: '1',
           name: 'Daily Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60, // 9:00 AM
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
         );
@@ -202,8 +202,8 @@ void main() {
           id: '1',
           name: 'Multi-time Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60,
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
           timesOfDay: [9 * 60, 14 * 60], // 9 AM and 2 PM
@@ -226,8 +226,8 @@ void main() {
           id: '1',
           name: 'Weekly Med',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 9 * 60,
           daysOfWeek: [1, 3, 5], // Mon, Wed, Fri
         );

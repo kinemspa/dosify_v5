@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -47,15 +47,15 @@ const _tips = <String, _CoachStep>{
   '/schedules/detail/:id': _CoachStep(
     title: 'Schedule detail',
     message:
-        'View timing, next dose, and pause controls for this schedule. '
+        'View timing, next entry, and pause controls for this schedule. '
         'Use the top-right button to pause or resume.',
     targetAlignment: Alignment(0.6, -0.82),
   ),
   '/calendar': _CoachStep(
     title: 'Calendar',
     message:
-        'See all scheduled doses across any day, week, or month. '
-        'Tap a dose card to log or review it.',
+        'See all scheduled entries across any day, week, or month. '
+        'Tap a entry card to log or review it.',
     targetAlignment: Alignment(0.0, 0.85),
   ),
   '/analytics': _CoachStep(

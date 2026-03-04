@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
@@ -142,7 +142,7 @@ class StockDonutGauge extends StatelessWidget {
 
 /// Dual-ring variant for showing two related stock percentages.
 ///
-/// Useful for Multi Dose Vials where the outer ring can represent
+/// Useful for Multi Entry Vials where the outer ring can represent
 /// the active vial volume and the inner ring can represent sealed
 ////backup vials status.
 class DualStockDonutGauge extends StatelessWidget {

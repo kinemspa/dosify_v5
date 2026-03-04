@@ -1,4 +1,4 @@
-// Dart imports:
+﻿// Dart imports:
 import 'dart:io' show Platform;
 
 // Flutter imports:
@@ -12,7 +12,7 @@ import 'package:timezone/timezone.dart' as tz;
 // Project imports:
 import 'package:dosifi_v5/src/core/notifications/notification_channel_service.dart';
 
-/// Handles creating, updating, and cancelling individual dose notifications.
+/// Handles creating, updating, and cancelling individual entry notifications.
 ///
 /// Depends on [NotificationChannelService] for the shared plugin instance,
 /// timezone readiness, and [canScheduleExactAlarms].
@@ -59,7 +59,7 @@ class NotificationScheduler {
     DateTime when, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) async {
     _log('scheduleAt(id=$id, when=${when.toIso8601String()}, title=$title)');
     var tzTime = tz.TZDateTime.from(when, tz.local);
@@ -125,7 +125,7 @@ class NotificationScheduler {
     DateTime whenUtc, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) async {
     _log(
       'scheduleAtUtc(id=$id, whenUtc=${whenUtc.toIso8601String()}, title=$title)',
@@ -193,7 +193,7 @@ class NotificationScheduler {
     DateTime when, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
     String? groupKey,
     bool setAsGroupSummary = false,
     String? payload,
@@ -223,7 +223,7 @@ class NotificationScheduler {
       _log('Adjusted (alarm clock) time to future: $tzTime');
     }
     final shouldUseExpandedStyle =
-        Platform.isAndroid && channelId == 'upcoming_dose' && !setAsGroupSummary;
+        Platform.isAndroid && channelId == 'upcoming_entry' && !setAsGroupSummary;
 
     final StyleInformation? styleInformation = shouldUseExpandedStyle
         ? (bigPicture != null
@@ -319,7 +319,7 @@ class NotificationScheduler {
     DateTime whenUtc, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) async {
     await _ensureTimeZoneReady();
     _log(
@@ -396,7 +396,7 @@ class NotificationScheduler {
     int seconds, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) async {
     await _ensureTimeZoneReady();
     final nowTz = tz.TZDateTime.now(tz.local);
@@ -437,7 +437,7 @@ class NotificationScheduler {
     int seconds, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) async {
     await _ensureTimeZoneReady();
     final nowTz = tz.TZDateTime.now(tz.local);
@@ -480,7 +480,7 @@ class NotificationScheduler {
     required int minutesOfDay, // 0..1439
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) async {
     _log(
       'scheduleWeeklyAt(id=$id, weekday=$weekday, minutesOfDay=$minutesOfDay)',
@@ -587,14 +587,14 @@ class NotificationScheduler {
 
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
-        'upcoming_dose',
-        'Upcoming Dose',
+        'upcoming_entry',
+        'Upcoming Entry',
         icon: 'ic_stat_notification',
         color: Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
-        actions: NotificationChannelService.upcomingDoseActions,
+        actions: NotificationChannelService.upcomingEntryActions,
         styleInformation: BigTextStyleInformation(
           body,
           contentTitle: title,
@@ -608,7 +608,7 @@ class NotificationScheduler {
       title,
       body,
       details,
-      payload: 'dose:test:${DateTime.now().millisecondsSinceEpoch}',
+      payload: 'entry:test:${DateTime.now().millisecondsSinceEpoch}',
     );
     _log('showTest() completed');
   }
@@ -643,31 +643,31 @@ class NotificationScheduler {
     );
   }
 
-  static Future<void> showTestGroupedUpcomingDoseReminders() async {
-    const groupKey = 'test_group|upcoming_dose';
+  static Future<void> showTestGroupedUpcomingEntryReminders() async {
+    const groupKey = 'test_group|upcoming_entry';
 
-    final item1 = stableIdForKey('test_group|dose_1');
-    final item2 = stableIdForKey('test_group|dose_2');
-    final summary = stableIdForKey('test_group|dose_summary');
+    final item1 = stableIdForKey('test_group|entry_1');
+    final item2 = stableIdForKey('test_group|entry_2');
+    final summary = stableIdForKey('test_group|entry_summary');
 
     const itemDetails = NotificationDetails(
       android: AndroidNotificationDetails(
-        'upcoming_dose',
-        'Upcoming Dose',
+        'upcoming_entry',
+        'Upcoming Entry',
         icon: 'ic_stat_notification',
         color: Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
         // ignore: deprecated_member_use
         priority: Priority.high,
         groupKey: groupKey,
-        actions: NotificationChannelService.upcomingDoseActions,
+        actions: NotificationChannelService.upcomingEntryActions,
       ),
     );
 
     const summaryDetails = NotificationDetails(
       android: AndroidNotificationDetails(
-        'upcoming_dose',
-        'Upcoming Dose',
+        'upcoming_entry',
+        'Upcoming Entry',
         icon: 'ic_stat_notification',
         color: Color(0xFF09A8BD),
         category: AndroidNotificationCategory.alarm,
@@ -683,18 +683,18 @@ class NotificationScheduler {
       'Medication A',
       '5 mg | 8:00 AM',
       itemDetails,
-      payload: 'dose:test_group_a:${DateTime.now().millisecondsSinceEpoch}',
+      payload: 'entry:test_group_a:${DateTime.now().millisecondsSinceEpoch}',
     );
     await NotificationChannelService.plugin.show(
       item2,
       'Medication B',
       '10 mg | 8:00 PM',
       itemDetails,
-      payload: 'dose:test_group_b:${DateTime.now().millisecondsSinceEpoch}',
+      payload: 'entry:test_group_b:${DateTime.now().millisecondsSinceEpoch}',
     );
     await NotificationChannelService.plugin.show(
       summary,
-      '2 dose reminders',
+      '2 entry reminders',
       'Open Dosifi to review',
       summaryDetails,
     );
@@ -704,7 +704,7 @@ class NotificationScheduler {
     int seconds, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) async {
     final id = DateTime.now().millisecondsSinceEpoch % 100000000;
     _log('showDelayed in ${seconds}s, id=$id');

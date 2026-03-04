@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element
+﻿// ignore_for_file: unused_element
 
 // Flutter imports:
 import 'package:flutter/material.dart';
@@ -16,18 +16,18 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/schedule_dose_metrics.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/schedule_entry_metrics.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/confirm_schedule_edit_dialog.dart';
-import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
-import 'package:dosifi_v5/src/widgets/dose_card.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_row.dart';
+import 'package:dosifi_v5/src/widgets/entry_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/entry_card.dart';
+import 'package:dosifi_v5/src/widgets/next_entry_row.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
@@ -40,12 +40,12 @@ class EnhancedScheduleCard extends StatefulWidget {
     super.key,
     required this.schedule,
     required this.medication,
-    this.showDoseCardWhenPossible = true,
+    this.showEntryCardWhenPossible = true,
   });
 
   final Schedule schedule;
   final Medication medication;
-  final bool showDoseCardWhenPossible;
+  final bool showEntryCardWhenPossible;
 
   @override
   State<EnhancedScheduleCard> createState() => _EnhancedScheduleCardState();
@@ -54,17 +54,17 @@ class EnhancedScheduleCard extends StatefulWidget {
 class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   bool _isExpanded = false;
 
-  Future<void> _cancelNotificationForDose(CalculatedDose dose) async {
+  Future<void> _cancelNotificationForEntry(CalculatedEntry entry) async {
     try {
       await NotificationService.cancel(
-        ScheduleScheduler.doseNotificationIdFor(
-          dose.scheduleId,
-          dose.scheduledTime,
+        ScheduleScheduler.entryNotificationIdFor(
+          entry.scheduleId,
+          entry.scheduledTime,
         ),
       );
       for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
-        dose.scheduleId,
-        dose.scheduledTime,
+        entry.scheduleId,
+        entry.scheduledTime,
       )) {
         await NotificationService.cancel(overdueId);
       }
@@ -73,50 +73,50 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     }
   }
 
-  Future<void> _showDoseActions(
-    CalculatedDose dose, {
-    DoseStatus? initialStatus,
+  Future<void> _showEntryActions(
+    CalculatedEntry entry, {
+    EntryStatus? initialStatus,
   }) {
-    return DoseActionSheet.show(
+    return EntryActionSheet.show(
       context,
-      dose: dose,
+      entry: entry,
       initialStatus: initialStatus,
       onMarkLogged: (request) async {
-        final logId = DoseLogIds.occurrenceId(
-          scheduleId: dose.scheduleId,
-          scheduledTime: dose.scheduledTime,
+        final logId = EntryLogIds.occurrenceId(
+          scheduleId: entry.scheduleId,
+          scheduledTime: entry.scheduledTime,
         );
-        final log = DoseLog(
+        final log = EntryLog(
           id: logId,
-          scheduleId: dose.scheduleId,
+          scheduleId: entry.scheduleId,
           scheduleName: widget.schedule.name,
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
-          scheduledTime: dose.scheduledTime,
+          scheduledTime: entry.scheduledTime,
           actionTime: request.actionTime,
-          doseValue: dose.doseValue,
-          doseUnit: dose.doseUnit,
-          action: DoseAction.logged,
-          actualDoseValue: request.actualDoseValue,
-          actualDoseUnit: request.actualDoseUnit,
+          entryValue: entry.entryValue,
+          entryUnit: entry.entryUnit,
+          action: EntryAction.logged,
+          actualEntryValue: request.actualEntryValue,
+          actualEntryUnit: request.actualEntryUnit,
           notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
-        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
         await repo.upsertOccurrence(log);
-        await _cancelNotificationForDose(dose);
+        await _cancelNotificationForEntry(entry);
 
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(widget.medication.id);
         if (currentMed != null) {
-          final effectiveDoseValue = request.actualDoseValue ?? dose.doseValue;
-          final effectiveDoseUnit = request.actualDoseUnit ?? dose.doseUnit;
+          final effectiveEntryValue = request.actualEntryValue ?? entry.entryValue;
+          final effectiveEntryUnit = request.actualEntryUnit ?? entry.entryUnit;
           final delta = MedicationStockAdjustment.tryCalculateStockDelta(
             medication: currentMed,
             schedule: widget.schedule,
-            doseValue: effectiveDoseValue,
-            doseUnit: effectiveDoseUnit,
-            preferDoseValue: request.actualDoseValue != null,
+            entryValue: effectiveEntryValue,
+            entryUnit: effectiveEntryUnit,
+            preferEntryValue: request.actualEntryValue != null,
           );
           if (delta != null) {
             final updated = MedicationStockAdjustment.deduct(
@@ -136,44 +136,44 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         showAppSnackBar(context, 'Entry recorded');
       },
       onSnooze: (request) async {
-        final logId = DoseLogIds.occurrenceId(
-          scheduleId: dose.scheduleId,
-          scheduledTime: dose.scheduledTime,
+        final logId = EntryLogIds.occurrenceId(
+          scheduleId: entry.scheduleId,
+          scheduledTime: entry.scheduledTime,
         );
-        final log = DoseLog(
+        final log = EntryLog(
           id: logId,
-          scheduleId: dose.scheduleId,
+          scheduleId: entry.scheduleId,
           scheduleName: widget.schedule.name,
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
-          scheduledTime: dose.scheduledTime,
+          scheduledTime: entry.scheduledTime,
           actionTime: request.actionTime,
-          doseValue: dose.doseValue,
-          doseUnit: dose.doseUnit,
-          action: DoseAction.snoozed,
-          actualDoseValue: request.actualDoseValue,
-          actualDoseUnit: request.actualDoseUnit,
+          entryValue: entry.entryValue,
+          entryUnit: entry.entryUnit,
+          action: EntryAction.snoozed,
+          actualEntryValue: request.actualEntryValue,
+          actualEntryUnit: request.actualEntryUnit,
           notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
-        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
         await repo.upsertOccurrence(log);
 
-        await _cancelNotificationForDose(dose);
+        await _cancelNotificationForEntry(entry);
         final when = request.actionTime;
         if (when.isAfter(DateTime.now())) {
           final time = DateTimeFormatter.formatTime(context, when);
           await NotificationService.scheduleAtAlarmClock(
-            ScheduleScheduler.doseNotificationIdFor(
-              dose.scheduleId,
-              dose.scheduledTime,
+            ScheduleScheduler.entryNotificationIdFor(
+              entry.scheduleId,
+              entry.scheduledTime,
             ),
             when,
             title: widget.medication.name,
             body: '${widget.schedule.name} | Snoozed until $time',
             payload:
-                'dose:${dose.scheduleId}:${dose.scheduledTime.millisecondsSinceEpoch}',
-            actions: NotificationService.upcomingDoseActions,
+                'entry:${entry.scheduleId}:${entry.scheduledTime.millisecondsSinceEpoch}',
+            actions: NotificationService.upcomingEntryActions,
             expandedLines: <String>[
               widget.schedule.name,
               'Snoozed until $time',
@@ -186,57 +186,57 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         showAppSnackBar(context, 'Reminder snoozed');
       },
       onSkip: (request) async {
-        final logId = DoseLogIds.occurrenceId(
-          scheduleId: dose.scheduleId,
-          scheduledTime: dose.scheduledTime,
+        final logId = EntryLogIds.occurrenceId(
+          scheduleId: entry.scheduleId,
+          scheduledTime: entry.scheduledTime,
         );
-        final log = DoseLog(
+        final log = EntryLog(
           id: logId,
-          scheduleId: dose.scheduleId,
+          scheduleId: entry.scheduleId,
           scheduleName: widget.schedule.name,
           medicationId: widget.medication.id,
           medicationName: widget.medication.name,
-          scheduledTime: dose.scheduledTime,
+          scheduledTime: entry.scheduledTime,
           actionTime: request.actionTime,
-          doseValue: dose.doseValue,
-          doseUnit: dose.doseUnit,
-          action: DoseAction.skipped,
-          actualDoseValue: request.actualDoseValue,
-          actualDoseUnit: request.actualDoseUnit,
+          entryValue: entry.entryValue,
+          entryUnit: entry.entryUnit,
+          action: EntryAction.skipped,
+          actualEntryValue: request.actualEntryValue,
+          actualEntryUnit: request.actualEntryUnit,
           notes: request.notes?.isEmpty ?? true ? null : request.notes,
         );
 
-        final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+        final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
         await repo.upsertOccurrence(log);
-        await _cancelNotificationForDose(dose);
+        await _cancelNotificationForEntry(entry);
 
         if (!mounted) return;
         setState(() {});
         showAppSnackBar(context, 'Entry skipped');
       },
       onDelete: (request) async {
-        final logBox = Hive.box<DoseLog>('dose_logs');
-        final baseId = DoseLogIds.occurrenceId(
-          scheduleId: dose.scheduleId,
-          scheduledTime: dose.scheduledTime,
+        final logBox = Hive.box<EntryLog>('entry_logs');
+        final baseId = EntryLogIds.occurrenceId(
+          scheduleId: entry.scheduleId,
+          scheduledTime: entry.scheduledTime,
         );
         final existingLog =
             logBox.get(baseId) ??
-            logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
+            logBox.get(EntryLogIds.legacySnoozeIdFromBase(baseId));
 
-        if (existingLog != null && existingLog.action == DoseAction.logged) {
+        if (existingLog != null && existingLog.action == EntryAction.logged) {
           final medBox = Hive.box<Medication>('medications');
           final currentMed = medBox.get(widget.medication.id);
           if (currentMed != null) {
             final oldValue =
-                existingLog.actualDoseValue ?? existingLog.doseValue;
-            final oldUnit = existingLog.actualDoseUnit ?? existingLog.doseUnit;
+                existingLog.actualEntryValue ?? existingLog.entryValue;
+            final oldUnit = existingLog.actualEntryUnit ?? existingLog.entryUnit;
             final delta = MedicationStockAdjustment.tryCalculateStockDelta(
               medication: currentMed,
               schedule: widget.schedule,
-              doseValue: oldValue,
-              doseUnit: oldUnit,
-              preferDoseValue: existingLog.actualDoseValue != null,
+              entryValue: oldValue,
+              entryUnit: oldUnit,
+              preferEntryValue: existingLog.actualEntryValue != null,
             );
             if (delta != null) {
               await medBox.put(
@@ -250,12 +250,12 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           }
         }
 
-        final repo = DoseLogRepository(logBox);
+        final repo = EntryLogRepository(logBox);
         await repo.deleteOccurrence(
-          scheduleId: dose.scheduleId,
-          scheduledTime: dose.scheduledTime,
+          scheduleId: entry.scheduleId,
+          scheduledTime: entry.scheduledTime,
         );
-        await _cancelNotificationForDose(dose);
+        await _cancelNotificationForEntry(entry);
 
         if (!mounted) return;
         setState(() {});
@@ -274,19 +274,19 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-    final nextDose = _getNextDose();
+    final nextEntry = _getNextEntry();
 
     final strengthLabel = MedicationDisplayHelpers.strengthOrConcentrationLabel(
       widget.medication,
     );
     final metrics = widget.schedule.displayMetrics(widget.medication);
 
-    final canShowDoseCard =
-        nextDose != null &&
+    final canShowEntryCard =
+        nextEntry != null &&
         strengthLabel.trim().isNotEmpty &&
         metrics.trim().isNotEmpty;
 
-    final showDoseCard = widget.showDoseCardWhenPossible && canShowDoseCard;
+    final showEntryCard = widget.showEntryCardWhenPossible && canShowEntryCard;
 
     return AnimatedContainer(
       duration: kAnimationNormal,
@@ -297,7 +297,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         child: AnimatedContainer(
           duration: kAnimationNormal,
           curve: kCurveEmphasized,
-          padding: showDoseCard
+          padding: showEntryCard
               ? EdgeInsets.zero
               : EdgeInsets.all(_isExpanded ? kCardPadding : kSpacingM),
           decoration: BoxDecoration(
@@ -315,59 +315,59 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (showDoseCard)
+              if (showEntryCard)
                 ValueListenableBuilder(
-                  valueListenable: Hive.box<DoseLog>('dose_logs').listenable(),
-                  builder: (context, Box<DoseLog> logBox, _) {
-                    final baseId = DoseLogIds.occurrenceId(
+                  valueListenable: Hive.box<EntryLog>('entry_logs').listenable(),
+                  builder: (context, Box<EntryLog> logBox, _) {
+                    final baseId = EntryLogIds.occurrenceId(
                       scheduleId: widget.schedule.id,
-                      scheduledTime: nextDose,
+                      scheduledTime: nextEntry,
                     );
                     final existingLog =
                         logBox.get(baseId) ??
-                        logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
+                        logBox.get(EntryLogIds.legacySnoozeIdFromBase(baseId));
 
-                    final dose = CalculatedDose(
+                    final entry = CalculatedEntry(
                       scheduleId: widget.schedule.id,
                       scheduleName: widget.schedule.name,
                       medicationName: widget.medication.name,
-                      scheduledTime: nextDose,
-                      doseValue: widget.schedule.doseValue,
-                      doseUnit: widget.schedule.doseUnit,
+                      scheduledTime: nextEntry,
+                      entryValue: widget.schedule.entryValue,
+                      entryUnit: widget.schedule.entryUnit,
                       existingLog: existingLog,
                     );
 
-                    return DoseCard(
-                      dose: dose,
+                    return EntryCard(
+                      entry: entry,
                       medicationName: widget.medication.name,
                       strengthOrConcentrationLabel: strengthLabel,
-                      doseMetrics: metrics,
+                      entryMetrics: metrics,
                       isActive: widget.schedule.isActive,
                       compact: true,
                       medicationFormIcon:
                           MedicationDisplayHelpers.medicationFormIcon(
                             widget.medication.form,
                           ),
-                      doseNumber: ScheduleOccurrenceService.occurrenceNumber(
+                      entryNumber: ScheduleOccurrenceService.occurrenceNumber(
                         widget.schedule,
-                        nextDose,
+                        nextEntry,
                       ),
                       titleTrailing: ScheduleStatusChip(
                         schedule: widget.schedule,
                       ),
                       onTap: () => setState(() => _isExpanded = !_isExpanded),
                       onQuickAction: (status) =>
-                          _showDoseActions(dose, initialStatus: status),
-                      onPrimaryAction: () => _showDoseActions(dose),
+                          _showEntryActions(entry, initialStatus: status),
+                      onPrimaryAction: () => _showEntryActions(entry),
                     );
                   },
                 )
               else
                 // COLLAPSED STATE - Ultra Clean Single Row
-                // In list mode (showDoseCardWhenPossible: false): tap navigates to detail,
+                // In list mode (showEntryCardWhenPossible: false): tap navigates to detail,
                 // no expand chevron. In normal mode: tap toggles expand.
                 InkWell(
-                  onTap: widget.showDoseCardWhenPossible
+                  onTap: widget.showEntryCardWhenPossible
                       ? () => setState(() => _isExpanded = !_isExpanded)
                       : () => context.push(
                           '/schedules/detail/${widget.schedule.id}',
@@ -397,7 +397,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           ),
                           const SizedBox(width: kSpacingS),
                           // Status on the right – always shown in list mode; in expand mode only when collapsed
-                          if (!_isExpanded || !widget.showDoseCardWhenPossible) ...[
+                          if (!_isExpanded || !widget.showEntryCardWhenPossible) ...[
                             ScheduleStatusChip(schedule: widget.schedule),
                             const SizedBox(width: kSpacingXS),
                             GestureDetector(
@@ -421,7 +421,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                             const SizedBox(width: kSpacingXS),
                           ],
                           // Expand/collapse chevron – only shown in standalone mode (not list mode)
-                          if (widget.showDoseCardWhenPossible)
+                          if (widget.showEntryCardWhenPossible)
                             Padding(
                               padding: const EdgeInsets.all(kSpacingXS),
                               child: AnimatedRotation(
@@ -439,9 +439,9 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                         ],
                       ),
                       const SizedBox(height: kSpacingXS),
-                      NextDoseRow(
+                      NextEntryRow(
                         schedule: widget.schedule,
-                        nextDose: nextDose,
+                        nextEntry: nextEntry,
                         dense: true,
                       ),
                     ],
@@ -449,7 +449,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                 ),
 
               // EXPANDED STATE – only in standalone mode (not list mode)
-              if (widget.showDoseCardWhenPossible)
+              if (widget.showEntryCardWhenPossible)
                 AnimatedCrossFade(
                 duration: kAnimationNormal,
                 crossFadeState: _isExpanded
@@ -457,7 +457,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     : CrossFadeState.showFirst,
                 firstChild: const SizedBox.shrink(),
                 secondChild: Padding(
-                  padding: showDoseCard
+                  padding: showEntryCard
                       ? const EdgeInsets.fromLTRB(
                           kCardPadding,
                           kSpacingL,
@@ -481,11 +481,11 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                           _buildDetailRow(
                             context,
                             'Amount',
-                            _formatExpandedDoseDetails(
+                            _formatExpandedEntryDetails(
                               metrics: metrics,
                               strengthOrConcentrationLabel: strengthLabel,
-                              fallbackDose:
-                                  '${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                              fallbackEntry:
+                                  '${_formatNumber(widget.schedule.entryValue)} ${widget.schedule.entryUnit}',
                             ),
                           ),
                           _buildDetailRow(context, 'Times', _getTimesText()),
@@ -642,7 +642,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     );
   }
 
-  String _formatNextDoseShort(DateTime dt) {
+  String _formatNextEntryShort(DateTime dt) {
     final now = DateTime.now();
     final diff = dt.difference(now);
 
@@ -710,7 +710,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     );
   }
 
-  Widget _buildRecentDoses() {
+  Widget _buildRecentEntries() {
     final logs = _getRecentLogs();
 
     if (logs.isEmpty) {
@@ -800,12 +800,12 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   }
 
   // Helper methods
-  DateTime? _getNextDose() {
+  DateTime? _getNextEntry() {
     return ScheduleOccurrenceService.nextOccurrence(widget.schedule);
   }
 
   Map<String, dynamic> _getAdherenceData() {
-    final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+    final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
     final now = DateTime.now();
     final weekAgo = now.subtract(const Duration(days: 7));
 
@@ -814,21 +814,21 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         .where((log) => log.scheduleId == widget.schedule.id)
         .toList();
 
-    final taken = logs.where((l) => l.action == DoseAction.logged).length;
+    final taken = logs.where((l) => l.action == EntryAction.logged).length;
     final total = logs.length;
     final rate = total > 0 ? (taken / total) * 100 : 0.0;
 
     return {'logged': taken, 'total': total, 'rate': rate};
   }
 
-  List<DoseLog> _getRecentLogs() {
-    final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+  List<EntryLog> _getRecentLogs() {
+    final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
     final logs = repo.getByScheduleId(widget.schedule.id);
     logs.sort((a, b) => b.actionTime.compareTo(a.actionTime));
     return logs;
   }
 
-  String _formatNextDose(DateTime dt) {
+  String _formatNextEntry(DateTime dt) {
     final now = DateTime.now();
     final diff = dt.difference(now);
 
@@ -910,15 +910,15 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     return DateFormat('MMM d, yyyy').format(endAt);
   }
 
-  String _formatExpandedDoseDetails({
+  String _formatExpandedEntryDetails({
     required String metrics,
     required String strengthOrConcentrationLabel,
-    required String fallbackDose,
+    required String fallbackEntry,
   }) {
     final m = metrics.trim();
     final s = strengthOrConcentrationLabel.trim();
 
-    final base = m.isNotEmpty ? m : fallbackDose;
+    final base = m.isNotEmpty ? m : fallbackEntry;
     if (s.isEmpty) return base;
     return '$base | $s';
   }
@@ -952,34 +952,34 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     return kAdherencePoorColor(context);
   }
 
-  IconData _getActionIcon(DoseAction action) {
+  IconData _getActionIcon(EntryAction action) {
     switch (action) {
-      case DoseAction.logged:
+      case EntryAction.logged:
         return Icons.check_circle;
-      case DoseAction.skipped:
+      case EntryAction.skipped:
         return Icons.block;
-      case DoseAction.snoozed:
+      case EntryAction.snoozed:
         return Icons.snooze;
     }
   }
 
-  Color _getActionColor(DoseAction action) {
-    return doseActionVisualSpec(context, action).color;
+  Color _getActionColor(EntryAction action) {
+    return entryActionVisualSpec(context, action).color;
   }
 
-  String _getActionLabel(DoseAction action) {
+  String _getActionLabel(EntryAction action) {
     switch (action) {
-      case DoseAction.logged:
+      case EntryAction.logged:
         return 'Logged';
-      case DoseAction.skipped:
+      case EntryAction.skipped:
         return 'Skipped';
-      case DoseAction.snoozed:
+      case EntryAction.snoozed:
         return 'Snoozed';
     }
   }
 
   // Action handlers
-  void _takeDoseNow() async {
+  void _takeEntryNow() async {
     final now = DateTime.now();
 
     // Show quick confirmation dialog with notes option
@@ -995,7 +995,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Recording ${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}',
+                'Recording ${_formatNumber(widget.schedule.entryValue)} ${widget.schedule.entryUnit}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -1043,8 +1043,8 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     );
 
     if (result != null && mounted) {
-      // Create dose log
-      final logId = DoseLogIds.occurrenceId(
+      // Create entry log
+      final logId = EntryLogIds.occurrenceId(
         scheduleId: widget.schedule.id,
         scheduledTime: now,
       );
@@ -1059,20 +1059,20 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
         }
       }
 
-      final log = DoseLog(
+      final log = EntryLog(
         id: logId,
         scheduleId: widget.schedule.id,
         scheduleName: widget.schedule.name,
         medicationId: widget.medication.id,
         medicationName: widget.medication.name,
         scheduledTime: now,
-        doseValue: widget.schedule.doseValue,
-        doseUnit: widget.schedule.doseUnit,
-        action: DoseAction.logged,
+        entryValue: widget.schedule.entryValue,
+        entryUnit: widget.schedule.entryUnit,
+        action: EntryAction.logged,
         notes: combinedNotes,
       );
 
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
       await repo.upsert(log);
 
       // Update medication stock
@@ -1080,7 +1080,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       final currentMed = medBox.get(widget.medication.id);
       if (currentMed != null) {
         final newStockValue =
-            (currentMed.stockValue - widget.schedule.doseValue).clamp(
+            (currentMed.stockValue - widget.schedule.entryValue).clamp(
               0.0,
               double.infinity,
             );
@@ -1097,15 +1097,15 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     }
   }
 
-  void _skipDose() async {
+  void _skipEntry() async {
     final now = DateTime.now();
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Skip Dose'),
+        title: const Text('Skip Entry'),
         content: Text(
-          'Skip ${_formatNumber(widget.schedule.doseValue)} ${widget.schedule.doseUnit}?',
+          'Skip ${_formatNumber(widget.schedule.entryValue)} ${widget.schedule.entryUnit}?',
         ),
         actions: [
           TextButton(
@@ -1121,23 +1121,23 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     );
 
     if (confirmed == true && mounted) {
-      final logId = DoseLogIds.occurrenceId(
+      final logId = EntryLogIds.occurrenceId(
         scheduleId: widget.schedule.id,
         scheduledTime: now,
       );
-      final log = DoseLog(
+      final log = EntryLog(
         id: logId,
         scheduleId: widget.schedule.id,
         scheduleName: widget.schedule.name,
         medicationId: widget.medication.id,
         medicationName: widget.medication.name,
         scheduledTime: now,
-        doseValue: widget.schedule.doseValue,
-        doseUnit: widget.schedule.doseUnit,
-        action: DoseAction.skipped,
+        entryValue: widget.schedule.entryValue,
+        entryUnit: widget.schedule.entryUnit,
+        action: EntryAction.skipped,
       );
 
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
       await repo.upsert(log);
 
       if (mounted) {
@@ -1147,13 +1147,13 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     }
   }
 
-  void _snoozeDose() async {
+  void _snoozeEntry() async {
     final now = DateTime.now();
 
     final snoozeDuration = await showDialog<Duration>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Snooze Dose'),
+        title: const Text('Snooze Entry'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1181,42 +1181,42 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
     );
 
     if (snoozeDuration != null && mounted) {
-      final logId = DoseLogIds.occurrenceId(
+      final logId = EntryLogIds.occurrenceId(
         scheduleId: widget.schedule.id,
         scheduledTime: now,
       );
-      final log = DoseLog(
+      final log = EntryLog(
         id: logId,
         scheduleId: widget.schedule.id,
         scheduleName: widget.schedule.name,
         medicationId: widget.medication.id,
         medicationName: widget.medication.name,
         scheduledTime: now,
-        doseValue: widget.schedule.doseValue,
-        doseUnit: widget.schedule.doseUnit,
-        action: DoseAction.snoozed,
+        entryValue: widget.schedule.entryValue,
+        entryUnit: widget.schedule.entryUnit,
+        action: EntryAction.snoozed,
         notes: 'Snoozed for ${snoozeDuration.inMinutes} minutes',
       );
 
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
       await repo.upsert(log);
 
       // Schedule a reminder notification at the snooze-until time.
       final snoozeUntil = now.add(snoozeDuration);
       await NotificationService.cancel(
-        ScheduleScheduler.doseNotificationIdFor(widget.schedule.id, now),
+        ScheduleScheduler.entryNotificationIdFor(widget.schedule.id, now),
       );
-      final metrics = ScheduleDoseMetrics.format(widget.schedule);
+      final metrics = ScheduleEntryMetrics.format(widget.schedule);
       if (mounted) {
         final timeLabel = DateTimeFormatter.formatTime(context, snoozeUntil);
         await NotificationService.scheduleAtAlarmClock(
-          ScheduleScheduler.doseNotificationIdFor(widget.schedule.id, now),
+          ScheduleScheduler.entryNotificationIdFor(widget.schedule.id, now),
           snoozeUntil,
           title: widget.medication.name,
           body: '$metrics | Snoozed until $timeLabel',
           payload:
-              'dose:${widget.schedule.id}:${now.millisecondsSinceEpoch}',
-          actions: NotificationService.upcomingDoseActions,
+              'entry:${widget.schedule.id}:${now.millisecondsSinceEpoch}',
+          actions: NotificationService.upcomingEntryActions,
           expandedLines: <String>[metrics, 'Snoozed until $timeLabel'],
         );
       }
@@ -1293,12 +1293,12 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
   }
 
   // Quick edit methods
-  void _quickEditDose() async {
+  void _quickEditEntry() async {
     final result = await showDialog<double>(
       context: context,
       builder: (context) {
         final controller = TextEditingController(
-          text: _formatNumber(widget.schedule.doseValue),
+          text: _formatNumber(widget.schedule.entryValue),
         );
 
         return AlertDialog(
@@ -1310,7 +1310,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                 controller: controller,
                 decoration: InputDecoration(
                   labelText: 'Amount',
-                  suffixText: widget.schedule.doseUnit,
+                  suffixText: widget.schedule.entryUnit,
                   border: const OutlineInputBorder(),
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
@@ -1326,7 +1326,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     onPressed: () {
                       final current =
                           double.tryParse(controller.text) ??
-                          widget.schedule.doseValue;
+                          widget.schedule.entryValue;
                       final newValue = (current - 0.5).clamp(0.1, 1000.0);
                       controller.text = _formatNumber(newValue);
                     },
@@ -1336,7 +1336,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
                     onPressed: () {
                       final current =
                           double.tryParse(controller.text) ??
-                          widget.schedule.doseValue;
+                          widget.schedule.entryValue;
                       final newValue = (current + 0.5).clamp(0.1, 1000.0);
                       controller.text = _formatNumber(newValue);
                     },
@@ -1365,14 +1365,14 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       },
     );
 
-    if (result != null && result != widget.schedule.doseValue && mounted) {
+    if (result != null && result != widget.schedule.entryValue && mounted) {
       final scheduleBox = Hive.box<Schedule>('schedules');
       final updated = Schedule(
         id: widget.schedule.id,
         name: widget.schedule.name,
         medicationName: widget.schedule.medicationName,
-        doseValue: result,
-        doseUnit: widget.schedule.doseUnit,
+        entryValue: result,
+        entryUnit: widget.schedule.entryUnit,
         minutesOfDay: widget.schedule.minutesOfDay,
         daysOfWeek: widget.schedule.daysOfWeek,
         active: widget.schedule.active,
@@ -1391,7 +1391,7 @@ class _EnhancedScheduleCardState extends State<EnhancedScheduleCard> {
       setState(() {});
       showAppSnackBar(
         context,
-        'Amount updated to ${_formatNumber(result)} ${widget.schedule.doseUnit}',
+        'Amount updated to ${_formatNumber(result)} ${widget.schedule.entryUnit}',
       );
     }
   }

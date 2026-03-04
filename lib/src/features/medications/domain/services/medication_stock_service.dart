@@ -1,4 +1,4 @@
-import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
+﻿import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
@@ -52,23 +52,23 @@ class MedicationStockService {
       // Get number of times per day
       final timesPerDay = schedule.timesOfDay?.length ?? 1;
 
-      // Get dose value
-      final doseValue = schedule.doseValue;
+      // Get entry value
+      final entryValue = schedule.entryValue;
 
       // Calculate daily consumption for this schedule
       // For weekly schedules, divide by 7
       if (schedule.hasCycle && schedule.cycleEveryNDays != null) {
         // Cyclic schedule: every N days
         final cycleLength = schedule.cycleEveryNDays!;
-        totalDailyConsumption += (doseValue * timesPerDay) / cycleLength;
+        totalDailyConsumption += (entryValue * timesPerDay) / cycleLength;
       } else if (schedule.hasDaysOfMonth) {
         // Monthly schedule: specific days of month
         final daysPerMonth = schedule.daysOfMonth!.length;
-        totalDailyConsumption += (doseValue * timesPerDay * daysPerMonth) / 30;
+        totalDailyConsumption += (entryValue * timesPerDay * daysPerMonth) / 30;
       } else {
         // Weekly schedule: specific days of week
         final daysPerWeek = schedule.daysOfWeek.length;
-        totalDailyConsumption += (doseValue * timesPerDay * daysPerWeek) / 7;
+        totalDailyConsumption += (entryValue * timesPerDay * daysPerWeek) / 7;
       }
     }
 

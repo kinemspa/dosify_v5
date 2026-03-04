@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 
@@ -92,7 +92,7 @@ class DebugPage extends StatelessWidget {
                           Navigator.of(context).pop();
                           if (!enabled) {
                             await NotificationService.openChannelSettings(
-                              'upcoming_dose',
+                              'upcoming_entry',
                             );
                           }
                           if (!canExact) {
@@ -309,10 +309,10 @@ class DebugPage extends StatelessWidget {
           const SizedBox(height: kSpacingS),
           FilledButton.icon(
             onPressed: () async {
-              await NotificationService.openChannelSettings('upcoming_dose');
+              await NotificationService.openChannelSettings('upcoming_entry');
             },
             icon: const Icon(Icons.settings_applications_outlined),
-            label: const Text('Open \"Upcoming Dose\" channel settings'),
+            label: const Text('Open \"Upcoming Entry\" channel settings'),
           ),
           const SizedBox(height: kSpacingS),
           FilledButton.icon(

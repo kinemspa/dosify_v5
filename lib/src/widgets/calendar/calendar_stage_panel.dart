@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -8,31 +8,31 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
-import 'package:dosifi_v5/src/widgets/dose_card.dart';
-import 'package:dosifi_v5/src/widgets/dose_summary_row.dart';
+import 'package:dosifi_v5/src/widgets/entry_card.dart';
+import 'package:dosifi_v5/src/widgets/entry_summary_row.dart';
 
-/// Displays a scrollable list of doses for a single day, grouped by hour.
+/// Displays a scrollable list of entries for a single day, grouped by hour.
 ///
-/// Used in [DoseCalendarWidget] when the view is set to `CalendarView.day`
+/// Used in [EntryCalendarWidget] when the view is set to `CalendarView.day`
 /// and `requireHourSelectionInDayView` is false. The widget owns its own
 /// scroll state and scroll-hint visibility.
 class CalendarDayStagePanel extends StatefulWidget {
   const CalendarDayStagePanel({
     super.key,
-    required this.doses,
+    required this.entries,
     required this.currentDate,
     required this.isFullVariant,
-    required this.onDoseTap,
-    required this.onOpenDoseActionSheet,
+    required this.onEntryTap,
+    required this.onOpenEntryActionSheet,
     required this.onDateChanged,
   });
 
-  /// All calculated doses for the current date range.
-  final List<CalculatedDose> doses;
+  /// All calculated entries for the current date range.
+  final List<CalculatedEntry> entries;
 
   /// The date being shown in day-stage mode.
   final DateTime currentDate;
@@ -40,13 +40,13 @@ class CalendarDayStagePanel extends StatefulWidget {
   /// Whether the parent uses [CalendarVariant.full] (affects bottom padding).
   final bool isFullVariant;
 
-  /// Called when the user taps a dose card (primary tap).
-  final void Function(CalculatedDose dose) onDoseTap;
+  /// Called when the user taps a entry card (primary tap).
+  final void Function(CalculatedEntry entry) onEntryTap;
 
-  /// Called when the user presses a quick-action button on a dose card.
+  /// Called when the user presses a quick-action button on a entry card.
   /// Pass `null` for [initialStatus] to open the sheet at the default tab.
-  final void Function(CalculatedDose dose, {DoseStatus? initialStatus})
-  onOpenDoseActionSheet;
+  final void Function(CalculatedEntry entry, {EntryStatus? initialStatus})
+  onOpenEntryActionSheet;
 
   /// Called when the user swipes left/right to change the displayed date.
   final void Function(DateTime date) onDateChanged;
@@ -107,8 +107,8 @@ class _CalendarDayStagePanelState extends State<CalendarDayStagePanel> {
     );
   }
 
-  Widget _buildDoseCardFor(CalculatedDose dose) {
-    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+  Widget _buildEntryCardFor(CalculatedEntry entry) {
+    final schedule = Hive.box<Schedule>('schedules').get(entry.scheduleId);
     final med = (schedule?.medicationId != null)
         ? Hive.box<Medication>('medications').get(schedule!.medicationId)
         : null;
@@ -119,34 +119,34 @@ class _CalendarDayStagePanelState extends State<CalendarDayStagePanel> {
 
     final metrics = med != null && schedule != null
         ? schedule.displayMetrics(med)
-        : '${dose.doseValue} ${dose.doseUnit}';
+        : '${entry.entryValue} ${entry.entryUnit}';
 
-    return DoseCard(
-      dose: dose,
-      medicationName: med?.name ?? dose.medicationName,
+    return EntryCard(
+      entry: entry,
+      medicationName: med?.name ?? entry.medicationName,
       strengthOrConcentrationLabel: strengthLabel,
-      doseMetrics: metrics,
+      entryMetrics: metrics,
       isActive: schedule?.isActive ?? true,
       medicationFormIcon: med == null
           ? null
           : MedicationDisplayHelpers.medicationFormIcon(med.form),
-      doseNumber: schedule == null
+      entryNumber: schedule == null
           ? null
           : ScheduleOccurrenceService.occurrenceNumber(
               schedule,
-              dose.scheduledTime,
+              entry.scheduledTime,
             ),
-      onQuickAction: (status) => widget.onOpenDoseActionSheet(
-        dose,
+      onQuickAction: (status) => widget.onOpenEntryActionSheet(
+        entry,
         initialStatus: status,
       ),
-      onTap: () => widget.onDoseTap(dose),
+      onTap: () => widget.onEntryTap(entry),
     );
   }
 
   Widget _buildHourSection({
     required int hour,
-    required List<CalculatedDose> hourDoses,
+    required List<CalculatedEntry> hourEntries,
   }) {
     return Padding(
       padding: kCalendarStageHourRowPadding,
@@ -161,10 +161,10 @@ class _CalendarDayStagePanelState extends State<CalendarDayStagePanel> {
               style: calendarStageHourLabelTextStyle(context),
             ),
           ),
-          for (final dose in hourDoses)
+          for (final entry in hourEntries)
             Padding(
-              padding: kCalendarStageDoseCardPadding,
-              child: _buildDoseCardFor(dose),
+              padding: kCalendarStageEntryCardPadding,
+              child: _buildEntryCardFor(entry),
             ),
         ],
       ),
@@ -179,21 +179,21 @@ class _CalendarDayStagePanelState extends State<CalendarDayStagePanel> {
       _updateDownHint(_scrollController.position);
     });
 
-    final dayDoses = widget.doses.where((dose) {
-      return dose.scheduledTime.year == widget.currentDate.year &&
-          dose.scheduledTime.month == widget.currentDate.month &&
-          dose.scheduledTime.day == widget.currentDate.day;
+    final dayEntries = widget.entries.where((entry) {
+      return entry.scheduledTime.year == widget.currentDate.year &&
+          entry.scheduledTime.month == widget.currentDate.month &&
+          entry.scheduledTime.day == widget.currentDate.day;
     }).toList()..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
 
-    if (dayDoses.isEmpty) {
-      return const CalendarNoDosesState();
+    if (dayEntries.isEmpty) {
+      return const CalendarNoEntriesState();
     }
 
-    final dosesByHour = <int, List<CalculatedDose>>{};
-    for (final dose in dayDoses) {
-      dosesByHour.putIfAbsent(dose.scheduledTime.hour, () => []).add(dose);
+    final entriesByHour = <int, List<CalculatedEntry>>{};
+    for (final entry in dayEntries) {
+      entriesByHour.putIfAbsent(entry.scheduledTime.hour, () => []).add(entry);
     }
-    final hours = dosesByHour.keys.toList()..sort();
+    final hours = entriesByHour.keys.toList()..sort();
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final listBottomPadding = widget.isFullVariant
@@ -221,7 +221,7 @@ class _CalendarDayStagePanelState extends State<CalendarDayStagePanel> {
           itemCount: hours.length,
           itemBuilder: (context, index) {
             final hour = hours[index];
-            final hourDoses = dosesByHour[hour] ?? const [];
+            final hourEntries = entriesByHour[hour] ?? const [];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -232,7 +232,7 @@ class _CalendarDayStagePanelState extends State<CalendarDayStagePanel> {
                     color: Theme.of(context).colorScheme.outlineVariant
                         .withValues(alpha: kOpacityVeryLow),
                   ),
-                _buildHourSection(hour: hour, hourDoses: hourDoses),
+                _buildHourSection(hour: hour, hourEntries: hourEntries),
               ],
             );
           },
@@ -242,38 +242,38 @@ class _CalendarDayStagePanelState extends State<CalendarDayStagePanel> {
   }
 }
 
-/// A compact panel showing dose cards for a selected hour in day-view mode.
+/// A compact panel showing entry cards for a selected hour in day-view mode.
 ///
-/// Used in [DoseCalendarWidget] when `requireHourSelectionInDayView` is true.
+/// Used in [EntryCalendarWidget] when `requireHourSelectionInDayView` is true.
 class CalendarSelectedHourPanel extends StatelessWidget {
   const CalendarSelectedHourPanel({
     super.key,
-    required this.doses,
+    required this.entries,
     required this.currentDate,
     required this.selectedHour,
     required this.isFullVariant,
-    required this.onDoseTap,
-    required this.onOpenDoseActionSheet,
+    required this.onEntryTap,
+    required this.onOpenEntryActionSheet,
   });
 
-  final List<CalculatedDose> doses;
+  final List<CalculatedEntry> entries;
   final DateTime currentDate;
   final int selectedHour;
   final bool isFullVariant;
-  final void Function(CalculatedDose dose) onDoseTap;
-  final void Function(CalculatedDose dose, {DoseStatus? initialStatus})
-  onOpenDoseActionSheet;
+  final void Function(CalculatedEntry entry) onEntryTap;
+  final void Function(CalculatedEntry entry, {EntryStatus? initialStatus})
+  onOpenEntryActionSheet;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final dayDoses = doses.where((dose) {
-      return dose.scheduledTime.year == currentDate.year &&
-          dose.scheduledTime.month == currentDate.month &&
-          dose.scheduledTime.day == currentDate.day &&
-          dose.scheduledTime.hour == selectedHour;
+    final dayEntries = entries.where((entry) {
+      return entry.scheduledTime.year == currentDate.year &&
+          entry.scheduledTime.month == currentDate.month &&
+          entry.scheduledTime.day == currentDate.day &&
+          entry.scheduledTime.hour == selectedHour;
     }).toList()..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
 
     final safeBottom = MediaQuery.paddingOf(context).bottom;
@@ -309,15 +309,15 @@ class CalendarSelectedHourPanel extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: dayDoses.isEmpty
-                  ? const CalendarNoDosesState(showIcon: false, compact: true)
+              child: dayEntries.isEmpty
+                  ? const CalendarNoEntriesState(showIcon: false, compact: true)
                   : ListView.builder(
                       padding: calendarStageListPadding(listBottomPadding),
-                      itemCount: dayDoses.length,
+                      itemCount: dayEntries.length,
                       itemBuilder: (context, index) {
-                        final dose = dayDoses[index];
+                        final entry = dayEntries[index];
                         final schedule =
-                            Hive.box<Schedule>('schedules').get(dose.scheduleId);
+                            Hive.box<Schedule>('schedules').get(entry.scheduleId);
                         final med = (schedule?.medicationId != null)
                             ? Hive.box<Medication>(
                                 'medications',
@@ -332,35 +332,35 @@ class CalendarSelectedHourPanel extends StatelessWidget {
 
                           if (strengthLabel.trim().isNotEmpty &&
                               metrics.trim().isNotEmpty) {
-                            return DoseCard(
-                              dose: dose,
+                            return EntryCard(
+                              entry: entry,
                               medicationName: med.name,
                               strengthOrConcentrationLabel: strengthLabel,
-                              doseMetrics: metrics,
+                              entryMetrics: metrics,
                               isActive: schedule.isActive,
                               medicationFormIcon:
                                   MedicationDisplayHelpers.medicationFormIcon(
                                     med.form,
                                   ),
-                              doseNumber:
+                              entryNumber:
                                   ScheduleOccurrenceService.occurrenceNumber(
                                     schedule,
-                                    dose.scheduledTime,
+                                    entry.scheduledTime,
                                   ),
                               onQuickAction: (status) =>
-                                  onOpenDoseActionSheet(
-                                    dose,
+                                  onOpenEntryActionSheet(
+                                    entry,
                                     initialStatus: status,
                                   ),
-                              onTap: () => onDoseTap(dose),
+                              onTap: () => onEntryTap(entry),
                             );
                           }
                         }
 
-                        return DoseSummaryRow(
-                          dose: dose,
+                        return EntrySummaryRow(
+                          entry: entry,
                           showMedicationName: true,
-                          onTap: () => onDoseTap(dose),
+                          onTap: () => onEntryTap(entry),
                         );
                       },
                     ),

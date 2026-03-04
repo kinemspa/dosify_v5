@@ -1,4 +1,4 @@
-// Dart imports:
+﻿// Dart imports:
 import 'dart:io';
 
 // Flutter imports:
@@ -22,7 +22,7 @@ import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
@@ -69,8 +69,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     MedicationForm.tablet => 'Tablets',
     MedicationForm.capsule => 'Capsules',
     MedicationForm.prefilledSyringe => 'Pre-filled Syringes',
-    MedicationForm.singleDoseVial => 'Single-dose Vials',
-    MedicationForm.multiDoseVial => 'Multi-dose Vials',
+    MedicationForm.singleDoseVial => 'Single-Dose Vials',
+    MedicationForm.multiDoseVial => 'Multi-Dose Vials',
   };
 
   // ── chart helpers ──────────────────────────────────────────────────────────
@@ -198,7 +198,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   /// BarChart with one bar per day for the last [days] days.
   Widget _buildDailyTrendChart(
     BuildContext context,
-    List<DoseLog> logItems,
+    List<EntryLog> logItems,
     int days,
   ) {
     final cs = Theme.of(context).colorScheme;
@@ -211,7 +211,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       countByDay[i] = 0;
     }
     for (final log in logItems) {
-      if (log.action != DoseAction.logged) continue;
+      if (log.action != EntryAction.logged) continue;
       final local = log.actionTime.toLocal();
       final dayOffset = DateTime(local.year, local.month, local.day)
           .difference(startDay)
@@ -488,7 +488,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   Widget build(BuildContext context) {
     final medsBox = Hive.box<Medication>('medications');
     final schedulesBox = Hive.box<Schedule>('schedules');
-    final doseLogsBox = Hive.box<DoseLog>('dose_logs');
+    final entryLogsBox = Hive.box<EntryLog>('entry_logs');
     final inventoryLogsBox = Hive.box<InventoryLog>('inventory_logs');
     final suppliesBox = Hive.box<Supply>('supplies');
     final stockMovementsBox = Hive.box<StockMovement>('stock_movements');
@@ -511,9 +511,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           return ValueListenableBuilder<Box<Schedule>>(
             valueListenable: schedulesBox.listenable(),
             builder: (context, schedules, __) {
-              return ValueListenableBuilder<Box<DoseLog>>(
-                valueListenable: doseLogsBox.listenable(),
-                builder: (context, doseLogs, ___) {
+              return ValueListenableBuilder<Box<EntryLog>>(
+                valueListenable: entryLogsBox.listenable(),
+                builder: (context, entryLogs, ___) {
                   return ValueListenableBuilder<Box<InventoryLog>>(
                     valueListenable: inventoryLogsBox.listenable(),
                     builder: (context, inventoryLogs, ____) {
@@ -527,7 +527,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       final scheduleItems =
                           schedules.values.toList(growable: false);
                       final allLogItems =
-                          doseLogs.values.toList(growable: false);
+                          entryLogs.values.toList(growable: false);
                       final allInventoryItems =
                           inventoryLogs.values.toList(growable: false);
 
@@ -551,18 +551,18 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                         );
 
                       final logged = logItems
-                          .where((l) => l.action == DoseAction.logged)
+                          .where((l) => l.action == EntryAction.logged)
                           .length;
                       final skipped = logItems
-                          .where((l) => l.action == DoseAction.skipped)
+                          .where((l) => l.action == EntryAction.skipped)
                           .length;
                       final snoozed = logItems
-                          .where((l) => l.action == DoseAction.snoozed)
+                          .where((l) => l.action == EntryAction.snoozed)
                           .length;
-                      final totalDoseActions = logged + skipped + snoozed;
-                      final adherencePercent = totalDoseActions == 0
+                      final totalEntryActions = logged + skipped + snoozed;
+                      final adherencePercent = totalEntryActions == 0
                           ? 0
-                          : ((logged / totalDoseActions) * 100).round();
+                          : ((logged / totalEntryActions) * 100).round();
 
                       final stockRefills = inventoryItems
                           .where(
@@ -578,8 +578,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           .where(
                             (l) =>
                                 l.changeType ==
-                                    InventoryChangeType.doseDeducted ||
-                                l.changeType == InventoryChangeType.adHocDose,
+                                    InventoryChangeType.entryDeducted ||
+                                l.changeType == InventoryChangeType.adHocEntry,
                           )
                           .length;
                       final stockAdjustments = inventoryItems
@@ -779,7 +779,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
                           // ── 3. Daily trend bar chart ─────────────────────────
                           SectionFormCard(
-                            title: 'Daily Dose Activity',
+                            title: 'Daily Entry Activity',
                             neutral: true,
                             children: [
                               Center(
@@ -1059,14 +1059,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 icon: Icons.history_outlined,
                                 enabled: logItems.isNotEmpty,
                                 onCsv: () async {
-                                  final csv = _csv.doseLogsToCsv(
+                                  final csv = _csv.entryLogsToCsv(
                                     logItems,
                                     range: range,
                                   );
                                   await _copyExport(csv, 'Activity Log CSV copied');
                                 },
                                 onHtml: () async {
-                                  final csv = _csv.doseLogsToCsv(
+                                  final csv = _csv.entryLogsToCsv(
                                     logItems,
                                     range: range,
                                   );
@@ -1080,7 +1080,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   );
                                 },
                                 onShareCsv: () async {
-                                  final csv = _csv.doseLogsToCsv(
+                                  final csv = _csv.entryLogsToCsv(
                                     logItems,
                                     range: range,
                                   );
@@ -1091,7 +1091,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   );
                                 },
                                 onShareHtml: () async {
-                                  final csv = _csv.doseLogsToCsv(
+                                  final csv = _csv.entryLogsToCsv(
                                     logItems,
                                     range: range,
                                   );

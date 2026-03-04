@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -7,7 +7,7 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_mode.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart'; // For DoseUnit/Mode enums
+import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart'; // For EntryUnit/Mode enums
 
 part 'schedule_form_controller.freezed.dart';
 
@@ -20,8 +20,8 @@ class ScheduleFormState with _$ScheduleFormState {
     @Default('') String name,
     @Default('') String medicationName,
     String? medicationId,
-    @Default(0) double doseValue,
-    @Default('mg') String doseUnit,
+    @Default(0) double entryValue,
+    @Default('mg') String entryUnit,
     @Default([TimeOfDay(hour: 9, minute: 0)]) List<TimeOfDay> times,
     @Default({1, 2, 3, 4, 5, 6, 7}) Set<int> days,
     @Default({}) Set<int> daysOfMonth,
@@ -74,8 +74,8 @@ class ScheduleFormController
         name: initial.name,
         medicationName: initial.medicationName,
         medicationId: initial.medicationId,
-        doseValue: initial.doseValue,
-        doseUnit: initial.doseUnit,
+        entryValue: initial.entryValue,
+        entryUnit: initial.entryUnit,
         times: times
             .map((m) => TimeOfDay(hour: m ~/ 60, minute: m % 60))
             .toList(),
@@ -135,22 +135,22 @@ class ScheduleFormController
     );
 
     // Set defaults
-    String newUnit = state.doseUnit;
-    double newValue = state.doseValue;
+    String newUnit = state.entryUnit;
+    double newValue = state.entryValue;
 
     switch (med.form) {
       case MedicationForm.tablet:
         newUnit = 'tablets';
-        if (state.doseValue == 0) newValue = 1;
+        if (state.entryValue == 0) newValue = 1;
       case MedicationForm.capsule:
         newUnit = 'capsules';
-        if (state.doseValue == 0) newValue = 1;
+        if (state.entryValue == 0) newValue = 1;
       case MedicationForm.prefilledSyringe:
         newUnit = 'syringes';
-        if (state.doseValue == 0) newValue = 1;
+        if (state.entryValue == 0) newValue = 1;
       case MedicationForm.singleDoseVial:
         newUnit = 'vials';
-        if (state.doseValue == 0) newValue = 1;
+        if (state.entryValue == 0) newValue = 1;
       case MedicationForm.multiDoseVial:
         final u = med.strengthUnit;
         if (u == Unit.unitsPerMl) {
@@ -158,7 +158,7 @@ class ScheduleFormController
         } else {
           newUnit = 'mg';
         }
-        if (state.doseValue == 0) {
+        if (state.entryValue == 0) {
           if (u == Unit.mcgPerMl) {
             newValue = med.strengthValue;
             newUnit = 'mcg';
@@ -177,12 +177,12 @@ class ScheduleFormController
         }
     }
 
-    state = state.copyWith(doseUnit: newUnit, doseValue: newValue);
+    state = state.copyWith(entryUnit: newUnit, entryValue: newValue);
     _maybeAutoName();
   }
 
-  void updateDose(double value, String unit) {
-    state = state.copyWith(doseValue: value, doseUnit: unit);
+  void updateEntry(double value, String unit) {
+    state = state.copyWith(entryValue: value, entryUnit: unit);
     _maybeAutoName();
   }
 
@@ -196,15 +196,15 @@ class ScheduleFormController
   void _maybeAutoName() {
     if (!state.nameAuto) return;
     final med = state.medicationName;
-    final dose = state.doseValue;
-    final unit = state.doseUnit;
-    if (med.isEmpty || dose == 0 || unit.isEmpty) return;
+    final entry = state.entryValue;
+    final unit = state.entryUnit;
+    if (med.isEmpty || entry == 0 || unit.isEmpty) return;
 
     // Simple formatting
-    final doseStr = dose == dose.roundToDouble()
-        ? dose.toStringAsFixed(0)
-        : dose.toStringAsFixed(2);
-    state = state.copyWith(name: '$med — $doseStr $unit');
+    final entryStr = entry == entry.roundToDouble()
+        ? entry.toStringAsFixed(0)
+        : entry.toStringAsFixed(2);
+    state = state.copyWith(name: '$med — $entryStr $unit');
   }
 
   void addTime(TimeOfDay time) {
@@ -325,27 +325,27 @@ class ScheduleFormController
       final timesUtc = minutesList.map(computeUtcMinutes).toList();
       final daysUtc = computeUtcDays(state.days, minutesList.first);
 
-      // Compute typed dose normalized fields
-      int? doseUnitCode;
-      int? doseMassMcg;
-      int? doseVolumeMicroliter;
-      int? doseTabletQuarters;
-      int? doseCapsules;
-      int? doseSyringes;
-      int? doseVials;
-      int? doseIU;
+      // Compute typed entry normalized fields
+      int? entryUnitCode;
+      int? entryMassMcg;
+      int? entryVolumeMicroliter;
+      int? entryTabletQuarters;
+      int? entryCapsules;
+      int? entrySyringes;
+      int? entryVials;
+      int? entryIU;
       int? displayUnitCode;
       int? inputModeCode;
 
       final med = state.selectedMed;
-      final doseVal = state.doseValue;
-      final unitStr = state.doseUnit.trim().toLowerCase();
+      final entryVal = state.entryValue;
+      final unitStr = state.entryUnit.trim().toLowerCase();
 
-      if (med != null && doseVal > 0 && unitStr.isNotEmpty) {
+      if (med != null && entryVal > 0 && unitStr.isNotEmpty) {
         switch (med.form) {
           case MedicationForm.tablet:
             if (unitStr == 'tablets') {
-              doseTabletQuarters = (doseVal * 4).round();
+              entryTabletQuarters = (entryVal * 4).round();
               // convert to mass using med.strength
               final perTabMcg = switch (med.strengthUnit) {
                 Unit.mcg => med.strengthValue,
@@ -357,19 +357,19 @@ class ScheduleFormController
                 Unit.gPerMl => med.strengthValue * 1e6,
                 Unit.unitsPerMl => med.strengthValue,
               };
-              doseMassMcg = (perTabMcg * doseTabletQuarters / 4.0).round();
-              doseUnitCode = DoseUnit.tablets.index;
-              displayUnitCode = DoseUnit.tablets.index;
-              inputModeCode = DoseInputMode.tablets.index;
+              entryMassMcg = (perTabMcg * entryTabletQuarters / 4.0).round();
+              entryUnitCode = EntryUnit.tablets.index;
+              displayUnitCode = EntryUnit.tablets.index;
+              inputModeCode = EntryInputMode.tablets.index;
             } else {
               // mass → compute tablets equivalence
               final desiredMcg = switch (unitStr) {
-                'mcg' => doseVal,
-                'mg' => doseVal * 1000,
-                'g' => doseVal * 1e6,
-                _ => doseVal,
+                'mcg' => entryVal,
+                'mg' => entryVal * 1000,
+                'g' => entryVal * 1e6,
+                _ => entryVal,
               };
-              doseMassMcg = desiredMcg.round();
+              entryMassMcg = desiredMcg.round();
               final perTabMcg = switch (med.strengthUnit) {
                 Unit.mcg => med.strengthValue,
                 Unit.mg => med.strengthValue * 1000,
@@ -380,19 +380,19 @@ class ScheduleFormController
                 Unit.gPerMl => med.strengthValue * 1e6,
                 Unit.unitsPerMl => med.strengthValue,
               };
-              doseTabletQuarters = ((desiredMcg / perTabMcg) * 4).round();
-              doseUnitCode = switch (unitStr) {
-                'mcg' => DoseUnit.mcg.index,
-                'mg' => DoseUnit.mg.index,
-                'g' => DoseUnit.g.index,
-                _ => DoseUnit.mg.index,
+              entryTabletQuarters = ((desiredMcg / perTabMcg) * 4).round();
+              entryUnitCode = switch (unitStr) {
+                'mcg' => EntryUnit.mcg.index,
+                'mg' => EntryUnit.mg.index,
+                'g' => EntryUnit.g.index,
+                _ => EntryUnit.mg.index,
               };
-              displayUnitCode = doseUnitCode;
-              inputModeCode = DoseInputMode.mass.index;
+              displayUnitCode = entryUnitCode;
+              inputModeCode = EntryInputMode.mass.index;
             }
           case MedicationForm.capsule:
             if (unitStr == 'capsules') {
-              doseCapsules = doseVal.round();
+              entryCapsules = entryVal.round();
               final perCapMcg = switch (med.strengthUnit) {
                 Unit.mcg => med.strengthValue,
                 Unit.mg => med.strengthValue * 1000,
@@ -400,18 +400,18 @@ class ScheduleFormController
                 Unit.units => med.strengthValue,
                 _ => med.strengthValue,
               };
-              doseMassMcg = (perCapMcg * doseCapsules).round();
-              doseUnitCode = DoseUnit.capsules.index;
-              displayUnitCode = DoseUnit.capsules.index;
-              inputModeCode = DoseInputMode.capsules.index;
+              entryMassMcg = (perCapMcg * entryCapsules).round();
+              entryUnitCode = EntryUnit.capsules.index;
+              displayUnitCode = EntryUnit.capsules.index;
+              inputModeCode = EntryInputMode.capsules.index;
             } else {
               final desiredMcg = switch (unitStr) {
-                'mcg' => doseVal,
-                'mg' => doseVal * 1000,
-                'g' => doseVal * 1e6,
-                _ => doseVal,
+                'mcg' => entryVal,
+                'mg' => entryVal * 1000,
+                'g' => entryVal * 1e6,
+                _ => entryVal,
               };
-              doseMassMcg = desiredMcg.round();
+              entryMassMcg = desiredMcg.round();
               final perCapMcg = switch (med.strengthUnit) {
                 Unit.mcg => med.strengthValue,
                 Unit.mg => med.strengthValue * 1000,
@@ -419,26 +419,26 @@ class ScheduleFormController
                 Unit.units => med.strengthValue,
                 _ => med.strengthValue,
               };
-              doseCapsules = (desiredMcg / perCapMcg).round();
-              doseUnitCode = switch (unitStr) {
-                'mcg' => DoseUnit.mcg.index,
-                'mg' => DoseUnit.mg.index,
-                'g' => DoseUnit.g.index,
-                _ => DoseUnit.mg.index,
+              entryCapsules = (desiredMcg / perCapMcg).round();
+              entryUnitCode = switch (unitStr) {
+                'mcg' => EntryUnit.mcg.index,
+                'mg' => EntryUnit.mg.index,
+                'g' => EntryUnit.g.index,
+                _ => EntryUnit.mg.index,
               };
-              displayUnitCode = doseUnitCode;
-              inputModeCode = DoseInputMode.mass.index;
+              displayUnitCode = entryUnitCode;
+              inputModeCode = EntryInputMode.mass.index;
             }
           case MedicationForm.prefilledSyringe:
-            doseSyringes = doseVal.round();
-            doseUnitCode = DoseUnit.syringes.index;
-            displayUnitCode = DoseUnit.syringes.index;
-            inputModeCode = DoseInputMode.count.index;
+            entrySyringes = entryVal.round();
+            entryUnitCode = EntryUnit.syringes.index;
+            displayUnitCode = EntryUnit.syringes.index;
+            inputModeCode = EntryInputMode.count.index;
           case MedicationForm.singleDoseVial:
-            doseVials = doseVal.round();
-            doseUnitCode = DoseUnit.vials.index;
-            displayUnitCode = DoseUnit.vials.index;
-            inputModeCode = DoseInputMode.count.index;
+            entryVials = entryVal.round();
+            entryUnitCode = EntryUnit.vials.index;
+            displayUnitCode = EntryUnit.vials.index;
+            inputModeCode = EntryInputMode.count.index;
           case MedicationForm.multiDoseVial:
             // Allow mg/mcg/g, IU/units or mL
             double? mgPerMl;
@@ -456,42 +456,42 @@ class ScheduleFormController
                 break;
             }
             if (unitStr == 'ml') {
-              final ml = doseVal;
-              doseVolumeMicroliter = (ml * 1000).round();
-              if (mgPerMl != null) doseMassMcg = (ml * mgPerMl * 1000).round();
-              if (iuPerMl != null) doseIU = (ml * iuPerMl).round();
-              doseUnitCode = DoseUnit.ml.index;
-              displayUnitCode = DoseUnit.ml.index;
-              inputModeCode = DoseInputMode.volume.index;
+              final ml = entryVal;
+              entryVolumeMicroliter = (ml * 1000).round();
+              if (mgPerMl != null) entryMassMcg = (ml * mgPerMl * 1000).round();
+              if (iuPerMl != null) entryIU = (ml * iuPerMl).round();
+              entryUnitCode = EntryUnit.ml.index;
+              displayUnitCode = EntryUnit.ml.index;
+              inputModeCode = EntryInputMode.volume.index;
             } else if (unitStr == 'iu' || unitStr == 'units') {
               if (iuPerMl != null) {
-                final ml = doseVal / iuPerMl;
-                doseIU = doseVal.round();
-                doseVolumeMicroliter = (ml * 1000).round();
-                doseUnitCode = DoseUnit.iu.index;
-                displayUnitCode = DoseUnit.iu.index;
-                inputModeCode = DoseInputMode.iuUnits.index;
+                final ml = entryVal / iuPerMl;
+                entryIU = entryVal.round();
+                entryVolumeMicroliter = (ml * 1000).round();
+                entryUnitCode = EntryUnit.iu.index;
+                displayUnitCode = EntryUnit.iu.index;
+                inputModeCode = EntryInputMode.iuUnits.index;
               }
             } else {
               // mg/mcg/g
               if (mgPerMl != null) {
                 final desiredMg = switch (unitStr) {
-                  'mg' => doseVal,
-                  'mcg' => doseVal / 1000.0,
-                  'g' => doseVal * 1000.0,
-                  _ => doseVal,
+                  'mg' => entryVal,
+                  'mcg' => entryVal / 1000.0,
+                  'g' => entryVal * 1000.0,
+                  _ => entryVal,
                 };
                 final ml = desiredMg / mgPerMl;
-                doseMassMcg = (desiredMg * 1000).round();
-                doseVolumeMicroliter = (ml * 1000).round();
-                doseUnitCode = switch (unitStr) {
-                  'mcg' => DoseUnit.mcg.index,
-                  'mg' => DoseUnit.mg.index,
-                  'g' => DoseUnit.g.index,
-                  _ => DoseUnit.mg.index,
+                entryMassMcg = (desiredMg * 1000).round();
+                entryVolumeMicroliter = (ml * 1000).round();
+                entryUnitCode = switch (unitStr) {
+                  'mcg' => EntryUnit.mcg.index,
+                  'mg' => EntryUnit.mg.index,
+                  'g' => EntryUnit.g.index,
+                  _ => EntryUnit.mg.index,
                 };
-                displayUnitCode = doseUnitCode;
-                inputModeCode = DoseInputMode.mass.index;
+                displayUnitCode = entryUnitCode;
+                inputModeCode = EntryInputMode.mass.index;
               }
             }
         }
@@ -501,8 +501,8 @@ class ScheduleFormController
         id: id,
         name: state.name.trim(),
         medicationName: state.medicationName.trim(),
-        doseValue: state.doseValue,
-        doseUnit: state.doseUnit.trim(),
+        entryValue: state.entryValue,
+        entryUnit: state.entryUnit.trim(),
         minutesOfDay: minutesList.first,
         daysOfWeek: state.days.toList()..sort(),
         minutesOfDayUtc: minutesUtc,
@@ -522,14 +522,14 @@ class ScheduleFormController
         daysOfMonth: state.daysOfMonth.isNotEmpty
             ? (state.daysOfMonth.toList()..sort())
             : null,
-        doseUnitCode: doseUnitCode,
-        doseMassMcg: doseMassMcg,
-        doseVolumeMicroliter: doseVolumeMicroliter,
-        doseTabletQuarters: doseTabletQuarters,
-        doseCapsules: doseCapsules,
-        doseSyringes: doseSyringes,
-        doseVials: doseVials,
-        doseIU: doseIU,
+        entryUnitCode: entryUnitCode,
+        entryMassMcg: entryMassMcg,
+        entryVolumeMicroliter: entryVolumeMicroliter,
+        entryTabletQuarters: entryTabletQuarters,
+        entryCapsules: entryCapsules,
+        entrySyringes: entrySyringes,
+        entryVials: entryVials,
+        entryIU: entryIU,
         displayUnitCode: displayUnitCode,
         inputModeCode: inputModeCode,
         startAt: () {

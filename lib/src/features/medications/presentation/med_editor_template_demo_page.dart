@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -245,7 +245,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
               )
             : null,
         strengthHelp:
-            'Specify the amount per dose and its unit of measurement.',
+            'Specify the amount per entry and its unit of measurement.',
         perMlHelp: _isPerMl
             ? 'Volume (mL) for the concentration; defaults to 1 mL.'
             : null,

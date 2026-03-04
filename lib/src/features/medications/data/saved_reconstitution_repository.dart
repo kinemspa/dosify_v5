@@ -46,8 +46,8 @@ class SavedReconstitutionRepository {
     required double strengthValue,
     required String strengthUnit,
     required double solventVolumeMl,
-    double? calculatedDose,
-    String? doseUnit,
+    double? calculatedEntry,
+    String? entryUnit,
   }) {
     String fmtNoTrailing(double v) {
       if (v == v.roundToDouble()) return v.toInt().toString();
@@ -59,11 +59,11 @@ class SavedReconstitutionRepository {
       '${fmtNoTrailing(strengthValue)} $strengthUnit',
     ];
 
-    if (calculatedDose != null &&
-        calculatedDose > 0 &&
-        doseUnit != null &&
-        doseUnit.trim().isNotEmpty) {
-      parts.add('${fmtNoTrailing(calculatedDose)} ${doseUnit.trim()}');
+    if (calculatedEntry != null &&
+        calculatedEntry > 0 &&
+        entryUnit != null &&
+        entryUnit.trim().isNotEmpty) {
+      parts.add('${fmtNoTrailing(calculatedEntry)} ${entryUnit.trim()}');
     }
 
     parts.add('${fmtNoTrailing(solventVolumeMl)} mL');

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 
@@ -30,7 +30,7 @@ class UnifiedStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final baseHorizontalPadding = dense ? kFieldSpacing : kSpacingS;
     final verticalPadding = dense
-        ? kDoseStatusBadgeVerticalPadding
+        ? kEntryStatusBadgeVerticalPadding
         : kSpacingXXS;
 
     final resolvedTextStyle =
@@ -39,7 +39,7 @@ class UnifiedStatusBadge extends StatelessWidget {
 
     final hasExplicitWidth = fixedWidth != null;
 
-    // When we're inside a fixed-width chip (e.g., DoseCard status), keep padding
+    // When we're inside a fixed-width chip (e.g., EntryCard status), keep padding
     // tight so the icon + label can always fit without overflow.
     final horizontalPadding = hasExplicitWidth
         ? kSpacingXXS

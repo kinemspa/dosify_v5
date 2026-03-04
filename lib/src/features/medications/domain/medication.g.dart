@@ -1,4 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
+﻿// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'medication.dart';
 
@@ -28,7 +28,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       description: fields[4] as String?,
       notes: fields[5] as String?,
       perMlValue: fields[8] as double?,
-      volumePerDose: fields[38] as double?,
+      volumePerEntry: fields[38] as double?,
       volumeUnit: fields[39] as VolumeUnit?,
       lowStockEnabled: fields[11] as bool,
       lowStockThreshold: fields[12] as double?,
@@ -87,7 +87,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(8)
       ..write(obj.perMlValue)
       ..writeByte(38)
-      ..write(obj.volumePerDose)
+      ..write(obj.volumePerEntry)
       ..writeByte(39)
       ..write(obj.volumeUnit)
       ..writeByte(40)

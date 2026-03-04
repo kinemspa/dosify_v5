@@ -1,8 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/hive/hive_watch.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 final schedulesBoxProvider = Provider<Box<Schedule>>((ref) {
@@ -14,11 +14,11 @@ final schedulesBoxChangesProvider = StreamProvider<int>((ref) {
   return watchBoxChanges(box);
 });
 
-final doseLogsBoxProvider = Provider<Box<DoseLog>>((ref) {
-  return Hive.box<DoseLog>('dose_logs');
+final entryLogsBoxProvider = Provider<Box<EntryLog>>((ref) {
+  return Hive.box<EntryLog>('entry_logs');
 });
 
-final doseLogsBoxChangesProvider = StreamProvider<int>((ref) {
-  final box = ref.watch(doseLogsBoxProvider);
+final entryLogsBoxChangesProvider = StreamProvider<int>((ref) {
+  final box = ref.watch(entryLogsBoxProvider);
   return watchBoxChanges(box);
 });

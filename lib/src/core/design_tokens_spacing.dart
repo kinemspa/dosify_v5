@@ -66,8 +66,8 @@ const double kHelperTextLeftPadding = kLabelColumnWidth + kLabelFieldGap;
 const double kHelperTextTopPadding = 2;
 const double kHelperTextBottomPadding = 6;
 
-/// Dose status badge spacing
-const double kDoseStatusBadgeVerticalPadding = 1;
+/// Entry status badge spacing
+const double kEntryStatusBadgeVerticalPadding = 1;
 
 /// Content padding (inside fields, buttons)
 const EdgeInsets kFieldContentPadding = EdgeInsets.symmetric(
@@ -192,8 +192,8 @@ const EdgeInsets kBottomSheetHeaderPadding = EdgeInsets.fromLTRB(
 );
 const EdgeInsets kBottomSheetContentPadding = EdgeInsets.all(kSpacingL);
 
-/// Dose action sheet (Take/Snooze/Skip) content padding.
-const EdgeInsets kDoseActionSheetContentPadding = EdgeInsets.fromLTRB(
+/// Entry action sheet (Take/Snooze/Skip) content padding.
+const EdgeInsets kEntryActionSheetContentPadding = EdgeInsets.fromLTRB(
   kSpacingM,
   kSpacingM,
   kSpacingM,
@@ -203,8 +203,8 @@ const EdgeInsets kBottomSheetHandleMargin = EdgeInsets.symmetric(
   vertical: kSpacingL,
 );
 
-/// DoseActionSheet dialog inset
-const EdgeInsets kDoseActionSheetDialogInsetPadding = EdgeInsets.symmetric(
+/// EntryActionSheet dialog inset
+const EdgeInsets kEntryActionSheetDialogInsetPadding = EdgeInsets.symmetric(
   horizontal: kSpacingM,
   vertical: kSpacingM,
 );
@@ -354,7 +354,7 @@ const double kCardMaxWidth = 800;
 /// Home page - mini calendar height.
 ///
 /// Sized to fit the 6-row month grid (CalendarHeader 56 + day-names 28 +
-/// 6 ├ù kCalendarDayHeight 52 = 396) PLUS a dose-stage panel below it
+/// 6 ├ù kCalendarDayHeight 52 = 396) PLUS a entry-stage panel below it
 /// (~184 dp) so the panel never overlaps calendar day cells.
 /// 396 + 184 = 580.
 const double kHomeMiniCalendarHeight = 580;
@@ -367,12 +367,12 @@ const int kHomeTodayMaxPreviewItems = 3;
 
 /// Max height for the scrollable Today preview list.
 ///
-/// Tuned so ~3 [DoseCard] rows are visible before scrolling.
-const double kHomeTodayDosePreviewListMaxHeight = 280;
+/// Tuned so ~3 [EntryCard] rows are visible before scrolling.
+const double kHomeTodayEntryPreviewListMaxHeight = 280;
 
 /// Detail pages - compact calendar height.
 ///
-/// Used for embedded [DoseCalendarWidget] on detail screens.
+/// Used for embedded [EntryCalendarWidget] on detail screens.
 const double kDetailCompactCalendarHeight = 400;
 
 /// Detail-card collapsed header padding (Medication Details screen).
@@ -398,33 +398,33 @@ const BoxConstraints kTightIconButtonConstraints = BoxConstraints.tightFor(
   height: kIconButtonSize,
 );
 
-/// Next-dose date badge sizing (Schedules list)
-const double kNextDoseDateCircleSizeCompact = 42;
-const double kNextDoseDateCircleSizeLarge = 48;
-const EdgeInsets kNextDoseDateCircleContentPaddingCompact =
+/// Next-entry date badge sizing (Schedules list)
+const double kNextEntryDateCircleSizeCompact = 42;
+const double kNextEntryDateCircleSizeLarge = 48;
+const EdgeInsets kNextEntryDateCircleContentPaddingCompact =
     EdgeInsets.symmetric(horizontal: kSpacingXS, vertical: kSpacingXXS);
-const EdgeInsets kNextDoseDateCircleContentPaddingLarge = EdgeInsets.symmetric(
+const EdgeInsets kNextEntryDateCircleContentPaddingLarge = EdgeInsets.symmetric(
   horizontal: kSpacingXXS,
   vertical: kSpacingXXS / 2,
 );
 
-/// Dose-card leading pill badge (replaces circle when dense+time mode).
+/// Entry-card leading pill badge (replaces circle when dense+time mode).
 /// Pill shape: wider/taller than the circle so times like "10:30 AM" sit
-/// comfortably, with optional dose-metrics row below a hairline divider.
-const double kDoseTimePillMinWidth = 48.0;
-const double kDoseTimePillMaxWidth = 64.0;
-const double kDoseTimePillBorderRadius = 8.0;
-const EdgeInsets kDoseTimePillPadding = EdgeInsets.symmetric(
+/// comfortably, with optional entry-metrics row below a hairline divider.
+const double kEntryTimePillMinWidth = 48.0;
+const double kEntryTimePillMaxWidth = 64.0;
+const double kEntryTimePillBorderRadius = 8.0;
+const EdgeInsets kEntryTimePillPadding = EdgeInsets.symmetric(
   horizontal: 4,
   vertical: 4,
 );
 
-/// Next-dose badge "Next" label padding variants.
-const EdgeInsets kNextDoseBadgeNextLabelPaddingTall = EdgeInsets.symmetric(
+/// Next-entry badge "Next" label padding variants.
+const EdgeInsets kNextEntryBadgeNextLabelPaddingTall = EdgeInsets.symmetric(
   horizontal: kSpacingXS,
   vertical: kSpacingXXS,
 );
-const EdgeInsets kNextDoseBadgeNextLabelPaddingStandard = EdgeInsets.symmetric(
+const EdgeInsets kNextEntryBadgeNextLabelPaddingStandard = EdgeInsets.symmetric(
   horizontal: kSpacingXS,
   vertical: 0,
 );
@@ -470,16 +470,16 @@ const double kConsistencySparklineHeight = 24;
 const double kConsistencySparklineStrokeWidth = 2.0;
 const double kConsistencySparklineVerticalPaddingFraction = 0.2;
 
-/// Dose amount trend (reports)
-const double kDoseTrendChartHeight = 36;
-const double kDoseTrendChartStrokeWidth = 2.0;
-const double kDoseTrendChartPointRadius = 2.5;
-const double kDoseTrendChartVerticalPaddingFraction = 0.2;
+/// Entry amount trend (reports)
+const double kEntryTrendChartHeight = 36;
+const double kEntryTrendChartStrokeWidth = 2.0;
+const double kEntryTrendChartPointRadius = 2.5;
+const double kEntryTrendChartVerticalPaddingFraction = 0.2;
 
-/// Dose strength history (reports)
-const double kDoseStrengthChartHeight = 44;
-const double kDoseStrengthChartBarSpacing = 2;
-const double kDoseStrengthChartBarRadius = 3;
+/// Entry strength history (reports)
+const double kEntryStrengthChartHeight = 44;
+const double kEntryStrengthChartBarSpacing = 2;
+const double kEntryStrengthChartBarRadius = 3;
 
 /// Stock donut gauge sizing
 const double kStockDonutGaugeSize = 96;
@@ -559,14 +559,14 @@ const double kCalendarDayHeight =
 const double kCalendarMonthDayHeaderHeight = 28;
 const double kCalendarHourHeight = 60; // Height of hour row in day view
 const double kCalendarHourHeightCollapsed = 24; // Height of empty/collapsed hour row
-const double kCalendarDoseBlockHeight = 60; // Default dose block height
-const double kCalendarDoseBlockMinHeight = 40; // Minimum when compressed
-const double kCalendarDoseIndicatorSize = 6; // Dot indicator diameter
-const double kCalendarDoseIndicatorBorderRadius = 2; // Subtle rounding for dot
-const double kCalendarDoseIndicatorSpacing = 2;
+const double kCalendarEntryBlockHeight = 60; // Default entry block height
+const double kCalendarEntryBlockMinHeight = 40; // Minimum when compressed
+const double kCalendarEntryIndicatorSize = 6; // Dot indicator diameter
+const double kCalendarEntryIndicatorBorderRadius = 2; // Subtle rounding for dot
+const double kCalendarEntryIndicatorSpacing = 2;
 const double kCalendarEmptyStateIconSize = 64;
 
-/// Calendar selected-day (Dose Card Stage) layout
+/// Calendar selected-day (Entry Card Stage) layout
 const double kCalendarStageHourLabelWidth = 48;
 const EdgeInsets kCalendarStageHourLabelPadding = EdgeInsets.only(
   top: kListItemSpacing,
@@ -578,7 +578,7 @@ const EdgeInsets kCalendarStageHourRowPadding = EdgeInsets.fromLTRB(
   kSpacingXS,
   kSpacingS,
 );
-const EdgeInsets kCalendarStageDoseCardPadding = EdgeInsets.only(
+const EdgeInsets kCalendarStageEntryCardPadding = EdgeInsets.only(
   bottom: kSpacingS,
 );
 
@@ -623,12 +623,12 @@ const EdgeInsets kCalendarWeekHeaderCellMargin = EdgeInsets.all(kSpacingXXS);
 const double kCalendarWeekHeaderCellBorderRadius = kBorderRadiusSmall;
 const double kCalendarWeekHeaderLabelGap = kSpacingXXS;
 
-/// Week-view compact dose indicator sizing.
-const double kCalendarWeekDoseIndicatorHeight = 28;
+/// Week-view compact entry indicator sizing.
+const double kCalendarWeekEntryIndicatorHeight = 28;
 
-/// Minimum width required to show the time label in week-view dose indicators.
-const double kCalendarWeekDoseIndicatorMinWidthForTime = 52;
-const EdgeInsets kCalendarWeekDoseIndicatorPadding = EdgeInsets.symmetric(
+/// Minimum width required to show the time label in week-view entry indicators.
+const double kCalendarWeekEntryIndicatorMinWidthForTime = 52;
+const EdgeInsets kCalendarWeekEntryIndicatorPadding = EdgeInsets.symmetric(
   horizontal: kSpacingXS,
   vertical: kSpacingXXS,
 );
@@ -643,13 +643,13 @@ const double kCalendarUpNextReservedHeight =
 
 /// Bottom sheet sizing
 
-/// DoseActionSheet scroll indicator (Scrollbar)
-const double kDoseActionSheetScrollbarThickness = 3;
-const Radius kDoseActionSheetScrollbarThumbRadius = Radius.circular(
+/// EntryActionSheet scroll indicator (Scrollbar)
+const double kEntryActionSheetScrollbarThickness = 3;
+const Radius kEntryActionSheetScrollbarThumbRadius = Radius.circular(
   kBorderRadiusChipTight,
 );
-const double kDoseActionSheetScrollHintIconSize = kIconSizeMedium;
-const EdgeInsets kDoseActionSheetScrollHintPadding = EdgeInsets.only(
+const double kEntryActionSheetScrollHintIconSize = kIconSizeMedium;
+const EdgeInsets kEntryActionSheetScrollHintPadding = EdgeInsets.only(
   bottom: kSpacingXS,
 );
 const double kReconstitutionDialogScrollHintIconSize = kIconSizeMedium;
@@ -661,12 +661,12 @@ const EdgeInsets kWizardScrollHintPadding = EdgeInsets.only(bottom: kSpacingS);
 const double kPageScrollHintIconSize = kIconSizeSmall;
 const EdgeInsets kPageScrollHintPadding = EdgeInsets.only(bottom: kSpacingS);
 
-/// Fixed width for the status cycle button in DoseActionSheet.
+/// Fixed width for the status cycle button in EntryActionSheet.
 ///
 /// Keeps the button from resizing as the label changes.
-const double kDoseActionSheetStatusButtonWidth = 170;
+const double kEntryActionSheetStatusButtonWidth = 170;
 
-/// Dose action sheet (Take/Snooze/Skip) content padding.
+/// Entry action sheet (Take/Snooze/Skip) content padding.
 ///
 /// Slightly tighter than the generic bottom-sheet padding to avoid
 /// compressing full-width preview cards.
@@ -681,10 +681,10 @@ const EdgeInsets kCalendarDayCountBadgePadding = EdgeInsets.symmetric(
   horizontal: kSpacingXS,
   vertical: kSpacingXXS / 2,
 );
-const EdgeInsets kCalendarDayDoseIndicatorPadding = EdgeInsets.all(
+const EdgeInsets kCalendarDayEntryIndicatorPadding = EdgeInsets.all(
   kSpacingXS / 2,
 );
-const int kCalendarMonthMaxDoseIndicators = 3;
+const int kCalendarMonthMaxEntryIndicators = 3;
 const double kCalendarDayCellBorderRadius = kBorderRadiusSmall / 2;
 const double kCalendarTodayButtonBorderRadius = kBorderRadiusSmall / 2;
 const double kCalendarDayOverflowTextOpacity = 0.60; // = kOpacityMedium
@@ -723,15 +723,15 @@ const double kCalendarSelectedDayPanelHeightRatioMonth = 0.42;
 // DOSE CARD SIZING (from spacing section)
 // ============================================================================
 
-/// NextDoseRow layout
-const double kNextDoseRowSecondaryIndent = kIconSizeSmall + kSpacingXS;
+/// NextEntryRow layout
+const double kNextEntryRowSecondaryIndent = kIconSizeSmall + kSpacingXS;
 
-/// DoseCard status icon sizing
-const double kDoseCardStatusIconSize = kIconSizeLarge;
-const double kDoseCardStatusIconSizeCompact = kIconSizeMedium;
+/// EntryCard status icon sizing
+const double kEntryCardStatusIconSize = kIconSizeLarge;
+const double kEntryCardStatusIconSizeCompact = kIconSizeMedium;
 
-/// DoseCard status chip sizing
-const double kDoseCardStatusChipHeight = 28;
-const double kDoseCardStatusChipHeightCompact = 26;
-const double kDoseCardStatusChipWidth = 84;
-const double kDoseCardStatusChipWidthCompact = 76;
+/// EntryCard status chip sizing
+const double kEntryCardStatusChipHeight = 28;
+const double kEntryCardStatusChipHeightCompact = 26;
+const double kEntryCardStatusChipWidth = 84;
+const double kEntryCardStatusChipWidthCompact = 76;

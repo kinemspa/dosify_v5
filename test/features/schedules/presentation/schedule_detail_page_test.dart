@@ -1,10 +1,10 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_detail_page.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
@@ -25,7 +25,7 @@ void main() {
       Hive.registerAdapter(ScheduleAdapter());
     }
     if (!Hive.isAdapterRegistered(3)) {
-      Hive.registerAdapter(DoseLogAdapter());
+      Hive.registerAdapter(EntryLogAdapter());
     }
   });
 
@@ -43,10 +43,10 @@ void main() {
       await Hive.openBox<Schedule>('schedules');
     }
     
-    if (Hive.isBoxOpen('dose_logs')) {
-      await Hive.box<DoseLog>('dose_logs').clear();
+    if (Hive.isBoxOpen('entry_logs')) {
+      await Hive.box<EntryLog>('entry_logs').clear();
     } else {
-      await Hive.openBox<DoseLog>('dose_logs');
+      await Hive.openBox<EntryLog>('entry_logs');
     }
   });
 
@@ -58,8 +58,8 @@ void main() {
     if (Hive.isBoxOpen('schedules')) {
       await Hive.box<Schedule>('schedules').close();
     }
-    if (Hive.isBoxOpen('dose_logs')) {
-      await Hive.box<DoseLog>('dose_logs').close();
+    if (Hive.isBoxOpen('entry_logs')) {
+      await Hive.box<EntryLog>('entry_logs').close();
     }
   });
 
@@ -75,8 +75,8 @@ void main() {
       id: 'test-schedule-1',
       name: 'Test Schedule',
       medicationName: 'Test Medication',
-      doseValue: 1.0,
-      doseUnit: 'tablet',
+      entryValue: 1.0,
+      entryUnit: 'tablet',
       minutesOfDay: 480, // 8:00 AM
       daysOfWeek: const [1, 2, 3, 4, 5],
     );

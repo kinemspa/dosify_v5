@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
+import 'package:dosifi_v5/src/widgets/calendar/entry_calendar_widget.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 enum CalendarCardScopeType { all, medication, schedule }
@@ -54,7 +54,7 @@ class CalendarCard extends ConsumerStatefulWidget {
   final bool neutral;
   final bool frameless;
 
-  /// When false, hides the selected day dose list panel below the calendar grid.
+  /// When false, hides the selected day entry list panel below the calendar grid.
   final bool showSelectedDayPanel;
 
   /// Overrides the default mini calendar height.
@@ -111,14 +111,14 @@ class _CalendarCardState extends ConsumerState<CalendarCard> {
           widget.reserveReorderHandleGutterWhenCollapsed,
       onExpandedChanged: _setExpanded,
       children: [
-        // When a dose-stage panel overlay is needed the widget must live inside
+        // When a entry-stage panel overlay is needed the widget must live inside
         // a bounded SizedBox so the Stack overlay can be positioned correctly.
         // When no panel is shown, let the widget size itself intrinsically so
         // the card doesn't reserve unused vertical space.
         if (widget.showSelectedDayPanel)
           SizedBox(
             height: widget.height ?? kHomeMiniCalendarHeight,
-            child: DoseCalendarWidget(
+            child: EntryCalendarWidget(
               variant: CalendarVariant.mini,
               defaultView: CalendarView.month,
               scheduleId: scheduleId,
@@ -130,7 +130,7 @@ class _CalendarCardState extends ConsumerState<CalendarCard> {
             ),
           )
         else
-          DoseCalendarWidget(
+          EntryCalendarWidget(
             variant: CalendarVariant.mini,
             defaultView: CalendarView.month,
             scheduleId: scheduleId,

@@ -6,11 +6,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:dosifi_v5/src/app/app_navigator.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/widgets/show_dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/show_entry_action_sheet.dart';
 
 class NotificationDeepLinkHandler {
   const NotificationDeepLinkHandler._();
@@ -45,7 +45,7 @@ class NotificationDeepLinkHandler {
     final payload = response.payload;
     if (payload == null || payload.trim().isEmpty) return;
 
-    // Best-effort: clear the tapped/acted notification so dose reminders do not
+    // Best-effort: clear the tapped/acted notification so entry reminders do not
     // accumulate in the tray across days.
     final id = response.id;
     if (id != null) {
@@ -70,15 +70,15 @@ class NotificationDeepLinkHandler {
       return;
     }
 
-    if (payload.startsWith('dose:')) {
-      final rest = payload.substring('dose:'.length);
+    if (payload.startsWith('entry:')) {
+      final rest = payload.substring('entry:'.length);
       final parts = rest.split(':');
       if (parts.length != 2) return;
       final scheduleId = parts[0];
       final whenMs = int.tryParse(parts[1]);
       if (scheduleId.isEmpty || whenMs == null) return;
 
-      await _openDoseActionSheet(
+      await _openEntryActionSheet(
         context,
         scheduleId: scheduleId,
         scheduledTime: DateTime.fromMillisecondsSinceEpoch(whenMs),
@@ -87,39 +87,39 @@ class NotificationDeepLinkHandler {
       return;
     }
 
-    if (payload.startsWith('dose_group:')) {
-      final groupKey = payload.substring('dose_group:'.length);
+    if (payload.startsWith('entry_group:')) {
+      final groupKey = payload.substring('entry_group:'.length);
       if (groupKey.isEmpty) return;
-      await _openDoseGroupPicker(context, groupKey: groupKey);
+      await _openEntryGroupPicker(context, groupKey: groupKey);
       return;
     }
   }
 
-  static DoseStatus? _initialStatusForActionId(String? actionId) {
+  static EntryStatus? _initialStatusForActionId(String? actionId) {
     switch (actionId) {
       case 'log':
-        return DoseStatus.logged;
+        return EntryStatus.logged;
       case 'snooze':
-        return DoseStatus.snoozed;
+        return EntryStatus.snoozed;
       case 'skip':
-        return DoseStatus.skipped;
+        return EntryStatus.skipped;
     }
     return null;
   }
 
-  static DoseLog? _findExistingLog(
-    Box<DoseLog> logBox, {
+  static EntryLog? _findExistingLog(
+    Box<EntryLog> logBox, {
     required String scheduleId,
     required DateTime scheduledTime,
   }) {
-    final baseId = DoseLogIds.occurrenceId(
+    final baseId = EntryLogIds.occurrenceId(
       scheduleId: scheduleId,
       scheduledTime: scheduledTime,
     );
-    return logBox.get(baseId) ?? logBox.get(DoseLogIds.legacySnoozeIdFromBase(baseId));
+    return logBox.get(baseId) ?? logBox.get(EntryLogIds.legacySnoozeIdFromBase(baseId));
   }
 
-  static Future<void> _openDoseActionSheet(
+  static Future<void> _openEntryActionSheet(
     BuildContext context, {
     required String scheduleId,
     required DateTime scheduledTime,
@@ -139,20 +139,20 @@ class NotificationDeepLinkHandler {
       return;
     }
 
-    final logBox = Hive.box<DoseLog>('dose_logs');
+    final logBox = Hive.box<EntryLog>('entry_logs');
     final existingLog = _findExistingLog(
       logBox,
       scheduleId: scheduleId,
       scheduledTime: scheduledTime,
     );
 
-    final dose = CalculatedDose(
+    final entry = CalculatedEntry(
       scheduleId: schedule.id,
       scheduleName: schedule.name,
       medicationName: medication.name,
       scheduledTime: scheduledTime,
-      doseValue: schedule.doseValue,
-      doseUnit: schedule.doseUnit,
+      entryValue: schedule.entryValue,
+      entryUnit: schedule.entryUnit,
       existingLog: existingLog,
     );
 
@@ -161,9 +161,9 @@ class NotificationDeepLinkHandler {
     // Ensure we are in the right tab first so bottom-nav is consistent.
     context.go('/');
 
-    await showDoseActionSheetFromModels(
+    await showEntryActionSheetFromModels(
       context,
-      dose: dose,
+      entry: entry,
       schedule: schedule,
       medication: medication,
       initialStatus: initialStatus,
@@ -171,10 +171,10 @@ class NotificationDeepLinkHandler {
   }
 
   static DateTime? _parseGroupKeyToLocalDateTime(String groupKey) {
-    // Expected: upcoming_dose|yyyymmdd|hhmm
+    // Expected: upcoming_entry|yyyymmdd|hhmm
     final parts = groupKey.split('|');
     if (parts.length != 3) return null;
-    if (parts[0] != 'upcoming_dose') return null;
+    if (parts[0] != 'upcoming_entry') return null;
 
     final ymd = parts[1];
     final hm = parts[2];
@@ -235,7 +235,7 @@ class NotificationDeepLinkHandler {
         timesLocal.contains(minutesLocal);
   }
 
-  static Future<void> _openDoseGroupPicker(
+  static Future<void> _openEntryGroupPicker(
     BuildContext context, {
     required String groupKey,
   }) async {
@@ -244,10 +244,10 @@ class NotificationDeepLinkHandler {
 
     final scheduleBox = Hive.box<Schedule>('schedules');
     final medBox = Hive.box<Medication>('medications');
-    final logBox = Hive.box<DoseLog>('dose_logs');
+    final logBox = Hive.box<EntryLog>('entry_logs');
 
     final entries =
-        <({CalculatedDose dose, Schedule schedule, Medication med})>[];
+        <({CalculatedEntry entry, Schedule schedule, Medication med})>[];
 
     for (final schedule in scheduleBox.values) {
       if (!_scheduleMatchesLocalMinute(schedule, dt)) continue;
@@ -261,13 +261,13 @@ class NotificationDeepLinkHandler {
       );
 
       entries.add((
-        dose: CalculatedDose(
+        entry: CalculatedEntry(
           scheduleId: schedule.id,
           scheduleName: schedule.name,
           medicationName: medication.name,
           scheduledTime: dt,
-          doseValue: schedule.doseValue,
-          doseUnit: schedule.doseUnit,
+          entryValue: schedule.entryValue,
+          entryUnit: schedule.entryUnit,
           existingLog: existingLog,
         ),
         schedule: schedule,
@@ -285,9 +285,9 @@ class NotificationDeepLinkHandler {
 
     if (entries.length == 1) {
       final e = entries.single;
-      await showDoseActionSheetFromModels(
+      await showEntryActionSheetFromModels(
         context,
-        dose: e.dose,
+        entry: e.entry,
         schedule: e.schedule,
         medication: e.med,
       );
@@ -295,9 +295,9 @@ class NotificationDeepLinkHandler {
     }
 
     entries.sort((a, b) {
-      final byTime = a.dose.scheduledTime.compareTo(b.dose.scheduledTime);
+      final byTime = a.entry.scheduledTime.compareTo(b.entry.scheduledTime);
       if (byTime != 0) return byTime;
-      return a.dose.scheduleName.compareTo(b.dose.scheduleName);
+      return a.entry.scheduleName.compareTo(b.entry.scheduleName);
     });
 
     await showDialog<void>(
@@ -305,7 +305,7 @@ class NotificationDeepLinkHandler {
       useRootNavigator: true,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Upcoming doses'),
+          title: const Text('Upcoming entries'),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.separated(
@@ -315,13 +315,13 @@ class NotificationDeepLinkHandler {
               itemBuilder: (context, index) {
                 final e = entries[index];
                 return ListTile(
-                  title: Text(e.dose.scheduleName),
+                  title: Text(e.entry.scheduleName),
                   subtitle: Text(e.med.name),
                   onTap: () async {
                     Navigator.of(dialogContext).pop();
-                    await showDoseActionSheetFromModels(
+                    await showEntryActionSheetFromModels(
                       context,
-                      dose: e.dose,
+                      entry: e.entry,
                       schedule: e.schedule,
                       medication: e.med,
                     );

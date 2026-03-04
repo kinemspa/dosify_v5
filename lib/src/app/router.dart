@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -297,8 +297,8 @@ final router = GoRouter(
             return ReconstitutionCalculatorPage(
               initialStrengthValue: (extra?['strength'] as double?) ?? 0,
               unitLabel: (extra?['unit'] as String?) ?? 'mg',
-              initialDoseValue: extra?['dose'] as double?,
-              initialDoseUnit: extra?['doseUnit'] as String?,
+              initialEntryValue: extra?['entry'] as double?,
+              initialEntryUnit: extra?['entryUnit'] as String?,
               initialSyringeSize: extra?['syringe'] as SyringeSizeMl?,
               initialVialSize: extra?['vialSize'] as double?,
             );

@@ -1,4 +1,4 @@
-// Package imports:
+﻿// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'inventory_log.g.dart';
@@ -58,10 +58,10 @@ class InventoryLog {
         return 'Added ${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} to stock';
       case InventoryChangeType.refillToMax:
         return 'Refilled to maximum (${newStock.toStringAsFixed(newStock == newStock.roundToDouble() ? 0 : 1)})';
-      case InventoryChangeType.doseDeducted:
-        return 'Dose taken (${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} deducted)';
-      case InventoryChangeType.adHocDose:
-        return 'Ad-hoc dose (${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} deducted)';
+      case InventoryChangeType.entryDeducted:
+        return 'Entry taken (${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} deducted)';
+      case InventoryChangeType.adHocEntry:
+        return 'Ad-hoc entry (${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} deducted)';
       case InventoryChangeType.manualAdjustment:
         return 'Manual adjustment';
       case InventoryChangeType.vialOpened:
@@ -83,10 +83,10 @@ enum InventoryChangeType {
   refillToMax, // Refilled to maximum stock level
 
   @HiveField(2)
-  doseDeducted, // Scheduled dose deducted stock
+  entryDeducted, // Scheduled entry deducted stock
 
   @HiveField(3)
-  adHocDose, // Ad-hoc dose deducted stock
+  adHocEntry, // Ad-hoc entry deducted stock
 
   @HiveField(4)
   manualAdjustment, // Manual stock correction

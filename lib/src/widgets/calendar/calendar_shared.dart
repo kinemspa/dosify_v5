@@ -1,4 +1,4 @@
-import 'package:dosifi_v5/src/core/design_system.dart';
+﻿import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:flutter/material.dart';
 
 String formatCalendarHour(int hour) {
@@ -43,13 +43,13 @@ class CalendarHourLabel extends StatelessWidget {
   }
 }
 
-class CalendarNoDosesState extends StatelessWidget {
-  const CalendarNoDosesState({
+class CalendarNoEntriesState extends StatelessWidget {
+  const CalendarNoEntriesState({
     this.date,
     this.showDate = false,
     this.showIcon = true,
     this.compact = false,
-    this.message = 'No doses scheduled',
+    this.message = 'No entries scheduled',
     super.key,
   });
 

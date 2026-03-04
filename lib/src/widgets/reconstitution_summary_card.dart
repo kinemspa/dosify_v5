@@ -1,9 +1,9 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
 import 'package:dosifi_v5/src/widgets/white_syringe_gauge.dart';
 
 /// Centralized reconstitution summary card widget
@@ -17,9 +17,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     super.key,
     this.containerVolumeMl,
     this.perMlValue,
-    this.volumePerDose,
-    this.doseStrengthValue,
-    this.doseStrengthUnit,
+    this.volumePerEntry,
+    this.entryStrengthValue,
+    this.entryStrengthUnit,
     this.reconFluidName,
     this.syringeSizeMl,
     this.compact = false,
@@ -31,9 +31,9 @@ class ReconstitutionSummaryCard extends StatelessWidget {
   final String medicationName;
   final double? containerVolumeMl;
   final double? perMlValue;
-  final double? volumePerDose;
-  final double? doseStrengthValue;
-  final String? doseStrengthUnit;
+  final double? volumePerEntry;
+  final double? entryStrengthValue;
+  final String? entryStrengthUnit;
   final String? reconFluidName;
   final double? syringeSizeMl;
   final bool compact;
@@ -101,15 +101,15 @@ class ReconstitutionSummaryCard extends StatelessWidget {
       color: cs.primary,
     );
 
-    final hasVolumePerDose = volumePerDose != null && volumePerDose! > 0;
-    final hasDoseStrength =
-        doseStrengthValue != null &&
-        doseStrengthValue! > 0 &&
-        doseStrengthUnit != null &&
-        doseStrengthUnit!.trim().isNotEmpty;
+    final hasVolumePerEntry = volumePerEntry != null && volumePerEntry! > 0;
+    final hasEntryStrength =
+        entryStrengthValue != null &&
+        entryStrengthValue! > 0 &&
+        entryStrengthUnit != null &&
+        entryStrengthUnit!.trim().isNotEmpty;
     final hasSyringeSize = syringeSizeMl != null && syringeSizeMl! > 0;
     final unitsPerMl = SyringeType.ml_1_0.unitsPerMl;
-    final doseUnits = hasVolumePerDose ? (volumePerDose! * unitsPerMl) : null;
+    final entryUnits = hasVolumePerEntry ? (volumePerEntry! * unitsPerMl) : null;
 
     return Container(
       padding: showCardSurface
@@ -240,7 +240,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               ),
             ),
           ],
-          if (hasDoseStrength) ...[
+          if (hasEntryStrength) ...[
             SizedBox(height: compact ? 8 : 14),
             RichText(
               textAlign: TextAlign.center,
@@ -250,16 +250,16 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                   const TextSpan(text: 'Amount Strength  '),
                   TextSpan(
                     text:
-                        '${_formatNoTrailing(doseStrengthValue!)} ${doseStrengthUnit!.trim()}',
+                        '${_formatNoTrailing(entryStrengthValue!)} ${entryStrengthUnit!.trim()}',
                     style: valueStyle,
                   ),
                 ],
               ),
             ),
           ],
-          if (hasVolumePerDose) ...[
+          if (hasVolumePerEntry) ...[
             SizedBox(height: compact ? 8 : 14),
-            // Volume per dose line
+            // Volume per entry line
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -267,7 +267,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 children: [
                   const TextSpan(text: 'Volume per Amount  '),
                   TextSpan(
-                    text: '${_formatNoTrailing(volumePerDose!)} mL',
+                    text: '${_formatNoTrailing(volumePerEntry!)} mL',
                     style: valueStyle,
                   ),
                 ],
@@ -275,7 +275,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             ),
           ],
 
-          if (hasVolumePerDose && doseUnits != null) ...[
+          if (hasVolumePerEntry && entryUnits != null) ...[
             const SizedBox(height: 6),
             RichText(
               textAlign: TextAlign.center,
@@ -283,7 +283,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
                 style: baseStyle,
                 children: [
                   const TextSpan(text: 'Syringe Units  '),
-                  TextSpan(text: '${doseUnits.round()} U', style: valueStyle),
+                  TextSpan(text: '${entryUnits.round()} U', style: valueStyle),
                 ],
               ),
             ),
@@ -301,12 +301,12 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             ),
           ],
 
-          if (hasVolumePerDose) ...[
+          if (hasVolumePerEntry) ...[
             const SizedBox(height: 6),
-            // Syringe gauge showing target dose
+            // Syringe gauge showing target entry
             WhiteSyringeGauge(
               totalUnits: (syringeSizeMl ?? 3.0) * unitsPerMl,
-              fillUnits: volumePerDose! * unitsPerMl,
+              fillUnits: volumePerEntry! * unitsPerMl,
               showValueLabel: true,
             ),
             const SizedBox(height: 8), // Extra padding to prevent cropping

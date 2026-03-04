@@ -1,4 +1,4 @@
-// Package imports:
+﻿// Package imports:
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 // Project imports:
@@ -91,7 +91,7 @@ class NotificationService {
     DateTime when, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) => NotificationScheduler.scheduleAt(
     id,
     when,
@@ -105,7 +105,7 @@ class NotificationService {
     DateTime whenUtc, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) => NotificationScheduler.scheduleAtUtc(
     id,
     whenUtc,
@@ -119,7 +119,7 @@ class NotificationService {
     DateTime when, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
     String? groupKey,
     bool setAsGroupSummary = false,
     String? payload,
@@ -147,7 +147,7 @@ class NotificationService {
     DateTime whenUtc, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) => NotificationScheduler.scheduleAtAlarmClockUtc(
     id,
     whenUtc,
@@ -162,7 +162,7 @@ class NotificationService {
     required int minutesOfDay,
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) => NotificationScheduler.scheduleWeeklyAt(
     id: id,
     weekday: weekday,
@@ -177,7 +177,7 @@ class NotificationService {
     int seconds, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) => NotificationScheduler.scheduleInSecondsExact(
     id,
     seconds,
@@ -191,7 +191,7 @@ class NotificationService {
     int seconds, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) => NotificationScheduler.scheduleInSecondsAlarmClock(
     id,
     seconds,
@@ -214,14 +214,14 @@ class NotificationService {
   static Future<void> showTestLowStockReminder() =>
       NotificationScheduler.showTestLowStockReminder();
 
-  static Future<void> showTestGroupedUpcomingDoseReminders() =>
-      NotificationScheduler.showTestGroupedUpcomingDoseReminders();
+  static Future<void> showTestGroupedUpcomingEntryReminders() =>
+      NotificationScheduler.showTestGroupedUpcomingEntryReminders();
 
   static Future<void> showDelayed(
     int seconds, {
     required String title,
     required String body,
-    String channelId = 'upcoming_dose',
+    String channelId = 'upcoming_entry',
   }) => NotificationScheduler.showDelayed(
     seconds,
     title: title,
@@ -242,6 +242,6 @@ class NotificationService {
   );
 
   // ── Forwarded constants ───────────────────────────────────────────────────
-  static List<AndroidNotificationAction> get upcomingDoseActions =>
-      NotificationChannelService.upcomingDoseActions;
+  static List<AndroidNotificationAction> get upcomingEntryActions =>
+      NotificationChannelService.upcomingEntryActions;
 }

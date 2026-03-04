@@ -25,8 +25,8 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
     super.key,
     this.medicationName,
     this.initialDiluentName,
-    this.initialDoseValue,
-    this.initialDoseUnit,
+    this.initialEntryValue,
+    this.initialEntryUnit,
     this.initialSyringeSize,
     this.initialVialSize,
     this.onApply,
@@ -39,8 +39,8 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
   final String unitLabel;
   final String? medicationName;
   final String? initialDiluentName;
-  final double? initialDoseValue;
-  final String? initialDoseUnit;
+  final double? initialEntryValue;
+  final String? initialEntryUnit;
   final SyringeSizeMl? initialSyringeSize;
   final double? initialVialSize;
   final void Function(ReconstitutionResult)? onApply;
@@ -56,10 +56,10 @@ class ReconstitutionCalculatorWidget extends StatefulWidget {
 class _ReconstitutionCalculatorWidgetState
     extends State<ReconstitutionCalculatorWidget>
     with SingleTickerProviderStateMixin {
-  late final TextEditingController _doseCtrl;
+  late final TextEditingController _entryCtrl;
   final TextEditingController _vialSizeCtrl = TextEditingController();
   final TextEditingController _diluentNameCtrl = TextEditingController();
-  late String _doseUnit;
+  late String _entryUnit;
   SyringeSizeMl _syringe = SyringeSizeMl.ml1;
   double _selectedUnits = 50;
   String? _selectedOption; // Track which option is selected
@@ -71,7 +71,7 @@ class _ReconstitutionCalculatorWidgetState
   late Animation<double> _unitsAnimation;
   double _targetUnits = 50;
 
-  String _normalizeDoseUnit({
+  String _normalizeEntryUnit({
     required String? unit,
     required String unitLabel,
   }) {
@@ -90,15 +90,15 @@ class _ReconstitutionCalculatorWidgetState
   void initState() {
     super.initState();
     // Default to 100 or use provided value
-    final defaultDose = widget.initialDoseValue ?? 100;
-    _doseCtrl = TextEditingController(
-      text: defaultDose == defaultDose.roundToDouble()
-          ? defaultDose.toInt().toString()
-          : defaultDose.toStringAsFixed(2),
+    final defaultEntry = widget.initialEntryValue ?? 100;
+    _entryCtrl = TextEditingController(
+      text: defaultEntry == defaultEntry.roundToDouble()
+          ? defaultEntry.toInt().toString()
+          : defaultEntry.toStringAsFixed(2),
     );
-    // Set dose unit to match vial unit for units-based medications, otherwise default to mcg
-    _doseUnit = _normalizeDoseUnit(
-      unit: widget.initialDoseUnit,
+    // Set entry unit to match vial unit for units-based medications, otherwise default to mcg
+    _entryUnit = _normalizeEntryUnit(
+      unit: widget.initialEntryUnit,
       unitLabel: widget.unitLabel,
     );
     _syringe = widget.initialSyringeSize ?? _syringe;
@@ -134,13 +134,13 @@ class _ReconstitutionCalculatorWidgetState
   void didUpdateWidget(covariant ReconstitutionCalculatorWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.unitLabel != widget.unitLabel) {
-      final normalized = _normalizeDoseUnit(
-        unit: _doseUnit,
+      final normalized = _normalizeEntryUnit(
+        unit: _entryUnit,
         unitLabel: widget.unitLabel,
       );
-      if (normalized != _doseUnit && mounted) {
+      if (normalized != _entryUnit && mounted) {
         setState(() {
-          _doseUnit = normalized;
+          _entryUnit = normalized;
         });
       }
     }
@@ -150,7 +150,7 @@ class _ReconstitutionCalculatorWidgetState
   void dispose() {
     _repeatTimer?.cancel();
     _transitionController.dispose();
-    _doseCtrl.dispose();
+    _entryCtrl.dispose();
     _vialSizeCtrl.dispose();
     _diluentNameCtrl.dispose();
     super.dispose();
@@ -251,11 +251,11 @@ class _ReconstitutionCalculatorWidgetState
   /// Computes concentration and vial volume for reconstitution based on units.
   ///
   /// This is the core calculation that determines how much diluent to add to achieve
-  /// the desired concentration for the target dose.
+  /// the desired concentration for the target entry.
   ///
   /// Parameters:
   /// - [S]: Total strength in vial (in base mass units, typically mg)
-  /// - [D]: Desired dose per injection (in base mass units, typically mg)
+  /// - [D]: Desired entry per injection (in base mass units, typically mg)
   /// - [U]: Insulin syringe units to draw (0-100 scale per mL)
   ///
   /// Formula:
@@ -278,9 +278,9 @@ class _ReconstitutionCalculatorWidgetState
   /// Calculates the three preset syringe unit values for the current syringe size.
   ///
   /// Returns three values representing different reconstitution concentrations:
-  /// - Concentrated (5% or min 5 units): Strong, small doses
+  /// - Concentrated (5% or min 5 units): Strong, small entries
   /// - Balanced (33%): Medium concentration
-  /// - Diluted (80%): Weaker, larger doses
+  /// - Diluted (80%): Weaker, larger entries
   ///
   /// These presets give users quick options without manual slider adjustment.
   (double, double, double) _presetUnitsRaw() {
@@ -363,18 +363,18 @@ class _ReconstitutionCalculatorWidgetState
     final cs = theme.colorScheme;
     final fg = reconForegroundColor(context);
 
-    // Keep dose unit valid for the dropdown options.
+    // Keep entry unit valid for the dropdown options.
     // This avoids a common Flutter assertion when the current value is not
     // present in the items list.
-    final normalizedDoseUnit = _normalizeDoseUnit(
-      unit: _doseUnit,
+    final normalizedEntryUnit = _normalizeEntryUnit(
+      unit: _entryUnit,
       unitLabel: widget.unitLabel,
     );
-    if (normalizedDoseUnit != _doseUnit) {
+    if (normalizedEntryUnit != _entryUnit) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           setState(() {
-            _doseUnit = normalizedDoseUnit;
+            _entryUnit = normalizedEntryUnit;
           });
         }
       });
@@ -382,13 +382,13 @@ class _ReconstitutionCalculatorWidgetState
 
     // Use strength from parent (already set above)
     final Sraw = widget.initialStrengthValue;
-    final Draw = double.tryParse(_doseCtrl.text) ?? 0;
+    final Draw = double.tryParse(_entryCtrl.text) ?? 0;
 
     var S = Sraw;
     var D = Draw;
     if (widget.unitLabel != 'units') {
       final sMg = toBaseMass(Sraw, widget.unitLabel);
-      final dMg = toBaseMass(Draw, _doseUnit);
+      final dMg = toBaseMass(Draw, _entryUnit);
       S = sMg;
       D = dMg;
     }
@@ -425,8 +425,8 @@ class _ReconstitutionCalculatorWidgetState
       diluentName: _diluentNameCtrl.text.trim().isNotEmpty
           ? _diluentNameCtrl.text.trim()
           : null,
-      calculatedDose: Draw,
-      doseUnit: _doseUnit,
+      calculatedEntry: Draw,
+      entryUnit: _entryUnit,
       maxVialSizeMl: vialMax,
     );
     final isValid = S > 0 && D > 0 && fitsVial;
@@ -519,21 +519,21 @@ class _ReconstitutionCalculatorWidgetState
           context,
           label: 'Desired Amount',
           field: StepperRow36(
-            controller: _doseCtrl,
+            controller: _entryCtrl,
             onDec: () {
-              final v = double.tryParse(_doseCtrl.text.trim()) ?? 0;
+              final v = double.tryParse(_entryCtrl.text.trim()) ?? 0;
               final newVal = (v - 1).clamp(1, double.infinity);
               setState(() {
-                _doseCtrl.text = newVal == newVal.roundToDouble()
+                _entryCtrl.text = newVal == newVal.roundToDouble()
                     ? newVal.toInt().toString()
                     : newVal.toString();
               });
             },
             onInc: () {
-              final v = double.tryParse(_doseCtrl.text.trim()) ?? 0;
+              final v = double.tryParse(_entryCtrl.text.trim()) ?? 0;
               final newVal = (v + 1).clamp(1, double.infinity);
               setState(() {
-                _doseCtrl.text = newVal == newVal.roundToDouble()
+                _entryCtrl.text = newVal == newVal.roundToDouble()
                     ? newVal.toInt().toString()
                     : newVal.toString();
               });
@@ -545,7 +545,7 @@ class _ReconstitutionCalculatorWidgetState
           context,
           label: 'Amount Unit',
           field: SmallDropdown36<String>(
-            value: _doseUnit,
+            value: _entryUnit,
             items: [
               if (widget.unitLabel == 'units')
                 const DropdownMenuItem(
@@ -568,8 +568,8 @@ class _ReconstitutionCalculatorWidgetState
               ],
             ],
             onChanged: (v) {
-              // Don't reset dose value when changing unit
-              setState(() => _doseUnit = v!);
+              // Don't reset entry value when changing unit
+              setState(() => _entryUnit = v!);
             },
             decoration: _fieldDecoration(context),
           ),
@@ -1096,7 +1096,7 @@ class _ReconstitutionCalculatorWidgetState
                     },
                   ),
                   const SizedBox(height: 12),
-                  // Dose amount on separate line
+                  // Entry amount on separate line
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
@@ -1108,7 +1108,7 @@ class _ReconstitutionCalculatorWidgetState
                       children: [
                         const TextSpan(text: 'for an amount of '),
                         TextSpan(
-                          text: '${_formatNoTrailing(Draw)} $_doseUnit',
+                          text: '${_formatNoTrailing(Draw)} $_entryUnit',
                           style: reconSummaryValueTextStyle(
                             context,
                             compact: false,
@@ -1174,8 +1174,8 @@ class _ReconstitutionCalculatorWidgetState
                         diluentName: _diluentNameCtrl.text.trim().isNotEmpty
                             ? _diluentNameCtrl.text.trim()
                             : null,
-                        calculatedDose: Draw,
-                        doseUnit: _doseUnit,
+                        calculatedEntry: Draw,
+                        entryUnit: _entryUnit,
                         maxVialSizeMl: vialMax,
                       );
                       widget.onApply?.call(result);
@@ -1203,7 +1203,7 @@ class _ReconstitutionCalculatorWidgetState
     final theme = Theme.of(context);
     final fg = reconForegroundColor(context);
     final roundedVolume = roundToHalfMl(calcResult.vialVolume);
-    // Calculate actual mL to draw for the dose
+    // Calculate actual mL to draw for the entry
     final mlToDraw = (units / 100) * _syringe.ml;
 
     // Get explainer text based on label

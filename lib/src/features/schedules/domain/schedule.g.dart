@@ -1,4 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
+﻿// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'schedule.dart';
 
@@ -20,8 +20,8 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       id: fields[0] as String,
       name: fields[1] as String,
       medicationName: fields[2] as String,
-      doseValue: fields[3] as double,
-      doseUnit: fields[4] as String,
+      entryValue: fields[3] as double,
+      entryUnit: fields[4] as String,
       minutesOfDay: fields[5] as int,
       daysOfWeek: (fields[6] as List).cast<int>(),
       minutesOfDayUtc: fields[9] as int?,
@@ -34,14 +34,14 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       cycleEveryNDays: fields[14] as int?,
       cycleAnchorDate: fields[15] as DateTime?,
       daysOfMonth: (fields[26] as List?)?.cast<int>(),
-      doseUnitCode: fields[16] as int?,
-      doseMassMcg: fields[17] as int?,
-      doseVolumeMicroliter: fields[18] as int?,
-      doseTabletQuarters: fields[19] as int?,
-      doseCapsules: fields[20] as int?,
-      doseSyringes: fields[21] as int?,
-      doseVials: fields[22] as int?,
-      doseIU: fields[23] as int?,
+      entryUnitCode: fields[16] as int?,
+      entryMassMcg: fields[17] as int?,
+      entryVolumeMicroliter: fields[18] as int?,
+      entryTabletQuarters: fields[19] as int?,
+      entryCapsules: fields[20] as int?,
+      entrySyringes: fields[21] as int?,
+      entryVials: fields[22] as int?,
+      entryIU: fields[23] as int?,
       displayUnitCode: fields[24] as int?,
       inputModeCode: fields[25] as int?,
       startAt: fields[27] as DateTime?,
@@ -62,9 +62,9 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..writeByte(2)
       ..write(obj.medicationName)
       ..writeByte(3)
-      ..write(obj.doseValue)
+      ..write(obj.entryValue)
       ..writeByte(4)
-      ..write(obj.doseUnit)
+      ..write(obj.entryUnit)
       ..writeByte(5)
       ..write(obj.minutesOfDay)
       ..writeByte(6)
@@ -92,21 +92,21 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..writeByte(26)
       ..write(obj.daysOfMonth)
       ..writeByte(16)
-      ..write(obj.doseUnitCode)
+      ..write(obj.entryUnitCode)
       ..writeByte(17)
-      ..write(obj.doseMassMcg)
+      ..write(obj.entryMassMcg)
       ..writeByte(18)
-      ..write(obj.doseVolumeMicroliter)
+      ..write(obj.entryVolumeMicroliter)
       ..writeByte(19)
-      ..write(obj.doseTabletQuarters)
+      ..write(obj.entryTabletQuarters)
       ..writeByte(20)
-      ..write(obj.doseCapsules)
+      ..write(obj.entryCapsules)
       ..writeByte(21)
-      ..write(obj.doseSyringes)
+      ..write(obj.entrySyringes)
       ..writeByte(22)
-      ..write(obj.doseVials)
+      ..write(obj.entryVials)
       ..writeByte(23)
-      ..write(obj.doseIU)
+      ..write(obj.entryIU)
       ..writeByte(24)
       ..write(obj.displayUnitCode)
       ..writeByte(25)

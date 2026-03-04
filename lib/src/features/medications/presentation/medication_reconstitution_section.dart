@@ -1,4 +1,4 @@
-// Reconstitution section extracted from medication_detail_page.dart (#166).
+﻿// Reconstitution section extracted from medication_detail_page.dart (#166).
 import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -12,12 +12,12 @@ import 'package:dosifi_v5/src/widgets/reconstitution_summary_card.dart';
 // Private helper functions
 // ---------------------------------------------------------------------------
 
-double? _inferDoseAmountFromSavedRecon(Medication med) {
+double? _inferEntryAmountFromSavedRecon(Medication med) {
   final perMl = med.perMlValue;
-  final doseVolumeMl = med.volumePerDose;
-  if (perMl == null || doseVolumeMl == null) return null;
-  if (perMl <= 0 || doseVolumeMl <= 0) return null;
-  return perMl * doseVolumeMl;
+  final entryVolumeMl = med.volumePerEntry;
+  if (perMl == null || entryVolumeMl == null) return null;
+  if (perMl <= 0 || entryVolumeMl <= 0) return null;
+  return perMl * entryVolumeMl;
 }
 
 String _unitLabel(Unit unit) => switch (unit) {
@@ -67,13 +67,13 @@ class MedicationReconstitutionSection extends StatelessWidget {
 
     final savedRecon =
         SavedReconstitutionRepository().ownedForMedication(med.id);
-    final actualDoseStrengthValue =
-        (savedRecon?.calculatedDose != null && savedRecon!.calculatedDose! > 0)
-            ? savedRecon.calculatedDose
-            : _inferDoseAmountFromSavedRecon(med);
-    final actualDoseStrengthUnit =
-        savedRecon?.doseUnit?.trim().isNotEmpty == true
-            ? savedRecon!.doseUnit!.trim()
+    final actualEntryStrengthValue =
+        (savedRecon?.calculatedEntry != null && savedRecon!.calculatedEntry! > 0)
+            ? savedRecon.calculatedEntry
+            : _inferEntryAmountFromSavedRecon(med);
+    final actualEntryStrengthUnit =
+        savedRecon?.entryUnit?.trim().isNotEmpty == true
+            ? savedRecon!.entryUnit!.trim()
             : _unitLabel(med.strengthUnit);
     final syringeSizeMl =
         (savedRecon != null && savedRecon.syringeSizeMl > 0)
@@ -149,9 +149,9 @@ class MedicationReconstitutionSection extends StatelessWidget {
                   medicationName: med.name,
                   containerVolumeMl: med.containerVolumeMl,
                   perMlValue: med.perMlValue,
-                  volumePerDose: med.volumePerDose,
-                  doseStrengthValue: actualDoseStrengthValue,
-                  doseStrengthUnit: actualDoseStrengthUnit,
+                  volumePerEntry: med.volumePerEntry,
+                  entryStrengthValue: actualEntryStrengthValue,
+                  entryStrengthUnit: actualEntryStrengthUnit,
                   reconFluidName: diluentName ?? 'Bacteriostatic Water',
                   syringeSizeMl: syringeSizeMl,
                   compact: true,

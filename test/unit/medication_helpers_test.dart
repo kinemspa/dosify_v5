@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -20,16 +20,16 @@ void main() {
 
     final s = Schedule(
       id: 's1',
-      name: 'dose1',
+      name: 'entry1',
       medicationName: med.name,
-      doseValue: 1.0,
-      doseUnit: 'mL',
+      entryValue: 1.0,
+      entryUnit: 'mL',
       minutesOfDay: 60,
       daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      doseVolumeMicroliter: 2000, // 2 mL
+      entryVolumeMicroliter: 2000, // 2 mL
     );
 
-    final updated = applyDoseTakenUpdate(med, s)!;
+    final updated = applyEntryTakenUpdate(med, s)!;
     expect(updated.activeVialVolume, closeTo(1.0, 0.0001));
     expect(updated.stockValue, equals(2.0));
   });
@@ -49,16 +49,16 @@ void main() {
 
     final s = Schedule(
       id: 's2',
-      name: 'dose2',
+      name: 'entry2',
       medicationName: med.name,
-      doseValue: 1.0,
-      doseUnit: 'mL',
+      entryValue: 1.0,
+      entryUnit: 'mL',
       minutesOfDay: 60,
       daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      doseVolumeMicroliter: 4000, // 4 mL
+      entryVolumeMicroliter: 4000, // 4 mL
     );
 
-    final updated = applyDoseTakenUpdate(med, s)!;
+    final updated = applyEntryTakenUpdate(med, s)!;
     // new active = 10 + (3 - 4) = 9
     expect(updated.activeVialVolume, closeTo(9.0, 0.001));
     expect(updated.stockValue, equals(1.0));
@@ -77,16 +77,16 @@ void main() {
 
     final s = Schedule(
       id: 's3',
-      name: 'dose3',
+      name: 'entry3',
       medicationName: med.name,
-      doseValue: 1.0,
-      doseUnit: 'tab',
+      entryValue: 1.0,
+      entryUnit: 'tab',
       minutesOfDay: 60,
       daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      doseTabletQuarters: 4,
+      entryTabletQuarters: 4,
     );
 
-    final updated = applyDoseTakenUpdate(med, s)!;
+    final updated = applyEntryTakenUpdate(med, s)!;
     expect(updated.stockValue, equals(9.0));
   });
 }

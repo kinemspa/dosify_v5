@@ -1,4 +1,4 @@
-// Copilot coding agent test - safe to remove
+﻿// Copilot coding agent test - safe to remove
 import 'dart:async'; // NEW: For runZonedGuarded (error handling to MCP)
 
 // Flutter imports:
@@ -12,7 +12,7 @@ import 'package:dosifi_v5/src/app/app.dart';
 import 'package:dosifi_v5/src/app/notification_deep_link_handler.dart';
 import 'package:dosifi_v5/src/app/router.dart' show disclaimerNotifier;
 import 'package:dosifi_v5/src/core/hive/hive_bootstrap.dart';
-import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/snooze_settings.dart';
@@ -57,7 +57,7 @@ Future<void> main() async {
           await NotificationService.init().timeout(const Duration(seconds: 30));
           print('Dosifi: NotificationService initialized');
 
-          await DoseTimingSettings.load();
+          await EntryTimingSettings.load();
           await ExperimentalUiSettings.load();
           await SnoozeSettings.load();
           await DateTimeFormatSettings.load();

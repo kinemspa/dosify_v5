@@ -1,4 +1,4 @@
-// Package imports:
+﻿// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'schedule.g.dart';
@@ -9,8 +9,8 @@ class Schedule {
     required this.id,
     required this.name,
     required this.medicationName,
-    required this.doseValue,
-    required this.doseUnit,
+    required this.entryValue,
+    required this.entryUnit,
     required this.minutesOfDay,
     required this.daysOfWeek,
     this.minutesOfDayUtc,
@@ -23,15 +23,15 @@ class Schedule {
     this.cycleEveryNDays,
     this.cycleAnchorDate,
     this.daysOfMonth,
-    // New typed dose fields (all optional for backward compatibility)
-    this.doseUnitCode,
-    this.doseMassMcg,
-    this.doseVolumeMicroliter,
-    this.doseTabletQuarters,
-    this.doseCapsules,
-    this.doseSyringes,
-    this.doseVials,
-    this.doseIU,
+    // New typed entry fields (all optional for backward compatibility)
+    this.entryUnitCode,
+    this.entryMassMcg,
+    this.entryVolumeMicroliter,
+    this.entryTabletQuarters,
+    this.entryCapsules,
+    this.entrySyringes,
+    this.entryVials,
+    this.entryIU,
     this.displayUnitCode,
     this.inputModeCode,
     this.startAt,
@@ -47,9 +47,9 @@ class Schedule {
   @HiveField(2)
   final String medicationName;
   @HiveField(3)
-  final double doseValue;
+  final double entryValue;
   @HiveField(4)
-  final String doseUnit; // mcg/mg/g/units/tablets/capsules/pfs/vial
+  final String entryUnit; // mcg/mg/g/units/tablets/capsules/pfs/vial
   @HiveField(5)
   final int minutesOfDay; // 0..1439 (local, legacy)
   @HiveField(6)
@@ -112,27 +112,27 @@ class Schedule {
   @HiveField(26)
   final List<int>? daysOfMonth; // e.g., [1, 15] for 1st and 15th of each month
 
-  // Typed dose fields (persisted as primitives to avoid new adapters)
+  // Typed entry fields (persisted as primitives to avoid new adapters)
   @HiveField(16)
-  final int? doseUnitCode; // maps to DoseUnit index
+  final int? entryUnitCode; // maps to EntryUnit index
   @HiveField(17)
-  final int? doseMassMcg; // micrograms
+  final int? entryMassMcg; // micrograms
   @HiveField(18)
-  final int? doseVolumeMicroliter; // microliters
+  final int? entryVolumeMicroliter; // microliters
   @HiveField(19)
-  final int? doseTabletQuarters; // 1 tab = 4 quarters
+  final int? entryTabletQuarters; // 1 tab = 4 quarters
   @HiveField(20)
-  final int? doseCapsules; // whole capsules
+  final int? entryCapsules; // whole capsules
   @HiveField(21)
-  final int? doseSyringes; // whole syringes
+  final int? entrySyringes; // whole syringes
   @HiveField(22)
-  final int? doseVials; // whole vials (single-dose)
+  final int? entryVials; // whole vials (single-entry)
   @HiveField(23)
-  final int? doseIU; // units (medication potency)
+  final int? entryIU; // units (medication potency)
   @HiveField(24)
-  final int? displayUnitCode; // maps to DoseUnit index for display preference
+  final int? displayUnitCode; // maps to EntryUnit index for display preference
   @HiveField(25)
-  final int? inputModeCode; // maps to DoseInputMode index
+  final int? inputModeCode; // maps to EntryInputMode index
 
   bool get hasUtc => minutesOfDayUtc != null && daysOfWeekUtc != null;
   bool get hasMultipleTimes => timesOfDay != null && timesOfDay!.isNotEmpty;
@@ -168,8 +168,8 @@ class Schedule {
       id: id,
       name: name,
       medicationName: medicationName,
-      doseValue: doseValue,
-      doseUnit: doseUnit,
+      entryValue: entryValue,
+      entryUnit: entryUnit,
       minutesOfDay: minutesOfDay,
       daysOfWeek: daysOfWeek,
       minutesOfDayUtc: minutesOfDayUtc,
@@ -184,14 +184,14 @@ class Schedule {
       cycleEveryNDays: cycleEveryNDays,
       cycleAnchorDate: cycleAnchorDate,
       daysOfMonth: daysOfMonth,
-      doseUnitCode: doseUnitCode,
-      doseMassMcg: doseMassMcg,
-      doseVolumeMicroliter: doseVolumeMicroliter,
-      doseTabletQuarters: doseTabletQuarters,
-      doseCapsules: doseCapsules,
-      doseSyringes: doseSyringes,
-      doseVials: doseVials,
-      doseIU: doseIU,
+      entryUnitCode: entryUnitCode,
+      entryMassMcg: entryMassMcg,
+      entryVolumeMicroliter: entryVolumeMicroliter,
+      entryTabletQuarters: entryTabletQuarters,
+      entryCapsules: entryCapsules,
+      entrySyringes: entrySyringes,
+      entryVials: entryVials,
+      entryIU: entryIU,
       displayUnitCode: displayUnitCode,
       inputModeCode: inputModeCode,
       startAt: startAt,
@@ -204,16 +204,16 @@ class Schedule {
   Schedule copyWithDetails({
     String? name,
     String? medicationName,
-    double? doseValue,
-    String? doseUnit,
-    Object? doseUnitCode = _noChange,
-    Object? doseMassMcg = _noChange,
-    Object? doseVolumeMicroliter = _noChange,
-    Object? doseTabletQuarters = _noChange,
-    Object? doseCapsules = _noChange,
-    Object? doseSyringes = _noChange,
-    Object? doseVials = _noChange,
-    Object? doseIU = _noChange,
+    double? entryValue,
+    String? entryUnit,
+    Object? entryUnitCode = _noChange,
+    Object? entryMassMcg = _noChange,
+    Object? entryVolumeMicroliter = _noChange,
+    Object? entryTabletQuarters = _noChange,
+    Object? entryCapsules = _noChange,
+    Object? entrySyringes = _noChange,
+    Object? entryVials = _noChange,
+    Object? entryIU = _noChange,
     Object? displayUnitCode = _noChange,
     Object? inputModeCode = _noChange,
     int? minutesOfDay,
@@ -235,8 +235,8 @@ class Schedule {
       id: id,
       name: name ?? this.name,
       medicationName: medicationName ?? this.medicationName,
-      doseValue: doseValue ?? this.doseValue,
-      doseUnit: doseUnit ?? this.doseUnit,
+      entryValue: entryValue ?? this.entryValue,
+      entryUnit: entryUnit ?? this.entryUnit,
       minutesOfDay: minutesOfDay ?? this.minutesOfDay,
       daysOfWeek: daysOfWeek ?? this.daysOfWeek,
       minutesOfDayUtc: minutesOfDayUtc == _noChange
@@ -265,26 +265,26 @@ class Schedule {
       daysOfMonth: daysOfMonth == _noChange
           ? this.daysOfMonth
           : daysOfMonth as List<int>?,
-      doseUnitCode: doseUnitCode == _noChange
-        ? this.doseUnitCode
-        : doseUnitCode as int?,
-      doseMassMcg: doseMassMcg == _noChange
-        ? this.doseMassMcg
-        : doseMassMcg as int?,
-      doseVolumeMicroliter: doseVolumeMicroliter == _noChange
-        ? this.doseVolumeMicroliter
-        : doseVolumeMicroliter as int?,
-      doseTabletQuarters: doseTabletQuarters == _noChange
-        ? this.doseTabletQuarters
-        : doseTabletQuarters as int?,
-      doseCapsules: doseCapsules == _noChange
-        ? this.doseCapsules
-        : doseCapsules as int?,
-      doseSyringes: doseSyringes == _noChange
-        ? this.doseSyringes
-        : doseSyringes as int?,
-      doseVials: doseVials == _noChange ? this.doseVials : doseVials as int?,
-      doseIU: doseIU == _noChange ? this.doseIU : doseIU as int?,
+      entryUnitCode: entryUnitCode == _noChange
+        ? this.entryUnitCode
+        : entryUnitCode as int?,
+      entryMassMcg: entryMassMcg == _noChange
+        ? this.entryMassMcg
+        : entryMassMcg as int?,
+      entryVolumeMicroliter: entryVolumeMicroliter == _noChange
+        ? this.entryVolumeMicroliter
+        : entryVolumeMicroliter as int?,
+      entryTabletQuarters: entryTabletQuarters == _noChange
+        ? this.entryTabletQuarters
+        : entryTabletQuarters as int?,
+      entryCapsules: entryCapsules == _noChange
+        ? this.entryCapsules
+        : entryCapsules as int?,
+      entrySyringes: entrySyringes == _noChange
+        ? this.entrySyringes
+        : entrySyringes as int?,
+      entryVials: entryVials == _noChange ? this.entryVials : entryVials as int?,
+      entryIU: entryIU == _noChange ? this.entryIU : entryIU as int?,
       displayUnitCode: displayUnitCode == _noChange
         ? this.displayUnitCode
         : displayUnitCode as int?,
@@ -309,17 +309,17 @@ class Schedule {
     return MonthlyMissingDayBehavior.values[code];
   }
 
-  // Convenience getters (renamed to avoid shadowing legacy doseUnit String field)
-  DoseUnit? get doseUnitEnum =>
-      doseUnitCode != null ? DoseUnit.values[doseUnitCode!] : null;
-  DoseUnit? get displayUnitEnum =>
-      displayUnitCode != null ? DoseUnit.values[displayUnitCode!] : null;
-  DoseInputMode? get inputModeEnum =>
-      inputModeCode != null ? DoseInputMode.values[inputModeCode!] : null;
+  // Convenience getters (renamed to avoid shadowing legacy entryUnit String field)
+  EntryUnit? get entryUnitEnum =>
+      entryUnitCode != null ? EntryUnit.values[entryUnitCode!] : null;
+  EntryUnit? get displayUnitEnum =>
+      displayUnitCode != null ? EntryUnit.values[displayUnitCode!] : null;
+  EntryInputMode? get inputModeEnum =>
+      inputModeCode != null ? EntryInputMode.values[inputModeCode!] : null;
 }
 
 // Typed units and input modes (not Hive-annotated; persisted as int codes)
-enum DoseUnit {
+enum EntryUnit {
   mcg,
   mg,
   g,
@@ -332,13 +332,13 @@ enum DoseUnit {
   vials,
 }
 
-enum DoseInputMode { tablets, capsules, mass, volume, iuUnits, count }
+enum EntryInputMode { tablets, capsules, mass, volume, iuUnits, count }
 
 enum MonthlyMissingDayBehavior {
   /// Skip the month if the selected day does not exist (legacy behavior).
   skip,
 
-  /// Move the dose to the last day of the month.
+  /// Move the entry to the last day of the month.
   lastDay,
 }
 

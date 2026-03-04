@@ -1,37 +1,37 @@
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+﻿import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-import 'package:dosifi_v5/src/widgets/dose_status_ui.dart';
+import 'package:dosifi_v5/src/widgets/entry_status_ui.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// A week view showing a 7-column grid with doses.
+/// A week view showing a 7-column grid with entries.
 ///
 /// Displays 7 days (Mon-Sun) with hourly rows (major hours only).
 /// Features:
 /// - 7-column grid layout
 /// - Day headers with dates
-/// - Compact dose indicators
+/// - Compact entry indicators
 /// - Current day highlight
 /// - Tap day header → switch to Day view
-/// - Tap dose → select day (prefers [onDayTap] when provided)
+/// - Tap entry → select day (prefers [onDayTap] when provided)
 /// - Swipe left/right → navigate weeks
 class CalendarWeekView extends StatelessWidget {
   const CalendarWeekView({
     required this.startDate,
-    required this.doses,
+    required this.entries,
     this.selectedDate,
-    this.onDoseTap,
+    this.onEntryTap,
     this.onDateChanged,
     this.onDayTap,
     super.key,
   });
 
   final DateTime startDate;
-  final List<CalculatedDose> doses;
+  final List<CalculatedEntry> entries;
   final DateTime? selectedDate;
-  final void Function(CalculatedDose dose)? onDoseTap;
+  final void Function(CalculatedEntry entry)? onEntryTap;
   final void Function(DateTime date)? onDateChanged;
   final void Function(DateTime date)? onDayTap;
 
@@ -51,19 +51,19 @@ class CalendarWeekView extends StatelessWidget {
         date.day == selectedDate!.day;
   }
 
-  List<CalculatedDose> _getDosesForDay(DateTime day) {
-    return doses.where((dose) {
-      return dose.scheduledTime.year == day.year &&
-          dose.scheduledTime.month == day.month &&
-          dose.scheduledTime.day == day.day;
+  List<CalculatedEntry> _getEntriesForDay(DateTime day) {
+    return entries.where((entry) {
+      return entry.scheduledTime.year == day.year &&
+          entry.scheduledTime.month == day.month &&
+          entry.scheduledTime.day == day.day;
     }).toList()..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasDoses = doses.isNotEmpty;
+    final hasEntries = entries.isNotEmpty;
 
-    if (!hasDoses) {
+    if (!hasEntries) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -77,7 +77,7 @@ class CalendarWeekView extends StatelessWidget {
             ),
             const SizedBox(height: kSectionSpacing),
             Text(
-              'No doses scheduled',
+              'No entries scheduled',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: Theme.of(
                   context,
@@ -120,7 +120,7 @@ class CalendarWeekView extends StatelessWidget {
           _WeekHeader(
             startDate: startDate,
             selectedDate: selectedDate,
-            doses: doses,
+            entries: entries,
             onDayTap: onDayTap,
           ),
           // Week grid
@@ -130,17 +130,17 @@ class CalendarWeekView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(7, (index) {
                 final day = startDate.add(Duration(days: index));
-                final dayDoses = _getDosesForDay(day);
+                final dayEntries = _getEntriesForDay(day);
                 final isToday = _isToday(day);
                 final isSelected = _isSelected(day);
 
                 return Expanded(
                   child: _DayColumn(
                     date: day,
-                    doses: dayDoses,
+                    entries: dayEntries,
                     isToday: isToday,
                     isSelected: isSelected,
-                    onDoseTap: onDoseTap,
+                    onEntryTap: onEntryTap,
                     onDayTap: onDayTap,
                   ),
                 );
@@ -156,18 +156,18 @@ class CalendarWeekView extends StatelessWidget {
 class _WeekHeader extends StatelessWidget {
   const _WeekHeader({
     required this.startDate,
-    required this.doses,
+    required this.entries,
     this.selectedDate,
     this.onDayTap,
   });
 
   final DateTime startDate;
-  final List<CalculatedDose> doses;
+  final List<CalculatedEntry> entries;
   final DateTime? selectedDate;
   final void Function(DateTime date)? onDayTap;
 
-  bool _hasDosesOnDay(DateTime date) {
-    return doses.any(
+  bool _hasEntriesOnDay(DateTime date) {
+    return entries.any(
       (d) =>
           d.scheduledTime.year == date.year &&
           d.scheduledTime.month == date.month &&
@@ -212,7 +212,7 @@ class _WeekHeader extends StatelessWidget {
           final theme = Theme.of(context);
           final colorScheme = theme.colorScheme;
 
-          final hasDoses = _hasDosesOnDay(day);
+          final hasEntries = _hasEntriesOnDay(day);
 
           return Expanded(
             child: InkWell(
@@ -238,11 +238,11 @@ class _WeekHeader extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Date number + optional dose dot at the TOP of the tile
+                    // Date number + optional entry dot at the TOP of the tile
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (hasDoses) ...
+                        if (hasEntries) ...
                           [
                             Container(
                               width: 5,
@@ -307,18 +307,18 @@ class _WeekHeader extends StatelessWidget {
 class _DayColumn extends StatelessWidget {
   const _DayColumn({
     required this.date,
-    required this.doses,
+    required this.entries,
     required this.isToday,
     required this.isSelected,
-    this.onDoseTap,
+    this.onEntryTap,
     this.onDayTap,
   });
 
   final DateTime date;
-  final List<CalculatedDose> doses;
+  final List<CalculatedEntry> entries;
   final bool isToday;
   final bool isSelected;
-  final void Function(CalculatedDose dose)? onDoseTap;
+  final void Function(CalculatedEntry entry)? onEntryTap;
   final void Function(DateTime date)? onDayTap;
 
   @override
@@ -358,20 +358,20 @@ class _DayColumn extends StatelessWidget {
                 : BorderSide.none,
           ),
         ),
-        child: doses.isEmpty
+        child: entries.isEmpty
             ? const SizedBox.shrink()
             : SingleChildScrollView(
                 padding: kCalendarWeekColumnPadding,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: doses.map((dose) {
+                  children: entries.map((entry) {
                     final VoidCallback? onTap = onDayTap != null
                         ? () => onDayTap!(date)
-                        : (onDoseTap != null ? () => onDoseTap!(dose) : null);
+                        : (onEntryTap != null ? () => onEntryTap!(entry) : null);
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: kListItemSpacing),
-                      child: _CompactDoseIndicator(dose: dose, onTap: onTap),
+                      child: _CompactEntryIndicator(entry: entry, onTap: onTap),
                     );
                   }).toList(),
                 ),
@@ -381,45 +381,45 @@ class _DayColumn extends StatelessWidget {
   }
 }
 
-class _CompactDoseIndicator extends StatelessWidget {
-  const _CompactDoseIndicator({required this.dose, this.onTap});
+class _CompactEntryIndicator extends StatelessWidget {
+  const _CompactEntryIndicator({required this.entry, this.onTap});
 
-  final CalculatedDose dose;
+  final CalculatedEntry entry;
   final VoidCallback? onTap;
 
   String _getDisplayText() {
-    // Try to show dose value (e.g. "10", "0.5") if it's short
-    if (dose.doseValue > 0) {
-      String val = dose.doseValue == dose.doseValue.roundToDouble()
-          ? dose.doseValue.toInt().toString()
-          : dose.doseValue.toString();
+    // Try to show entry value (e.g. "10", "0.5") if it's short
+    if (entry.entryValue > 0) {
+      String val = entry.entryValue == entry.entryValue.roundToDouble()
+          ? entry.entryValue.toInt().toString()
+          : entry.entryValue.toString();
       if (val.length <= 3) return val;
     }
 
     // Fallback to 1 letter of schedule name
-    if (dose.scheduleName.isNotEmpty) {
-      return dose.scheduleName[0].toUpperCase();
+    if (entry.scheduleName.isNotEmpty) {
+      return entry.scheduleName[0].toUpperCase();
     }
     return '?';
   }
 
   @override
   Widget build(BuildContext context) {
-    final schedule = Hive.box<Schedule>('schedules').get(dose.scheduleId);
+    final schedule = Hive.box<Schedule>('schedules').get(entry.scheduleId);
     final disabled = schedule != null && !schedule.isActive;
-    final statusColor = doseStatusVisual(
+    final statusColor = entryStatusVisual(
       context,
-      dose.status,
+      entry.status,
       disabled: disabled,
     ).color;
-    final timeText = DateFormat('ha').format(dose.scheduledTime).toLowerCase();
+    final timeText = DateFormat('ha').format(entry.scheduledTime).toLowerCase();
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(kBorderRadiusSmall),
       child: Container(
-        height: kCalendarWeekDoseIndicatorHeight,
-        padding: kCalendarWeekDoseIndicatorPadding,
+        height: kCalendarWeekEntryIndicatorHeight,
+        padding: kCalendarWeekEntryIndicatorPadding,
         decoration: buildInsetSectionDecoration(
           context: context,
           borderRadius: kBorderRadiusSmall,
@@ -428,7 +428,7 @@ class _CompactDoseIndicator extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final showTime =
-                constraints.maxWidth >= kCalendarWeekDoseIndicatorMinWidthForTime;
+                constraints.maxWidth >= kCalendarWeekEntryIndicatorMinWidthForTime;
 
             if (!showTime) {
               return Center(
@@ -440,7 +440,7 @@ class _CompactDoseIndicator extends StatelessWidget {
                     Flexible(
                       child: Text(
                         _getDisplayText(),
-                        style: calendarWeekDoseIndicatorValueTextStyle(
+                        style: calendarWeekEntryIndicatorValueTextStyle(
                           context,
                           color: statusColor,
                         ),
@@ -461,7 +461,7 @@ class _CompactDoseIndicator extends StatelessWidget {
                 Expanded(
                   child: Text(
                     _getDisplayText(),
-                    style: calendarWeekDoseIndicatorValueTextStyle(
+                    style: calendarWeekEntryIndicatorValueTextStyle(
                       context,
                       color: statusColor,
                     ),
@@ -473,7 +473,7 @@ class _CompactDoseIndicator extends StatelessWidget {
                 Flexible(
                   child: Text(
                     timeText,
-                    style: calendarWeekDoseIndicatorTimeTextStyle(
+                    style: calendarWeekEntryIndicatorTimeTextStyle(
                       context,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -499,8 +499,8 @@ class _StatusDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: kCalendarDoseIndicatorSize,
-      height: kCalendarDoseIndicatorSize,
+      width: kCalendarEntryIndicatorSize,
+      height: kCalendarEntryIndicatorSize,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,

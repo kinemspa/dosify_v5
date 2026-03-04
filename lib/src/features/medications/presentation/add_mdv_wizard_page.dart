@@ -118,8 +118,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             calculatedUnits: _reconResult!.calculatedUnits,
             syringeSizeMl: _reconResult!.syringeSizeMl,
             diluentName: _reconResult!.diluentName,
-            calculatedDose: _reconResult!.calculatedDose,
-            doseUnit: _reconResult!.doseUnit,
+            calculatedEntry: _reconResult!.calculatedEntry,
+            entryUnit: _reconResult!.entryUnit,
             maxVialSizeMl: _reconResult!.maxVialSizeMl,
           );
           // Update the per mL display
@@ -143,7 +143,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
       _vialVolumeCtrl.text = m.containerVolumeMl?.toString() ?? '0';
 
       // Prefer the medication-owned saved reconstitution (if present) so the
-      // calculator opens with the same prior dose/diluent/syringe defaults.
+      // calculator opens with the same prior entry/diluent/syringe defaults.
       if (m.form == MedicationForm.multiDoseVial) {
         final owned = _savedReconRepo.ownedForMedication(m.id);
         if (owned != null) {
@@ -153,8 +153,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
             calculatedUnits: owned.calculatedUnits,
             syringeSizeMl: owned.syringeSizeMl,
             diluentName: owned.diluentName,
-            calculatedDose: owned.calculatedDose,
-            doseUnit: owned.doseUnit,
+            calculatedEntry: owned.calculatedEntry,
+            entryUnit: owned.entryUnit,
             maxVialSizeMl: owned.maxVialSizeMl,
           );
           _vialVolumeCtrl.text = owned.solventVolumeMl.toString();
@@ -392,7 +392,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     }
 
     // Best-effort: persist the medication's current reconstitution settings as
-    // an owned saved reconstitution. This is used for defaults (e.g. dose) and
+    // an owned saved reconstitution. This is used for defaults (e.g. entry) and
     // is deleted automatically when the medication is deleted.
     if (med.form == MedicationForm.multiDoseVial && _reconResult != null) {
       try {
@@ -405,8 +405,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           strengthValue: med.strengthValue,
           strengthUnit: med.strengthUnit.name,
           solventVolumeMl: _reconResult!.solventVolumeMl,
-          calculatedDose: _reconResult!.calculatedDose,
-          doseUnit: _reconResult!.doseUnit,
+          calculatedEntry: _reconResult!.calculatedEntry,
+          entryUnit: _reconResult!.entryUnit,
         );
 
         final owned = SavedReconstitutionCalculation(
@@ -421,8 +421,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
           calculatedUnits: _reconResult!.calculatedUnits,
           syringeSizeMl: _reconResult!.syringeSizeMl,
           diluentName: _reconResult!.diluentName,
-          calculatedDose: _reconResult!.calculatedDose,
-          doseUnit: _reconResult!.doseUnit,
+          calculatedEntry: _reconResult!.calculatedEntry,
+          entryUnit: _reconResult!.entryUnit,
           maxVialSizeMl: _reconResult!.maxVialSizeMl,
           createdAt: existing?.createdAt,
           updatedAt: DateTime.now(),
@@ -698,7 +698,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         Text('Strength & Reconstitution', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'Multi-dose vials require reconstitution (mixing with liquid). Enter the strength and use our calculator to reference the reconstitution ratio.',
+          'Multi-Dose Vials require reconstitution (mixing with liquid). Enter the strength and use our calculator to reference the reconstitution ratio.',
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
@@ -813,8 +813,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                       unitLabel: _strengthUnit.name,
                       medicationName: _nameCtrl.text.trim(),
                       initialDiluentName: _reconResult?.diluentName,
-                      initialDoseValue: _reconResult?.calculatedDose,
-                      initialDoseUnit: _reconResult?.doseUnit,
+                      initialEntryValue: _reconResult?.calculatedEntry,
+                      initialEntryUnit: _reconResult?.entryUnit,
                       onStrengthAdjusted: (value, unit) {
                         final normalized = unit.trim().toLowerCase();
                         Unit mappedUnit;
@@ -1964,7 +1964,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
     final Widget content;
     if (result == null) {
       content = Text(
-        'Multi-dose vials need to be mixed with liquid (reconstituted). Tap to open the calculator.',
+        'Multi-Dose Vials need to be mixed with liquid (reconstituted). Tap to open the calculator.',
         style: mutedTextStyle(context)?.copyWith(color: bodyFg),
       );
     } else {

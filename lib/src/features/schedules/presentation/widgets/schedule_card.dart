@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dosifi_v5/src/core/design_system.dart';
@@ -8,15 +8,15 @@ import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
-import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
+import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/schedule_status_badge.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
-import 'package:dosifi_v5/src/widgets/next_dose_row.dart';
+import 'package:dosifi_v5/src/widgets/next_entry_row.dart';
 
 class ScheduleCard extends StatelessWidget {
   const ScheduleCard({
@@ -96,7 +96,7 @@ class ScheduleCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${s.doseValue} ${s.doseUnit}',
+                      '${s.entryValue} ${s.entryUnit}',
                       style: helperTextStyle(context),
                     ),
                   ],
@@ -116,7 +116,7 @@ class ScheduleCard extends StatelessWidget {
                       final ok = await confirmTake(context, s);
                       if (!ok) return;
 
-                      // 1. Create Dose Log
+                      // 1. Create Entry Log
                       await _markAsTaken(context, s);
 
                       // 2. Decrement Stock
@@ -188,7 +188,7 @@ class ScheduleCard extends StatelessWidget {
           ),
           const SizedBox(height: kFieldSpacing),
           Text(
-            '${_doseLine(s)} × ${_timesLine(context, s)}',
+            '${_entryLine(s)} × ${_timesLine(context, s)}',
             style: helperTextStyle(context),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -200,10 +200,10 @@ class ScheduleCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    NextDoseRow(schedule: s, nextDose: next, dense: true),
+                    NextEntryRow(schedule: s, nextEntry: next, dense: true),
                     if (!dense && last != null)
                       Text(
-                        'Last Dose: ${_fmtWhen(context, last)}',
+                        'Last Entry: ${_fmtWhen(context, last)}',
                         style: helperTextStyle(
                           context,
                           color: cs.onSurfaceVariant.withValues(
@@ -270,12 +270,12 @@ class ScheduleCard extends StatelessWidget {
     );
   }
 
-  String _doseLine(Schedule s) {
-    final v = s.doseValue;
+  String _entryLine(Schedule s) {
+    final v = s.entryValue;
     final vf = (v == v.roundToDouble())
         ? v.toStringAsFixed(0)
         : v.toStringAsFixed(2);
-    return '$vf ${s.doseUnit}';
+    return '$vf ${s.entryUnit}';
   }
 
   String _timesLine(BuildContext context, Schedule s) {
@@ -417,37 +417,37 @@ class ScheduleCard extends StatelessWidget {
     return null;
   }
 
-  /// Helper: mark current schedule's next occurrence as taken by creating a DoseLog
+  /// Helper: mark current schedule's next occurrence as taken by creating a EntryLog
   Future<void> _markAsTaken(BuildContext context, Schedule s) async {
     final occ = _nextOccurrenceAndIndex(s);
     final next = occ?.dt;
     if (next == null) return;
 
-    final logId = DoseLogIds.occurrenceId(
+    final logId = EntryLogIds.occurrenceId(
       scheduleId: s.id,
       scheduledTime: next,
     );
-    final log = DoseLog(
+    final log = EntryLog(
       id: logId,
       scheduleId: s.id,
       scheduleName: s.name,
       medicationId: s.medicationId ?? 'unknown',
       medicationName: s.medicationName,
       scheduledTime: next,
-      doseValue: s.doseValue,
-      doseUnit: s.doseUnit,
-      action: DoseAction.logged,
+      entryValue: s.entryValue,
+      entryUnit: s.entryUnit,
+      action: EntryAction.logged,
       actionTime: DateTime.now(),
     );
 
     try {
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
       await repo.upsertOccurrence(log);
 
       // Cancel notification for this slot
       try {
         await NotificationService.cancel(
-          ScheduleScheduler.doseNotificationIdFor(s.id, next),
+          ScheduleScheduler.entryNotificationIdFor(s.id, next),
         );
         for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
           s.id,
@@ -468,28 +468,28 @@ class ScheduleCard extends StatelessWidget {
         await NotificationService.cancel(legacyId);
       } catch (_) {}
     } catch (e) {
-      debugPrint('Error logging dose: $e');
+      debugPrint('Error logging entry: $e');
     }
   }
 
-  /// Helper: snooze current schedule's next occurrence by creating a DoseLog entry
+  /// Helper: snooze current schedule's next occurrence by creating a EntryLog entry
   Future<void> _snoozeSchedule(BuildContext context, Schedule s) async {
     final occ = _nextOccurrenceAndIndex(s);
     final next = occ?.dt;
     if (next == null) {
       if (context.mounted) {
-        showAppSnackBar(context, 'No upcoming dose to snooze');
+        showAppSnackBar(context, 'No upcoming entry to snooze');
       }
       return;
     }
 
     final snoozeUntil = next.add(const Duration(minutes: 15));
 
-    final logId = DoseLogIds.occurrenceId(
+    final logId = EntryLogIds.occurrenceId(
       scheduleId: s.id,
       scheduledTime: next,
     );
-    final log = DoseLog(
+    final log = EntryLog(
       id: logId,
       scheduleId: s.id,
       scheduleName: s.name,
@@ -497,19 +497,19 @@ class ScheduleCard extends StatelessWidget {
       medicationName: s.medicationName,
       scheduledTime: next,
       actionTime: snoozeUntil,
-      doseValue: s.doseValue,
-      doseUnit: s.doseUnit,
-      action: DoseAction.snoozed,
+      entryValue: s.entryValue,
+      entryUnit: s.entryUnit,
+      action: EntryAction.snoozed,
     );
 
     try {
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
       await repo.upsertOccurrence(log);
 
       // Cancel any existing reminder for this occurrence (best-effort).
       try {
         await NotificationService.cancel(
-          ScheduleScheduler.doseNotificationIdFor(s.id, next),
+          ScheduleScheduler.entryNotificationIdFor(s.id, next),
         );
         for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
           s.id,
@@ -532,12 +532,12 @@ class ScheduleCard extends StatelessWidget {
       // Reschedule notification for 15 minutes later as a one-off snooze alarm.
       try {
         await NotificationService.scheduleAtAlarmClock(
-          ScheduleScheduler.doseNotificationIdFor(s.id, next),
+          ScheduleScheduler.entryNotificationIdFor(s.id, next),
           snoozeUntil,
           title: s.medicationName,
           body: 'Snoozed',
-          payload: 'dose:${s.id}:${next.millisecondsSinceEpoch}',
-          actions: NotificationService.upcomingDoseActions,
+          payload: 'entry:${s.id}:${next.millisecondsSinceEpoch}',
+          actions: NotificationService.upcomingEntryActions,
           expandedLines: <String>['Snoozed'],
         );
       } catch (e) {
@@ -551,8 +551,8 @@ class ScheduleCard extends StatelessWidget {
             snoozeUntil.day == now.day;
         final time = DateTimeFormatter.formatTime(context, snoozeUntil);
         final label = sameDay
-            ? 'Dose snoozed until $time'
-            : 'Dose snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} | $time';
+            ? 'Entry snoozed until $time'
+            : 'Entry snoozed until ${MaterialLocalizations.of(context).formatMediumDate(snoozeUntil)} | $time';
         showAppSnackBar(context, label);
       }
     } catch (e) {
@@ -562,41 +562,41 @@ class ScheduleCard extends StatelessWidget {
     }
   }
 
-  /// Helper: skip current schedule's next occurrence by creating a DoseLog and attempting to cancel notification
+  /// Helper: skip current schedule's next occurrence by creating a EntryLog and attempting to cancel notification
   Future<void> _skipSchedule(BuildContext context, Schedule s) async {
     final occ = _nextOccurrenceAndIndex(s);
     final next = occ?.dt;
     if (next == null) {
       if (context.mounted) {
-        showAppSnackBar(context, 'No upcoming dose to skip');
+        showAppSnackBar(context, 'No upcoming entry to skip');
       }
       return;
     }
 
-    final logId = DoseLogIds.occurrenceId(
+    final logId = EntryLogIds.occurrenceId(
       scheduleId: s.id,
       scheduledTime: next,
     );
-    final log = DoseLog(
+    final log = EntryLog(
       id: logId,
       scheduleId: s.id,
       scheduleName: s.name,
       medicationId: s.medicationId ?? 'unknown',
       medicationName: s.medicationName,
       scheduledTime: next,
-      doseValue: s.doseValue,
-      doseUnit: s.doseUnit,
-      action: DoseAction.skipped,
+      entryValue: s.entryValue,
+      entryUnit: s.entryUnit,
+      action: EntryAction.skipped,
     );
 
     try {
-      final repo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+      final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
       await repo.upsertOccurrence(log);
 
       // Attempt to cancel scheduled notification for the day (best-effort)
       try {
         await NotificationService.cancel(
-          ScheduleScheduler.doseNotificationIdFor(s.id, next),
+          ScheduleScheduler.entryNotificationIdFor(s.id, next),
         );
         for (final overdueId in ScheduleScheduler.overdueNotificationIdsFor(
           s.id,
@@ -620,11 +620,11 @@ class ScheduleCard extends StatelessWidget {
       }
 
       if (context.mounted) {
-        showAppSnackBar(context, 'Dose skipped');
+        showAppSnackBar(context, 'Entry skipped');
       }
     } catch (e) {
       if (context.mounted) {
-        showAppSnackBar(context, 'Error skipping dose: $e');
+        showAppSnackBar(context, 'Error skipping entry: $e');
       }
     }
   }
@@ -641,8 +641,8 @@ Future<bool> confirmTake(BuildContext context, Schedule s) async {
   return await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Mark dose as taken?'),
-          content: Text('${s.medicationName} | ${s.doseValue} ${s.doseUnit}'),
+          title: const Text('Mark entry as taken?'),
+          content: Text('${s.medicationName} | ${s.entryValue} ${s.entryUnit}'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -679,11 +679,11 @@ Future<bool> applyStockDecrement(BuildContext context, Schedule s) async {
   // Defer to centralized helper for stock decrement logic
 
   // Use centralized helper
-  final updated = applyDoseTakenUpdate(med, s);
+  final updated = applyEntryTakenUpdate(med, s);
   if (updated == null) {
     showAppSnackBar(
       context,
-      'Could not compute stock decrement for this dose. Check medication strength/units.',
+      'Could not compute stock decrement for this entry. Check medication strength/units.',
     );
     return false;
   }

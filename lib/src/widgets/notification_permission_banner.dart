@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -9,7 +9,7 @@ import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
 enum _BannerIssue { noPermission, noExactAlarm }
 
 /// Inline warning banner shown on the home page when the user's device is
-/// missing a notification-related permission that would prevent scheduled dose
+/// missing a notification-related permission that would prevent scheduled entry
 /// reminders from arriving.
 ///
 /// Two cases are handled:

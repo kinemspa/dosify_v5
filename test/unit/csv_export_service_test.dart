@@ -1,11 +1,11 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/csv_export_service.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 
 void main() {
@@ -47,11 +47,11 @@ void main() {
     expect(lines[2].startsWith('b,Zeta,'), isTrue);
   });
 
-  test('Dose logs CSV is stably ordered by actionTime desc then id', () {
+  test('Entry logs CSV is stably ordered by actionTime desc then id', () {
     final t0 = DateTime.utc(2026, 1, 1, 12);
     final t1 = DateTime.utc(2026, 1, 2, 12);
 
-    final l1 = DoseLog(
+    final l1 = EntryLog(
       id: 'b',
       scheduleId: 's',
       scheduleName: 'Sched',
@@ -59,11 +59,11 @@ void main() {
       medicationName: 'Med',
       scheduledTime: t0,
       actionTime: t0,
-      doseValue: 1,
-      doseUnit: 'mg',
-      action: DoseAction.logged,
+      entryValue: 1,
+      entryUnit: 'mg',
+      action: EntryAction.logged,
     );
-    final l2 = DoseLog(
+    final l2 = EntryLog(
       id: 'a',
       scheduleId: 's',
       scheduleName: 'Sched',
@@ -71,12 +71,12 @@ void main() {
       medicationName: 'Med',
       scheduledTime: t1,
       actionTime: t1,
-      doseValue: 1,
-      doseUnit: 'mg',
-      action: DoseAction.logged,
+      entryValue: 1,
+      entryUnit: 'mg',
+      action: EntryAction.logged,
     );
 
-    final out = csv.doseLogsToCsv([l1, l2]);
+    final out = csv.entryLogsToCsv([l1, l2]);
     final lines = out.trim().split('\n');
     expect(lines.length, equals(3));
     // Newest first
@@ -125,8 +125,8 @@ void main() {
       id: 'b',
       name: 'Zeta',
       medicationName: 'Med',
-      doseValue: 1,
-      doseUnit: 'mg',
+      entryValue: 1,
+      entryUnit: 'mg',
       minutesOfDay: 60,
       daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
     );
@@ -134,8 +134,8 @@ void main() {
       id: 'a',
       name: 'Alpha',
       medicationName: 'Med',
-      doseValue: 1,
-      doseUnit: 'mg',
+      entryValue: 1,
+      entryUnit: 'mg',
       minutesOfDay: 60,
       daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
     );

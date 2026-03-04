@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -31,20 +31,20 @@ class SelectInjectionTypePage extends StatelessWidget {
           SelectionOptionCard(
             icon: Icons.colorize,
             title: 'Pre-Filled Syringe',
-            subtitle: 'Ready to use single dose syringe',
+            subtitle: 'Ready to use single entry syringe',
             onTap: () => context.push('/medications/add/injection/pfs'),
           ),
           const SizedBox(height: kSpacingL),
           SelectionOptionCard(
             icon: Icons.local_drink,
-            title: 'Single Dose Vial',
+            title: 'Single Entry Vial',
             subtitle: 'One time use vial',
             onTap: () => context.push('/medications/add/injection/single'),
           ),
           const SizedBox(height: kSpacingL),
           SelectionOptionCard(
             icon: Icons.addchart,
-            title: 'Multi Dose Vial',
+            title: 'Multi Entry Vial',
             subtitle: 'Step-by-step guided setup for reconstitution',
             onTap: () => context.push('/medications/add/injection/multi'),
           ),

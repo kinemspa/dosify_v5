@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_null_comparison, unused_element, unused_element_parameter, unused_local_variable
+﻿// ignore_for_file: unnecessary_null_comparison, unused_element, unused_element_parameter, unused_local_variable
 
 // Dart imports:
 
@@ -34,13 +34,13 @@ import 'package:dosifi_v5/src/features/medications/presentation/medication_detai
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_detail_header_identity.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/widgets/medication_header_widget.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
-import 'package:dosifi_v5/src/widgets/dose_action_sheet.dart';
+import 'package:dosifi_v5/src/widgets/entry_action_sheet.dart';
 import 'package:dosifi_v5/src/widgets/glass_card_surface.dart';
 import 'package:dosifi_v5/src/widgets/selection_cards.dart';
 import 'package:dosifi_v5/src/widgets/smart_expiry_picker.dart';
@@ -49,7 +49,7 @@ import 'package:dosifi_v5/src/widgets/stock_donut_gauge.dart';
 import 'package:dosifi_v5/src/widgets/status_pill.dart';
 import 'package:dosifi_v5/src/widgets/unified_form.dart';
 import 'package:dosifi_v5/src/widgets/medication_schedules_section.dart';
-import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/today_entries_card.dart';
 
 /// Modern, revolutionized medication detail screen with:
 /// - Hero header with gradient and key stats
@@ -61,7 +61,7 @@ const double _kDetailHeaderExpandedHeight =
     224; // Keep header size consistent (reduced empty space)
 const double _kDetailHeaderCollapsedHeight = 56;
 
-SyringeSizeMl _inferSyringeSizeFromDoseVolumeMl(double volumeMl) {
+SyringeSizeMl _inferSyringeSizeFromEntryVolumeMl(double volumeMl) {
   if (volumeMl <= 0.3) return SyringeSizeMl.ml0_3;
   if (volumeMl <= 0.5) return SyringeSizeMl.ml0_5;
   if (volumeMl <= 1.0) return SyringeSizeMl.ml1;
@@ -69,44 +69,44 @@ SyringeSizeMl _inferSyringeSizeFromDoseVolumeMl(double volumeMl) {
   return SyringeSizeMl.ml5;
 }
 
-/// Reconstitution calculator expects a *dose amount* (mass/units), not volume.
-/// If we have a saved concentration (per mL) and dose volume (mL), compute:
-/// doseAmount = concentrationPerMl * doseVolumeMl.
-double? _inferDoseAmountFromSavedRecon(Medication med) {
+/// Reconstitution calculator expects a *entry amount* (mass/units), not volume.
+/// If we have a saved concentration (per mL) and entry volume (mL), compute:
+/// entryAmount = concentrationPerMl * entryVolumeMl.
+double? _inferEntryAmountFromSavedRecon(Medication med) {
   final perMl = med.perMlValue;
-  final doseVolumeMl = med.volumePerDose;
-  if (perMl == null || doseVolumeMl == null) return null;
-  if (perMl <= 0 || doseVolumeMl <= 0) return null;
-  return perMl * doseVolumeMl;
+  final entryVolumeMl = med.volumePerEntry;
+  if (perMl == null || entryVolumeMl == null) return null;
+  if (perMl <= 0 || entryVolumeMl <= 0) return null;
+  return perMl * entryVolumeMl;
 }
 
-double? _inferDoseAmountFromReconCalc(SavedReconstitutionCalculation recon) {
+double? _inferEntryAmountFromReconCalc(SavedReconstitutionCalculation recon) {
   if (recon.perMlConcentration <= 0) return null;
   if (recon.calculatedUnits <= 0) return null;
 
   final unitsPerMl = SyringeType.ml_1_0.unitsPerMl;
   if (unitsPerMl <= 0) return null;
 
-  final doseVolumeMl = recon.calculatedUnits / unitsPerMl;
-  if (doseVolumeMl <= 0) return null;
+  final entryVolumeMl = recon.calculatedUnits / unitsPerMl;
+  if (entryVolumeMl <= 0) return null;
 
-  return recon.perMlConcentration * doseVolumeMl;
+  return recon.perMlConcentration * entryVolumeMl;
 }
 
-double? _inferInitialDesiredDoseAmount(Medication med) {
+double? _inferInitialDesiredEntryAmount(Medication med) {
   final savedRecon = SavedReconstitutionRepository().ownedForMedication(med.id);
-  final savedDose = savedRecon?.calculatedDose;
-  if (savedDose != null && savedDose > 0) return savedDose;
+  final savedEntry = savedRecon?.calculatedEntry;
+  if (savedEntry != null && savedEntry > 0) return savedEntry;
 
   final inferredFromSaved = savedRecon != null
-      ? _inferDoseAmountFromReconCalc(savedRecon)
+      ? _inferEntryAmountFromReconCalc(savedRecon)
       : null;
-  return inferredFromSaved ?? _inferDoseAmountFromSavedRecon(med);
+  return inferredFromSaved ?? _inferEntryAmountFromSavedRecon(med);
 }
 
-String _inferInitialDesiredDoseUnit(Medication med) {
+String _inferInitialDesiredEntryUnit(Medication med) {
   final savedRecon = SavedReconstitutionRepository().ownedForMedication(med.id);
-  final unit = savedRecon?.doseUnit?.trim();
+  final unit = savedRecon?.entryUnit?.trim();
   if (unit != null && unit.isNotEmpty) return unit;
   return med.strengthUnit.name;
 }
@@ -280,7 +280,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         animation: Listenable.merge([
           box.listenable(),
           Hive.box<Schedule>('schedules').listenable(),
-          Hive.box<DoseLog>('dose_logs').listenable(),
+          Hive.box<EntryLog>('entry_logs').listenable(),
         ]),
         builder: (context, _) {
           final updatedMed = box.get(med.id) ?? med;
@@ -390,8 +390,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                                       updatedMed,
                                                     )
                                               : null,
-                                          onAdHocDose: () =>
-                                              _showAdHocDoseDialog(
+                                          onAdHocEntry: () =>
+                                              _showAdHocEntryDialog(
                                                 context,
                                                 updatedMed,
                                               ),
@@ -595,7 +595,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                             updatedMed.form == MedicationForm.multiDoseVial
                             ? () {}
                             : null,
-                        onAdHocDose: () {},
+                        onAdHocEntry: () {},
                         hasSchedules: hasSchedules,
                       ),
                     ),
@@ -621,8 +621,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
               setState(() => _isReconstitutionExpanded = v),
           onEdit: () => _editReconstitution(context, med),
         ),
-      _kCardToday: TodayDosesCard(
-        scope: TodayDosesScope.medication(med.id),
+      _kCardToday: TodayEntriesCard(
+        scope: TodayEntriesScope.medication(med.id),
         isExpanded: _isTodayExpanded,
         onExpandedChanged: (expanded) {
           if (!mounted) return;
@@ -1441,7 +1441,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         if (!hasSchedules)
           buildHelperText(context, 'No schedules')
         else
-          MedicationSchedulesSection(medication: med, showNextDoseCard: false),
+          MedicationSchedulesSection(medication: med, showNextEntryCard: false),
       ],
     );
   }
@@ -2131,16 +2131,16 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       latest.id,
     );
 
-    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
-    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
+    final initialEntryAmount = _inferInitialDesiredEntryAmount(latest);
+    final initialEntryUnit = _inferInitialDesiredEntryUnit(latest);
 
     SyringeSizeMl initialSyringe;
     if (savedRecon != null && savedRecon.syringeSizeMl > 0) {
-      initialSyringe = _inferSyringeSizeFromDoseVolumeMl(
+      initialSyringe = _inferSyringeSizeFromEntryVolumeMl(
         savedRecon.syringeSizeMl,
       );
-    } else if (latest.volumePerDose != null && latest.volumePerDose! > 0) {
-      initialSyringe = _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!);
+    } else if (latest.volumePerEntry != null && latest.volumePerEntry! > 0) {
+      initialSyringe = _inferSyringeSizeFromEntryVolumeMl(latest.volumePerEntry!);
     } else {
       initialSyringe = SyringeSizeMl.ml1;
     }
@@ -2158,8 +2158,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         builder: (context, scrollController) => ReconstitutionCalculatorDialog(
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
-          initialDoseValue: initialDoseAmount,
-          initialDoseUnit: initialDoseUnit,
+          initialEntryValue: initialEntryAmount,
+          initialEntryUnit: initialEntryUnit,
           initialSyringeSize: initialSyringe,
           initialVialSize:
               savedRecon?.solventVolumeMl ?? latest.containerVolumeMl,
@@ -2177,7 +2177,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       latest.copyWith(
         perMlValue: result.perMlConcentration,
         containerVolumeMl: result.solventVolumeMl,
-        volumePerDose: result.calculatedUnits / SyringeType.ml_1_0.unitsPerMl,
+        volumePerEntry: result.calculatedUnits / SyringeType.ml_1_0.unitsPerMl,
         diluentName: result.diluentName ?? latest.diluentName,
         activeVialVolume: result.solventVolumeMl,
         reconstitutedAt: DateTime.now(),
@@ -2196,8 +2196,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
         strengthValue: latest.strengthValue,
         strengthUnit: latest.strengthUnit.name,
         solventVolumeMl: result.solventVolumeMl,
-        calculatedDose: result.calculatedDose,
-        doseUnit: result.doseUnit,
+        calculatedEntry: result.calculatedEntry,
+        entryUnit: result.entryUnit,
       );
 
       await savedReconRepo.upsert(
@@ -2213,8 +2213,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           calculatedUnits: result.calculatedUnits,
           syringeSizeMl: result.syringeSizeMl,
           diluentName: result.diluentName,
-          calculatedDose: result.calculatedDose,
-          doseUnit: result.doseUnit,
+          calculatedEntry: result.calculatedEntry,
+          entryUnit: result.entryUnit,
           maxVialSizeMl: result.maxVialSizeMl,
           createdAt: existing?.createdAt,
           updatedAt: DateTime.now(),
@@ -2464,8 +2464,8 @@ String _formLabel(MedicationForm form) => switch (form) {
   MedicationForm.tablet => 'Tablet',
   MedicationForm.capsule => 'Capsule',
   MedicationForm.prefilledSyringe => 'Pre-filled Syringe',
-  MedicationForm.singleDoseVial => 'Single Dose Vial',
-  MedicationForm.multiDoseVial => 'Multi Dose Vial',
+  MedicationForm.singleDoseVial => 'Single Entry Vial',
+  MedicationForm.multiDoseVial => 'Multi Entry Vial',
 };
 
 String _unitLabel(Unit unit) => switch (unit) {
@@ -2871,11 +2871,11 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
 
   // If user chose 'recalculate', open the calculator first
   if (reconChoice == 'recalculate') {
-    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
-    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
+    final initialEntryAmount = _inferInitialDesiredEntryAmount(latest);
+    final initialEntryUnit = _inferInitialDesiredEntryUnit(latest);
     final initialSyringe =
-        (latest.volumePerDose != null && latest.volumePerDose! > 0)
-        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+        (latest.volumePerEntry != null && latest.volumePerEntry! > 0)
+        ? _inferSyringeSizeFromEntryVolumeMl(latest.volumePerEntry!)
         : SyringeSizeMl.ml1;
 
     final result = await showModalBottomSheet<ReconstitutionResult>(
@@ -2891,8 +2891,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         builder: (ctx, scrollController) => ReconstitutionCalculatorDialog(
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
-          initialDoseValue: initialDoseAmount,
-          initialDoseUnit: initialDoseUnit,
+          initialEntryValue: initialEntryAmount,
+          initialEntryUnit: initialEntryUnit,
           initialSyringeSize: initialSyringe,
           initialVialSize: latest.containerVolumeMl ?? vialSize,
           initialDiluentName: selectedDiluentName,
@@ -2922,11 +2922,11 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   }
 
   Future<void> pickReconstitution(BuildContext dialogContext) async {
-    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
-    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
+    final initialEntryAmount = _inferInitialDesiredEntryAmount(latest);
+    final initialEntryUnit = _inferInitialDesiredEntryUnit(latest);
     final initialSyringe =
-        (latest.volumePerDose != null && latest.volumePerDose! > 0)
-        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+        (latest.volumePerEntry != null && latest.volumePerEntry! > 0)
+        ? _inferSyringeSizeFromEntryVolumeMl(latest.volumePerEntry!)
         : SyringeSizeMl.ml1;
 
     Future<void> setRecon({
@@ -2958,8 +2958,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         builder: (context, scrollController) => ReconstitutionCalculatorDialog(
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
-          initialDoseValue: initialDoseAmount,
-          initialDoseUnit: initialDoseUnit,
+          initialEntryValue: initialEntryAmount,
+          initialEntryUnit: initialEntryUnit,
           initialSyringeSize: initialSyringe,
           initialVialSize: (double.tryParse(replaceVolumeCtrl.text) ?? 0) > 0
               ? (double.tryParse(replaceVolumeCtrl.text) ?? vialSize)
@@ -2984,11 +2984,11 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
   }
 
   Future<void> pickTopUpStrength(BuildContext dialogContext) async {
-    final initialDoseAmount = _inferInitialDesiredDoseAmount(latest);
-    final initialDoseUnit = _inferInitialDesiredDoseUnit(latest);
+    final initialEntryAmount = _inferInitialDesiredEntryAmount(latest);
+    final initialEntryUnit = _inferInitialDesiredEntryUnit(latest);
     final initialSyringe =
-        (latest.volumePerDose != null && latest.volumePerDose! > 0)
-        ? _inferSyringeSizeFromDoseVolumeMl(latest.volumePerDose!)
+        (latest.volumePerEntry != null && latest.volumePerEntry! > 0)
+        ? _inferSyringeSizeFromEntryVolumeMl(latest.volumePerEntry!)
         : SyringeSizeMl.ml1;
 
     final result = await showModalBottomSheet<ReconstitutionResult>(
@@ -3004,8 +3004,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         builder: (context, scrollController) => ReconstitutionCalculatorDialog(
           initialStrengthValue: med.strengthValue,
           unitLabel: med.strengthUnit.name,
-          initialDoseValue: initialDoseAmount,
-          initialDoseUnit: initialDoseUnit,
+          initialEntryValue: initialEntryAmount,
+          initialEntryUnit: initialEntryUnit,
           initialSyringeSize: initialSyringe,
           initialVialSize: latest.containerVolumeMl ?? vialSize,
           initialDiluentName: topUpDiluentName,
@@ -3549,9 +3549,9 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       med.copyWith(
         containerVolumeMl: reconVolume,
         perMlValue: perMl,
-        volumePerDose: calculatedUnits != null && calculatedUnits > 0
+        volumePerEntry: calculatedUnits != null && calculatedUnits > 0
             ? (calculatedUnits / SyringeType.ml_1_0.unitsPerMl)
-            : med.volumePerDose,
+            : med.volumePerEntry,
         diluentName: diluentName,
         activeVialVolume: reconVolume,
         reconstitutedAt: now,
@@ -3741,14 +3741,14 @@ Future<void> _showRestockSealedVialsDialog(
   }
 }
 
-void _showAdHocDoseDialog(BuildContext context, Medication med) async {
+void _showAdHocEntryDialog(BuildContext context, Medication med) async {
   final now = DateTime.now();
   final isMdv = med.form == MedicationForm.multiDoseVial;
-  final doseUnit = isMdv ? 'mL' : _stockUnitLabel(med.stockUnit);
+  final entryUnit = isMdv ? 'mL' : _stockUnitLabel(med.stockUnit);
   final defaultAmount = isMdv ? 0.5 : 1.0;
 
-  final id = IdGen.newId(prefix: 'dose_adhoc');
-  final draftLog = DoseLog(
+  final id = IdGen.newId(prefix: 'entry_adhoc');
+  final draftLog = EntryLog(
     id: id,
     scheduleId: 'ad_hoc',
     scheduleName: 'Ad-hoc Entry',
@@ -3756,27 +3756,27 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
     medicationName: med.name,
     scheduledTime: now.toUtc(),
     actionTime: now,
-    doseValue: defaultAmount,
-    doseUnit: doseUnit,
-    action: DoseAction.logged,
+    entryValue: defaultAmount,
+    entryUnit: entryUnit,
+    action: EntryAction.logged,
   );
 
-  final dose = CalculatedDose(
+  final entry = CalculatedEntry(
     scheduleId: 'ad_hoc',
     scheduleName: 'Ad-hoc Entry',
     medicationName: med.name,
     scheduledTime: draftLog.scheduledTime,
-    doseValue: defaultAmount,
-    doseUnit: doseUnit,
+    entryValue: defaultAmount,
+    entryUnit: entryUnit,
     existingLog: draftLog,
   );
 
-  await DoseActionSheet.show(
+  await EntryActionSheet.show(
     context,
-    dose: dose,
-    initialStatus: DoseStatus.logged,
+    entry: entry,
+    initialStatus: EntryStatus.logged,
     onMarkLogged: (_) async {
-      // Ad-hoc persistence is handled inside DoseActionSheet.
+      // Ad-hoc persistence is handled inside EntryActionSheet.
     },
     onSnooze: (_) async {
       // Not applicable for ad-hoc entries.
@@ -3785,22 +3785,22 @@ void _showAdHocDoseDialog(BuildContext context, Medication med) async {
       // Not applicable for ad-hoc entries.
     },
     onDelete: (_) async {
-      final logBox = Hive.box<DoseLog>('dose_logs');
+      final logBox = Hive.box<EntryLog>('entry_logs');
       final existing = logBox.get(draftLog.id);
       if (existing == null) return;
 
-      if (existing.action == DoseAction.logged) {
+      if (existing.action == EntryAction.logged) {
         final medBox = Hive.box<Medication>('medications');
         final currentMed = medBox.get(existing.medicationId);
         if (currentMed != null) {
-          final value = existing.actualDoseValue ?? existing.doseValue;
-          final unit = existing.actualDoseUnit ?? existing.doseUnit;
+          final value = existing.actualEntryValue ?? existing.entryValue;
+          final unit = existing.actualEntryUnit ?? existing.entryUnit;
           final delta = MedicationStockAdjustment.tryCalculateStockDelta(
             medication: currentMed,
             schedule: null,
-            doseValue: value,
-            doseUnit: unit,
-            preferDoseValue: true,
+            entryValue: value,
+            entryUnit: unit,
+            preferEntryValue: true,
           );
           if (delta != null && delta > 0) {
             final restored = MedicationStockAdjustment.restore(
@@ -4437,7 +4437,7 @@ void _deleteMedication(BuildContext context, Medication med) async {
 
 // Calculate adherence data for the last 7 days
 List<double> _calculateAdherenceData(Medication med) {
-  final doseLogBox = Hive.box<DoseLog>('dose_logs');
+  final entryLogBox = Hive.box<EntryLog>('entry_logs');
   final now = DateTime.now();
   final data = <double>[];
 
@@ -4449,7 +4449,7 @@ List<double> _calculateAdherenceData(Medication med) {
     ).subtract(Duration(days: i));
     final nextDay = day.add(const Duration(days: 1));
 
-    final logsForDay = doseLogBox.values.where((log) {
+    final logsForDay = entryLogBox.values.where((log) {
       return log.medicationId == med.id &&
           log.actionTime.isAfter(day) &&
           log.actionTime.isBefore(nextDay);
@@ -4466,7 +4466,7 @@ List<double> _calculateAdherenceData(Medication med) {
 }
 
 Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
-  final doseBox = Hive.box<DoseLog>('dose_logs');
+  final entryBox = Hive.box<EntryLog>('entry_logs');
   final scheduleBox = Hive.box<Schedule>('schedules');
 
   final now = DateTime.now();
@@ -4493,10 +4493,10 @@ Widget _buildAdherenceGraph(BuildContext context, Color color, Medication med) {
       continue;
     }
 
-    final taken = doseBox.values.any((log) {
+    final taken = entryBox.values.any((log) {
       final localScheduled = log.scheduledTime.toLocal();
       return log.medicationId == med.id &&
-          log.action == DoseAction.logged &&
+          log.action == EntryAction.logged &&
           localScheduled.year == date.year &&
           localScheduled.month == date.month &&
           localScheduled.day == date.day;
@@ -4542,40 +4542,40 @@ Widget _buildStockForecastCard(
 
   double weeklyConsumption = 0;
   for (final schedule in schedules) {
-    final dosesPerDay = schedule.hasMultipleTimes
+    final entriesPerDay = schedule.hasMultipleTimes
         ? schedule.timesOfDay!.length
         : 1;
     final daysPerWeek = schedule.daysOfWeek.length;
 
-    double amountPerDose = 1.0;
+    double amountPerEntry = 1.0;
     if (med.form == MedicationForm.tablet ||
         med.form == MedicationForm.capsule) {
-      if (schedule.doseValue > 0) {
-        amountPerDose = schedule.doseValue;
+      if (schedule.entryValue > 0) {
+        amountPerEntry = schedule.entryValue;
       }
     }
 
-    weeklyConsumption += dosesPerDay * daysPerWeek * amountPerDose;
+    weeklyConsumption += entriesPerDay * daysPerWeek * amountPerEntry;
   }
 
   if (weeklyConsumption == 0) return const SizedBox.shrink();
 
   final dailyConsumption = weeklyConsumption / 7.0;
 
-  double totalStockDoses = med.stockValue;
+  double totalStockEntries = med.stockValue;
 
   if (med.form == MedicationForm.multiDoseVial) {
     if (med.containerVolumeMl != null &&
-        med.volumePerDose != null &&
-        med.volumePerDose! > 0) {
+        med.volumePerEntry != null &&
+        med.volumePerEntry! > 0) {
       final activeVol = med.activeVialVolume ?? med.containerVolumeMl!;
       final sealedVol = med.stockValue * med.containerVolumeMl!;
       final totalVol = activeVol + sealedVol;
-      totalStockDoses = totalVol / med.volumePerDose!;
+      totalStockEntries = totalVol / med.volumePerEntry!;
     }
   }
 
-  final daysRemaining = totalStockDoses / dailyConsumption;
+  final daysRemaining = totalStockEntries / dailyConsumption;
   final date = DateTime.now().add(Duration(days: daysRemaining.floor()));
   final dateStr = DateFormat('d MMM y').format(date);
 

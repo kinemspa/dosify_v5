@@ -1,4 +1,4 @@
-/// ============================================================================
+﻿/// ============================================================================
 /// DESIGN TOKENS — TYPOGRAPHY, ANIMATION, ELEVATION, TEXT STYLES
 /// ============================================================================
 ///
@@ -67,10 +67,10 @@ const double kMedicationDetailStockForecastDateFontSize = 14;
 const double kMedicationDetailStockForecastDaysFontSize = 12;
 const double kMedicationDetailStockForecastExpiryFontSize = 10;
 
-/// Next-dose date badge typography (Schedules list)
-const double kNextDoseDateCircleDayFontSizeCompact = 16;
-const double kNextDoseDateCircleDayFontSizeLarge = 18;
-const double kNextDoseDateCircleMonthFontSize = kFontSizeSmall;
+/// Next-entry date badge typography (Schedules list)
+const double kNextEntryDateCircleDayFontSizeCompact = 16;
+const double kNextEntryDateCircleDayFontSizeLarge = 18;
+const double kNextEntryDateCircleMonthFontSize = kFontSizeSmall;
 
 /// Specific component font sizes
 const double kFontSizeInput = kInputFontSize; // 13
@@ -230,7 +230,7 @@ TextStyle? hintLabelTextStyle(BuildContext context, {Color? color}) {
   )?.copyWith(fontSize: kFontSizeHint, height: kLineHeightTight);
 }
 
-TextStyle? nextDoseBadgeTodayTextStyle(
+TextStyle? nextEntryBadgeTodayTextStyle(
   BuildContext context, {
   required bool dense,
   required Color color,
@@ -243,35 +243,35 @@ TextStyle? nextDoseBadgeTodayTextStyle(
   );
 }
 
-TextStyle? nextDoseBadgeDayTextStyle(
+TextStyle? nextEntryBadgeDayTextStyle(
   BuildContext context, {
   required bool dense,
   required Color color,
 }) {
   return bodyTextStyle(context)?.copyWith(
     fontSize: dense
-        ? kNextDoseDateCircleDayFontSizeCompact
-        : kNextDoseDateCircleDayFontSizeLarge,
+        ? kNextEntryDateCircleDayFontSizeCompact
+        : kNextEntryDateCircleDayFontSizeLarge,
     fontWeight: kFontWeightExtraBold,
     height: 1,
     color: color,
   );
 }
 
-TextStyle? nextDoseBadgeMonthTextStyle(
+TextStyle? nextEntryBadgeMonthTextStyle(
   BuildContext context, {
   required bool dense,
   required Color color,
 }) {
   return bodyTextStyle(context)?.copyWith(
-    fontSize: dense ? kFontSizeXSmall : kNextDoseDateCircleMonthFontSize,
+    fontSize: dense ? kFontSizeXSmall : kNextEntryDateCircleMonthFontSize,
     fontWeight: kFontWeightSemiBold,
     height: 1,
     color: color,
   );
 }
 
-TextStyle? nextDoseBadgeNextTagTextStyle(
+TextStyle? nextEntryBadgeNextTagTextStyle(
   BuildContext context, {
   required Color color,
 }) {
@@ -283,7 +283,7 @@ TextStyle? nextDoseBadgeNextTagTextStyle(
   );
 }
 
-TextStyle? nextDoseBadgeTimeTextStyle(
+TextStyle? nextEntryBadgeTimeTextStyle(
   BuildContext context, {
   required Color color,
 }) {
@@ -313,8 +313,8 @@ TextStyle? stockDonutSecondaryLabelTextStyle(
   )?.copyWith(fontSize: kFontSizeXXSmall, height: 1.0);
 }
 
-/// Dose-card leading time label style.
-TextStyle? doseCardTimeTextStyle(BuildContext context, {required Color color}) {
+/// Entry-card leading time label style.
+TextStyle? entryCardTimeTextStyle(BuildContext context, {required Color color}) {
   return helperTextStyle(context, color: color)?.copyWith(
     fontSize: kFontSizeXSmall,
     fontWeight: kFontWeightBold,
@@ -322,8 +322,8 @@ TextStyle? doseCardTimeTextStyle(BuildContext context, {required Color color}) {
   );
 }
 
-/// Dose-card primary title style (med name).
-TextStyle? doseCardPrimaryTitleTextStyle(
+/// Entry-card primary title style (med name).
+TextStyle? entryCardPrimaryTitleTextStyle(
   BuildContext context, {
   required Color color,
 }) {
@@ -335,8 +335,8 @@ TextStyle? doseCardPrimaryTitleTextStyle(
   );
 }
 
-/// Dose-card secondary title style (schedule/dose name).
-TextStyle? doseCardSecondaryTitleTextStyle(
+/// Entry-card secondary title style (schedule/entry name).
+TextStyle? entryCardSecondaryTitleTextStyle(
   BuildContext context, {
   required Color color,
 }) {
@@ -348,8 +348,8 @@ TextStyle? doseCardSecondaryTitleTextStyle(
   );
 }
 
-/// Dose-card leading dose-number label style.
-TextStyle? doseCardDoseNumberTextStyle(
+/// Entry-card leading entry-number label style.
+TextStyle? entryCardEntryNumberTextStyle(
   BuildContext context, {
   required Color color,
 }) {
@@ -359,8 +359,8 @@ TextStyle? doseCardDoseNumberTextStyle(
   )?.copyWith(fontSize: kFontSizeXXSmall, height: kLineHeightTight);
 }
 
-/// Dose-card status-chip label style.
-TextStyle? doseCardStatusChipLabelTextStyle(
+/// Entry-card status-chip label style.
+TextStyle? entryCardStatusChipLabelTextStyle(
   BuildContext context, {
   required Color color,
 }) {
@@ -371,8 +371,8 @@ TextStyle? doseCardStatusChipLabelTextStyle(
   );
 }
 
-/// Dose-card "Take ..." metrics line style.
-TextStyle? doseCardTakeMetricsTextStyle(
+/// Entry-card "Take ..." metrics line style.
+TextStyle? entryCardTakeMetricsTextStyle(
   BuildContext context, {
   required Color color,
 }) {
@@ -383,15 +383,15 @@ TextStyle? doseCardTakeMetricsTextStyle(
   );
 }
 
-/// Centralized DoseCard content padding.
-EdgeInsets doseCardContentPadding({required bool compact}) {
+/// Centralized EntryCard content padding.
+EdgeInsets entryCardContentPadding({required bool compact}) {
   return EdgeInsets.symmetric(
     horizontal: compact ? kSpacingL : kSpacingXL,
     vertical: compact ? kSpacingXS : kSpacingS,
   );
 }
 
-double doseCardColumnGap({required bool compact}) {
+double entryCardColumnGap({required bool compact}) {
   return compact ? kSpacingS : (kSpacingM - kSpacingXXS);
 }
 
@@ -847,8 +847,8 @@ TextStyle? reconCalculatorOptionTitleTextStyle(
   );
 }
 
-/// Week-view compact dose indicator (value/initial) text style.
-TextStyle? calendarWeekDoseIndicatorValueTextStyle(
+/// Week-view compact entry indicator (value/initial) text style.
+TextStyle? calendarWeekEntryIndicatorValueTextStyle(
   BuildContext context, {
   Color? color,
 }) {
@@ -861,8 +861,8 @@ TextStyle? calendarWeekDoseIndicatorValueTextStyle(
   );
 }
 
-/// Week-view compact dose indicator (time) text style.
-TextStyle? calendarWeekDoseIndicatorTimeTextStyle(
+/// Week-view compact entry indicator (time) text style.
+TextStyle? calendarWeekEntryIndicatorTimeTextStyle(
   BuildContext context, {
   Color? color,
 }) {
@@ -1083,8 +1083,8 @@ TextStyle? calendarDayOverflowTextStyle(BuildContext context) {
   ).textTheme.labelSmall?.copyWith(fontWeight: kFontWeightSemiBold);
 }
 
-/// Calendar compact dose-block title style (e.g. schedule name in a block).
-TextStyle? calendarDoseBlockTitleTextStyle(
+/// Calendar compact entry-block title style (e.g. schedule name in a block).
+TextStyle? calendarEntryBlockTitleTextStyle(
   BuildContext context, {
   Color? color,
 }) {
@@ -1095,8 +1095,8 @@ TextStyle? calendarDoseBlockTitleTextStyle(
   );
 }
 
-/// Calendar compact dose-block subtitle style (e.g. dose description in a block).
-TextStyle? calendarDoseBlockSubtitleTextStyle(
+/// Calendar compact entry-block subtitle style (e.g. entry description in a block).
+TextStyle? calendarEntryBlockSubtitleTextStyle(
   BuildContext context, {
   Color? color,
 }) {

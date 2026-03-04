@@ -1,4 +1,4 @@
-/// Canonical disclaimer strings for Dosifi.
+﻿/// Canonical disclaimer strings for Dosifi.
 ///
 /// All disclaimer text lives here as a single source of truth so that the
 /// marketing docs, in-app dialogs, settings page, and Store listings all
@@ -23,11 +23,11 @@ Dosifi is not a doctor, pharmacist, nurse, or healthcare provider.
 
 Dosifi does not offer health recommendations, treatment plans, or clinical guidance.
 
-Dosifi is purely a tracking app with medication metrics and records (for example: schedules, doses, dose logs, inventory, and vial/reconstitution tracking). It is intended for tracking approved medications only and does not endorse or facilitate use of unapproved substances.
+Dosifi is purely a tracking app with medication metrics and records (for example: schedules, entries, entry logs, inventory, and vial/reconstitution tracking). It is intended for tracking approved medications only and does not endorse or facilitate use of unapproved substances.
 
-You should always follow instructions from your licensed healthcare professional and the official medication labeling. Do not start, stop, or change any medicine, dose, concentration, schedule, titration, or injection/reconstitution process based solely on information displayed in this app.
+You should always follow instructions from your licensed healthcare professional and the official medication labeling. Do not start, stop, or change any medicine, entry, concentration, schedule, titration, or injection/reconstitution process based solely on information displayed in this app.
 
-Dosifi reminders and notifications may be affected by device settings, battery optimization, operating system restrictions, network conditions, time zone changes, and manufacturer-specific behavior. Reminder delivery is not guaranteed. You are responsible for maintaining a backup reminder method for critical doses.
+Dosifi reminders and notifications may be affected by device settings, battery optimization, operating system restrictions, network conditions, time zone changes, and manufacturer-specific behavior. Reminder delivery is not guaranteed. You are responsible for maintaining a backup reminder method for critical entries.
 
 Any calculations, including reconstitution, concentration, and vial-related calculations, are simple mathematical conversions provided for organizational convenience only and must be independently verified by a qualified healthcare professional before use. Dosifi does not interpret or analyze medical data.
 
@@ -41,8 +41,8 @@ To the maximum extent permitted by applicable law, Dosifi and its developers dis
 
   static const String onboarding =
       'Dosifi helps you organize medicines and schedules, but it is not medical advice, '
-      'diagnosis, or treatment. Verify all dose and reconstitution details with your '
-      'healthcare professional. Keep a backup reminder method for important doses.\n\n'
+      'diagnosis, or treatment. Verify all entry and reconstitution details with your '
+      'healthcare professional. Keep a backup reminder method for important entries.\n\n'
       'Dosifi is not a doctor and does not offer health recommendations or decisions about '
       'diseases/conditions. It is a tracking app for medication metrics only, intended '
       'for approved medications.';

@@ -1,4 +1,4 @@
-// Project imports:
+﻿// Project imports:
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
@@ -9,17 +9,17 @@ class MedicationStockAdjustment {
   static double? tryCalculateStockDelta({
     required Medication medication,
     Schedule? schedule,
-    double? doseValue,
-    String? doseUnit,
-    bool preferDoseValue = false,
+    double? entryValue,
+    String? entryUnit,
+    bool preferEntryValue = false,
   }) {
     final StockUnit stockUnit = medication.stockUnit;
 
-    if (preferDoseValue && doseValue != null && doseValue > 0) {
-      final delta = _tryCalculateFromDoseValue(
+    if (preferEntryValue && entryValue != null && entryValue > 0) {
+      final delta = _tryCalculateFromEntryValue(
         medication: medication,
-        doseValue: doseValue,
-        doseUnit: doseUnit,
+        entryValue: entryValue,
+        entryUnit: entryUnit,
       );
       if (delta != null && delta > 0) return delta;
     }
@@ -32,54 +32,54 @@ class MedicationStockAdjustment {
       if (calculated != null && calculated > 0) return calculated;
 
       // Fallback: if schedule is a simple numeric unit that matches stockUnit.
-      final scheduleUnit = schedule.doseUnit.trim().toLowerCase();
-      final scheduleValue = schedule.doseValue;
+      final scheduleUnit = schedule.entryUnit.trim().toLowerCase();
+      final scheduleValue = schedule.entryValue;
       if (scheduleValue > 0 &&
-          _doseUnitMatchesStockUnit(scheduleUnit, stockUnit)) {
+          _entryUnitMatchesStockUnit(scheduleUnit, stockUnit)) {
         return scheduleValue.toDouble();
       }
     }
 
-    if (doseValue != null && doseValue > 0) {
-      final unit = (doseUnit ?? '').trim().toLowerCase();
+    if (entryValue != null && entryValue > 0) {
+      final unit = (entryUnit ?? '').trim().toLowerCase();
 
       if (stockUnit == StockUnit.multiDoseVials) {
         // For MDV, delta is mL consumed; only accept direct volume units.
-        if (_looksLikeMl(unit)) return doseValue;
+        if (_looksLikeMl(unit)) return entryValue;
         return null;
       }
 
-      if (unit.isEmpty || _doseUnitMatchesStockUnit(unit, stockUnit)) {
-        return doseValue;
+      if (unit.isEmpty || _entryUnitMatchesStockUnit(unit, stockUnit)) {
+        return entryValue;
       }
 
-      // Mass fallbacks: if doseUnit is a mass unit that matches stockUnit.
-      final massDelta = _tryConvertMassToStockUnit(doseValue, unit, stockUnit);
+      // Mass fallbacks: if entryUnit is a mass unit that matches stockUnit.
+      final massDelta = _tryConvertMassToStockUnit(entryValue, unit, stockUnit);
       if (massDelta != null && massDelta > 0) return massDelta;
     }
 
     return null;
   }
 
-  static double? _tryCalculateFromDoseValue({
+  static double? _tryCalculateFromEntryValue({
     required Medication medication,
-    required double doseValue,
-    String? doseUnit,
+    required double entryValue,
+    String? entryUnit,
   }) {
     final StockUnit stockUnit = medication.stockUnit;
-    final unit = (doseUnit ?? '').trim().toLowerCase();
+    final unit = (entryUnit ?? '').trim().toLowerCase();
 
     if (stockUnit == StockUnit.multiDoseVials) {
       // For MDV, delta is mL consumed; only accept direct volume units.
-      if (_looksLikeMl(unit)) return doseValue;
+      if (_looksLikeMl(unit)) return entryValue;
       return null;
     }
 
-    if (unit.isEmpty || _doseUnitMatchesStockUnit(unit, stockUnit)) {
-      return doseValue;
+    if (unit.isEmpty || _entryUnitMatchesStockUnit(unit, stockUnit)) {
+      return entryValue;
     }
 
-    final massDelta = _tryConvertMassToStockUnit(doseValue, unit, stockUnit);
+    final massDelta = _tryConvertMassToStockUnit(entryValue, unit, stockUnit);
     if (massDelta != null && massDelta > 0) return massDelta;
 
     return null;
@@ -124,16 +124,16 @@ class MedicationStockAdjustment {
   }) {
     switch (medication.stockUnit) {
       case StockUnit.tablets:
-        if (schedule.doseTabletQuarters != null) {
-          return schedule.doseTabletQuarters! / 4.0;
+        if (schedule.entryTabletQuarters != null) {
+          return schedule.entryTabletQuarters! / 4.0;
         }
-        if (schedule.doseMassMcg != null) {
+        if (schedule.entryMassMcg != null) {
           final perTabMcg = _convertToMcg(
             medication.strengthValue,
             medication.strengthUnit,
           );
           if (perTabMcg <= 0) return null;
-          return (schedule.doseMassMcg! / perTabMcg).clamp(
+          return (schedule.entryMassMcg! / perTabMcg).clamp(
             0.0,
             double.infinity,
           );
@@ -141,16 +141,16 @@ class MedicationStockAdjustment {
         return null;
 
       case StockUnit.capsules:
-        if (schedule.doseCapsules != null) {
-          return schedule.doseCapsules!.toDouble();
+        if (schedule.entryCapsules != null) {
+          return schedule.entryCapsules!.toDouble();
         }
-        if (schedule.doseMassMcg != null) {
+        if (schedule.entryMassMcg != null) {
           final perCapMcg = _convertToMcg(
             medication.strengthValue,
             medication.strengthUnit,
           );
           if (perCapMcg <= 0) return null;
-          return (schedule.doseMassMcg! / perCapMcg).clamp(
+          return (schedule.entryMassMcg! / perCapMcg).clamp(
             0.0,
             double.infinity,
           );
@@ -158,14 +158,14 @@ class MedicationStockAdjustment {
         return null;
 
       case StockUnit.preFilledSyringes:
-        if (schedule.doseSyringes != null) {
-          return schedule.doseSyringes!.toDouble();
+        if (schedule.entrySyringes != null) {
+          return schedule.entrySyringes!.toDouble();
         }
         return null;
 
       case StockUnit.singleDoseVials:
-        if (schedule.doseVials != null) {
-          return schedule.doseVials!.toDouble();
+        if (schedule.entryVials != null) {
+          return schedule.entryVials!.toDouble();
         }
         return null;
 
@@ -179,20 +179,20 @@ class MedicationStockAdjustment {
         return null;
 
       case StockUnit.mcg:
-        if (schedule.doseMassMcg != null) {
-          return schedule.doseMassMcg!.toDouble();
+        if (schedule.entryMassMcg != null) {
+          return schedule.entryMassMcg!.toDouble();
         }
         return null;
 
       case StockUnit.mg:
-        if (schedule.doseMassMcg != null) {
-          return schedule.doseMassMcg! / 1000.0;
+        if (schedule.entryMassMcg != null) {
+          return schedule.entryMassMcg! / 1000.0;
         }
         return null;
 
       case StockUnit.g:
-        if (schedule.doseMassMcg != null) {
-          return schedule.doseMassMcg! / 1e6;
+        if (schedule.entryMassMcg != null) {
+          return schedule.entryMassMcg! / 1e6;
         }
         return null;
     }
@@ -202,27 +202,27 @@ class MedicationStockAdjustment {
     required Medication medication,
     required Schedule schedule,
   }) {
-    if (schedule.doseVolumeMicroliter != null) {
-      return schedule.doseVolumeMicroliter! / 1000.0;
+    if (schedule.entryVolumeMicroliter != null) {
+      return schedule.entryVolumeMicroliter! / 1000.0;
     }
 
-    // Fallback: allow explicit mL doseValue in schedule.
-    final scheduleUnit = schedule.doseUnit.trim().toLowerCase();
-    if (_looksLikeMl(scheduleUnit) && schedule.doseValue > 0) {
-      return schedule.doseValue.toDouble();
+    // Fallback: allow explicit mL entryValue in schedule.
+    final scheduleUnit = schedule.entryUnit.trim().toLowerCase();
+    if (_looksLikeMl(scheduleUnit) && schedule.entryValue > 0) {
+      return schedule.entryValue.toDouble();
     }
 
-    if (schedule.doseMassMcg != null) {
+    if (schedule.entryMassMcg != null) {
       final mgPerMl = _tryGetMgPerMl(medication);
       if (mgPerMl == null || mgPerMl <= 0) return null;
-      final mg = schedule.doseMassMcg! / 1000.0;
+      final mg = schedule.entryMassMcg! / 1000.0;
       return mg / mgPerMl;
     }
 
-    if (schedule.doseIU != null) {
+    if (schedule.entryIU != null) {
       final iuPerMl = _tryGetUnitsPerMl(medication);
       if (iuPerMl == null || iuPerMl <= 0) return null;
-      return schedule.doseIU! / iuPerMl;
+      return schedule.entryIU! / iuPerMl;
     }
 
     return null;
@@ -259,26 +259,26 @@ class MedicationStockAdjustment {
     }
   }
 
-  static bool _doseUnitMatchesStockUnit(String doseUnit, StockUnit stockUnit) {
-    if (doseUnit.isEmpty) return false;
+  static bool _entryUnitMatchesStockUnit(String entryUnit, StockUnit stockUnit) {
+    if (entryUnit.isEmpty) return false;
 
     switch (stockUnit) {
       case StockUnit.tablets:
-        return doseUnit.contains('tablet');
+        return entryUnit.contains('tablet');
       case StockUnit.capsules:
-        return doseUnit.contains('capsule');
+        return entryUnit.contains('capsule');
       case StockUnit.preFilledSyringes:
-        return doseUnit.contains('syringe');
+        return entryUnit.contains('syringe');
       case StockUnit.singleDoseVials:
-        return doseUnit.contains('vial');
+        return entryUnit.contains('vial');
       case StockUnit.multiDoseVials:
-        return _looksLikeMl(doseUnit);
+        return _looksLikeMl(entryUnit);
       case StockUnit.mcg:
-        return doseUnit == 'mcg' || doseUnit == 'μg' || doseUnit == 'ug';
+        return entryUnit == 'mcg' || entryUnit == 'μg' || entryUnit == 'ug';
       case StockUnit.mg:
-        return doseUnit == 'mg';
+        return entryUnit == 'mg';
       case StockUnit.g:
-        return doseUnit == 'g';
+        return entryUnit == 'g';
     }
   }
 

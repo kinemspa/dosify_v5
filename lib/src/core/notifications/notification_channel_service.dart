@@ -1,4 +1,4 @@
-// Dart imports:
+﻿// Dart imports:
 import 'dart:io' show Platform;
 
 // Flutter imports:
@@ -61,9 +61,9 @@ class NotificationChannelService {
   }
 
   // ── Android notification channels ─────────────────────────────────────────
-  static const AndroidNotificationChannel _upcomingDose =
+  static const AndroidNotificationChannel _upcomingEntry =
       AndroidNotificationChannel(
-        'upcoming_dose',
+        'upcoming_entry',
         'Schedule Reminders',
         description: 'Alerts sent at each scheduled time',
         importance: Importance.high,
@@ -87,8 +87,8 @@ class NotificationChannelService {
         importance: Importance.max,
       );
 
-  /// Action buttons shown on upcoming-dose notifications.
-  static const List<AndroidNotificationAction> upcomingDoseActions = [
+  /// Action buttons shown on upcoming-entry notifications.
+  static const List<AndroidNotificationAction> upcomingEntryActions = [
     AndroidNotificationAction(
       'log',
       'Log',
@@ -201,7 +201,7 @@ class NotificationChannelService {
         >();
     if (android != null) {
       _log('Creating Android notification channels');
-      await android.createNotificationChannel(_upcomingDose);
+      await android.createNotificationChannel(_upcomingEntry);
       await android.createNotificationChannel(_lowStock);
       await android.createNotificationChannel(_expiry);
       await android.createNotificationChannel(_testAlarm);
@@ -409,9 +409,9 @@ class NotificationChannelService {
     try {
       final importance = await platform.invokeMethod<int>(
         'getChannelImportance',
-        {'channelId': 'upcoming_dose'},
+        {'channelId': 'upcoming_entry'},
       );
-      _log('Channel "upcoming_dose" importance: ${importance?.toString() ?? 'null'}');
+      _log('Channel "upcoming_entry" importance: ${importance?.toString() ?? 'null'}');
     } catch (e) {
       _log('Error querying channel importance: $e');
     }

@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/utils/format.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
-// import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart'; // unused
+// import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart'; // unused
 
 /// Centralized helpers for displaying medication information.
 class MedicationDisplayHelpers {
@@ -20,7 +20,7 @@ class MedicationDisplayHelpers {
     };
   }
 
-  static String formatDoseMassFromMcg(Medication med, double mcg) {
+  static String formatEntryMassFromMcg(Medication med, double mcg) {
     switch (med.strengthUnit) {
       case Unit.mcg:
       case Unit.mcgPerMl:
@@ -37,7 +37,7 @@ class MedicationDisplayHelpers {
     }
   }
 
-  static String formatDoseVolumeFromMicroliter(double microliter) {
+  static String formatEntryVolumeFromMicroliter(double microliter) {
     return '${fmt2(microliter / 1000)} mL';
   }
 
@@ -102,24 +102,24 @@ class MedicationDisplayHelpers {
     }
   }
 
-  /// Formats dose metrics consistently across screens.
+  /// Formats entry metrics consistently across screens.
   ///
   /// Inputs:
   /// - [med] provides the dosage form and preferred strength unit.
-  /// - Dose inputs are expected to be in the same units used by schedules:
-  ///   - [doseMassMcg] in micrograms
-  ///   - [doseVolumeMicroliter] in microliters
+  /// - Entry inputs are expected to be in the same units used by schedules:
+  ///   - [entryMassMcg] in micrograms
+  ///   - [entryVolumeMicroliter] in microliters
   ///   - [syringeUnits] in device units (U)
   ///
   /// The returned string is intended for compact summaries (single line).
-  static String doseMetricsSummary(
+  static String entryMetricsSummary(
     Medication med, {
-    int? doseTabletQuarters,
-    int? doseCapsules,
-    int? doseSyringes,
-    int? doseVials,
-    double? doseMassMcg,
-    double? doseVolumeMicroliter,
+    int? entryTabletQuarters,
+    int? entryCapsules,
+    int? entrySyringes,
+    int? entryVials,
+    double? entryMassMcg,
+    double? entryVolumeMicroliter,
     double? syringeUnits,
     String separator = ' × ',
   }) {
@@ -133,7 +133,7 @@ class MedicationDisplayHelpers {
     }
 
     String formatStrengthFromMcg(double mcg) {
-      return formatDoseMassFromMcg(med, mcg);
+      return formatEntryMassFromMcg(med, mcg);
     }
 
     final metrics = <String>[];
@@ -141,15 +141,15 @@ class MedicationDisplayHelpers {
     final derivedUnits =
         (med.form == MedicationForm.multiDoseVial &&
             syringeUnits == null &&
-            doseVolumeMicroliter != null)
-        ? (doseVolumeMicroliter / 1000) * SyringeType.ml_1_0.unitsPerMl
+            entryVolumeMicroliter != null)
+        ? (entryVolumeMicroliter / 1000) * SyringeType.ml_1_0.unitsPerMl
         : null;
     final effectiveSyringeUnits = syringeUnits ?? derivedUnits;
 
     switch (med.form) {
       case MedicationForm.tablet:
-        if (doseTabletQuarters != null) {
-          final quarters = doseTabletQuarters;
+        if (entryTabletQuarters != null) {
+          final quarters = entryTabletQuarters;
           final count = quarters / 4.0;
           final unit = (count - 1.0).abs() < 0.0001 || count < 1
               ? 'tablet'
@@ -157,18 +157,18 @@ class MedicationDisplayHelpers {
           metrics.add('${formatTabletCountFromQuarters(quarters)} $unit');
         }
       case MedicationForm.capsule:
-        if (doseCapsules != null) {
-          final n = doseCapsules;
+        if (entryCapsules != null) {
+          final n = entryCapsules;
           metrics.add('$n ${n == 1 ? 'capsule' : 'capsules'}');
         }
       case MedicationForm.prefilledSyringe:
-        if (doseSyringes != null) {
-          final n = doseSyringes;
+        if (entrySyringes != null) {
+          final n = entrySyringes;
           metrics.add('$n ${n == 1 ? 'syringe' : 'syringes'}');
         }
       case MedicationForm.singleDoseVial:
-        if (doseVials != null) {
-          final n = doseVials;
+        if (entryVials != null) {
+          final n = entryVials;
           metrics.add('$n ${n == 1 ? 'vial' : 'vials'}');
         }
       case MedicationForm.multiDoseVial:
@@ -180,18 +180,18 @@ class MedicationDisplayHelpers {
       if (effectiveSyringeUnits != null) {
         metrics.add(formatSyringeUnits(effectiveSyringeUnits, longLabel: true));
       }
-      if (doseVolumeMicroliter != null) {
-        metrics.add(formatDoseVolumeFromMicroliter(doseVolumeMicroliter));
+      if (entryVolumeMicroliter != null) {
+        metrics.add(formatEntryVolumeFromMicroliter(entryVolumeMicroliter));
       }
-      if (doseMassMcg != null) {
-        metrics.add(formatStrengthFromMcg(doseMassMcg));
+      if (entryMassMcg != null) {
+        metrics.add(formatStrengthFromMcg(entryMassMcg));
       }
     } else {
-      if (doseMassMcg != null) {
-        metrics.add(formatStrengthFromMcg(doseMassMcg));
+      if (entryMassMcg != null) {
+        metrics.add(formatStrengthFromMcg(entryMassMcg));
       }
-      if (doseVolumeMicroliter != null) {
-        metrics.add(formatDoseVolumeFromMicroliter(doseVolumeMicroliter));
+      if (entryVolumeMicroliter != null) {
+        metrics.add(formatEntryVolumeFromMicroliter(entryVolumeMicroliter));
       }
       if (effectiveSyringeUnits != null) {
         metrics.add(
@@ -217,9 +217,9 @@ class MedicationDisplayHelpers {
         case MedicationForm.prefilledSyringe:
           return 'Pre-Filled Syringes';
         case MedicationForm.singleDoseVial:
-          return 'Single Dose Vials';
+          return 'Single Entry Vials';
         case MedicationForm.multiDoseVial:
-          return 'Multi Dose Vial';
+          return 'Multi Entry Vial';
       }
     }
     // Singular
@@ -231,9 +231,9 @@ class MedicationDisplayHelpers {
       case MedicationForm.prefilledSyringe:
         return 'Pre-Filled Syringe';
       case MedicationForm.singleDoseVial:
-        return 'Single Dose Vial';
+        return 'Single Entry Vial';
       case MedicationForm.multiDoseVial:
-        return 'Multi Dose Vial';
+        return 'Multi Entry Vial';
     }
   }
 
@@ -369,28 +369,28 @@ class StockDisplayInfo {
       label.split(' ').length > 1 ? label.split(' ').sublist(1).join(' ') : '';
 }
 
-/// Apply a single scheduled dose decrement to a medication and return an updated
+/// Apply a single scheduled entry decrement to a medication and return an updated
 /// Medication object.
 ///
 /// Behavior:
-/// - For tablets/capsules/single dose vials/pre-filled syringes, this subtracts
+/// - For tablets/capsules/single entry vials/pre-filled syringes, this subtracts
 ///   the relevant quantity from `stockValue`.
 /// - For multi-dose vials (MDV) it decrements `activeVialVolume` first and, if
 ///   the active vial is depleted, opens backup sealed vials (reducing `stockValue`)
-///   as required to satisfy the dose. The helper will consume multiple backup
+///   as required to satisfy the entry. The helper will consume multiple backup
 ///   vials if necessary, and clamps values to non-negative ranges.
 /// - Returns `null` if the decrement could not be computed (e.g., missing
 ///   strength, missing per-mL conversions required for MDV dosing).
-Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
+Medication? applyEntryTakenUpdate(Medication med, Schedule s) {
   // Copy candidates
   var updated = med;
 
   switch (med.stockUnit) {
     case StockUnit.tablets:
       double delta = 0.0;
-      if (s.doseTabletQuarters != null) {
-        delta = s.doseTabletQuarters! / 4.0;
-      } else if (s.doseMassMcg != null) {
+      if (s.entryTabletQuarters != null) {
+        delta = s.entryTabletQuarters! / 4.0;
+      } else if (s.entryMassMcg != null) {
         final perTabMcg = switch (med.strengthUnit) {
           Unit.mcg => med.strengthValue,
           Unit.mg => med.strengthValue * 1000,
@@ -401,7 +401,7 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
           Unit.gPerMl => med.strengthValue * 1e6,
           Unit.unitsPerMl => med.strengthValue,
         };
-        delta = (s.doseMassMcg! / perTabMcg).clamp(0, double.infinity);
+        delta = (s.entryMassMcg! / perTabMcg).clamp(0, double.infinity);
       }
       if (delta <= 0) return null;
       updated = updated.copyWith(
@@ -411,9 +411,9 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
 
     case StockUnit.capsules:
       double delta = 0.0;
-      if (s.doseCapsules != null) {
-        delta = s.doseCapsules!.toDouble();
-      } else if (s.doseMassMcg != null) {
+      if (s.entryCapsules != null) {
+        delta = s.entryCapsules!.toDouble();
+      } else if (s.entryMassMcg != null) {
         final perCapMcg = switch (med.strengthUnit) {
           Unit.mcg => med.strengthValue,
           Unit.mg => med.strengthValue * 1000,
@@ -421,7 +421,7 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
           Unit.units => med.strengthValue,
           _ => med.strengthValue,
         };
-        delta = (s.doseMassMcg! / perCapMcg).clamp(0, double.infinity);
+        delta = (s.entryMassMcg! / perCapMcg).clamp(0, double.infinity);
       }
       if (delta <= 0) return null;
       updated = updated.copyWith(
@@ -430,8 +430,8 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
       return updated;
 
     case StockUnit.preFilledSyringes:
-      if (s.doseSyringes != null) {
-        final delta = s.doseSyringes!.toDouble();
+      if (s.entrySyringes != null) {
+        final delta = s.entrySyringes!.toDouble();
         updated = updated.copyWith(
           stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
         );
@@ -440,8 +440,8 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
       return null;
 
     case StockUnit.singleDoseVials:
-      if (s.doseVials != null) {
-        final delta = s.doseVials!.toDouble();
+      if (s.entryVials != null) {
+        final delta = s.entryVials!.toDouble();
         updated = updated.copyWith(
           stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
         );
@@ -452,9 +452,9 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
     case StockUnit.multiDoseVials:
       // For MDV: compute used milliliters and decrement active vial first
       var usedMl = 0.0;
-      if (s.doseVolumeMicroliter != null) {
-        usedMl = s.doseVolumeMicroliter! / 1000.0;
-      } else if (s.doseMassMcg != null) {
+      if (s.entryVolumeMicroliter != null) {
+        usedMl = s.entryVolumeMicroliter! / 1000.0;
+      } else if (s.entryMassMcg != null) {
         double? mgPerMl;
         switch (med.strengthUnit) {
           case Unit.mgPerMl:
@@ -469,12 +469,12 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
           default:
             mgPerMl = null;
         }
-        if (mgPerMl != null) usedMl = (s.doseMassMcg! / 1000.0) / mgPerMl;
-      } else if (s.doseIU != null) {
+        if (mgPerMl != null) usedMl = (s.entryMassMcg! / 1000.0) / mgPerMl;
+      } else if (s.entryIU != null) {
         double? iuPerMl;
         if (med.strengthUnit == Unit.unitsPerMl)
           iuPerMl = med.perMlValue ?? med.strengthValue;
-        if (iuPerMl != null) usedMl = s.doseIU! / iuPerMl;
+        if (iuPerMl != null) usedMl = s.entryIU! / iuPerMl;
       }
 
       if (usedMl > 0) {
@@ -530,8 +530,8 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
       return null;
 
     case StockUnit.mcg:
-      if (s.doseMassMcg != null) {
-        final delta = s.doseMassMcg!.toDouble();
+      if (s.entryMassMcg != null) {
+        final delta = s.entryMassMcg!.toDouble();
         updated = updated.copyWith(
           stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
         );
@@ -539,8 +539,8 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
       }
       return null;
     case StockUnit.mg:
-      if (s.doseMassMcg != null) {
-        final delta = s.doseMassMcg! / 1000.0;
+      if (s.entryMassMcg != null) {
+        final delta = s.entryMassMcg! / 1000.0;
         updated = updated.copyWith(
           stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
         );
@@ -548,8 +548,8 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
       }
       return null;
     case StockUnit.g:
-      if (s.doseMassMcg != null) {
-        final delta = s.doseMassMcg! / 1e6;
+      if (s.entryMassMcg != null) {
+        final delta = s.entryMassMcg! / 1e6;
         updated = updated.copyWith(
           stockValue: (med.stockValue - delta).clamp(0.0, double.infinity),
         );
@@ -560,33 +560,33 @@ Medication? applyDoseTakenUpdate(Medication med, Schedule s) {
 }
 
 /// Extension on [Schedule] that eliminates the 7-argument boilerplate when
-/// calling [MedicationDisplayHelpers.doseMetricsSummary].
+/// calling [MedicationDisplayHelpers.entryMetricsSummary].
 ///
 /// Replaces the repeated:
 /// ```dart
-/// MedicationDisplayHelpers.doseMetricsSummary(
+/// MedicationDisplayHelpers.entryMetricsSummary(
 ///   med,
-///   doseTabletQuarters: schedule.doseTabletQuarters,
-///   doseCapsules:       schedule.doseCapsules,
-///   doseSyringes:       schedule.doseSyringes,
-///   doseVials:          schedule.doseVials,
-///   doseMassMcg:        schedule.doseMassMcg?.toDouble(),
-///   doseVolumeMicroliter: schedule.doseVolumeMicroliter?.toDouble(),
-///   syringeUnits:       schedule.doseIU?.toDouble(),
+///   entryTabletQuarters: schedule.entryTabletQuarters,
+///   entryCapsules:       schedule.entryCapsules,
+///   entrySyringes:       schedule.entrySyringes,
+///   entryVials:          schedule.entryVials,
+///   entryMassMcg:        schedule.entryMassMcg?.toDouble(),
+///   entryVolumeMicroliter: schedule.entryVolumeMicroliter?.toDouble(),
+///   syringeUnits:       schedule.entryIU?.toDouble(),
 /// )
 /// ```
 /// with the single-expression form `schedule.displayMetrics(med)`.
 extension ScheduleMetricsX on Schedule {
   String displayMetrics(Medication med, {String separator = ' × '}) =>
-      MedicationDisplayHelpers.doseMetricsSummary(
+      MedicationDisplayHelpers.entryMetricsSummary(
         med,
-        doseTabletQuarters: doseTabletQuarters,
-        doseCapsules: doseCapsules,
-        doseSyringes: doseSyringes,
-        doseVials: doseVials,
-        doseMassMcg: doseMassMcg?.toDouble(),
-        doseVolumeMicroliter: doseVolumeMicroliter?.toDouble(),
-        syringeUnits: doseIU?.toDouble(),
+        entryTabletQuarters: entryTabletQuarters,
+        entryCapsules: entryCapsules,
+        entrySyringes: entrySyringes,
+        entryVials: entryVials,
+        entryMassMcg: entryMassMcg?.toDouble(),
+        entryVolumeMicroliter: entryVolumeMicroliter?.toDouble(),
+        syringeUnits: entryIU?.toDouble(),
         separator: separator,
       );
 }

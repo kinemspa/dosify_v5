@@ -1,25 +1,25 @@
-import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
+﻿import 'package:dosifi_v5/src/core/design_system.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
 import 'package:intl/intl.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_dose_block.dart';
+import 'package:dosifi_v5/src/widgets/calendar/calendar_entry_block.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_shared.dart';
 import 'package:flutter/material.dart';
 
-/// A day view showing an hourly timeline with dose blocks.
+/// A day view showing an hourly timeline with entry blocks.
 ///
-/// Displays hours from 12 AM to 11 PM (full 24 hours) with doses positioned at their scheduled times.
+/// Displays hours from 12 AM to 11 PM (full 24 hours) with entries positioned at their scheduled times.
 /// Features:
 /// - Hourly grid with time labels
 /// - Current time indicator (red line)
-/// - Dose blocks at scheduled times
+/// - Entry blocks at scheduled times
 /// - Auto-scroll to current hour
-/// - Tap dose → detail callback
+/// - Tap entry → detail callback
 /// - Swipe left/right → navigate days
 class CalendarDayView extends StatefulWidget {
   const CalendarDayView({
     required this.date,
-    required this.doses,
-    this.onDoseTap,
+    required this.entries,
+    this.onEntryTap,
     this.selectedHour,
     this.onHourTap,
     this.onDateChanged,
@@ -27,8 +27,8 @@ class CalendarDayView extends StatefulWidget {
   });
 
   final DateTime date;
-  final List<CalculatedDose> doses;
-  final void Function(CalculatedDose dose)? onDoseTap;
+  final List<CalculatedEntry> entries;
+  final void Function(CalculatedEntry entry)? onEntryTap;
   final int? selectedHour;
   final void Function(int hour)? onHourTap;
   final void Function(DateTime date)? onDateChanged;
@@ -43,7 +43,7 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   static const int _endHour = 23; // 11 PM
   static const int _hourCount = _endHour - _startHour + 1; // 24 hours
 
-  /// When true, hours with no scheduled doses are rendered at
+  /// When true, hours with no scheduled entries are rendered at
   /// [kCalendarHourHeightCollapsed] instead of [kCalendarHourHeight].
   bool _collapseEmptyHours = true;
 
@@ -76,13 +76,13 @@ class _CalendarDayViewState extends State<CalendarDayView> {
           curve: Curves.easeInOut,
         );
       }
-    } else if (widget.doses.isNotEmpty) {
-      // Non-today: scroll to the earliest scheduled dose.
-      final firstDoseHour = widget.doses
+    } else if (widget.entries.isNotEmpty) {
+      // Non-today: scroll to the earliest scheduled entry.
+      final firstEntryHour = widget.entries
           .map((d) => d.scheduledTime.hour)
           .reduce((a, b) => a < b ? a : b);
       _scrollController.animateTo(
-        _hourTop(firstDoseHour),
+        _hourTop(firstEntryHour),
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
@@ -94,8 +94,8 @@ class _CalendarDayViewState extends State<CalendarDayView> {
   double _hourTop(int hour) {
     var y = 0.0;
     for (var h = _startHour; h < hour; h++) {
-      final hasDose = _getDosesForHour(h).isNotEmpty;
-      y += _collapseEmptyHours && !hasDose
+      final hasEntry = _getEntriesForHour(h).isNotEmpty;
+      y += _collapseEmptyHours && !hasEntry
           ? kCalendarHourHeightCollapsed
           : kCalendarHourHeight;
     }
@@ -118,23 +118,23 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 
     if (currentHour < _startHour || currentHour > _endHour) return -1;
 
-    final rowHeight = (_collapseEmptyHours && _getDosesForHour(currentHour).isEmpty)
+    final rowHeight = (_collapseEmptyHours && _getEntriesForHour(currentHour).isEmpty)
         ? kCalendarHourHeightCollapsed
         : kCalendarHourHeight;
     final minuteFraction = currentMinute / 60.0;
     return _hourTop(currentHour) + minuteFraction * rowHeight;
   }
 
-  List<CalculatedDose> _getDosesForHour(int hour) {
-    return widget.doses.where((dose) {
-      return dose.scheduledTime.hour == hour;
+  List<CalculatedEntry> _getEntriesForHour(int hour) {
+    return widget.entries.where((entry) {
+      return entry.scheduledTime.hour == hour;
     }).toList()..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
   }
 
   @override
   Widget build(BuildContext context) {
     final currentTimePosition = _getCurrentTimePosition();
-    final hasDoses = widget.doses.isNotEmpty;
+    final hasEntries = widget.entries.isNotEmpty;
 
     final hourGrid = GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -161,14 +161,14 @@ class _CalendarDayViewState extends State<CalendarDayView> {
             itemCount: _hourCount,
             itemBuilder: (context, index) {
               final hour = _startHour + index;
-              final doses = _getDosesForHour(hour);
+              final entries = _getEntriesForHour(hour);
               return _HourRow(
                 hour: hour,
-                doses: doses,
-                onDoseTap: widget.onDoseTap,
+                entries: entries,
+                onEntryTap: widget.onEntryTap,
                 isSelected: widget.selectedHour == hour,
                 onHourTap: widget.onHourTap,
-                isCollapsed: _collapseEmptyHours && doses.isEmpty,
+                isCollapsed: _collapseEmptyHours && entries.isEmpty,
               );
             },
           ),
@@ -189,8 +189,8 @@ class _CalendarDayViewState extends State<CalendarDayView> {
         _DayDateBanner(
           date: widget.date,
           collapseEmptyHours: _collapseEmptyHours,
-          // Only show the toggle when there are doses to collapse/expand.
-          onToggleCollapse: hasDoses
+          // Only show the toggle when there are entries to collapse/expand.
+          onToggleCollapse: hasEntries
               ? () {
                   setState(() => _collapseEmptyHours = !_collapseEmptyHours);
                   // Re-scroll after the layout updates so the view snaps to the
@@ -202,9 +202,9 @@ class _CalendarDayViewState extends State<CalendarDayView> {
               : null,
         ),
         Expanded(
-          child: hasDoses
+          child: hasEntries
               ? hourGrid
-              : CalendarNoDosesState(date: widget.date, showDate: false),
+              : CalendarNoEntriesState(date: widget.date, showDate: false),
         ),
       ],
     );
@@ -214,20 +214,20 @@ class _CalendarDayViewState extends State<CalendarDayView> {
 class _HourRow extends StatelessWidget {
   const _HourRow({
     required this.hour,
-    required this.doses,
-    this.onDoseTap,
+    required this.entries,
+    this.onEntryTap,
     this.isSelected = false,
     this.onHourTap,
     this.isCollapsed = false,
   });
 
   final int hour;
-  final List<CalculatedDose> doses;
-  final void Function(CalculatedDose dose)? onDoseTap;
+  final List<CalculatedEntry> entries;
+  final void Function(CalculatedEntry entry)? onEntryTap;
   final bool isSelected;
   final void Function(int hour)? onHourTap;
   /// When true the row is rendered at [kCalendarHourHeightCollapsed] with only
-  /// the time label visible. Only set when the hour contains no scheduled doses.
+  /// the time label visible. Only set when the hour contains no scheduled entries.
   final bool isCollapsed;
 
   @override
@@ -262,7 +262,7 @@ class _HourRow extends StatelessWidget {
                     ? colorScheme.primary.withAlpha((0.06 * 255).round())
                     : null,
               ),
-              child: isCollapsed || doses.isEmpty
+              child: isCollapsed || entries.isEmpty
                   ? null
                   : SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(
@@ -271,17 +271,17 @@ class _HourRow extends StatelessWidget {
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: doses.map((dose) {
+                        children: entries.map((entry) {
                           return Padding(
                             padding: const EdgeInsets.only(
                               bottom: kListItemSpacing,
                             ),
-                            child: CalendarDoseBlock(
-                              dose: dose,
-                              onTap: onDoseTap != null
-                                  ? () => onDoseTap!(dose)
+                            child: CalendarEntryBlock(
+                              entry: entry,
+                              onTap: onEntryTap != null
+                                  ? () => onEntryTap!(entry)
                                   : null,
-                              compact: doses.length > 2,
+                              compact: entries.length > 2,
                             ),
                           );
                         }).toList(),

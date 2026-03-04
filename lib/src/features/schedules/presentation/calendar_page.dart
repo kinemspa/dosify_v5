@@ -1,14 +1,14 @@
-import 'package:dosifi_v5/src/widgets/app_header.dart';
+﻿import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/calendar/calendar_header.dart';
-import 'package:dosifi_v5/src/widgets/calendar/dose_calendar_widget.dart';
+import 'package:dosifi_v5/src/widgets/calendar/entry_calendar_widget.dart';
 import 'package:flutter/material.dart';
 
 /// Full-screen calendar page.
 ///
-/// This page provides a complete calendar view of all scheduled doses.
+/// This page provides a complete calendar view of all scheduled entries.
 /// Features:
 /// - Full calendar widget with all views (Day/Week/Month)
-/// - Tap dose → show dose detail dialog
+/// - Tap entry → show entry detail dialog
 /// - FAB → add new schedule
 /// - Deep linking support (navigate to specific date)
 /// - Navigation from bottom bar or drawer
@@ -45,14 +45,14 @@ class CalendarPage extends StatelessWidget {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Calendar', forceBackButton: true),
       body: SafeArea(
-        child: DoseCalendarWidget(
+        child: EntryCalendarWidget(
           variant: CalendarVariant.full,
           startDate: initialDate,
           scheduleId: scheduleId,
           medicationId: medicationId,
           showUpNextCard: false,
           requireHourSelectionInDayView: false,
-          // Use default bottom sheet handler (removed onDoseTap override)
+          // Use default bottom sheet handler (removed onEntryTap override)
         ),
       ),
     );

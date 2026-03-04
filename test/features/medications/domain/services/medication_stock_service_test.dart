@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/services/medication_stock_service.dart';
@@ -117,8 +117,8 @@ void main() {
           id: 's1',
           name: 'Daily',
           medicationName: 'Test',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 540,
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
         );
@@ -146,8 +146,8 @@ void main() {
           name: 'Daily',
           medicationName: 'Test',
           medicationId: '1',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 540,
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7], // Every day
         );
@@ -177,8 +177,8 @@ void main() {
           name: 'Twice Daily',
           medicationName: 'Test',
           medicationId: '1',
-          doseValue: 1,
-          doseUnit: 'tablet',
+          entryValue: 1,
+          entryUnit: 'tablet',
           minutesOfDay: 540,
           daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
           timesOfDay: [540, 1080], // 9 AM and 6 PM

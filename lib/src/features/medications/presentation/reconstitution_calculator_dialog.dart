@@ -10,7 +10,7 @@ import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_c
 import 'package:dosifi_v5/src/features/medications/presentation/reconstitution_calculator_widget.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/saved_reconstitution_sheet.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_calculator.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_calculator.dart';
 
 enum SyringeSizeMl { ml0_3, ml0_5, ml1, ml3, ml5 }
 
@@ -36,20 +36,20 @@ class ReconstitutionResult {
     required this.calculatedUnits,
     required this.syringeSizeMl,
     this.diluentName,
-    this.calculatedDose,
-    this.doseUnit,
+    this.calculatedEntry,
+    this.entryUnit,
     this.maxVialSizeMl,
     this.strengthValueUsed,
     this.strengthUnitUsed,
   });
 
-  final double perMlConcentration; // same base unit as dose/strength (per mL)
+  final double perMlConcentration; // same base unit as entry/strength (per mL)
   final double solventVolumeMl; // mL to add to vial
-  final double calculatedUnits; // syringe units fill for the dose
+  final double calculatedUnits; // syringe units fill for the entry
   final double syringeSizeMl; // chosen syringe size mL
   final String? diluentName; // name of diluent fluid (e.g., 'Sterile Water')
-  final double? calculatedDose; // desired dose value for reopening calculator
-  final String? doseUnit; // dose unit (mcg/mg/g) for reopening calculator
+  final double? calculatedEntry; // desired entry value for reopening calculator
+  final String? entryUnit; // entry unit (mcg/mg/g) for reopening calculator
   final double?
   maxVialSizeMl; // max vial size constraint for reopening calculator
   final double? strengthValueUsed;
@@ -63,8 +63,8 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
     required this.unitLabel, // e.g., mg, mcg, g, units
     this.medicationName,
     this.initialDiluentName,
-    this.initialDoseValue,
-    this.initialDoseUnit,
+    this.initialEntryValue,
+    this.initialEntryUnit,
     this.initialSyringeSize,
     this.initialVialSize,
     this.onStrengthAdjusted,
@@ -74,8 +74,8 @@ class ReconstitutionCalculatorDialog extends StatefulWidget {
   final String unitLabel;
   final String? medicationName;
   final String? initialDiluentName;
-  final double? initialDoseValue;
-  final String? initialDoseUnit; // 'mcg'|'mg'|'g'|'units'
+  final double? initialEntryValue;
+  final String? initialEntryUnit; // 'mcg'|'mg'|'g'|'units'
   final SyringeSizeMl? initialSyringeSize;
   final double? initialVialSize; // mL
   final void Function(double strengthValue, String strengthUnit)?
@@ -98,8 +98,8 @@ class _ReconstitutionCalculatorDialogState
   late double _activeStrengthValue;
   late String _activeUnitLabel;
   String? _seedDiluentName;
-  double? _seedDoseValue;
-  String? _seedDoseUnit;
+  double? _seedEntryValue;
+  String? _seedEntryUnit;
   SyringeSizeMl? _seedSyringeSize;
   double? _seedVialSize;
   int _calculatorSeedVersion = 0;
@@ -110,8 +110,8 @@ class _ReconstitutionCalculatorDialogState
     _activeStrengthValue = widget.initialStrengthValue;
     _activeUnitLabel = widget.unitLabel;
     _seedDiluentName = widget.initialDiluentName;
-    _seedDoseValue = widget.initialDoseValue;
-    _seedDoseUnit = widget.initialDoseUnit;
+    _seedEntryValue = widget.initialEntryValue;
+    _seedEntryUnit = widget.initialEntryUnit;
     _seedSyringeSize = widget.initialSyringeSize;
     _seedVialSize = widget.initialVialSize;
   }
@@ -155,8 +155,8 @@ class _ReconstitutionCalculatorDialogState
   void _applySavedSeed(SavedReconstitutionCalculation saved) {
     setState(() {
       _seedDiluentName = saved.diluentName;
-      _seedDoseValue = saved.calculatedDose;
-      _seedDoseUnit = saved.doseUnit;
+      _seedEntryValue = saved.calculatedEntry;
+      _seedEntryUnit = saved.entryUnit;
       _seedSyringeSize = _inferSyringeSize(saved.syringeSizeMl);
       _seedVialSize = saved.solventVolumeMl;
       _calculatorSeedVersion += 1;
@@ -214,11 +214,11 @@ class _ReconstitutionCalculatorDialogState
     final result = _lastResult;
     if (!_canSubmit || result == null || _activeStrengthValue <= 0) return;
 
-    final dose = result.calculatedDose;
-    final doseUnit = result.doseUnit?.trim();
+    final entry = result.calculatedEntry;
+    final entryUnit = result.entryUnit?.trim();
     final defaultNameParts = <String>['Reconstitution'];
-    if (dose != null && dose > 0 && doseUnit != null && doseUnit.isNotEmpty) {
-      defaultNameParts.add('${_formatNoTrailing(dose)} $doseUnit');
+    if (entry != null && entry > 0 && entryUnit != null && entryUnit.isNotEmpty) {
+      defaultNameParts.add('${_formatNoTrailing(entry)} $entryUnit');
     }
     defaultNameParts.add('${_formatNoTrailing(result.solventVolumeMl)} mL');
 
@@ -239,8 +239,8 @@ class _ReconstitutionCalculatorDialogState
       calculatedUnits: result.calculatedUnits,
       syringeSizeMl: result.syringeSizeMl,
       diluentName: result.diluentName,
-      calculatedDose: result.calculatedDose,
-      doseUnit: result.doseUnit,
+      calculatedEntry: result.calculatedEntry,
+      entryUnit: result.entryUnit,
       maxVialSizeMl: result.maxVialSizeMl,
       createdAt: now,
       updatedAt: now,
@@ -486,8 +486,8 @@ class _ReconstitutionCalculatorDialogState
                       unitLabel: _activeUnitLabel,
                       medicationName: widget.medicationName,
                       initialDiluentName: _seedDiluentName,
-                      initialDoseValue: _seedDoseValue,
-                      initialDoseUnit: _seedDoseUnit,
+                      initialEntryValue: _seedEntryValue,
+                      initialEntryUnit: _seedEntryUnit,
                       initialSyringeSize: _seedSyringeSize,
                       initialVialSize: _seedVialSize,
                       onCalculate: _onCalculation,

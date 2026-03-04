@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -9,7 +9,7 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 
-/// Custom summary card for schedule screen with prominent dose display
+/// Custom summary card for schedule screen with prominent entry display
 class ScheduleSummaryCard extends StatelessWidget {
   const ScheduleSummaryCard({
     super.key,
@@ -260,7 +260,7 @@ class ScheduleSummaryCard extends StatelessWidget {
   /// Line 1: Take X form
   /// Line 2: Frequency
   /// Line 3: At times
-  /// Line 4: Dates with Total per Dose on right
+  /// Line 4: Dates with Total per Entry on right
   Widget _buildCompactInstructions(
     BuildContext context,
     String description,
@@ -269,17 +269,17 @@ class ScheduleSummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Parse description to extract components
-    // Format: "Take {dose} {MedName} {MedType} {frequency} at {times}. Dose is {dose} {unit} is {strength}."
+    // Format: "Take {entry} {MedName} {MedType} {frequency} at {times}. Entry is {entry} {unit} is {strength}."
 
-    // Extract dose and form (tablet/capsule/etc)
-    final doseFormMatch = RegExp(
-      r'Take\s+(\d+\.?\d*)\s+\S+\s+(Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)',
+    // Extract entry and form (tablet/capsule/etc)
+    final entryFormMatch = RegExp(
+      r'Take\s+(\d+\.?\d*)\s+\S+\s+(Tablets?|Capsules?|Pre-Filled Syringes?|Single Entry Vials?|Multi Entry Vials?)',
       caseSensitive: false,
     ).firstMatch(description);
 
     // Extract frequency (Everything between form and "at")
     final frequencyMatch = RegExp(
-      r'(?:Tablets?|Capsules?|Pre-Filled Syringes?|Single Dose Vials?|Multi Dose Vials?)\s+(.+?)\s+at\s+',
+      r'(?:Tablets?|Capsules?|Pre-Filled Syringes?|Single Entry Vials?|Multi Entry Vials?)\s+(.+?)\s+at\s+',
       caseSensitive: false,
     ).firstMatch(description);
 
@@ -289,7 +289,7 @@ class ScheduleSummaryCard extends StatelessWidget {
       caseSensitive: false,
     ).firstMatch(description);
 
-    // Extract total dose/strength (last occurrence of "is {number}{unit}")
+    // Extract total entry/strength (last occurrence of "is {number}{unit}")
     final strengthMatch = RegExp(
       r'is\s+(\d+\.?\d*)(mg|mcg|g|IU|units|ml)',
       caseSensitive: false,
@@ -297,18 +297,18 @@ class ScheduleSummaryCard extends StatelessWidget {
 
     // Build line 1: "Take X form"
     String? line1;
-    if (doseFormMatch != null) {
-      final doseStr = doseFormMatch.group(1);
-      final dose = double.tryParse(doseStr ?? '0') ?? 0;
-      final form = doseFormMatch.group(2)?.toLowerCase() ?? '';
+    if (entryFormMatch != null) {
+      final entryStr = entryFormMatch.group(1);
+      final entry = double.tryParse(entryStr ?? '0') ?? 0;
+      final form = entryFormMatch.group(2)?.toLowerCase() ?? '';
 
       // Convert decimal to fraction for common values
-      final displayDose = _toFractional(dose);
+      final displayEntry = _toFractional(entry);
 
       // Simplify and make singular/plural aware
-      final simpleForm = _simplifyForm(form, dose);
+      final simpleForm = _simplifyForm(form, entry);
 
-      line1 = 'Take $displayDose $simpleForm';
+      line1 = 'Take $displayEntry $simpleForm';
     }
 
     // Build line 2: Frequency
@@ -333,12 +333,12 @@ class ScheduleSummaryCard extends StatelessWidget {
       }
     }
 
-    // Build total dose text for line 4 right side
-    String? totalDose;
+    // Build total entry text for line 4 right side
+    String? totalEntry;
     if (strengthMatch != null) {
       final amount = strengthMatch.group(1);
       final unit = strengthMatch.group(2);
-      totalDose = 'Total per Dose: $amount$unit';
+      totalEntry = 'Total per Entry: $amount$unit';
     }
 
     return Column(
@@ -378,16 +378,16 @@ class ScheduleSummaryCard extends StatelessWidget {
             ),
           ),
         ],
-        // Line 4: Dates with total dose on right
-        if (startDate != null || totalDose != null) ...[
+        // Line 4: Dates with total entry on right
+        if (startDate != null || totalEntry != null) ...[
           const SizedBox(height: 2),
           Row(
             children: [
               Expanded(child: _buildDatesLine(context, fg)),
-              if (totalDose != null) ...[
+              if (totalEntry != null) ...[
                 const SizedBox(width: 8),
                 Text(
-                  totalDose,
+                  totalEntry,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: fg.withValues(alpha: 0.95),
                     fontWeight: FontWeight.w700,
@@ -401,30 +401,30 @@ class ScheduleSummaryCard extends StatelessWidget {
     );
   }
 
-  /// Convert decimal dose to fractional display (0.25 -> 1/4, 0.5 -> 1/2, 0.75 -> 3/4)
-  String _toFractional(double dose) {
-    if (dose == dose.roundToDouble()) {
-      return dose.toStringAsFixed(0);
+  /// Convert decimal entry to fractional display (0.25 -> 1/4, 0.5 -> 1/2, 0.75 -> 3/4)
+  String _toFractional(double entry) {
+    if (entry == entry.roundToDouble()) {
+      return entry.toStringAsFixed(0);
     }
 
     // Check for common fractions
-    if ((dose - 0.25).abs() < 0.01) return '¼'; // ¼
-    if ((dose - 0.5).abs() < 0.01) return '½'; // ½
-    if ((dose - 0.75).abs() < 0.01) return '¾'; // ¾
-    if ((dose - 1.25).abs() < 0.01) return '1¼';
-    if ((dose - 1.5).abs() < 0.01) return '1½';
-    if ((dose - 1.75).abs() < 0.01) return '1¾';
-    if ((dose - 2.25).abs() < 0.01) return '2¼';
-    if ((dose - 2.5).abs() < 0.01) return '2½';
-    if ((dose - 2.75).abs() < 0.01) return '2¾';
+    if ((entry - 0.25).abs() < 0.01) return '¼'; // ¼
+    if ((entry - 0.5).abs() < 0.01) return '½'; // ½
+    if ((entry - 0.75).abs() < 0.01) return '¾'; // ¾
+    if ((entry - 1.25).abs() < 0.01) return '1¼';
+    if ((entry - 1.5).abs() < 0.01) return '1½';
+    if ((entry - 1.75).abs() < 0.01) return '1¾';
+    if ((entry - 2.25).abs() < 0.01) return '2¼';
+    if ((entry - 2.5).abs() < 0.01) return '2½';
+    if ((entry - 2.75).abs() < 0.01) return '2¾';
 
     // For other decimals, show as-is
-    return dose.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
+    return entry.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '');
   }
 
   /// Simplify form name and make it singular/plural aware
-  String _simplifyForm(String form, double dose) {
-    final isPlural = dose > 1;
+  String _simplifyForm(String form, double entry) {
+    final isPlural = entry > 1;
 
     // Normalize form string
     final lower = form.toLowerCase();

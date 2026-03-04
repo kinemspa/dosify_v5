@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/foundation.dart';
 
 // Package imports:
@@ -12,8 +12,8 @@ import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
 import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/saved_reconstitution_calculation.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_status_change_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_status_change_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/stock_movement.dart';
 import 'package:dosifi_v5/src/features/supplies/domain/supply.dart';
@@ -23,8 +23,8 @@ class HiveBootstrap {
   static const _allBoxNames = [
     'medications',
     'schedules',
-    'dose_logs',
-    'dose_status_change_logs',
+    'entry_logs',
+    'entry_status_change_logs',
     'supplies',
     'stock_movements',
     'inventory_logs',
@@ -60,9 +60,9 @@ class HiveBootstrap {
     }
 
     await _openBoxWithRetry<Schedule>('schedules', cipher: cipher);
-    await _openBoxWithRetry<DoseLog>('dose_logs', cipher: cipher);
-    await _openBoxWithRetry<DoseStatusChangeLog>(
-      'dose_status_change_logs',
+    await _openBoxWithRetry<EntryLog>('entry_logs', cipher: cipher);
+    await _openBoxWithRetry<EntryStatusChangeLog>(
+      'entry_status_change_logs',
       cipher: cipher,
     );
     await _openBoxWithRetry<Supply>('supplies', cipher: cipher);
@@ -172,12 +172,12 @@ class HiveBootstrap {
     if (!Hive.isAdapterRegistered(10))
       Hive.registerAdapter(MedicationAdapter());
 
-    // Schedules + dose logging
+    // Schedules + entry logging
     if (!Hive.isAdapterRegistered(40)) Hive.registerAdapter(ScheduleAdapter());
-    if (!Hive.isAdapterRegistered(41)) Hive.registerAdapter(DoseLogAdapter());
-    if (!Hive.isAdapterRegistered(42)) Hive.registerAdapter(DoseActionAdapter());
+    if (!Hive.isAdapterRegistered(41)) Hive.registerAdapter(EntryLogAdapter());
+    if (!Hive.isAdapterRegistered(42)) Hive.registerAdapter(EntryActionAdapter());
     if (!Hive.isAdapterRegistered(45))
-      Hive.registerAdapter(DoseStatusChangeLogAdapter());
+      Hive.registerAdapter(EntryStatusChangeLogAdapter());
 
     // Supplies + stock
     if (!Hive.isAdapterRegistered(50)) Hive.registerAdapter(SupplyAdapter());

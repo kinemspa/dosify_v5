@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
-import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_dose_card.dart';
+import 'package:dosifi_v5/src/features/medications/presentation/widgets/next_entry_card.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/enhanced_schedule_card.dart';
 
@@ -11,11 +11,11 @@ class MedicationSchedulesSection extends StatelessWidget {
   const MedicationSchedulesSection({
     super.key,
     required this.medication,
-    this.showNextDoseCard = true,
+    this.showNextEntryCard = true,
   });
 
   final Medication medication;
-  final bool showNextDoseCard;
+  final bool showNextEntryCard;
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +31,15 @@ class MedicationSchedulesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showNextDoseCard) ...[
-          NextDoseCard(medication: medication, schedules: schedules),
+        if (showNextEntryCard) ...[
+          NextEntryCard(medication: medication, schedules: schedules),
           const SizedBox(height: kSpacingM),
         ],
         ...schedules.map(
           (schedule) => EnhancedScheduleCard(
             schedule: schedule,
             medication: medication,
-            showDoseCardWhenPossible: false,
+            showEntryCardWhenPossible: false,
           ),
         ),
       ],

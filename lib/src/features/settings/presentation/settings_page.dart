@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 // Flutter imports:
 import 'package:flutter/foundation.dart';
@@ -19,7 +19,7 @@ import 'package:dosifi_v5/src/core/legal/disclaimer_settings.dart';
 import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
-import 'package:dosifi_v5/src/core/notifications/dose_timing_settings.dart';
+import 'package:dosifi_v5/src/core/notifications/entry_timing_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:dosifi_v5/src/core/notifications/expiry_notification_settings.dart';
 import 'package:dosifi_v5/src/core/notifications/notification_service.dart';
@@ -584,8 +584,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             ListTile(
               leading: const Icon(Icons.notifications_active_outlined),
-              title: const Text('Show test dose reminder'),
-              subtitle: const Text('Fires exactly at each scheduled dose time'),
+              title: const Text('Show test entry reminder'),
+              subtitle: const Text('Fires exactly at each scheduled entry time'),
               trailing: const Icon(Icons.play_arrow_rounded),
               onTap: () => runNotificationTest(NotificationService.showTest),
             ),
@@ -593,11 +593,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               leading: const Icon(Icons.stacked_bar_chart_outlined),
               title: const Text('Show test grouped reminders'),
               subtitle: const Text(
-                'When multiple doses are due at the same time they appear as a group',
+                'When multiple entries are due at the same time they appear as a group',
               ),
               trailing: const Icon(Icons.play_arrow_rounded),
               onTap: () => runNotificationTest(
-                NotificationService.showTestGroupedUpcomingDoseReminders,
+                NotificationService.showTestGroupedUpcomingEntryReminders,
               ),
             ),
             ListTile(
@@ -795,11 +795,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               showAppSnackBar(context, 'Opened system notification settings');
             },
           ),
-          ValueListenableBuilder<DoseTimingConfig>(
-            valueListenable: DoseTimingSettings.value,
+          ValueListenableBuilder<EntryTimingConfig>(
+            valueListenable: EntryTimingSettings.value,
             builder: (context, config, _) {
               final missedSubtitle =
-                  '${config.missedGracePercent}% of time until next dose';
+                  '${config.missedGracePercent}% of time until next entry';
               final overdueSubtitle = config.overdueReminderPercent <= 0
                   ? 'Disabled'
                   : '${config.overdueReminderPercent}% of grace window';
@@ -815,16 +815,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.timer_outlined),
-                    title: const Text('Missed dose grace period'),
+                    title: const Text('Missed entry grace period'),
                     subtitle: Text(missedSubtitle),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => editPercentSetting(
-                      title: 'Missed dose grace period',
+                      title: 'Missed entry grace period',
                       description:
-                          'How long after the scheduled time a dose stays "Due" before it becomes "Missed" (based on time until the next scheduled dose).',
+                          'How long after the scheduled time a entry stays "Due" before it becomes "Missed" (based on time until the next scheduled entry).',
                       currentValue: config.missedGracePercent,
                       onSave: (v) =>
-                          DoseTimingSettings.setMissedGracePercent(v),
+                          EntryTimingSettings.setMissedGracePercent(v),
                     ),
                   ),
                   ListTile(
@@ -838,7 +838,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           'Sends a reminder between the scheduled time and the missed threshold to prompt logging. For logging purposes only — not a clinical alert. 0% disables this reminder. Example: 50% sends halfway through the due-to-missed window.',
                       currentValue: config.overdueReminderPercent,
                       onSave: (v) =>
-                          DoseTimingSettings.setOverdueReminderPercent(v),
+                          EntryTimingSettings.setOverdueReminderPercent(v),
                     ),
                   ),
                   ListTile(
@@ -886,7 +886,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         },
                       );
                       if (count != null) {
-                        await DoseTimingSettings.setFollowUpReminderCount(
+                        await EntryTimingSettings.setFollowUpReminderCount(
                           count,
                         );
                       }
@@ -900,7 +900,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             valueListenable: SnoozeSettings.value,
             builder: (context, config, _) {
               final pct = config.defaultSnoozePercent;
-              final subtitle = '$pct% of time until next scheduled dose';
+              final subtitle = '$pct% of time until next scheduled entry';
               return ListTile(
                 leading: const Icon(Icons.snooze_outlined),
                 title: const Text('Snooze timing (default)'),
@@ -909,7 +909,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 onTap: () => editPercentSetting(
                   title: 'Snooze timing (default)',
                   description:
-                      'Sets default snooze as a percentage of the remaining time until the next scheduled dose. Example: 25% means snooze for one-quarter of the remaining window, and it will never pass the next dose time.',
+                      'Sets default snooze as a percentage of the remaining time until the next scheduled entry. Example: 25% means snooze for one-quarter of the remaining window, and it will never pass the next entry time.',
                   currentValue: pct,
                   onSave: (v) => SnoozeSettings.setDefaultSnoozePercent(v),
                   min: 0,

@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
@@ -14,17 +14,17 @@ import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/reports/domain/report_time_range.dart';
-import 'package:dosifi_v5/src/features/schedules/data/dose_log_repository.dart';
+import 'package:dosifi_v5/src/features/schedules/data/entry_log_repository.dart';
 import 'package:dosifi_v5/src/features/schedules/data/schedule_scheduler.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log_ids.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log_ids.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/pages/add_schedule_wizard_page.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/schedule_status_ui.dart';
 import 'package:dosifi_v5/src/features/schedules/presentation/widgets/schedule_detail_header_banner.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
-import 'package:dosifi_v5/src/widgets/cards/today_doses_card.dart';
+import 'package:dosifi_v5/src/widgets/cards/today_entries_card.dart';
 import 'package:dosifi_v5/src/widgets/cards/activity_card.dart';
 import 'package:dosifi_v5/src/widgets/app_snackbar.dart';
 import 'package:dosifi_v5/src/widgets/schedule_pause_dialog.dart';
@@ -41,7 +41,7 @@ class ScheduleDetailPage extends StatefulWidget {
 }
 
 class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
-  late final DoseLogRepository _doseLogRepo;
+  late final EntryLogRepository _entryLogRepo;
 
   bool _isScheduleDetailsExpanded = true;
   bool _isTodayExpanded = true;
@@ -56,7 +56,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   @override
   void initState() {
     super.initState();
-    _doseLogRepo = DoseLogRepository(Hive.box<DoseLog>('dose_logs'));
+    _entryLogRepo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
   }
 
   int _computeUtcMinutes(int localMinutes, DateTime now) {
@@ -165,9 +165,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     );
   }
 
-  Future<void> _editScheduleDose(BuildContext context, Schedule s) async {
-    final controller = TextEditingController(text: _formatNumber(s.doseValue));
-    final originalUnit = s.doseUnit.trim().isEmpty ? 'mg' : s.doseUnit;
+  Future<void> _editScheduleEntry(BuildContext context, Schedule s) async {
+    final controller = TextEditingController(text: _formatNumber(s.entryValue));
+    final originalUnit = s.entryUnit.trim().isEmpty ? 'mg' : s.entryUnit;
     final units = <String>[
       'mcg',
       'mg',
@@ -266,19 +266,19 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     final value = result['value'] as double?;
     final unit = (result['unit'] as String?)?.trim();
     if (value == null || unit == null || unit.isEmpty) return;
-    if (value == s.doseValue &&
-        unit.toLowerCase() == s.doseUnit.toLowerCase()) {
+    if (value == s.entryValue &&
+        unit.toLowerCase() == s.entryUnit.toLowerCase()) {
       return;
     }
 
-    int? doseMassMcg;
-    int? doseVolumeMicroliter;
-    int? doseTabletQuarters;
-    int? doseCapsules;
-    int? doseSyringes;
-    int? doseVials;
-    int? doseIU;
-    int? doseUnitCode;
+    int? entryMassMcg;
+    int? entryVolumeMicroliter;
+    int? entryTabletQuarters;
+    int? entryCapsules;
+    int? entrySyringes;
+    int? entryVials;
+    int? entryIU;
+    int? entryUnitCode;
     int? displayUnitCode;
     int? inputModeCode;
 
@@ -290,60 +290,60 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
         'g' => value * 1000000,
         _ => value,
       };
-      doseMassMcg = mcg.round();
-      doseUnitCode = switch (unitLower) {
-        'mcg' => DoseUnit.mcg.index,
-        'mg' => DoseUnit.mg.index,
-        'g' => DoseUnit.g.index,
+      entryMassMcg = mcg.round();
+      entryUnitCode = switch (unitLower) {
+        'mcg' => EntryUnit.mcg.index,
+        'mg' => EntryUnit.mg.index,
+        'g' => EntryUnit.g.index,
         _ => null,
       };
-      displayUnitCode = doseUnitCode;
-      inputModeCode = DoseInputMode.mass.index;
+      displayUnitCode = entryUnitCode;
+      inputModeCode = EntryInputMode.mass.index;
     } else if (unitLower == 'ml' || unitLower == 'mL'.toLowerCase()) {
-      doseVolumeMicroliter = (value * 1000).round();
-      doseUnitCode = DoseUnit.ml.index;
-      displayUnitCode = doseUnitCode;
-      inputModeCode = DoseInputMode.volume.index;
+      entryVolumeMicroliter = (value * 1000).round();
+      entryUnitCode = EntryUnit.ml.index;
+      displayUnitCode = entryUnitCode;
+      inputModeCode = EntryInputMode.volume.index;
     } else if (unitLower == 'iu' || unitLower == 'units') {
-      doseIU = value.round();
-      doseUnitCode = DoseUnit.iu.index;
-      displayUnitCode = doseUnitCode;
-      inputModeCode = DoseInputMode.iuUnits.index;
+      entryIU = value.round();
+      entryUnitCode = EntryUnit.iu.index;
+      displayUnitCode = entryUnitCode;
+      inputModeCode = EntryInputMode.iuUnits.index;
     } else if (unitLower == 'tablets') {
-      doseTabletQuarters = (value * 4).round();
-      doseUnitCode = DoseUnit.tablets.index;
-      displayUnitCode = doseUnitCode;
-      inputModeCode = DoseInputMode.tablets.index;
+      entryTabletQuarters = (value * 4).round();
+      entryUnitCode = EntryUnit.tablets.index;
+      displayUnitCode = entryUnitCode;
+      inputModeCode = EntryInputMode.tablets.index;
     } else if (unitLower == 'capsules') {
-      doseCapsules = value.round();
-      doseUnitCode = DoseUnit.capsules.index;
-      displayUnitCode = doseUnitCode;
-      inputModeCode = DoseInputMode.capsules.index;
+      entryCapsules = value.round();
+      entryUnitCode = EntryUnit.capsules.index;
+      displayUnitCode = entryUnitCode;
+      inputModeCode = EntryInputMode.capsules.index;
     } else if (unitLower == 'syringes') {
-      doseSyringes = value.round();
-      doseUnitCode = DoseUnit.syringes.index;
-      displayUnitCode = doseUnitCode;
-      inputModeCode = DoseInputMode.count.index;
+      entrySyringes = value.round();
+      entryUnitCode = EntryUnit.syringes.index;
+      displayUnitCode = entryUnitCode;
+      inputModeCode = EntryInputMode.count.index;
     } else if (unitLower == 'vials') {
-      doseVials = value.round();
-      doseUnitCode = DoseUnit.vials.index;
-      displayUnitCode = doseUnitCode;
-      inputModeCode = DoseInputMode.count.index;
+      entryVials = value.round();
+      entryUnitCode = EntryUnit.vials.index;
+      displayUnitCode = entryUnitCode;
+      inputModeCode = EntryInputMode.count.index;
     }
 
     await _upsertSchedule(
       context,
       s.copyWithDetails(
-        doseValue: value,
-        doseUnit: unit,
-        doseUnitCode: doseUnitCode,
-        doseMassMcg: doseMassMcg,
-        doseVolumeMicroliter: doseVolumeMicroliter,
-        doseTabletQuarters: doseTabletQuarters,
-        doseCapsules: doseCapsules,
-        doseSyringes: doseSyringes,
-        doseVials: doseVials,
-        doseIU: doseIU,
+        entryValue: value,
+        entryUnit: unit,
+        entryUnitCode: entryUnitCode,
+        entryMassMcg: entryMassMcg,
+        entryVolumeMicroliter: entryVolumeMicroliter,
+        entryTabletQuarters: entryTabletQuarters,
+        entryCapsules: entryCapsules,
+        entrySyringes: entrySyringes,
+        entryVials: entryVials,
+        entryIU: entryIU,
         displayUnitCode: displayUnitCode,
         inputModeCode: inputModeCode,
       ),
@@ -975,11 +975,11 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   /// Check if there's already a log for this scheduled time
-  DoseLog? _getExistingLog(DateTime scheduledTime) {
-    final logs = _doseLogRepo.getByScheduleId(widget.scheduleId);
+  EntryLog? _getExistingLog(DateTime scheduledTime) {
+    final logs = _entryLogRepo.getByScheduleId(widget.scheduleId);
     final scheduledUtc = scheduledTime.toUtc();
 
-    return logs.cast<DoseLog?>().firstWhere(
+    return logs.cast<EntryLog?>().firstWhere(
       (log) =>
           log!.scheduledTime.year == scheduledUtc.year &&
           log.scheduledTime.month == scheduledUtc.month &&
@@ -990,12 +990,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     );
   }
 
-  /// Show dialog to record dose with notes and injection site
-  Future<void> _showRecordDoseDialog({
+  /// Show dialog to record entry with notes and injection site
+  Future<void> _showRecordEntryDialog({
     required Schedule schedule,
     required DateTime scheduledTime,
-    required DoseAction action,
-    DoseLog? existingLog,
+    required EntryAction action,
+    EntryLog? existingLog,
   }) async {
     final notesController = TextEditingController(text: existingLog?.notes);
     String? injectionSite = existingLog?.notes?.contains('Site:') == true
@@ -1004,12 +1004,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
     final isInjection =
         schedule.medicationName.toLowerCase().contains('injection') ||
-        schedule.doseUnit.toLowerCase().contains('syringe') ||
-        schedule.doseUnit.toLowerCase().contains('vial');
+        schedule.entryUnit.toLowerCase().contains('syringe') ||
+        schedule.entryUnit.toLowerCase().contains('vial');
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => _DoseRecordDialog(
+      builder: (context) => _EntryRecordDialog(
         action: action,
         existingLog: existingLog,
         isInjection: isInjection,
@@ -1021,7 +1021,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     if (result == null) return;
 
     if (result['delete'] == true && existingLog != null) {
-      await _doseLogRepo.delete(existingLog.id);
+      await _entryLogRepo.delete(existingLog.id);
       if (!mounted) return;
       showAppSnackBar(context, 'Entry removed');
       setState(() {});
@@ -1035,10 +1035,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       if (site?.isNotEmpty == true) 'Site: $site',
     ].join('\n');
 
-    final log = DoseLog(
+    final log = EntryLog(
       id:
           existingLog?.id ??
-          DoseLogIds.occurrenceId(
+          EntryLogIds.occurrenceId(
             scheduleId: schedule.id,
             scheduledTime: scheduledTime,
           ),
@@ -1047,19 +1047,19 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       medicationId: schedule.medicationId ?? '',
       medicationName: schedule.medicationName,
       scheduledTime: scheduledTime.toUtc(),
-      doseValue: schedule.doseValue,
-      doseUnit: schedule.doseUnit,
+      entryValue: schedule.entryValue,
+      entryUnit: schedule.entryUnit,
       action: action,
       notes: combinedNotes.isEmpty ? null : combinedNotes,
     );
 
-    await _doseLogRepo.upsert(log);
+    await _entryLogRepo.upsert(log);
 
     if (!mounted) return;
 
-    final actionText = action == DoseAction.logged
+    final actionText = action == EntryAction.logged
         ? 'logged'
-        : action == DoseAction.skipped
+        : action == EntryAction.skipped
         ? 'skipped'
         : 'snoozed for 15 minutes';
 
@@ -1068,29 +1068,29 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     setState(() {});
   }
 
-  // Helper methods for dose action UI
-  Color _getActionColor(BuildContext context, DoseAction action) {
+  // Helper methods for entry action UI
+  Color _getActionColor(BuildContext context, EntryAction action) {
     final cs = Theme.of(context).colorScheme;
     return switch (action) {
-      DoseAction.logged => cs.primary,
-      DoseAction.snoozed => cs.tertiary,
-      DoseAction.skipped => cs.error,
+      EntryAction.logged => cs.primary,
+      EntryAction.snoozed => cs.tertiary,
+      EntryAction.skipped => cs.error,
     };
   }
 
-  IconData _getActionIcon(DoseAction action) {
+  IconData _getActionIcon(EntryAction action) {
     return switch (action) {
-      DoseAction.logged => Icons.check_circle,
-      DoseAction.snoozed => Icons.snooze,
-      DoseAction.skipped => Icons.cancel,
+      EntryAction.logged => Icons.check_circle,
+      EntryAction.snoozed => Icons.snooze,
+      EntryAction.skipped => Icons.cancel,
     };
   }
 
-  String _getActionLabel(DoseAction action) {
+  String _getActionLabel(EntryAction action) {
     return switch (action) {
-      DoseAction.logged => 'Logged',
-      DoseAction.snoozed => 'Snoozed',
-      DoseAction.skipped => 'Skipped',
+      EntryAction.logged => 'Logged',
+      EntryAction.snoozed => 'Snoozed',
+      EntryAction.skipped => 'Skipped',
     };
   }
 
@@ -1124,7 +1124,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       builder: (context, Box<Schedule> box, _) {
         try {
           final s = box.get(widget.scheduleId) ?? schedule;
-          final nextDose = _nextOccurrence(s);
+          final nextEntry = _nextOccurrence(s);
           final mergedTitle = _mergedTitle(s);
 
           final medsBox = Hive.box<Medication>('medications');
@@ -1146,13 +1146,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   showDeleteInMenu: false,
                   statsBannerContent: ScheduleDetailHeaderBanner(
                     schedule: s,
-                    nextDose: nextDose,
+                    nextEntry: nextEntry,
                     title: mergedTitle,
                     medication: med,
                     onPauseResumePressed: () =>
                         _promptPauseFromHeader(context, s),
                   ),
-                  sections: _buildSections(context, s, nextDose),
+                  sections: _buildSections(context, s, nextEntry),
                 ),
               ),
               Offstage(
@@ -1168,7 +1168,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                       ),
                       child: ScheduleDetailHeaderBanner(
                         schedule: s,
-                        nextDose: nextDose,
+                        nextEntry: nextEntry,
                         title: mergedTitle,
                         medication: med,
                         onPauseResumePressed: () {},
@@ -1294,13 +1294,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   List<Widget> _buildSections(
     BuildContext context,
     Schedule s,
-    DateTime? nextDose,
+    DateTime? nextEntry,
   ) {
     return [
       Padding(
         padding: const EdgeInsets.only(bottom: kSpacingS),
-        child: TodayDosesCard(
-          scope: TodayDosesScope.schedule(s.id),
+        child: TodayEntriesCard(
+          scope: TodayEntriesScope.schedule(s.id),
           isExpanded: _isTodayExpanded,
           onExpandedChanged: (expanded) {
             if (!mounted) return;
@@ -1380,8 +1380,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       buildDetailInfoRow(
         context,
         label: 'Amount',
-        value: _getDoseDisplay(s),
-        onTap: () => _editScheduleDose(context, s),
+        value: _getEntryDisplay(s),
+        onTap: () => _editScheduleEntry(context, s),
       ),
       buildDetailInfoRow(
         context,
@@ -1465,13 +1465,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
   }
 
   // ignore: unused_element
-  Widget _buildNextDoseSection(
+  Widget _buildNextEntrySection(
     BuildContext context,
     Schedule s,
-    DateTime nextDose,
+    DateTime nextEntry,
   ) {
-    final existingLog = _getExistingLog(nextDose);
-    final isTaken = existingLog?.action == DoseAction.logged;
+    final existingLog = _getExistingLog(nextEntry);
+    final isTaken = existingLog?.action == EntryAction.logged;
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -1486,13 +1486,13 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             context,
             label: 'When',
             value:
-                '${DateFormat('EEE, MMM d').format(nextDose)} | ${DateTimeFormatter.formatTime(context, nextDose)}',
+                '${DateFormat('EEE, MMM d').format(nextEntry)} | ${DateTimeFormatter.formatTime(context, nextEntry)}',
             maxLines: 2,
           ),
           buildDetailInfoRow(
             context,
             label: 'Time until',
-            value: _getTimeUntil(nextDose),
+            value: _getTimeUntil(nextEntry),
           ),
           if (existingLog != null)
             buildDetailInfoRow(
@@ -1508,10 +1508,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    _showRecordDoseDialog(
+                    _showRecordEntryDialog(
                       schedule: s,
-                      scheduledTime: nextDose,
-                      action: DoseAction.logged,
+                      scheduledTime: nextEntry,
+                      action: EntryAction.logged,
                       existingLog: existingLog,
                     );
                   },
@@ -1527,10 +1527,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      _showRecordDoseDialog(
+                      _showRecordEntryDialog(
                         schedule: s,
-                        scheduledTime: nextDose,
-                        action: DoseAction.snoozed,
+                        scheduledTime: nextEntry,
+                        action: EntryAction.snoozed,
                         existingLog: existingLog,
                       );
                     },
@@ -1546,10 +1546,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                 const SizedBox(width: kSpacingS),
                 OutlinedButton(
                   onPressed: () {
-                    _showRecordDoseDialog(
+                    _showRecordEntryDialog(
                       schedule: s,
-                      scheduledTime: nextDose,
-                      action: DoseAction.skipped,
+                      scheduledTime: nextEntry,
+                      action: EntryAction.skipped,
                       existingLog: existingLog,
                     );
                   },
@@ -1589,9 +1589,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     );
   }
 
-  /// Unified dose timeline showing past (with logs), today, and future doses
+  /// Unified entry timeline showing past (with logs), today, and future entries
   // ignore: unused_element
-  Widget _buildDoseTimeline(BuildContext context, Schedule s) {
+  Widget _buildEntryTimeline(BuildContext context, Schedule s) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
@@ -1616,7 +1616,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     date.month == today.month &&
                     date.day == today.day;
                 final isPast = date.isBefore(today);
-                final hasDoses = _hasDosesOnDate(date, s);
+                final hasEntries = _hasEntriesOnDate(date, s);
 
                 return _buildTimelineDay(
                   context,
@@ -1624,7 +1624,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   date,
                   isToday: isToday,
                   isPast: isPast,
-                  hasDoses: hasDoses,
+                  hasEntries: hasEntries,
                 );
               },
             ),
@@ -1640,15 +1640,15 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     DateTime date, {
     required bool isToday,
     required bool isPast,
-    required bool hasDoses,
+    required bool hasEntries,
   }) {
-    if (!hasDoses) {
+    if (!hasEntries) {
       return const SizedBox.shrink();
     }
 
     final cs = Theme.of(context).colorScheme;
 
-    final doses = _getDosesForDate(date, s);
+    final entries = _getEntriesForDate(date, s);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: kSpacingL),
@@ -1676,10 +1676,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
             ],
           ),
           const SizedBox(height: kSpacingS),
-          // Doses for this day
-          ...doses.map((dt) {
+          // Entries for this day
+          ...entries.map((dt) {
             final existingLog = _getExistingLog(dt);
-            return _buildTimelineDoseCard(
+            return _buildTimelineEntryCard(
               context,
               s,
               dt,
@@ -1693,16 +1693,16 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     );
   }
 
-  Widget _buildTimelineDoseCard(
+  Widget _buildTimelineEntryCard(
     BuildContext context,
     Schedule s,
     DateTime dt, {
-    DoseLog? existingLog,
+    EntryLog? existingLog,
     required bool isPast,
     required bool isToday,
   }) {
     final cs = Theme.of(context).colorScheme;
-    final isTaken = existingLog?.action == DoseAction.logged;
+    final isTaken = existingLog?.action == EntryAction.logged;
     final hasLog = existingLog != null;
     final accentColor = hasLog
         ? _getActionColor(context, existingLog.action)
@@ -1736,7 +1736,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                         )?.copyWith(color: cs.onSurface),
                       ),
                       Text(
-                        _getDoseDisplay(s),
+                        _getEntryDisplay(s),
                         style: helperTextStyle(
                           context,
                           color: cs.onSurfaceVariant,
@@ -1806,7 +1806,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               }(),
             ],
 
-            // Action buttons for future or today's doses
+            // Action buttons for future or today's entries
             if (!isPast || isToday) ...[
               const SizedBox(height: kSpacingS),
               Row(
@@ -1815,10 +1815,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          _showRecordDoseDialog(
+                          _showRecordEntryDialog(
                             schedule: s,
                             scheduledTime: dt,
-                            action: DoseAction.logged,
+                            action: EntryAction.logged,
                             existingLog: existingLog,
                           );
                         },
@@ -1838,10 +1838,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          _showRecordDoseDialog(
+                          _showRecordEntryDialog(
                             schedule: s,
                             scheduledTime: dt,
-                            action: DoseAction.snoozed,
+                            action: EntryAction.snoozed,
                             existingLog: existingLog,
                           );
                         },
@@ -1861,10 +1861,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          _showRecordDoseDialog(
+                          _showRecordEntryDialog(
                             schedule: s,
                             scheduledTime: dt,
-                            action: DoseAction.skipped,
+                            action: EntryAction.skipped,
                             existingLog: existingLog,
                           );
                         },
@@ -1884,10 +1884,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          _showRecordDoseDialog(
+                          _showRecordEntryDialog(
                             schedule: s,
                             scheduledTime: dt,
-                            action: DoseAction.logged,
+                            action: EntryAction.logged,
                             existingLog: existingLog,
                           );
                         },
@@ -1913,7 +1913,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     );
   }
 
-  String _getDoseDisplay(Schedule s) {
+  String _getEntryDisplay(Schedule s) {
     String trimZerosNumber(double value, {int decimals = 3}) {
       final fixed = value.toStringAsFixed(decimals);
       return fixed
@@ -1945,8 +1945,8 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     }
 
     String? countPart;
-    if (s.doseTabletQuarters != null) {
-      final q = s.doseTabletQuarters!;
+    if (s.entryTabletQuarters != null) {
+      final q = s.entryTabletQuarters!;
       final count = q / 4.0;
       String amount;
       if (q == 1) {
@@ -1963,14 +1963,14 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
 
       final label = (count == 1) ? 'tablet' : 'tablets';
       countPart = '$amount $label';
-    } else if (s.doseCapsules != null) {
-      final count = s.doseCapsules!.toDouble();
+    } else if (s.entryCapsules != null) {
+      final count = s.entryCapsules!.toDouble();
       countPart = formatCount(count, 'capsule');
-    } else if (s.doseSyringes != null) {
-      final count = s.doseSyringes!.toDouble();
+    } else if (s.entrySyringes != null) {
+      final count = s.entrySyringes!.toDouble();
       countPart = formatCount(count, 'syringe');
-    } else if (s.doseVials != null) {
-      final count = s.doseVials!.toDouble();
+    } else if (s.entryVials != null) {
+      final count = s.entryVials!.toDouble();
       countPart = formatCount(count, 'vial');
     }
 
@@ -1979,12 +1979,12 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
       parts.add(countPart);
     }
 
-    if (s.doseMassMcg != null) {
-      parts.add(formatMass(s.doseMassMcg!));
+    if (s.entryMassMcg != null) {
+      parts.add(formatMass(s.entryMassMcg!));
     }
 
-    if (s.doseVolumeMicroliter != null) {
-      parts.add(formatVolume(s.doseVolumeMicroliter!));
+    if (s.entryVolumeMicroliter != null) {
+      parts.add(formatVolume(s.entryVolumeMicroliter!));
     }
 
     if (parts.isNotEmpty) {
@@ -1992,10 +1992,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     }
 
     // Fallback (legacy)
-    return '${_formatNumber(s.doseValue)} ${s.doseUnit}'.trim();
+    return '${_formatNumber(s.entryValue)} ${s.entryUnit}'.trim();
   }
 
-  bool _hasDosesOnDate(DateTime date, Schedule s) {
+  bool _hasEntriesOnDate(DateTime date, Schedule s) {
     final onDay = s.hasCycle && s.cycleEveryNDays != null
         ? (() {
             final anchor = s.cycleAnchorDate ?? DateTime.now();
@@ -2008,9 +2008,9 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     return onDay;
   }
 
-  List<DateTime> _getDosesForDate(DateTime date, Schedule s) {
-    final doses = <DateTime>[];
-    final onDay = _hasDosesOnDate(date, s);
+  List<DateTime> _getEntriesForDate(DateTime date, Schedule s) {
+    final entries = <DateTime>[];
+    final onDay = _hasEntriesOnDate(date, s);
 
     if (onDay) {
       final times = ScheduleOccurrenceService.normalizedTimesOfDay(s);
@@ -2022,10 +2022,10 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
           minutes ~/ 60,
           minutes % 60,
         );
-        doses.add(dt);
+        entries.add(dt);
       }
     }
-    return doses;
+    return entries;
   }
 
   String _formatNumber(double value) {
@@ -2139,15 +2139,15 @@ class _DateEditResult {
   final DateTime? date;
 }
 
-/// Dialog for recording a dose with notes and optional injection site
-class _DoseRecordDialog extends StatefulWidget {
-  final DoseAction action;
-  final DoseLog? existingLog;
+/// Dialog for recording a entry with notes and optional injection site
+class _EntryRecordDialog extends StatefulWidget {
+  final EntryAction action;
+  final EntryLog? existingLog;
   final bool isInjection;
   final TextEditingController notesController;
   final String? initialInjectionSite;
 
-  const _DoseRecordDialog({
+  const _EntryRecordDialog({
     required this.action,
     required this.existingLog,
     required this.isInjection,
@@ -2156,10 +2156,10 @@ class _DoseRecordDialog extends StatefulWidget {
   });
 
   @override
-  State<_DoseRecordDialog> createState() => _DoseRecordDialogState();
+  State<_EntryRecordDialog> createState() => _EntryRecordDialogState();
 }
 
-class _DoseRecordDialogState extends State<_DoseRecordDialog> {
+class _EntryRecordDialogState extends State<_EntryRecordDialog> {
   late final TextEditingController _injectionSiteController;
 
   @override
@@ -2178,9 +2178,9 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
 
   String get _actionLabel {
     return switch (widget.action) {
-      DoseAction.logged => 'Log Entry',
-      DoseAction.snoozed => 'Snooze Reminder',
-      DoseAction.skipped => 'Skip Entry',
+      EntryAction.logged => 'Log Entry',
+      EntryAction.snoozed => 'Snooze Reminder',
+      EntryAction.skipped => 'Skip Entry',
     };
   }
 
@@ -2202,7 +2202,7 @@ class _DoseRecordDialogState extends State<_DoseRecordDialog> {
               decoration: buildFieldDecoration(
                 context,
                 label: 'Notes (optional)',
-                hint: 'Add any notes about this dose...',
+                hint: 'Add any notes about this entry...',
               ),
               maxLines: 3,
               textCapitalization: kTextCapitalizationDefault,

@@ -1,4 +1,4 @@
-import 'package:dosifi_v5/src/core/design_system.dart';
+﻿import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/core/monetization/billing_service.dart';
 import 'package:dosifi_v5/src/core/monetization/entitlement_service.dart';
 import 'package:dosifi_v5/src/core/monetization/monetization_metrics_service.dart';
@@ -28,7 +28,7 @@ enum _MedView { list, compact, large }
 
 enum _SortBy {
   name,
-  nextDose,
+  nextEntry,
   mostUsed,
   manufacturer,
   form,
@@ -566,11 +566,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 ),
                 const PopupMenuItem(
                   value: _FilterBy.formSingleDoseVial,
-                  child: Text('Single dose vials'),
+                  child: Text('Single entry vials'),
                 ),
                 const PopupMenuItem(
                   value: _FilterBy.formMultiDoseVial,
-                  child: Text('Multi-dose vials'),
+                  child: Text('Multi-Dose Vials'),
                 ),
               ],
             ),
@@ -582,7 +582,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 if (value is _SortBy) {
                   final nextSortAsc = switch (value) {
                     _SortBy.mostUsed => false,
-                    _SortBy.nextDose => true,
+                    _SortBy.nextEntry => true,
                     _ => _sortAsc,
                   };
                   _saveSort(sortBy: value, sortAsc: nextSortAsc);
@@ -596,7 +596,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                   child: Text('Sort by name'),
                 ),
                 const PopupMenuItem(
-                  value: _SortBy.nextDose,
+                  value: _SortBy.nextEntry,
                   child: Text('Sort by next entry'),
                 ),
                 const PopupMenuItem(
@@ -650,9 +650,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   }) {
     var items = List<Medication>.from(medications);
 
-    final nextDoseByMedId = <String, DateTime>{};
-    final scheduledDoses7dByMedId = <String, int>{};
-    if (_sortBy == _SortBy.nextDose || _sortBy == _SortBy.mostUsed) {
+    final nextEntryByMedId = <String, DateTime>{};
+    final scheduledEntries7dByMedId = <String, int>{};
+    if (_sortBy == _SortBy.nextEntry || _sortBy == _SortBy.mostUsed) {
       final now = DateTime.now();
       final horizonEnd = now.add(const Duration(days: 30));
       final usageWindowEnd = now.add(const Duration(days: 7));
@@ -670,9 +670,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         if (occurrences.isEmpty) continue;
 
         final nextOccurrence = occurrences.first;
-        final existingNext = nextDoseByMedId[medId];
+        final existingNext = nextEntryByMedId[medId];
         if (existingNext == null || nextOccurrence.isBefore(existingNext)) {
-          nextDoseByMedId[medId] = nextOccurrence;
+          nextEntryByMedId[medId] = nextOccurrence;
         }
 
         var count7d = 0;
@@ -681,8 +681,8 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
           count7d++;
         }
         if (count7d > 0) {
-          scheduledDoses7dByMedId[medId] =
-              (scheduledDoses7dByMedId[medId] ?? 0) + count7d;
+          scheduledEntries7dByMedId[medId] =
+              (scheduledEntries7dByMedId[medId] ?? 0) + count7d;
         }
       }
     }
@@ -743,16 +743,16 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
       switch (_sortBy) {
         case _SortBy.name:
           return dir(a.name.compareTo(b.name));
-        case _SortBy.nextDose:
-          final an = nextDoseByMedId[a.id];
-          final bn = nextDoseByMedId[b.id];
+        case _SortBy.nextEntry:
+          final an = nextEntryByMedId[a.id];
+          final bn = nextEntryByMedId[b.id];
           if (an == null && bn == null) return 0;
           if (an == null) return dir(1);
           if (bn == null) return dir(-1);
           return dir(an.compareTo(bn));
         case _SortBy.mostUsed:
-          final ac = scheduledDoses7dByMedId[a.id] ?? 0;
-          final bc = scheduledDoses7dByMedId[b.id] ?? 0;
+          final ac = scheduledEntries7dByMedId[a.id] ?? 0;
+          final bc = scheduledEntries7dByMedId[b.id] ?? 0;
           return dir(ac.compareTo(bc));
         case _SortBy.manufacturer:
           final am = (a.manufacturer ?? '').trim();

@@ -1,4 +1,4 @@
-// coverage:ignore-file
+﻿// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
@@ -22,8 +22,8 @@ mixin _$ScheduleFormState {
   String get name => throw _privateConstructorUsedError;
   String get medicationName => throw _privateConstructorUsedError;
   String? get medicationId => throw _privateConstructorUsedError;
-  double get doseValue => throw _privateConstructorUsedError;
-  String get doseUnit => throw _privateConstructorUsedError;
+  double get entryValue => throw _privateConstructorUsedError;
+  String get entryUnit => throw _privateConstructorUsedError;
   List<TimeOfDay> get times => throw _privateConstructorUsedError;
   Set<int> get days => throw _privateConstructorUsedError;
   Set<int> get daysOfMonth => throw _privateConstructorUsedError;
@@ -60,8 +60,8 @@ abstract class $ScheduleFormStateCopyWith<$Res> {
       String name,
       String medicationName,
       String? medicationId,
-      double doseValue,
-      String doseUnit,
+      double entryValue,
+      String entryUnit,
       List<TimeOfDay> times,
       Set<int> days,
       Set<int> daysOfMonth,
@@ -99,8 +99,8 @@ class _$ScheduleFormStateCopyWithImpl<$Res, $Val extends ScheduleFormState>
     Object? name = null,
     Object? medicationName = null,
     Object? medicationId = freezed,
-    Object? doseValue = null,
-    Object? doseUnit = null,
+    Object? entryValue = null,
+    Object? entryUnit = null,
     Object? times = null,
     Object? days = null,
     Object? daysOfMonth = null,
@@ -143,13 +143,13 @@ class _$ScheduleFormStateCopyWithImpl<$Res, $Val extends ScheduleFormState>
           ? _value.medicationId
           : medicationId // ignore: cast_nullable_to_non_nullable
               as String?,
-      doseValue: null == doseValue
-          ? _value.doseValue
-          : doseValue // ignore: cast_nullable_to_non_nullable
+      entryValue: null == entryValue
+          ? _value.entryValue
+          : entryValue // ignore: cast_nullable_to_non_nullable
               as double,
-      doseUnit: null == doseUnit
-          ? _value.doseUnit
-          : doseUnit // ignore: cast_nullable_to_non_nullable
+      entryUnit: null == entryUnit
+          ? _value.entryUnit
+          : entryUnit // ignore: cast_nullable_to_non_nullable
               as String,
       times: null == times
           ? _value.times
@@ -234,8 +234,8 @@ abstract class _$$ScheduleFormStateImplCopyWith<$Res>
       String name,
       String medicationName,
       String? medicationId,
-      double doseValue,
-      String doseUnit,
+      double entryValue,
+      String entryUnit,
       List<TimeOfDay> times,
       Set<int> days,
       Set<int> daysOfMonth,
@@ -271,8 +271,8 @@ class __$$ScheduleFormStateImplCopyWithImpl<$Res>
     Object? name = null,
     Object? medicationName = null,
     Object? medicationId = freezed,
-    Object? doseValue = null,
-    Object? doseUnit = null,
+    Object? entryValue = null,
+    Object? entryUnit = null,
     Object? times = null,
     Object? days = null,
     Object? daysOfMonth = null,
@@ -315,13 +315,13 @@ class __$$ScheduleFormStateImplCopyWithImpl<$Res>
           ? _value.medicationId
           : medicationId // ignore: cast_nullable_to_non_nullable
               as String?,
-      doseValue: null == doseValue
-          ? _value.doseValue
-          : doseValue // ignore: cast_nullable_to_non_nullable
+      entryValue: null == entryValue
+          ? _value.entryValue
+          : entryValue // ignore: cast_nullable_to_non_nullable
               as double,
-      doseUnit: null == doseUnit
-          ? _value.doseUnit
-          : doseUnit // ignore: cast_nullable_to_non_nullable
+      entryUnit: null == entryUnit
+          ? _value.entryUnit
+          : entryUnit // ignore: cast_nullable_to_non_nullable
               as String,
       times: null == times
           ? _value._times
@@ -401,8 +401,8 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
       this.name = '',
       this.medicationName = '',
       this.medicationId,
-      this.doseValue = 0,
-      this.doseUnit = 'mg',
+      this.entryValue = 0,
+      this.entryUnit = 'mg',
       final List<TimeOfDay> times = const [TimeOfDay(hour: 9, minute: 0)],
       final Set<int> days = const {1, 2, 3, 4, 5, 6, 7},
       final Set<int> daysOfMonth = const {},
@@ -440,10 +440,10 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
   final String? medicationId;
   @override
   @JsonKey()
-  final double doseValue;
+  final double entryValue;
   @override
   @JsonKey()
-  final String doseUnit;
+  final String entryUnit;
   final List<TimeOfDay> _times;
   @override
   @JsonKey()
@@ -509,7 +509,7 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
 
   @override
   String toString() {
-    return 'ScheduleFormState(mode: $mode, endDate: $endDate, noEnd: $noEnd, name: $name, medicationName: $medicationName, medicationId: $medicationId, doseValue: $doseValue, doseUnit: $doseUnit, times: $times, days: $days, daysOfMonth: $daysOfMonth, active: $active, useCycle: $useCycle, daysOn: $daysOn, daysOff: $daysOff, cycleN: $cycleN, cycleAnchor: $cycleAnchor, nameAuto: $nameAuto, selectedMed: $selectedMed, startDate: $startDate, selectedSyringeType: $selectedSyringeType, showMedSelector: $showMedSelector, isSaving: $isSaving, error: $error)';
+    return 'ScheduleFormState(mode: $mode, endDate: $endDate, noEnd: $noEnd, name: $name, medicationName: $medicationName, medicationId: $medicationId, entryValue: $entryValue, entryUnit: $entryUnit, times: $times, days: $days, daysOfMonth: $daysOfMonth, active: $active, useCycle: $useCycle, daysOn: $daysOn, daysOff: $daysOff, cycleN: $cycleN, cycleAnchor: $cycleAnchor, nameAuto: $nameAuto, selectedMed: $selectedMed, startDate: $startDate, selectedSyringeType: $selectedSyringeType, showMedSelector: $showMedSelector, isSaving: $isSaving, error: $error)';
   }
 
   @override
@@ -525,10 +525,10 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
                 other.medicationName == medicationName) &&
             (identical(other.medicationId, medicationId) ||
                 other.medicationId == medicationId) &&
-            (identical(other.doseValue, doseValue) ||
-                other.doseValue == doseValue) &&
-            (identical(other.doseUnit, doseUnit) ||
-                other.doseUnit == doseUnit) &&
+            (identical(other.entryValue, entryValue) ||
+                other.entryValue == entryValue) &&
+            (identical(other.entryUnit, entryUnit) ||
+                other.entryUnit == entryUnit) &&
             const DeepCollectionEquality().equals(other._times, _times) &&
             const DeepCollectionEquality().equals(other._days, _days) &&
             const DeepCollectionEquality()
@@ -565,8 +565,8 @@ class _$ScheduleFormStateImpl implements _ScheduleFormState {
         name,
         medicationName,
         medicationId,
-        doseValue,
-        doseUnit,
+        entryValue,
+        entryUnit,
         const DeepCollectionEquality().hash(_times),
         const DeepCollectionEquality().hash(_days),
         const DeepCollectionEquality().hash(_daysOfMonth),
@@ -601,8 +601,8 @@ abstract class _ScheduleFormState implements ScheduleFormState {
       final String name,
       final String medicationName,
       final String? medicationId,
-      final double doseValue,
-      final String doseUnit,
+      final double entryValue,
+      final String entryUnit,
       final List<TimeOfDay> times,
       final Set<int> days,
       final Set<int> daysOfMonth,
@@ -633,9 +633,9 @@ abstract class _ScheduleFormState implements ScheduleFormState {
   @override
   String? get medicationId;
   @override
-  double get doseValue;
+  double get entryValue;
   @override
-  String get doseUnit;
+  String get entryUnit;
   @override
   List<TimeOfDay> get times;
   @override

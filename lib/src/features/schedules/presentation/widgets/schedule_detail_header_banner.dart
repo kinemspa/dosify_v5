@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/core/design_system.dart';
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -12,7 +12,7 @@ import 'package:dosifi_v5/src/widgets/schedule_status_chip.dart';
 class ScheduleDetailHeaderBanner extends StatelessWidget {
   const ScheduleDetailHeaderBanner({
     required this.schedule,
-    required this.nextDose,
+    required this.nextEntry,
     required this.title,
     required this.onPauseResumePressed,
     super.key,
@@ -20,7 +20,7 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
   });
 
   final Schedule schedule;
-  final DateTime? nextDose;
+  final DateTime? nextEntry;
   final String title;
   final VoidCallback onPauseResumePressed;
   final Medication? medication;
@@ -33,8 +33,8 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
       headerChips: null,
       row1Left: DetailStatItem(
         icon: Icons.medication_outlined,
-        label: 'Dose',
-        value: _doseDisplay(schedule, medication),
+        label: 'Entry',
+        value: _entryDisplay(schedule, medication),
         valueMaxLines: 4,
       ),
       row1Right: _HeaderPauseResumeAction(
@@ -57,12 +57,12 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
       row3Left: DetailStatItem(
         icon: Icons.event_outlined,
         label: 'Next',
-        value: nextDose == null ? '—' : _nextDateText(context, nextDose!),
+        value: nextEntry == null ? '—' : _nextDateText(context, nextEntry!),
       ),
       row3Right: DetailStatItem(
         icon: Icons.timer_outlined,
         label: 'In',
-        value: nextDose == null ? '—' : _timeUntil(nextDose!),
+        value: nextEntry == null ? '—' : _timeUntil(nextEntry!),
         alignEnd: true,
       ),
     );
@@ -79,21 +79,21 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
     return MaterialLocalizations.of(context).formatShortMonthDay(local);
   }
 
-  String _doseDisplay(Schedule s, Medication? med) {
+  String _entryDisplay(Schedule s, Medication? med) {
     if (med != null) {
       final showSlash =
-          s.doseVolumeMicroliter != null &&
-          (s.doseIU != null || med.form == MedicationForm.multiDoseVial);
+          s.entryVolumeMicroliter != null &&
+          (s.entryIU != null || med.form == MedicationForm.multiDoseVial);
 
-      final metricsLine = MedicationDisplayHelpers.doseMetricsSummary(
+      final metricsLine = MedicationDisplayHelpers.entryMetricsSummary(
         med,
-        doseTabletQuarters: s.doseTabletQuarters,
-        doseCapsules: s.doseCapsules,
-        doseSyringes: s.doseSyringes,
-        doseVials: s.doseVials,
-        doseVolumeMicroliter: s.doseVolumeMicroliter?.toDouble(),
-        syringeUnits: s.doseIU?.toDouble(),
-        doseMassMcg: null,
+        entryTabletQuarters: s.entryTabletQuarters,
+        entryCapsules: s.entryCapsules,
+        entrySyringes: s.entrySyringes,
+        entryVials: s.entryVials,
+        entryVolumeMicroliter: s.entryVolumeMicroliter?.toDouble(),
+        syringeUnits: s.entryIU?.toDouble(),
+        entryMassMcg: null,
         separator: showSlash ? ' / ' : ' × ',
       ).trim();
 
@@ -115,23 +115,23 @@ class ScheduleDetailHeaderBanner extends StatelessWidget {
             : 'Med Strength';
         lines.add('$strengthPrefix - $normalizedStrengthLabel');
       }
-      if (s.doseMassMcg != null) {
+      if (s.entryMassMcg != null) {
         lines.add(
-          'Dose strength - ${MedicationDisplayHelpers.formatDoseMassFromMcg(med, s.doseMassMcg!.toDouble())}',
+          'Entry strength - ${MedicationDisplayHelpers.formatEntryMassFromMcg(med, s.entryMassMcg!.toDouble())}',
         );
       }
 
       if (lines.isNotEmpty) return lines.join('\n');
     }
 
-    final doseValue = s.doseValue;
-    final formatted = doseValue == doseValue.roundToDouble()
-        ? doseValue.toStringAsFixed(0)
-        : doseValue
+    final entryValue = s.entryValue;
+    final formatted = entryValue == entryValue.roundToDouble()
+        ? entryValue.toStringAsFixed(0)
+        : entryValue
               .toStringAsFixed(2)
               .replaceFirst(RegExp(r'\\.0+$'), '')
               .replaceFirst(RegExp(r'(\\.\\d*[1-9])0+$'), r'$1');
-    return '$formatted ${s.doseUnit}';
+    return '$formatted ${s.entryUnit}';
   }
 
   String _scheduleTypeText(Schedule schedule) {

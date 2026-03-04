@@ -1,4 +1,4 @@
-@Tags(['golden'])
+﻿@Tags(['golden'])
 library;
 
 import 'package:flutter/material.dart';
@@ -9,7 +9,7 @@ import 'package:dosifi_v5/src/widgets/unified_form.dart';
 
 ThemeData _goldenTheme() {
   const primarySeed = kDetailHeaderGradientStart;
-  const secondarySeed = kDoseStatusSnoozedOrange;
+  const secondarySeed = kEntryStatusSnoozedOrange;
 
   final scheme = ColorScheme.fromSeed(seedColor: primarySeed).copyWith(
     primary: primarySeed,

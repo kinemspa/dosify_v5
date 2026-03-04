@@ -1,9 +1,9 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// Emits immediately, then debounces subsequent Hive box changes so that
-/// rapid-fire mutations (e.g. batch scheduling, multiple dose logs) are
+/// rapid-fire mutations (e.g. batch scheduling, multiple entry logs) are
 /// coalesced into a single downstream rebuild instead of N individual ones.
 ///
 /// The [debounce] duration defaults to 200 ms – long enough to collapse a

@@ -1,15 +1,15 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:dosifi_v5/src/core/design_system.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/calculated_dose.dart';
-import 'package:dosifi_v5/src/widgets/calendar/calendar_dose_block.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/calculated_entry.dart';
+import 'package:dosifi_v5/src/widgets/calendar/calendar_entry_block.dart';
 
 /// Calendar day cell for month view
 class CalendarDayCell extends StatelessWidget {
   final DateTime date;
-  final List<CalculatedDose> doses;
+  final List<CalculatedEntry> entries;
   final bool isCurrentMonth;
   final bool isToday;
   final bool isSelected;
@@ -18,7 +18,7 @@ class CalendarDayCell extends StatelessWidget {
   const CalendarDayCell({
     super.key,
     required this.date,
-    required this.doses,
+    required this.entries,
     this.isCurrentMonth = true,
     this.isToday = false,
     this.isSelected = false,
@@ -60,16 +60,16 @@ class CalendarDayCell extends StatelessWidget {
           final headerHeight =
             effectiveNumberPadding.vertical + effectiveDayNumberSize;
             final indicatorsMinHeight =
-                kCalendarDayDoseIndicatorPadding.vertical +
-              kCalendarDoseIndicatorSize;
+                kCalendarDayEntryIndicatorPadding.vertical +
+              kCalendarEntryIndicatorSize;
             final canShowIndicators =
-                doses.isNotEmpty &&
+                entries.isNotEmpty &&
                 (constraints.maxHeight - headerHeight) >= indicatorsMinHeight;
 
-            final indicatorCount = doses.length > kCalendarMonthMaxDoseIndicators
-                ? kCalendarMonthMaxDoseIndicators
-                : doses.length;
-            final overflowCount = doses.length - indicatorCount;
+            final indicatorCount = entries.length > kCalendarMonthMaxEntryIndicators
+                ? kCalendarMonthMaxEntryIndicators
+                : entries.length;
+            final overflowCount = entries.length - indicatorCount;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -103,16 +103,16 @@ class CalendarDayCell extends StatelessWidget {
                   Expanded(
                     child: ClipRect(
                       child: Padding(
-                        padding: kCalendarDayDoseIndicatorPadding,
+                        padding: kCalendarDayEntryIndicatorPadding,
                         child: Align(
                           alignment: Alignment.topCenter,
                           child: Wrap(
                             alignment: WrapAlignment.center,
-                            spacing: kCalendarDoseIndicatorSpacing,
-                            runSpacing: kCalendarDoseIndicatorSpacing,
+                            spacing: kCalendarEntryIndicatorSpacing,
+                            runSpacing: kCalendarEntryIndicatorSpacing,
                             children: [
-                              for (final dose in doses.take(indicatorCount))
-                                CalendarDoseIndicator(dose: dose),
+                              for (final entry in entries.take(indicatorCount))
+                                CalendarEntryIndicator(entry: entry),
                               if (overflowCount > 0)
                                 Text(
                                   '+$overflowCount',

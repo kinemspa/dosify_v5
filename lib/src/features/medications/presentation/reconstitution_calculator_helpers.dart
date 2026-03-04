@@ -1,4 +1,4 @@
-/// Helper functions and utilities for reconstitution calculator
+﻿/// Helper functions and utilities for reconstitution calculator
 ///
 /// Extracted from reconstitution_calculator_widget.dart to reduce file size
 /// and improve maintainability.
@@ -45,7 +45,7 @@ double toBaseMass(double value, String from) {
 /// - units: Explains units vs syringe markings, provides HGH conversion
 /// - mg: Explains pre-filled vs powder vials
 /// - mcg: Warns about unit confusion with mg
-/// - g: Simple guidance for large-dose medications
+/// - g: Simple guidance for large-entry medications
 String getStrengthHelperText(String unit) {
   switch (unit) {
     case 'units':

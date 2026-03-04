@@ -1,4 +1,4 @@
-// Flutter imports:
+﻿// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -13,7 +13,7 @@ import 'package:dosifi_v5/src/features/medications/domain/inventory_log.dart';
 import 'package:dosifi_v5/src/features/medications/domain/medication.dart';
 import 'package:dosifi_v5/src/features/medications/domain/services/medication_stock_service.dart';
 import 'package:dosifi_v5/src/features/medications/presentation/medication_display_helpers.dart';
-import 'package:dosifi_v5/src/features/schedules/domain/dose_log.dart';
+import 'package:dosifi_v5/src/features/schedules/domain/entry_log.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/widgets/app_header.dart';
 import 'package:dosifi_v5/src/widgets/detail_page_scaffold.dart';
@@ -35,7 +35,7 @@ class _InventoryPageState extends State<InventoryPage> {
   Widget build(BuildContext context) {
     final medsBox = Hive.box<Medication>('medications');
     final schedulesBox = Hive.box<Schedule>('schedules');
-    final doseLogsBox = Hive.box<DoseLog>('dose_logs');
+    final entryLogsBox = Hive.box<EntryLog>('entry_logs');
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Inventory', forceBackButton: true),
@@ -45,9 +45,9 @@ class _InventoryPageState extends State<InventoryPage> {
           return ValueListenableBuilder<Box<Schedule>>(
             valueListenable: schedulesBox.listenable(),
             builder: (context, schedules, __) {
-              return ValueListenableBuilder<Box<DoseLog>>(
-                valueListenable: doseLogsBox.listenable(),
-                builder: (context, doseLogs, ___) {
+              return ValueListenableBuilder<Box<EntryLog>>(
+                valueListenable: entryLogsBox.listenable(),
+                builder: (context, entryLogs, ___) {
                   final medItems = meds.values.toList(growable: false)
                     ..sort(
                       (a, b) =>
@@ -56,7 +56,7 @@ class _InventoryPageState extends State<InventoryPage> {
                   final scheduleItems = schedules.values.toList(
                     growable: false,
                   );
-                  final doseLogItems = doseLogs.values.toList(growable: false);
+                  final entryLogItems = entryLogs.values.toList(growable: false);
 
                   final medLow = medItems
                       .where(MedicationStockService.isLowStock)
@@ -65,8 +65,8 @@ class _InventoryPageState extends State<InventoryPage> {
                       .where((m) => MedicationStockService.calculateStockRatio(m) <= 0)
                       .length;
 
-                  final takenDoses = doseLogItems
-                      .where((d) => d.action == DoseAction.logged)
+                  final takenEntries = entryLogItems
+                      .where((d) => d.action == EntryAction.logged)
                       .length;
 
                   return ListView(
@@ -96,7 +96,7 @@ class _InventoryPageState extends State<InventoryPage> {
                           buildDetailInfoRow(
                             context,
                             label: 'Used (recorded)',
-                            value: takenDoses.toString(),
+                            value: takenEntries.toString(),
                           ),
                           buildHelperText(
                             context,

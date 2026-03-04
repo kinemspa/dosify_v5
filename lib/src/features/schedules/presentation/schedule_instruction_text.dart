@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'package:dosifi_v5/src/features/schedules/domain/schedule.dart';
 import 'package:dosifi_v5/src/core/utils/datetime_formatter.dart';
 import 'package:dosifi_v5/src/features/schedules/domain/schedule_occurrence_service.dart';
 
 String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
-  final dose = _doseLabel(schedule);
+  final entry = _entryLabel(schedule);
   final medName = schedule.medicationName.trim().isNotEmpty
       ? schedule.medicationName.trim()
       : schedule.name.trim();
@@ -13,26 +13,26 @@ String scheduleTakeInstructionLabel(BuildContext context, Schedule schedule) {
   final type = _scheduleTypeLabel(schedule);
   final time = _timesLabel(context, schedule);
 
-  return '$dose of $medName — $type at $time';
+  return '$entry of $medName — $type at $time';
 }
 
-String scheduleDoseSummaryLabel(Schedule schedule) {
-  final dose = _doseLabel(schedule);
+String scheduleEntrySummaryLabel(Schedule schedule) {
+  final entry = _entryLabel(schedule);
   final type = _scheduleTypeLabel(schedule);
-  return '$dose × $type';
+  return '$entry × $type';
 }
 
-String _doseLabel(Schedule s) {
-  final value = _formatNumber(s.doseValue);
-  final unit = s.doseUnit.trim();
+String _entryLabel(Schedule s) {
+  final value = _formatNumber(s.entryValue);
+  final unit = s.entryUnit.trim();
 
   if (unit.isEmpty) return value;
 
   final unitLabel = switch (unit) {
-    'tablets' => s.doseValue == 1 ? 'tablet' : 'tablets',
-    'capsules' => s.doseValue == 1 ? 'capsule' : 'capsules',
-    'syringes' => s.doseValue == 1 ? 'syringe' : 'syringes',
-    'vials' => s.doseValue == 1 ? 'vial' : 'vials',
+    'tablets' => s.entryValue == 1 ? 'tablet' : 'tablets',
+    'capsules' => s.entryValue == 1 ? 'capsule' : 'capsules',
+    'syringes' => s.entryValue == 1 ? 'syringe' : 'syringes',
+    'vials' => s.entryValue == 1 ? 'vial' : 'vials',
     _ => unit,
   };
 

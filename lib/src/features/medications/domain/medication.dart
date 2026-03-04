@@ -1,4 +1,4 @@
-// Package imports:
+﻿// Package imports:
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
@@ -20,7 +20,7 @@ class Medication {
     this.description,
     this.notes,
     this.perMlValue,
-    this.volumePerDose,
+    this.volumePerEntry,
     this.volumeUnit,
     this.lowStockEnabled = false,
     this.lowStockThreshold,
@@ -85,7 +85,7 @@ class Medication {
   final double? perMlValue;
 
   @HiveField(38)
-  final double? volumePerDose;
+  final double? volumePerEntry;
 
   @HiveField(39)
   final VolumeUnit? volumeUnit;
@@ -140,7 +140,7 @@ class Medication {
   @HiveField(20)
   final double? containerVolumeMl;
 
-  // Multi-dose low stock thresholds
+  // Multi-entry low stock thresholds
   // Threshold for the current vial liquid volume (mL)
   @HiveField(21)
   final double? lowStockVialVolumeThresholdMl;
@@ -208,7 +208,7 @@ class Medication {
     double? strengthValue,
     Unit? strengthUnit,
     double? perMlValue,
-    double? volumePerDose,
+    double? volumePerEntry,
     VolumeUnit? volumeUnit,
     double? stockValue,
     StockUnit? stockUnit,
@@ -255,7 +255,7 @@ class Medication {
       strengthValue: strengthValue ?? this.strengthValue,
       strengthUnit: strengthUnit ?? this.strengthUnit,
       perMlValue: perMlValue ?? this.perMlValue,
-      volumePerDose: volumePerDose ?? this.volumePerDose,
+      volumePerEntry: volumePerEntry ?? this.volumePerEntry,
       volumeUnit: volumeUnit ?? this.volumeUnit,
       stockValue: stockValue ?? this.stockValue,
       stockUnit: stockUnit ?? this.stockUnit,

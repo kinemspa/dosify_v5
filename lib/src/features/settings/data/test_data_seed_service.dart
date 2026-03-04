@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+﻿import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:dosifi_v5/src/features/medications/domain/enums.dart';
@@ -75,7 +75,7 @@ class TestDataSeedService {
       strengthUnit: Unit.mgPerMl,
       stockValue: 10,
       stockUnit: StockUnit.preFilledSyringes,
-      volumePerDose: 0.5,
+      volumePerEntry: 0.5,
       volumeUnit: VolumeUnit.ml,
       description: 'Sample prefilled syringe for UI testing.',
     );
@@ -83,7 +83,7 @@ class TestDataSeedService {
     final sdv = Medication(
       id: _medIdSdv,
       form: MedicationForm.singleDoseVial,
-      name: 'Test Single Dose Vial',
+      name: 'Test Single Entry Vial',
       strengthValue: 1,
       strengthUnit: Unit.mg,
       stockValue: 8,
@@ -94,7 +94,7 @@ class TestDataSeedService {
     final mdv = Medication(
       id: _medIdMdv,
       form: MedicationForm.multiDoseVial,
-      name: 'Test Multi Dose Vial',
+      name: 'Test Multi Entry Vial',
       strengthValue: 10,
       strengthUnit: Unit.mgPerMl,
       stockValue: 2,
@@ -118,8 +118,8 @@ class TestDataSeedService {
       name: '1 Tablet',
       medicationName: tablet.name,
       medicationId: tablet.id,
-      doseValue: 1,
-      doseUnit: 'tablets',
+      entryValue: 1,
+      entryUnit: 'tablets',
       minutesOfDay: 9 * 60,
       daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
       timesOfDay: const [9 * 60],
@@ -131,8 +131,8 @@ class TestDataSeedService {
       name: '1 Capsule',
       medicationName: capsule.name,
       medicationId: capsule.id,
-      doseValue: 1,
-      doseUnit: 'capsules',
+      entryValue: 1,
+      entryUnit: 'capsules',
       minutesOfDay: 8 * 60,
       daysOfWeek: const [1, 3, 5],
       timesOfDay: const [8 * 60, 20 * 60],
@@ -144,8 +144,8 @@ class TestDataSeedService {
       name: 'Injection (every 2 days)',
       medicationName: pfs.name,
       medicationId: pfs.id,
-      doseValue: 1,
-      doseUnit: 'syringes',
+      entryValue: 1,
+      entryUnit: 'syringes',
       minutesOfDay: 7 * 60 + 30,
       daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
       timesOfDay: const [7 * 60 + 30],
@@ -159,8 +159,8 @@ class TestDataSeedService {
       name: 'Monthly (31st)',
       medicationName: sdv.name,
       medicationId: sdv.id,
-      doseValue: 1,
-      doseUnit: 'vials',
+      entryValue: 1,
+      entryUnit: 'vials',
       minutesOfDay: 9 * 60,
       daysOfWeek: const [1, 2, 3, 4, 5, 6, 7],
       timesOfDay: const [9 * 60],
@@ -174,8 +174,8 @@ class TestDataSeedService {
       name: 'MDV (weekly)',
       medicationName: mdv.name,
       medicationId: mdv.id,
-      doseValue: 0.25,
-      doseUnit: 'ml',
+      entryValue: 0.25,
+      entryUnit: 'ml',
       minutesOfDay: 10 * 60,
       daysOfWeek: const [2],
       timesOfDay: const [10 * 60],
