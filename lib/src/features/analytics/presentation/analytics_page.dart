@@ -28,6 +28,7 @@ import 'package:skedux/src/widgets/app_snackbar.dart';
 import 'package:skedux/src/widgets/app_header.dart';
 import 'package:skedux/src/widgets/detail_page_scaffold.dart';
 import 'package:skedux/src/widgets/report_time_range_selector_row.dart';
+import 'package:skedux/src/widgets/no_medications_banner.dart';
 import 'package:skedux/src/widgets/unified_form.dart';
 
 class AnalyticsPage extends StatefulWidget {
@@ -505,7 +506,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Analytics', forceBackButton: true),
-      body: ValueListenableBuilder<Box<Medication>>(
+      body: Column(
+        children: [
+          const NoMedicationsBanner(),
+          Expanded(
+            child: ValueListenableBuilder<Box<Medication>>(
         valueListenable: medsBox.listenable(),
         builder: (context, meds, _) {
           return ValueListenableBuilder<Box<Schedule>>(
@@ -1175,6 +1180,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             },
           );
         },
+      ),
+          ),
+        ],
       ),
     );
   }

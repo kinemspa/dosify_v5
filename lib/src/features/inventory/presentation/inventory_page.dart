@@ -19,6 +19,7 @@ import 'package:skedux/src/widgets/app_header.dart';
 import 'package:skedux/src/widgets/detail_page_scaffold.dart';
 import 'package:skedux/src/widgets/field36.dart';
 import 'package:skedux/src/widgets/stock_donut_gauge.dart';
+import 'package:skedux/src/widgets/no_medications_banner.dart';
 import 'package:skedux/src/widgets/unified_form.dart';
 
 class InventoryPage extends StatefulWidget {
@@ -39,7 +40,11 @@ class _InventoryPageState extends State<InventoryPage> {
 
     return Scaffold(
       appBar: const GradientAppBar(title: 'Inventory', forceBackButton: true),
-      body: ValueListenableBuilder<Box<Medication>>(
+      body: Column(
+        children: [
+          const NoMedicationsBanner(),
+          Expanded(
+            child: ValueListenableBuilder<Box<Medication>>(
         valueListenable: medsBox.listenable(),
         builder: (context, meds, _) {
           return ValueListenableBuilder<Box<Schedule>>(
@@ -170,6 +175,9 @@ class _InventoryPageState extends State<InventoryPage> {
             },
           );
         },
+      ),
+          ),
+        ],
       ),
     );
   }

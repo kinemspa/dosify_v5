@@ -19,6 +19,7 @@ import 'package:skedux/src/widgets/app_header.dart';
 import 'package:skedux/src/widgets/cards/activity_card.dart';
 import 'package:skedux/src/widgets/cards/calendar_card.dart';
 import 'package:skedux/src/widgets/cards/today_entries_card.dart';
+import 'package:skedux/src/widgets/no_medications_banner.dart';
 import 'package:skedux/src/widgets/notification_permission_banner.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -289,6 +290,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
             const SizedBox(height: kSpacingL),
             const NotificationPermissionBanner(),
+            const NoMedicationsBanner(),
             _buildHomeCards(context),
             const SizedBox(height: kSpacingXL),
           ],

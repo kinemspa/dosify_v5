@@ -15,6 +15,7 @@ import 'package:skedux/src/widgets/app_header.dart';
 import 'package:skedux/src/widgets/schedule_status_chip.dart';
 import 'package:skedux/src/features/schedules/presentation/widgets/schedule_list_card.dart';
 import 'package:skedux/src/features/schedules/presentation/schedule_providers.dart';
+import 'package:skedux/src/widgets/no_medications_banner.dart';
 
 enum _SchedView { list, compact, large }
 
@@ -99,8 +100,12 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
     final box = ref.watch(schedulesBoxProvider);
     return Scaffold(
       appBar: const GradientAppBar(title: 'Schedules', forceBackButton: true),
-      body: Builder(
-        builder: (context) {
+      body: Column(
+        children: [
+          const NoMedicationsBanner(),
+          Expanded(
+            child: Builder(
+              builder: (context) {
           var items = box.values.toList(growable: false);
           // Filter
           items = switch (_filter) {
@@ -206,6 +211,9 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
             ],
           );
         },
+            ),
+          ),
+        ],
       ),
       floatingActionButton:
           (box.values.isNotEmpty || _query.isNotEmpty)
