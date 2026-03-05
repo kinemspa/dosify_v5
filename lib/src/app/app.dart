@@ -238,7 +238,15 @@ class SkeduxApp extends ConsumerWidget {
     final schemeDark = ColorScheme.fromSeed(
       seedColor: primarySeed,
       brightness: Brightness.dark,
-    ).copyWith(primary: primarySeed, secondary: secondarySeed);
+    ).copyWith(
+      primary: primarySeed,
+      secondary: secondarySeed,
+      // Force onPrimary to white — pinning primary to the brand seed in dark
+      // mode doesn't automatically recalculate onPrimary, which can leave it
+      // dark. FABs, filled buttons, and elevated buttons must always use white
+      // foreground/icons on the primary-coloured background.
+      onPrimary: Colors.white,
+    );
     final baseDark = ThemeData(
       colorScheme: schemeDark,
       useMaterial3: true,

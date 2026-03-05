@@ -9,13 +9,9 @@ import 'package:skedux/src/core/ui/onboarding_settings.dart';
 // ── Per-screen tip definitions ───────────────────────────────────────────────
 
 const _tips = <String, _CoachStep>{
-  '/': _CoachStep(
-    title: 'Welcome to Skedux',
-    message:
-        'Skedux helps you organise medications, schedules, and track activity '
-        'for personal reference. All data stays on your device.',
-    targetAlignment: Alignment(0.0, 0.85),
-  ),
+  // Note: '/' tip intentionally omitted — the disclaimer gate serves as the
+  // first-launch welcome screen. Showing a second tip immediately after would
+  // create a double-onboarding experience.
   '/medications': _CoachStep(
     title: 'Medications',
     message:
