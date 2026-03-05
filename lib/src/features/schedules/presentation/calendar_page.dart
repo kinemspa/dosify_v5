@@ -45,10 +45,9 @@ class CalendarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const GradientAppBar(title: 'Calendar', forceBackButton: true),
-      body: Column(
+      body: Stack(
         children: [
-          const NoMedicationsBanner(),
-          Expanded(
+          Positioned.fill(
             child: SafeArea(
               child: EntryCalendarWidget(
                 variant: CalendarVariant.full,
@@ -60,6 +59,12 @@ class CalendarPage extends StatelessWidget {
                 // Use default bottom sheet handler (removed onEntryTap override)
               ),
             ),
+          ),
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: NoMedicationsBanner(),
           ),
         ],
       ),
