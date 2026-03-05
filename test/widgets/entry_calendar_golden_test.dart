@@ -62,7 +62,7 @@ void main() {
 	setUpAll(() async {
 		Intl.defaultLocale = 'en_US';
 
-		hiveDir = await Directory.systemTemp.createTemp('dosifi_hive_calendar_');
+		hiveDir = await Directory.systemTemp.createTemp('skedux_hive_calendar_');
 		Hive.init(hiveDir!.path);
 
 		if (!Hive.isAdapterRegistered(UnitAdapter().typeId)) {

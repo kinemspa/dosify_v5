@@ -695,7 +695,7 @@ class NotificationScheduler {
     await NotificationChannelService.plugin.show(
       summary,
       '2 entry reminders',
-      'Open Dosifi to review',
+      'Open Skedux to review',
       summaryDetails,
     );
   }

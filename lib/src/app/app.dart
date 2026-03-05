@@ -11,8 +11,8 @@ import 'package:skedux/src/app/theme_mode_controller.dart';
 import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/widgets/branded_launch_gate.dart';
 
-class DosifiApp extends ConsumerWidget {
-  const DosifiApp({super.key});
+class SkeduxApp extends ConsumerWidget {
+  const SkeduxApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -6,7 +6,7 @@ import 'package:skedux/src/core/notifications/notification_channel_service.dart'
 import 'package:skedux/src/core/notifications/notification_scheduler.dart';
 
 export 'package:skedux/src/core/notifications/notification_channel_service.dart'
-    show dosifiNotificationTapBackground;
+    show skeduxNotificationTapBackground;
 
 /// Thin public facade over [NotificationChannelService] and
 /// [NotificationScheduler]. All existing call sites (main.dart,

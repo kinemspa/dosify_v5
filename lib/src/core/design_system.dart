@@ -1,5 +1,5 @@
 ﻿/// ============================================================================
-/// DOSIFI V5 - UNIVERSAL DESIGN SYSTEM
+/// SKEDUX V5 - UNIVERSAL DESIGN SYSTEM
 /// ============================================================================
 ///
 /// This is the SINGLE SOURCE OF TRUTH for ALL styling in the entire app.

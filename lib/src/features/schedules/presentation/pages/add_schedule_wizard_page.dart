@@ -1670,8 +1670,8 @@ class _AddScheduleWizardPageState
           title: const Text('Allow reminders'),
           content: Text(
             !enabled
-                ? 'Notifications are disabled for Dosifi. Enable notifications to receive reminders.'
-                : 'Android restricts exact alarms. Enable "Alarms & reminders" for Dosifi to deliver reminders at the exact time.',
+                ? 'Notifications are disabled for Skedux. Enable notifications to receive reminders.'
+                : 'Android restricts exact alarms. Enable "Alarms & reminders" for Skedux to deliver reminders at the exact time.',
           ),
           actionsAlignment: MainAxisAlignment.center,
           actions: [

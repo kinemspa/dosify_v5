@@ -39,15 +39,15 @@ class _LegalContent extends StatelessWidget {
         _SectionHeading('Privacy Policy'),
         const SizedBox(height: kSpacingM),
         _Para(
-          'Dosifi stores all data you enter — including compound names, '
+          'Skedux stores all data you enter — including compound names, '
           'reconstitution calculations, schedules, and entry logs — locally '
           'on your device inside an encrypted Hive database. No data is '
-          'transmitted to any Dosifi server.',
+          'transmitted to any Skedux server.',
         ),
         const SizedBox(height: kSpacingM),
         _Para(
           'Google Drive Backup (optional): If you enable Google Drive backup '
-          'via the Settings screen, Dosifi requests read/write access to a '
+          'via the Settings screen, Skedux requests read/write access to a '
           'dedicated app folder in your Google Drive. This data is governed '
           'by Google\u2019s Privacy Policy (policies.google.com/privacy). '
           'You may revoke access at any time from your Google Account settings.',
@@ -59,7 +59,7 @@ class _LegalContent extends StatelessWidget {
         ),
         const SizedBox(height: kSpacingM),
         _Para(
-          'Advertising: Dosifi may display ads served by Google AdMob. '
+          'Advertising: Skedux may display ads served by Google AdMob. '
           'AdMob may use device identifiers in accordance with '
           'Google\u2019s advertising policies. You can reset your '
           'advertising ID or opt out of personalised ads in your device '
@@ -67,7 +67,7 @@ class _LegalContent extends StatelessWidget {
         ),
         const SizedBox(height: kSpacingM),
         _Para(
-          'Analytics: Dosifi does not collect personally identifiable '
+          'Analytics: Skedux does not collect personally identifiable '
           'analytics. Aggregate, non-identifiable usage signals may be '
           'collected by Google Play Services.',
         ),
@@ -87,7 +87,7 @@ class _LegalContent extends StatelessWidget {
         _SubHeading('Research & Informational Purposes Only'),
         const SizedBox(height: kSpacingS),
         _Para(
-          'Dosifi is a research reference and personal tracking application. '
+          'Skedux is a research reference and personal tracking application. '
           'It is not a medical device and does not provide medical advice, '
           'diagnosis, or treatment of any kind.',
         ),
@@ -106,7 +106,7 @@ class _LegalContent extends StatelessWidget {
         const SizedBox(height: kSpacingS),
         _Para(
           'To the fullest extent permitted by applicable law, the developers '
-          'of Dosifi disclaim all liability for any loss, injury, or damage '
+          'of Skedux disclaim all liability for any loss, injury, or damage '
           'arising from reliance on information or calculations produced by '
           'this application. The app is provided \u201cas is\u201d without '
           'any warranty of accuracy, fitness for purpose, or '
@@ -116,7 +116,7 @@ class _LegalContent extends StatelessWidget {
         _SubHeading('Age Requirement'),
         const SizedBox(height: kSpacingS),
         _Para(
-          'By using Dosifi you confirm that you are 18 years of age or older.',
+          'By using Skedux you confirm that you are 18 years of age or older.',
         ),
         const SizedBox(height: kSpacingM),
         _SubHeading('Changes to These Terms'),

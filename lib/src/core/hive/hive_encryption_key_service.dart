@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -15,7 +15,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 /// Cross-device restore would require exporting data as JSON. This is tracked
 /// as a future enhancement.
 class HiveEncryptionKeyService {
-  static const _keyName = 'dosifi_hive_aes_key_v1';
+  static const _keyName = 'skedux_hive_aes_key_v1';
 
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),

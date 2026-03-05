@@ -142,7 +142,7 @@ class _DisclaimerBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _Paragraph(
-          'Dosifi is designed for research and informational purposes only. '
+          'Skedux is designed for research and informational purposes only. '
           'It does not constitute medical advice, diagnosis, or treatment.',
         ),
         const SizedBox(height: kSpacingL),

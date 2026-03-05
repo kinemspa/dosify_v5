@@ -111,7 +111,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
-              hint: 'eg. DosifiTab-500',
+              hint: 'eg. SkeduxTab-500',
               suppressError: true,
             ),
             onChanged: (_) => setState(() {}),
@@ -124,7 +124,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
-              hint: 'eg. Dosifi Labs',
+              hint: 'eg. Skedux Labs',
               suppressError: true,
             ),
             onChanged: (_) => setState(() {}),

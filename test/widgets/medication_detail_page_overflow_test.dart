@@ -92,7 +92,7 @@ void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
 
-    hiveDir = await Directory.systemTemp.createTemp('dosifi_hive_test_');
+    hiveDir = await Directory.systemTemp.createTemp('skedux_hive_test_');
     Hive.init(hiveDir!.path);
 
     _registerHiveAdaptersIfNeeded();

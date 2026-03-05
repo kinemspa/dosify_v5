@@ -12,7 +12,7 @@ void main() {
   testWidgets('App builds without throwing and renders MaterialApp', (
     tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: DosifiApp()));
+    await tester.pumpWidget(const ProviderScope(child: SkeduxApp()));
     await tester.pumpAndSettle();
     expect(find.byType(MaterialApp), findsOneWidget);
   });

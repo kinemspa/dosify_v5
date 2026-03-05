@@ -13,7 +13,7 @@ void main() {
 
   setUp(() async {
     // Initialize a temp Hive directory for tests
-    final dir = Directory.systemTemp.createTempSync('dosifi_test_hive');
+    final dir = Directory.systemTemp.createTempSync('skedux_test_hive');
     Hive.init(dir.path);
     if (!Hive.isAdapterRegistered(41)) Hive.registerAdapter(EntryLogAdapter());
     if (!Hive.isAdapterRegistered(42))

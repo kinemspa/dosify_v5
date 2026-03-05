@@ -11,7 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    final dir = Directory.systemTemp.createTempSync('dosifi_test_hive_supplies');
+    final dir = Directory.systemTemp.createTempSync('skedux_test_hive_supplies');
     Hive.init(dir.path);
 
     if (!Hive.isAdapterRegistered(50)) Hive.registerAdapter(SupplyAdapter());

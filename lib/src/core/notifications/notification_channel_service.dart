@@ -16,7 +16,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 /// Entry point for background notification taps.
 @pragma('vm:entry-point')
-void dosifiNotificationTapBackground(NotificationResponse response) {
+void skeduxNotificationTapBackground(NotificationResponse response) {
   debugPrint(
     '[NotificationService] BackgroundNotificationResponse: id=${response.id}, actionId=${response.actionId}, payload=${response.payload}',
   );
@@ -172,7 +172,7 @@ class NotificationChannelService {
           _dispatchNotificationResponse(response);
         },
         onDidReceiveBackgroundNotificationResponse:
-            dosifiNotificationTapBackground,
+            skeduxNotificationTapBackground,
       );
     } catch (e) {
       _log('FlutterLocalNotificationsPlugin.initialize failed: $e');

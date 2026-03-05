@@ -78,8 +78,8 @@ class DebugPage extends StatelessWidget {
                     title: const Text('Allow reminders'),
                     content: Text(
                       !enabled
-                          ? 'Notifications are disabled for Dosifi. Enable notifications to receive the test reminder.'
-                          : 'Android restricts exact alarms. Enable \"Alarms & reminders\" for Dosifi to deliver the test at the exact time.',
+                          ? 'Notifications are disabled for Skedux. Enable notifications to receive the test reminder.'
+                          : 'Android restricts exact alarms. Enable \"Alarms & reminders\" for Skedux to deliver the test at the exact time.',
                     ),
                     actionsAlignment: MainAxisAlignment.center,
                     actions: [
@@ -114,7 +114,7 @@ class DebugPage extends StatelessWidget {
               await NotificationService.scheduleInSecondsExact(
                 id,
                 30,
-                title: 'Dosifi test',
+                title: 'Skedux test',
                 body: 'This should appear in ~30 seconds',
               );
               if (!context.mounted) return;
@@ -138,14 +138,14 @@ class DebugPage extends StatelessWidget {
               await NotificationService.scheduleInSecondsExact(
                 base,
                 5,
-                title: 'Dosifi test (exact)',
+                title: 'Skedux test (exact)',
                 body: 'Exact in ~5s',
                 channelId: 'test_alarm',
               );
               await NotificationService.scheduleInSecondsAlarmClock(
                 base + 1,
                 6,
-                title: 'Dosifi test (alarm)',
+                title: 'Skedux test (alarm)',
                 body: 'AlarmClock in ~6s',
                 channelId: 'test_alarm',
               );
@@ -153,7 +153,7 @@ class DebugPage extends StatelessWidget {
               // ignore: unawaited_futures
               NotificationService.showDelayed(
                 7,
-                title: 'Dosifi test (backup)',
+                title: 'Skedux test (backup)',
                 body: 'Backup banner after 7s',
                 channelId: 'test_alarm',
               );
@@ -175,14 +175,14 @@ class DebugPage extends StatelessWidget {
               await NotificationService.scheduleInSecondsAlarmClock(
                 base,
                 5,
-                title: 'Dosifi test (alarm)',
+                title: 'Skedux test (alarm)',
                 body: 'AlarmClock in ~5s',
                 channelId: 'test_alarm',
               );
               await NotificationService.scheduleInSecondsExact(
                 base + 1,
                 6,
-                title: 'Dosifi test (exact)',
+                title: 'Skedux test (exact)',
                 body: 'Exact in ~6s',
                 channelId: 'test_alarm',
               );
@@ -190,7 +190,7 @@ class DebugPage extends StatelessWidget {
               // ignore: unawaited_futures
               NotificationService.showDelayed(
                 7,
-                title: 'Dosifi test (backup)',
+                title: 'Skedux test (backup)',
                 body: 'Backup banner after 7s',
                 channelId: 'test_alarm',
               );
@@ -212,7 +212,7 @@ class DebugPage extends StatelessWidget {
               // ignore: unawaited_futures
               NotificationService.showDelayed(
                 5,
-                title: 'Dosifi test (direct)',
+                title: 'Skedux test (direct)',
                 body: 'Direct show after 5s',
                 channelId: 'test_alarm',
               );
@@ -233,7 +233,7 @@ class DebugPage extends StatelessWidget {
               await NotificationService.scheduleInSecondsAlarmClock(
                 id,
                 120,
-                title: 'Dosifi test (alarm clock)',
+                title: 'Skedux test (alarm clock)',
                 body: '2m via AlarmClock',
                 channelId: 'test_alarm',
               );
@@ -256,7 +256,7 @@ class DebugPage extends StatelessWidget {
               await NotificationService.scheduleInSecondsExact(
                 id,
                 120,
-                title: 'Dosifi test (exact)',
+                title: 'Skedux test (exact)',
                 body: '2m exact',
                 channelId: 'test_alarm',
               );
@@ -278,7 +278,7 @@ class DebugPage extends StatelessWidget {
               await NotificationService.scheduleInSecondsAlarmClock(
                 id,
                 30,
-                title: 'Dosifi test (alarm clock)',
+                title: 'Skedux test (alarm clock)',
                 body: '30s via AlarmClock',
               );
               if (context.mounted) {

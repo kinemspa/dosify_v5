@@ -28,21 +28,21 @@ Future<void> main() async {
     // NEW: Wraps app init for MCP error reporting
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-      print('Dosifi: WidgetsFlutterBinding initialized');
+      print('Skedux: WidgetsFlutterBinding initialized');
 
-      print('Dosifi: Initializing Hive...');
+      print('Skedux: Initializing Hive...');
       await HiveBootstrap.init();
-      print('Dosifi: Hive initialized');
+      print('Skedux: Hive initialized');
 
-      print('Dosifi: Initializing MCPToolkit...');
+      print('Skedux: Initializing MCPToolkit...');
       MCPToolkitBinding.instance
         ..initialize() // NEW: Initializes MCP bridge
         ..initializeFlutterToolkit(); // NEW: Hooks Flutter inspector for widget trees/screenshots
-      print('Dosifi: MCPToolkit initialized');
+      print('Skedux: MCPToolkit initialized');
 
-      print('Dosifi: Running App...');
+      print('Skedux: Running App...');
       await disclaimerNotifier.load();
-      runApp(const ProviderScope(child: DosifiApp()));
+      runApp(const ProviderScope(child: SkeduxApp()));
 
       NotificationService.setNotificationResponseHandler(
         NotificationDeepLinkHandler.handle,
@@ -53,9 +53,9 @@ Future<void> main() async {
       // ignore: unawaited_futures
       () async {
         try {
-          print('Dosifi: Initializing NotificationService (background)...');
+          print('Skedux: Initializing NotificationService (background)...');
           await NotificationService.init().timeout(const Duration(seconds: 30));
-          print('Dosifi: NotificationService initialized');
+          print('Skedux: NotificationService initialized');
 
           await EntryTimingSettings.load();
           await ExperimentalUiSettings.load();
@@ -68,7 +68,7 @@ Future<void> main() async {
           await ScheduleScheduler.rescheduleAllActiveIfStale();
           await ExpiryNotificationScheduler.rescheduleAll();
         } catch (e) {
-          print('Dosifi: Notification init/reschedule skipped: $e');
+          print('Skedux: Notification init/reschedule skipped: $e');
         }
       }();
     },

@@ -15,7 +15,7 @@ class GoogleDriveBackupService {
           googleSignIn ??
           GoogleSignIn(scopes: const [drive.DriveApi.driveAppdataScope]);
 
-  static const _fileNamePrefix = 'dosifi_backup_';
+  static const _fileNamePrefix = 'skedux_backup_';
 
   final BackupZipCodec _codec;
   final GoogleSignIn _googleSignIn;

@@ -1,7 +1,7 @@
-// Package imports:
+﻿// Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Persists whether the user has accepted the Dosifi disclaimer.
+/// Persists whether the user has accepted the Skedux disclaimer.
 ///
 /// Acceptance is recorded once and survives app restarts. Clearing app data
 /// or reinstalling will prompt the dialog again.

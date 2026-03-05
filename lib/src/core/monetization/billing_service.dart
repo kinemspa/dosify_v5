@@ -9,7 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:skedux/src/core/monetization/entitlement_service.dart';
 import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
 
-const String kProLifetimeProductId = 'dosifi_pro_lifetime';
+const String kProLifetimeProductId = 'skedux_pro_lifetime';
 
 class BillingState {
   const BillingState({

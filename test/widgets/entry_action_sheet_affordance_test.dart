@@ -17,7 +17,7 @@ void main() {
   Directory? hiveDir;
 
   setUpAll(() async {
-    hiveDir = await Directory.systemTemp.createTemp('dosifi_hive_test_');
+    hiveDir = await Directory.systemTemp.createTemp('skedux_hive_test_');
     Hive.init(hiveDir!.path);
 
     if (!Hive.isAdapterRegistered(UnitAdapter().typeId)) {
