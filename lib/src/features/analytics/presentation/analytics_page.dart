@@ -1000,6 +1000,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     () => _pdf.buildTablePdf(
                                       title: 'Medications',
                                       csv: csv,
+                                      excludeColumns: const {'id'},
                                     ),
                                     'skedux_medications.pdf',
                                     'Skedux Medications',
