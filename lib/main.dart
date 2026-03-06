@@ -15,6 +15,7 @@ import 'package:skedux/src/core/hive/hive_bootstrap.dart';
 import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
 import 'package:skedux/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:skedux/src/core/notifications/expiry_notification_settings.dart';
+import 'package:skedux/src/core/notifications/notification_action_settings.dart';
 import 'package:skedux/src/core/notifications/snooze_settings.dart';
 import 'package:skedux/src/core/notifications/notification_service.dart';
 import 'package:skedux/src/core/ui/experimental_ui_settings.dart';
@@ -60,6 +61,7 @@ Future<void> main() async {
           await EntryTimingSettings.load();
           await ExperimentalUiSettings.load();
           await SnoozeSettings.load();
+          await NotificationActionSettings.load();
           await DateTimeFormatSettings.load();
           await ExpiryNotificationSettings.load();
 

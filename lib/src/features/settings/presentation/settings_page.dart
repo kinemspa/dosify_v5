@@ -23,6 +23,7 @@ import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
 import 'package:skedux/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:skedux/src/core/notifications/expiry_notification_settings.dart';
 import 'package:skedux/src/core/notifications/notification_service.dart';
+import 'package:skedux/src/core/notifications/notification_action_settings.dart';
 import 'package:skedux/src/core/notifications/snooze_settings.dart';
 import 'package:skedux/src/core/ui/experimental_ui_settings.dart';
 import 'package:skedux/src/core/ui/onboarding_settings.dart';
@@ -920,6 +921,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             },
           ),
 
+          ValueListenableBuilder<bool>(
+            valueListenable: NotificationActionSettings.quickLogEnabled,
+            builder: (context, quickLog, _) {
+              return SwitchListTile(
+                secondary: const Icon(Icons.bolt_outlined),
+                title: const Text('Quick-log from notification'),
+                subtitle: const Text(
+                  'Tapping “Log” on a reminder records the entry immediately without opening the app. '
+                  'Turn off to open the log sheet instead.',
+                ),
+                value: quickLog,
+                onChanged: NotificationActionSettings.setQuickLogEnabled,
+              );
+            },
+          ),
           ValueListenableBuilder<ExpiryNotificationConfig>(
             valueListenable: ExpiryNotificationSettings.value,
             builder: (context, config, _) {

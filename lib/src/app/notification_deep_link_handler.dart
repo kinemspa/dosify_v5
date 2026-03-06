@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:skedux/src/app/app_navigator.dart';
 import 'package:skedux/src/core/notifications/low_stock_notifier.dart';
+import 'package:skedux/src/core/notifications/notification_action_settings.dart';
 import 'package:skedux/src/core/notifications/notification_service.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
 import 'package:skedux/src/features/medications/domain/medication_stock_adjustment.dart';
@@ -165,7 +166,9 @@ class NotificationDeepLinkHandler {
     // hasn't already been logged, write the log directly without opening the
     // action sheet.  Snooze/Skip still open the sheet so the user can choose
     // a time / confirm they want to skip.
+    // Respects the user's "Quick-log from notification" setting.
     if (actionId == 'log' &&
+        NotificationActionSettings.quickLogEnabled.value &&
         (existingLog == null || existingLog.action != EntryAction.logged)) {
       await _directLogEntry(
         context,
