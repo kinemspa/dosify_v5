@@ -231,63 +231,73 @@ class EntryCard extends StatelessWidget {
                             : kSpacingL.toDouble(),
                         vertical: vPad,
                       ),
-                      child: Center(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Row(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Expanded(
-                                        child: Text(
-                                          medicationName,
-                                          style: c.primaryStyle,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                medicationName,
+                                                style: c.primaryStyle,
+                                                maxLines: 1,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            if (titleTrailing != null) ...[
+                                              const SizedBox(
+                                                  width: kSpacingXS),
+                                              titleTrailing!,
+                                            ],
+                                          ],
                                         ),
                                       ),
-                                      if (titleTrailing != null) ...[
-                                        const SizedBox(width: kSpacingXS),
-                                        titleTrailing!,
-                                      ],
                                     ],
                                   ),
-                                ),
-                                if (showActions) ...[
-                                  const SizedBox(width: kSpacingS),
-                                  _chip(context,
-                                      status: c.effectiveStatus,
-                                      disabled: c.disabled),
+                                  if (entryMetrics.isNotEmpty) ...[
+                                    const SizedBox(height: 1),
+                                    Text(
+                                      entryMetrics,
+                                      style: c.secondaryStyle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                  if (leadingFooter != null) ...[
+                                    const SizedBox(height: kSpacingXS),
+                                    leadingFooter!,
+                                  ],
+                                  if (c.hasDetails) ...[
+                                    const SizedBox(height: kSpacingXXS),
+                                    ...c.detailWidgets,
+                                  ],
+                                  if (c.hasFooter) ...[
+                                    const SizedBox(height: kSpacingS),
+                                    footer!,
+                                  ],
                                 ],
-                              ],
-                            ),
-                            if (entryMetrics.isNotEmpty) ...[
-                              const SizedBox(height: 1),
-                              Text(
-                                entryMetrics,
-                                style: c.secondaryStyle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
-                            ],
-                            if (leadingFooter != null) ...[
-                              const SizedBox(height: kSpacingXS),
-                              leadingFooter!,
-                            ],
-                            if (c.hasDetails) ...[
-                              const SizedBox(height: kSpacingXXS),
-                              ...c.detailWidgets,
-                            ],
-                            if (c.hasFooter) ...[
-                              const SizedBox(height: kSpacingS),
-                              footer!,
-                            ],
+                            ),
+                          ),
+                          if (showActions) ...[
+                            const SizedBox(width: kSpacingS),
+                            _chip(context,
+                                status: c.effectiveStatus,
+                                disabled: c.disabled),
                           ],
-                        ),
+                        ],
                       ),
                     ),
                   ),
