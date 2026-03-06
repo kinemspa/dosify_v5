@@ -47,13 +47,20 @@ class UnifiedStatusBadge extends StatelessWidget {
 
     final row = Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(icon, size: kIconSizeXXSmall, color: color),
         const SizedBox(width: kSpacingXS),
         Flexible(
           child: Text(
             label,
-            style: resolvedTextStyle?.copyWith(fontWeight: kFontWeightBold),
+            // height: 1.0 removes the extra line-height padding above/below the
+            // glyph so CrossAxisAlignment.center visually aligns the text cap
+            // with the icon center (icon is 12dp; text base size is 9dp).
+            style: resolvedTextStyle?.copyWith(
+              fontWeight: kFontWeightBold,
+              height: 1.0,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
