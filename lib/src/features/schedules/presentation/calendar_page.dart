@@ -3,6 +3,8 @@ import 'package:skedux/src/widgets/calendar/calendar_header.dart';
 import 'package:skedux/src/widgets/calendar/entry_calendar_widget.dart';
 import 'package:skedux/src/widgets/no_medications_banner.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skedux/src/features/medications/presentation/medication_providers.dart';
 
 /// Full-screen calendar page.
 ///
@@ -29,7 +31,7 @@ import 'package:flutter/material.dart';
 ///   ),
 /// );
 /// ```
-class CalendarPage extends StatelessWidget {
+class CalendarPage extends ConsumerWidget {
   const CalendarPage({
     this.initialDate,
     this.scheduleId,
@@ -42,13 +44,12 @@ class CalendarPage extends StatelessWidget {
   final String? medicationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasMedications = ref.watch(medicationsListProvider).isNotEmpty;
     return Scaffold(
       appBar: const GradientAppBar(title: 'Calendar', forceBackButton: true),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: SafeArea(
+      body: hasMedications
+          ? SafeArea(
               child: EntryCalendarWidget(
                 variant: CalendarVariant.full,
                 startDate: initialDate,
@@ -56,18 +57,9 @@ class CalendarPage extends StatelessWidget {
                 medicationId: medicationId,
                 showUpNextCard: false,
                 requireHourSelectionInDayView: false,
-                // Use default bottom sheet handler (removed onEntryTap override)
               ),
-            ),
-          ),
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: NoMedicationsBanner(),
-          ),
-        ],
-      ),
+            )
+          : const Center(child: NoMedicationsBanner()),
     );
   }
 }

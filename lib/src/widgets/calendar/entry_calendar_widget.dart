@@ -1288,7 +1288,9 @@ class _EntryCalendarWidgetState extends State<EntryCalendarWidget> {
     final peekRatio = kCalendarSelectedDayStagePeekRatio;
     final minRatio = peekRatio < initialRatio ? peekRatio : initialRatio;
 
-    final safeBottom = MediaQuery.paddingOf(context).bottom;
+    // Use viewPaddingOf so the gesture-nav-bar inset is always included
+    // even when SafeArea has already consumed paddingOf.
+    final safeBottom = MediaQuery.viewPaddingOf(context).bottom;
     final listBottomPadding = safeBottom + kPageBottomPadding;
 
     return DraggableScrollableSheet(
@@ -1300,6 +1302,7 @@ class _EntryCalendarWidgetState extends State<EntryCalendarWidget> {
       snapSizes: {minRatio, initialRatio, 1.0}.toList(),
       builder: (context, scrollController) {
         return Container(
+          clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
             color: colorScheme.surface,
             border: Border(
@@ -1427,15 +1430,60 @@ class _EntryCalendarWidgetState extends State<EntryCalendarWidget> {
       );
     }
 
-    // Compose: fixed (pinned) handle + header above the scrollable entry list.
-    // Using Column + Expanded ensures the header never scrolls away.
+    // Use CustomScrollView so the DraggableScrollableSheet's scrollController
+    // covers the handle and header area too — drags anywhere on the sheet work,
+    // and there are no fixed-height Column children that overflow the peek size.
     if (includeHandle || includeHeader) {
-      return Column(
-        children: [
-          if (includeHandle) buildHandle(context),
-          if (includeHeader) buildHeader(context),
-          Expanded(child: buildEntryList()),
-        ],
+      return _wrapWithCenteredDownScrollHint(
+        showHint: _showSelectedDayStageDownHint,
+        onMetrics: _updateSelectedDayStageDownHint,
+        child: CustomScrollView(
+          controller: scrollController,
+          slivers: [
+            if (includeHandle)
+              SliverToBoxAdapter(child: buildHandle(context)),
+            if (includeHeader)
+              SliverToBoxAdapter(child: buildHeader(context)),
+            if (dayEntries.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: calendarStageListPadding(listBottomPadding),
+                  child: const CalendarNoEntriesState(
+                    showIcon: false,
+                    compact: true,
+                  ),
+                ),
+              )
+            else
+              SliverList.builder(
+                itemCount: hours.length,
+                itemBuilder: (context, index) {
+                  final hour = hours[index];
+                  final hourEntries = entriesByHour[hour] ?? const [];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (index == 0) const SizedBox(height: kSpacingS),
+                      if (index != 0)
+                        Divider(
+                          height: kSpacingM,
+                          thickness: kBorderWidthThin,
+                          color: Theme.of(context).colorScheme.outlineVariant
+                              .withValues(alpha: kOpacityVeryLow),
+                        ),
+                      _buildHourEntrySection(
+                        hour: hour,
+                        hourEntries: hourEntries,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            // Bottom padding sliver so last item clears system nav bar.
+            SliverToBoxAdapter(child: SizedBox(height: listBottomPadding)),
+          ],
+        ),
       );
     }
 
