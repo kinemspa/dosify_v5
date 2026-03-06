@@ -549,6 +549,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.workspace_premium_outlined),
+              title: const Text('Simulate Pro entitlement'),
+              subtitle: Text(
+                entitlement.isPro ? 'Pro is ON — tap to revoke' : 'Free tier — tap to grant Pro',
+              ),
+              trailing: Switch(
+                value: entitlement.isPro,
+                onChanged: (v) => ref
+                    .read(entitlementServiceProvider.notifier)
+                    .setPro(v),
+              ),
+            ),
+            ListTile(
               leading: const Icon(Icons.science_outlined),
               title: const Text('Test Data'),
               subtitle: const Text(
