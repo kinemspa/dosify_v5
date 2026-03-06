@@ -38,6 +38,7 @@ import 'package:skedux/src/features/schedules/presentation/schedules_page.dart';
 import 'package:skedux/src/features/schedules/presentation/select_medication_for_schedule_page.dart';
 import 'package:skedux/src/features/settings/presentation/bottom_nav_settings_page.dart';
 import 'package:skedux/src/features/settings/presentation/debug_page.dart';
+import 'package:skedux/src/features/settings/presentation/purchases_page.dart';
 import 'package:skedux/src/features/settings/presentation/settings_page.dart';
 
 // Removed incorrect import
@@ -197,6 +198,11 @@ final router = GoRouter(
           name: 'debug',
           redirect: (context, state) => kDebugMode ? null : '/settings',
           builder: (context, state) => const DebugPage(),
+        ),
+        GoRoute(
+          path: '/settings/purchases',
+          name: 'purchases',
+          builder: (context, state) => const PurchasesPage(),
         ),
         // Nested under shell so bottom nav persists
         GoRoute(

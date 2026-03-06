@@ -436,6 +436,7 @@ class _ReconstitutionCalculatorPageState
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.calculate,
@@ -443,13 +444,14 @@ class _ReconstitutionCalculatorPageState
                       size: 24,
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
+                    Flexible(
                       child: Text(
                         'Reconstitution Reference Calculator',
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: fg,
                           fontWeight: kFontWeightBold,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],

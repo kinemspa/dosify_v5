@@ -3,6 +3,7 @@
 // Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,9 +17,7 @@ import 'package:skedux/src/core/backup/backup_models.dart';
 import 'package:skedux/src/core/backup/google_drive_backup_service.dart';
 import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/core/legal/disclaimer_settings.dart';
-import 'package:skedux/src/core/monetization/billing_service.dart';
 import 'package:skedux/src/core/monetization/entitlement_service.dart';
-import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
 import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
 import 'package:skedux/src/core/notifications/expiry_notification_scheduler.dart';
 import 'package:skedux/src/core/notifications/expiry_notification_settings.dart';
@@ -41,7 +40,7 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  static const _unlockTapTarget = 5;
+  static const _unlockTapTarget = 10;
 
   late final Future<PackageInfo> _packageInfo;
   late final GoogleDriveBackupService _backupService;
@@ -63,7 +62,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     setState(() => _devEnabled = enabled);
   }
 
-  Future<void> _handleBuildTap(BuildContext context) async {
+  Future<void> _handleLogoTap(BuildContext context) async {
     final now = DateTime.now();
     final resetWindowMs = 2000;
     if (_lastTapAt == null ||
@@ -97,7 +96,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final cs = Theme.of(context).colorScheme;
     final themeMode = ref.watch(themeModeProvider);
     final entitlement = ref.watch(entitlementServiceProvider);
-    final billing = ref.watch(billingServiceProvider);
 
     Future<void> editPercentSetting({
       required String title,
@@ -649,132 +647,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const SizedBox(height: kSpacingS),
           ListTile(
-            leading: const Icon(Icons.workspace_premium_outlined),
-            title: Text(entitlement.isPro ? 'Pro unlocked' : 'Free tier'),
+            leading: Icon(
+              entitlement.isPro
+                  ? Icons.workspace_premium
+                  : Icons.workspace_premium_outlined,
+              color: entitlement.isPro ? cs.primary : null,
+            ),
+            title: Text(
+              entitlement.isPro ? 'Pro — Unlocked' : 'Upgrade to Pro',
+            ),
             subtitle: Text(
               entitlement.isPro
                   ? 'Unlimited medications and no ads'
-                  : billing.product != null
-                  ? 'Up to $kFreeTierMedicationLimit medications + ads | Pro: ${billing.product!.price}'
-                  : 'Up to $kFreeTierMedicationLimit medications + ads',
+                  : 'Manage purchases, restore, and upgrade',
             ),
-          ),
-          if (!entitlement.isPro)
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('Pro benefits'),
-              subtitle: const Text('Unlimited medications + no ads'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () async {
-                await MonetizationMetricsService.trackPaywallShown();
-                if (!context.mounted) return;
-                await showDialog<void>(
-                  context: context,
-                  builder: (dialogContext) {
-                    return AlertDialog(
-                      title: const Text('Go Pro'),
-                      content: Text(
-                        'Unlock unlimited medications and remove ads from safe screens. Purchases are linked to your Google Play account and can be restored on reinstall/new device.',
-                        style: bodyTextStyle(dialogContext),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text('Not now'),
-                        ),
-                        FilledButton(
-                          onPressed: () async {
-                            Navigator.of(dialogContext).pop();
-                            final started = await ref
-                                .read(billingServiceProvider.notifier)
-                                .buyProLifetime();
-                            if (!context.mounted || !started) return;
-                            showAppSnackBar(
-                              context,
-                              'Purchase flow started. Complete checkout in Google Play.',
-                            );
-                          },
-                          child: const Text('Buy Pro'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          if (!entitlement.isPro)
-            ListTile(
-              leading: const Icon(Icons.shopping_bag_outlined),
-              title: const Text('Buy Pro (lifetime)'),
-              subtitle: Text(
-                billing.product?.price ?? 'Fetches product from Google Play',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: billing.isLoading
-                  ? null
-                  : () async {
-                      final started = await ref
-                          .read(billingServiceProvider.notifier)
-                          .buyProLifetime();
-                      if (!context.mounted || !started) return;
-                      showAppSnackBar(
-                        context,
-                        'Purchase flow started. Complete checkout in Google Play.',
-                      );
-                    },
-            ),
-          ListTile(
-            leading: const Icon(Icons.restore_rounded),
-            title: const Text('Restore purchases'),
-            subtitle: const Text('Refresh Pro entitlement on this device'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              await ref
-                  .read(billingServiceProvider.notifier)
-                  .restorePurchases();
-              await ref.read(entitlementServiceProvider.notifier).restore();
-              if (!context.mounted) return;
-              final isProNow = ref.read(entitlementServiceProvider).isPro;
-              showAppSnackBar(
-                context,
-                isProNow
-                    ? 'Pro entitlement restored'
-                    : 'No Pro entitlement found for this device/account',
-              );
-            },
+            onTap: () => context.push('/settings/purchases'),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: kSpacingM,
-              vertical: kSpacingXS,
-            ),
-            child: Text(
-              'Billing FAQ: Pro unlock is tied to your Play account. Use Restore purchases after reinstall or device change.',
-              style: helperTextStyle(context),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.manage_accounts_outlined),
-            title: const Text('Manage purchases'),
-            subtitle: const Text('Open Google Play purchases/subscriptions'),
-            trailing: const Icon(Icons.open_in_new),
-            onTap: () async {
-              await ref
-                  .read(billingServiceProvider.notifier)
-                  .openManagePurchases();
-            },
-          ),
-          if (billing.lastError != null && billing.lastError!.trim().isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: kSpacingM,
-                vertical: kSpacingXS,
-              ),
-              child: Text(
-                billing.lastError!,
-                style: helperTextStyle(context, color: cs.error),
-              ),
-            ),
           const SizedBox(height: kSpacingL),
           Text(
             'Notifications',
@@ -1018,6 +907,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, e.message);
+              } on PlatformException catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(
+                  context,
+                  'Google sign-in failed (${e.code}): ${e.message ?? 'Check your account and try again.'}',
+                );
               } catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, 'Backup failed: $e');
@@ -1080,6 +975,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, e.message);
+              } on PlatformException catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(
+                  context,
+                  'Google sign-in failed (${e.code}): ${e.message ?? 'Check your account and try again.'}',
+                );
               } catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, 'Restore failed: $e');
@@ -1155,21 +1056,38 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 leading: const Icon(Icons.info_outline),
                 title: const Text('Build'),
                 subtitle: Text('$versionText | $subtitle'),
-                onTap: () => _handleBuildTap(context),
               );
             },
           ),
           ListTile(
-            leading: Image.asset(
-              kPrimaryLogoAssetPath,
-              height: kSettingsAboutTileLogoSize,
-              width: kSettingsAboutTileLogoSize,
-              filterQuality: FilterQuality.high,
+            leading: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _handleLogoTap(context),
+              child: Image.asset(
+                kPrimaryLogoAssetPath,
+                height: kSettingsAboutTileLogoSize,
+                width: kSettingsAboutTileLogoSize,
+                filterQuality: FilterQuality.high,
+              ),
             ),
             title: const Text('About Skedux'),
-            subtitle: const Text('App version and licenses'),
+            subtitle: Text(
+              _devEnabled
+                  ? 'Developer options enabled — tap logo to toggle'
+                  : 'App info — tap logo 10× to unlock developer options',
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: showAbout,
+          ),
+          ListTile(
+            leading: const Icon(Icons.gavel_outlined),
+            title: const Text('Licenses'),
+            subtitle: const Text('Open source package licenses'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'Skedux',
+            ),
           ),
         ],
       ),

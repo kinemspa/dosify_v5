@@ -60,6 +60,7 @@ class UnifiedStatusBadge extends StatelessWidget {
             style: resolvedTextStyle?.copyWith(
               fontWeight: kFontWeightBold,
               height: 1.0,
+              leadingDistribution: TextLeadingDistribution.even,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

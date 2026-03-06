@@ -1,9 +1,9 @@
 ﻿// Dart imports:
 import 'dart:io';
+import 'dart:typed_data';
 
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:fl_chart/fl_chart.dart';
@@ -43,14 +43,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   final _csv = const CsvExportService();
   final _pdf = const PdfExportService();
   ReportTimeRangePreset _rangePreset = ReportTimeRangePreset.last30Days;
+  Set<MedicationForm> _filterForms = {};
 
   // ── helpers ────────────────────────────────────────────────────────────────
-
-  Future<void> _copyExport(String text, String successMessage) async {
-    await Clipboard.setData(ClipboardData(text: text));
-    if (!mounted) return;
-    showAppSnackBar(context, successMessage);
-  }
 
   Future<void> _shareExport(
     String content,
@@ -450,7 +445,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     required String label,
     required IconData icon,
     required bool enabled,
-    required VoidCallback? onCsv,
     VoidCallback? onShareCsv,
     VoidCallback? onSharePdf,
   }) {
@@ -463,11 +457,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         ),
         MenuAnchor(
           menuChildren: [
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.table_chart_outlined),
-              onPressed: enabled ? onCsv : null,
-              child: const Text('Copy CSV'),
-            ),
             if (onShareCsv != null)
               MenuItemButton(
                 leadingIcon: const Icon(Icons.share_outlined),
@@ -722,14 +711,21 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     setState(() => _rangePreset = next),
                               ),
                               const SizedBox(height: kSpacingM),
-                              // 4-stat grid
                               Row(
                                 children: [
                                   _statTile(
                                     context,
                                     icon: Icons.medication_outlined,
-                                    label: 'Medications',
-                                    value: medItems.length.toString(),
+                                    label: _filterForms.isEmpty
+                                        ? 'Medications'
+                                        : 'Filtered',
+                                    value: (_filterForms.isEmpty
+                                            ? medItems.length
+                                            : medItems
+                                                .where((m) => _filterForms
+                                                    .contains(m.form))
+                                                .length)
+                                        .toString(),
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
@@ -737,6 +733,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.schedule_outlined,
                                     label: 'Schedules',
                                     value: scheduleItems.length.toString(),
+                                    valueColor:
+                                        Theme.of(context).colorScheme.secondary,
                                   ),
                                 ],
                               ),
@@ -748,6 +746,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.check_circle_outline,
                                     label: 'Activity log',
                                     value: logItems.length.toString(),
+                                    valueColor:
+                                        Theme.of(context).colorScheme.tertiary,
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
@@ -755,25 +755,90 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     icon: Icons.inventory_2_outlined,
                                     label: 'Stock logs',
                                     value: inventoryItems.length.toString(),
+                                    valueColor:
+                                        Theme.of(context).colorScheme.secondary,
                                   ),
                                 ],
                               ),
+                              if (totalEntryActions > 0) ...[
+                                const SizedBox(height: kSpacingS),
+                                Center(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        adherencePercent >= 80
+                                            ? Icons.check_circle_outline
+                                            : adherencePercent >= 50
+                                                ? Icons.remove_circle_outline
+                                                : Icons.cancel_outlined,
+                                        size: kIconSizeSmall,
+                                        color: adherencePercent >= 80
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : adherencePercent >= 50
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .error,
+                                      ),
+                                      const SizedBox(width: kSpacingXS),
+                                      Text(
+                                        'Adherence: $adherencePercent%',
+                                        style: helperTextStyle(
+                                          context,
+                                        )?.copyWith(
+                                          fontWeight: kFontWeightSemiBold,
+                                          color: adherencePercent >= 80
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : adherencePercent >= 50
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary
+                                                  : Theme.of(context)
+                                                      .colorScheme
+                                                      .error,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               if (typeBreakdown.isNotEmpty) ...[
                                 const SizedBox(height: kSpacingM),
                                 buildHelperText(
                                   context,
-                                  'Medications by type',
+                                  _filterForms.isEmpty
+                                      ? 'By type — tap to filter'
+                                      : 'Filtered: ${_filterForms.map(_formLabel).join(', ')}',
                                 ),
                                 const SizedBox(height: kSpacingXS),
                                 Wrap(
                                   spacing: kSpacingS,
                                   runSpacing: kSpacingXS,
+                                  alignment: WrapAlignment.center,
                                   children: [
                                     for (final form in MedicationForm.values)
                                       if ((typeBreakdown[form] ?? 0) > 0)
-                                        _chip(
+                                        _filterChip(
                                           context,
-                                          '${_formLabel(form)}: ${typeBreakdown[form]}',
+                                          label:
+                                              '${_formLabel(form)}: ${typeBreakdown[form]}',
+                                          selected:
+                                              _filterForms.contains(form),
+                                          onTap: () => setState(() {
+                                            if (_filterForms
+                                                .contains(form)) {
+                                              _filterForms.remove(form);
+                                            } else {
+                                              _filterForms.add(form);
+                                            }
+                                          }),
                                         ),
                                   ],
                                 ),
@@ -957,10 +1022,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 label: 'Summary',
                                 icon: Icons.summarize_outlined,
                                 enabled: true,
-                                onCsv: () => _copyExport(
-                                  summaryCsv,
-                                  'Summary CSV copied',
-                                ),
                                 onShareCsv: () => _shareExport(
                                   summaryCsv,
                                   'skedux_summary.csv',
@@ -981,11 +1042,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 label: 'Medications',
                                 icon: Icons.medication_outlined,
                                 enabled: medItems.isNotEmpty,
-                                onCsv: () async {
-                                  final csv =
-                                      _csv.medicationsToCsv(medItems);
-                                  await _copyExport(csv, 'Medications CSV copied');
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.medicationsToCsv(medItems);
                                   await _shareExport(
@@ -1013,11 +1069,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 label: 'Schedules',
                                 icon: Icons.schedule_outlined,
                                 enabled: scheduleItems.isNotEmpty,
-                                onCsv: () async {
-                                  final csv =
-                                      _csv.schedulesToCsv(scheduleItems);
-                                  await _copyExport(csv, 'Schedules CSV copied');
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.schedulesToCsv(scheduleItems);
                                   await _shareExport(
@@ -1045,13 +1096,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 label: 'Activity Log',
                                 icon: Icons.history_outlined,
                                 enabled: logItems.isNotEmpty,
-                                onCsv: () async {
-                                  final csv = _csv.entryLogsToCsv(
-                                    logItems,
-                                    range: range,
-                                  );
-                                  await _copyExport(csv, 'Activity Log CSV copied');
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.entryLogsToCsv(
                                     logItems,
@@ -1085,16 +1129,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 label: 'Inventory Logs',
                                 icon: Icons.inventory_2_outlined,
                                 enabled: inventoryItems.isNotEmpty,
-                                onCsv: () async {
-                                  final csv = _csv.inventoryLogsToCsv(
-                                    inventoryItems,
-                                    range: range,
-                                  );
-                                  await _copyExport(
-                                    csv,
-                                    'Inventory Logs CSV copied',
-                                  );
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.inventoryLogsToCsv(
                                     inventoryItems,
@@ -1189,17 +1223,42 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
-  Widget _chip(BuildContext context, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: kSpacingS,
-        vertical: kSpacingXS,
+  Widget _filterChip(
+    BuildContext context, {
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(kBorderRadiusChip),
+      child: AnimatedContainer(
+        duration: kAnimationFast,
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingS,
+          vertical: kSpacingXS,
+        ),
+        decoration: BoxDecoration(
+          color: selected
+              ? cs.primaryContainer
+              : cs.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(kBorderRadiusChip),
+          border: Border.all(
+            color: selected
+                ? cs.primary
+                : cs.outline.withValues(alpha: 0.3),
+            width: selected ? 1.5 : 0.5,
+          ),
+        ),
+        child: Text(
+          label,
+          style: helperTextStyle(context)?.copyWith(
+            color: selected ? cs.onPrimaryContainer : null,
+            fontWeight: selected ? kFontWeightSemiBold : null,
+          ),
+        ),
       ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(kBorderRadiusChip),
-      ),
-      child: Text(label, style: helperTextStyle(context)),
     );
   }
 }
