@@ -265,6 +265,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(kSpacingM),
         children: [
+          if (!entitlement.isPro) ...[
+            Text(
+              'Purchases & Pro',
+              style: cardTitleStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+            ),
+            const SizedBox(height: kSpacingS),
+            ListTile(
+              leading: const Icon(Icons.workspace_premium_outlined),
+              title: const Text('Upgrade to Pro'),
+              subtitle: const Text('Manage purchases, restore, and upgrade'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/purchases'),
+            ),
+            const SizedBox(height: kSpacingL),
+          ],
           Text(
             'UI Customization',
             style: cardTitleStyle(
@@ -638,32 +655,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
           ],
-          const SizedBox(height: kSpacingL),
-          Text(
-            'Purchases & Pro',
-            style: cardTitleStyle(
-              context,
-            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
-          ),
-          const SizedBox(height: kSpacingS),
-          ListTile(
-            leading: Icon(
-              entitlement.isPro
-                  ? Icons.workspace_premium
-                  : Icons.workspace_premium_outlined,
-              color: entitlement.isPro ? cs.primary : null,
-            ),
-            title: Text(
-              entitlement.isPro ? 'Pro — Unlocked' : 'Upgrade to Pro',
-            ),
-            subtitle: Text(
-              entitlement.isPro
-                  ? 'Unlimited medications and no ads'
-                  : 'Manage purchases, restore, and upgrade',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings/purchases'),
-          ),
           const SizedBox(height: kSpacingL),
           Text(
             'Notifications',
@@ -1089,6 +1080,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               applicationName: 'Skedux',
             ),
           ),
+          if (entitlement.isPro) ...[
+            const SizedBox(height: kSpacingL),
+            Text(
+              'Purchases & Pro',
+              style: cardTitleStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
+            ),
+            const SizedBox(height: kSpacingS),
+            ListTile(
+              leading: Icon(
+                Icons.workspace_premium,
+                color: cs.primary,
+              ),
+              title: const Text('Pro — Unlocked'),
+              subtitle: const Text('Unlimited medications and no ads'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/settings/purchases'),
+            ),
+          ],
         ],
       ),
     );
