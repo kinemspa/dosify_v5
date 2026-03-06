@@ -21,6 +21,7 @@ import 'package:skedux/src/features/supplies/domain/stock_movement.dart';
 import 'package:skedux/src/features/supplies/domain/supply.dart';
 import 'package:skedux/src/features/medications/domain/saved_reconstitution_calculation.dart';
 import 'package:skedux/src/features/reports/domain/csv_export_service.dart';
+import 'package:skedux/src/features/reports/domain/pdf_export_service.dart';
 import 'package:skedux/src/features/reports/domain/report_time_range.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log.dart';
 import 'package:skedux/src/features/schedules/domain/schedule.dart';
@@ -40,6 +41,7 @@ class AnalyticsPage extends StatefulWidget {
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
   final _csv = const CsvExportService();
+  final _pdf = const PdfExportService();
   ReportTimeRangePreset _rangePreset = ReportTimeRangePreset.last30Days;
 
   // ── helpers ────────────────────────────────────────────────────────────────
@@ -63,6 +65,26 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     } catch (e) {
       if (!mounted) return;
       showAppSnackBar(context, 'Export failed: $e');
+    }
+  }
+
+  Future<void> _sharePdfExport(
+    Future<Uint8List> Function() buildPdf,
+    String filename,
+    String subject,
+  ) async {
+    try {
+      final bytes = await buildPdf();
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/$filename');
+      await file.writeAsBytes(bytes);
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/pdf')],
+        subject: subject,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnackBar(context, 'PDF export failed: $e');
     }
   }
 
@@ -429,9 +451,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     required IconData icon,
     required bool enabled,
     required VoidCallback? onCsv,
-    required VoidCallback? onHtml,
     VoidCallback? onShareCsv,
-    VoidCallback? onShareHtml,
+    VoidCallback? onSharePdf,
   }) {
     return Row(
       children: [
@@ -447,22 +468,17 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               onPressed: enabled ? onCsv : null,
               child: const Text('Copy CSV'),
             ),
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.code_outlined),
-              onPressed: enabled ? onHtml : null,
-              child: const Text('Copy HTML'),
-            ),
             if (onShareCsv != null)
               MenuItemButton(
                 leadingIcon: const Icon(Icons.share_outlined),
                 onPressed: enabled ? onShareCsv : null,
                 child: const Text('Share CSV'),
               ),
-            if (onShareHtml != null)
+            if (onSharePdf != null)
               MenuItemButton(
-                leadingIcon: const Icon(Icons.share_outlined),
-                onPressed: enabled ? onShareHtml : null,
-                child: const Text('Share HTML'),
+                leadingIcon: const Icon(Icons.picture_as_pdf_outlined),
+                onPressed: enabled ? onSharePdf : null,
+                child: const Text('Share PDF'),
               ),
           ],
           builder: (ctx, controller, _) => OutlinedButton.icon(
@@ -933,7 +949,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             children: [
                               buildHelperText(
                                 context,
-                                'Export data as CSV or HTML. Activity & inventory exports use the selected time range.',
+                                'Export data as CSV or PDF. Activity & inventory exports use the selected time range.',
                               ),
                               const SizedBox(height: kSpacingM),
                               _exportButton(
@@ -945,29 +961,19 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   summaryCsv,
                                   'Summary CSV copied',
                                 ),
-                                onHtml: () async {
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Analytics Summary',
-                                    csv: summaryCsv,
-                                  );
-                                  await _copyExport(html, 'Summary HTML copied');
-                                },
                                 onShareCsv: () => _shareExport(
                                   summaryCsv,
                                   'skedux_summary.csv',
                                   'Skedux Analytics Summary',
                                 ),
-                                onShareHtml: () async {
-                                  final html = _csv.csvToHtmlDocument(
+                                onSharePdf: () => _sharePdfExport(
+                                  () => _pdf.buildTablePdf(
                                     title: 'Analytics Summary',
                                     csv: summaryCsv,
-                                  );
-                                  await _shareExport(
-                                    html,
-                                    'skedux_summary.html',
-                                    'Skedux Analytics Summary',
-                                  );
-                                },
+                                  ),
+                                  'skedux_summary.pdf',
+                                  'Skedux Analytics Summary',
+                                ),
                               ),
                               const Divider(height: kSpacingL),
                               _exportButton(
@@ -980,18 +986,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                       _csv.medicationsToCsv(medItems);
                                   await _copyExport(csv, 'Medications CSV copied');
                                 },
-                                onHtml: () async {
-                                  final csv =
-                                      _csv.medicationsToCsv(medItems);
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Medications',
-                                    csv: csv,
-                                  );
-                                  await _copyExport(
-                                    html,
-                                    'Medications HTML copied',
-                                  );
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.medicationsToCsv(medItems);
                                   await _shareExport(
@@ -1000,15 +994,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     'Skedux Medications',
                                   );
                                 },
-                                onShareHtml: () async {
+                                onSharePdf: () async {
                                   final csv = _csv.medicationsToCsv(medItems);
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Medications',
-                                    csv: csv,
-                                  );
-                                  await _shareExport(
-                                    html,
-                                    'skedux_medications.html',
+                                  await _sharePdfExport(
+                                    () => _pdf.buildTablePdf(
+                                      title: 'Medications',
+                                      csv: csv,
+                                    ),
+                                    'skedux_medications.pdf',
                                     'Skedux Medications',
                                   );
                                 },
@@ -1024,18 +1017,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                       _csv.schedulesToCsv(scheduleItems);
                                   await _copyExport(csv, 'Schedules CSV copied');
                                 },
-                                onHtml: () async {
-                                  final csv =
-                                      _csv.schedulesToCsv(scheduleItems);
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Schedules',
-                                    csv: csv,
-                                  );
-                                  await _copyExport(
-                                    html,
-                                    'Schedules HTML copied',
-                                  );
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.schedulesToCsv(scheduleItems);
                                   await _shareExport(
@@ -1044,15 +1025,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     'Skedux Schedules',
                                   );
                                 },
-                                onShareHtml: () async {
+                                onSharePdf: () async {
                                   final csv = _csv.schedulesToCsv(scheduleItems);
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Schedules',
-                                    csv: csv,
-                                  );
-                                  await _shareExport(
-                                    html,
-                                    'skedux_schedules.html',
+                                  await _sharePdfExport(
+                                    () => _pdf.buildTablePdf(
+                                      title: 'Schedules',
+                                      csv: csv,
+                                      landscape: true,
+                                    ),
+                                    'skedux_schedules.pdf',
                                     'Skedux Schedules',
                                   );
                                 },
@@ -1070,20 +1051,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   );
                                   await _copyExport(csv, 'Activity Log CSV copied');
                                 },
-                                onHtml: () async {
-                                  final csv = _csv.entryLogsToCsv(
-                                    logItems,
-                                    range: range,
-                                  );
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Activity Log',
-                                    csv: csv,
-                                  );
-                                  await _copyExport(
-                                    html,
-                                    'Activity Log HTML copied',
-                                  );
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.entryLogsToCsv(
                                     logItems,
@@ -1095,18 +1062,18 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     'Skedux Activity Log',
                                   );
                                 },
-                                onShareHtml: () async {
+                                onSharePdf: () async {
                                   final csv = _csv.entryLogsToCsv(
                                     logItems,
                                     range: range,
                                   );
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Activity Log',
-                                    csv: csv,
-                                  );
-                                  await _shareExport(
-                                    html,
-                                    'skedux_activity_log.html',
+                                  await _sharePdfExport(
+                                    () => _pdf.buildTablePdf(
+                                      title: 'Activity Log',
+                                      csv: csv,
+                                      landscape: true,
+                                    ),
+                                    'skedux_activity_log.pdf',
                                     'Skedux Activity Log',
                                   );
                                 },
@@ -1127,20 +1094,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     'Inventory Logs CSV copied',
                                   );
                                 },
-                                onHtml: () async {
-                                  final csv = _csv.inventoryLogsToCsv(
-                                    inventoryItems,
-                                    range: range,
-                                  );
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Inventory Logs',
-                                    csv: csv,
-                                  );
-                                  await _copyExport(
-                                    html,
-                                    'Inventory Logs HTML copied',
-                                  );
-                                },
                                 onShareCsv: () async {
                                   final csv = _csv.inventoryLogsToCsv(
                                     inventoryItems,
@@ -1152,18 +1105,18 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     'Skedux Inventory Logs',
                                   );
                                 },
-                                onShareHtml: () async {
+                                onSharePdf: () async {
                                   final csv = _csv.inventoryLogsToCsv(
                                     inventoryItems,
                                     range: range,
                                   );
-                                  final html = _csv.csvToHtmlDocument(
-                                    title: 'Inventory Logs',
-                                    csv: csv,
-                                  );
-                                  await _shareExport(
-                                    html,
-                                    'skedux_inventory_logs.html',
+                                  await _sharePdfExport(
+                                    () => _pdf.buildTablePdf(
+                                      title: 'Inventory Logs',
+                                      csv: csv,
+                                      landscape: true,
+                                    ),
+                                    'skedux_inventory_logs.pdf',
                                     'Skedux Inventory Logs',
                                   );
                                 },
