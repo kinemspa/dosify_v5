@@ -1010,6 +1010,7 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
             const SizedBox(height: kSpacingM),
             CollapsibleSectionFormCard(
               title: 'Advanced',
+              frameless: true,
               isExpanded: _editExpanded,
               onExpandedChanged: (v) => setState(() => _editExpanded = v),
               children: [

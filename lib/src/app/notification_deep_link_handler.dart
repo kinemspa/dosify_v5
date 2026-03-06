@@ -4,12 +4,17 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:skedux/src/app/app_navigator.dart';
+import 'package:skedux/src/core/notifications/low_stock_notifier.dart';
 import 'package:skedux/src/core/notifications/notification_service.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/medication_stock_adjustment.dart';
+import 'package:skedux/src/features/schedules/data/entry_log_repository.dart';
+import 'package:skedux/src/features/schedules/data/schedule_scheduler.dart';
 import 'package:skedux/src/features/schedules/domain/calculated_entry.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log_ids.dart';
 import 'package:skedux/src/features/schedules/domain/schedule.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
 import 'package:skedux/src/widgets/show_entry_action_sheet.dart';
 
 class NotificationDeepLinkHandler {
@@ -156,6 +161,21 @@ class NotificationDeepLinkHandler {
       existingLog: existingLog,
     );
 
+    // Quick-log: when the user taps "Log" on the notification and the entry
+    // hasn't already been logged, write the log directly without opening the
+    // action sheet.  Snooze/Skip still open the sheet so the user can choose
+    // a time / confirm they want to skip.
+    if (actionId == 'log' &&
+        (existingLog == null || existingLog.action != EntryAction.logged)) {
+      await _directLogEntry(
+        context,
+        schedule: schedule,
+        medication: medication,
+        entry: entry,
+      );
+      return;
+    }
+
     final initialStatus = _initialStatusForActionId(actionId);
 
     // Ensure we are in the right tab first so bottom-nav is consistent.
@@ -168,6 +188,93 @@ class NotificationDeepLinkHandler {
       medication: medication,
       initialStatus: initialStatus,
     );
+  }
+
+  /// Writes an entry log directly without showing the action sheet.
+  ///
+  /// Called when the user taps the "Log" button on a notification and the
+  /// entry has not already been recorded.  Handles stock deduction and
+  /// notification cancellation identically to the normal sheet save path.
+  static Future<void> _directLogEntry(
+    BuildContext context, {
+    required Schedule schedule,
+    required Medication medication,
+    required CalculatedEntry entry,
+  }) async {
+    try {
+      final logId = EntryLogIds.occurrenceId(
+        scheduleId: entry.scheduleId,
+        scheduledTime: entry.scheduledTime,
+      );
+      final log = EntryLog(
+        id: logId,
+        scheduleId: entry.scheduleId,
+        scheduleName: entry.scheduleName,
+        medicationId: medication.id,
+        medicationName: medication.name,
+        scheduledTime: entry.scheduledTime,
+        actionTime: DateTime.now(),
+        entryValue: entry.entryValue,
+        entryUnit: entry.entryUnit,
+        action: EntryAction.logged,
+      );
+
+      final repo = EntryLogRepository(Hive.box<EntryLog>('entry_logs'));
+      await repo.upsertOccurrence(log);
+
+      // Cancel notification for this occurrence.
+      try {
+        await NotificationService.cancel(
+          ScheduleScheduler.entryNotificationIdFor(
+            entry.scheduleId,
+            entry.scheduledTime,
+          ),
+        );
+        for (final id in ScheduleScheduler.overdueNotificationIdsFor(
+          entry.scheduleId,
+          entry.scheduledTime,
+        )) {
+          await NotificationService.cancel(id);
+        }
+        await NotificationService.cancel(
+          ScheduleScheduler.entrySummaryNotificationIdFor(
+            entry.scheduledTime.toLocal(),
+          ),
+        );
+      } catch (_) {}
+
+      // Deduct stock.
+      final medBox = Hive.box<Medication>('medications');
+      final currentMed = medBox.get(medication.id);
+      if (currentMed != null) {
+        final delta = MedicationStockAdjustment.tryCalculateStockDelta(
+          medication: currentMed,
+          schedule: schedule,
+          entryValue: entry.entryValue,
+          entryUnit: entry.entryUnit,
+          preferEntryValue: false,
+        );
+        if (delta != null) {
+          final updated = MedicationStockAdjustment.deduct(
+            medication: currentMed,
+            delta: delta,
+          );
+          await medBox.put(currentMed.id, updated);
+          await LowStockNotifier.handleStockChange(
+            before: currentMed,
+            after: updated,
+          );
+        }
+      }
+
+      if (context.mounted) {
+        showAppSnackBar(context, '${medication.name} — entry logged');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showAppSnackBar(context, 'Quick log failed: $e');
+      }
+    }
   }
 
   static DateTime? _parseGroupKeyToLocalDateTime(String groupKey) {
