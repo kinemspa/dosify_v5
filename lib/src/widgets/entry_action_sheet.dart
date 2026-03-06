@@ -404,28 +404,33 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
         ? _buildMdvGaugeInCard(context, med: med)
         : null;
 
-    return SizedBox(
-      width: double.infinity,
-      child: EntryCard(
-        entry: widget.entry,
-        medicationName: med.name,
-        strengthOrConcentrationLabel: strengthLabel,
-        entryMetrics: metrics,
-        isActive: schedule?.isActive ?? true,
-        medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
-          med.form,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        EntryCard(
+          entry: widget.entry,
+          medicationName: med.name,
+          strengthOrConcentrationLabel: strengthLabel,
+          entryMetrics: metrics,
+          isActive: schedule?.isActive ?? true,
+          medicationFormIcon: MedicationDisplayHelpers.medicationFormIcon(
+            med.form,
+          ),
+          entryNumber: schedule == null
+              ? null
+              : ScheduleOccurrenceService.occurrenceNumber(
+                  schedule,
+                  widget.entry.scheduledTime,
+                ),
+          statusOverride: _selectedStatus,
+          detailLines: metaLines,
+          onTap: () {},
         ),
-        entryNumber: schedule == null
-            ? null
-            : ScheduleOccurrenceService.occurrenceNumber(
-                schedule,
-                widget.entry.scheduledTime,
-              ),
-        statusOverride: _selectedStatus,
-        detailLines: metaLines,
-        footer: mdvGaugeInCard,
-        onTap: () {},
-      ),
+        if (mdvGaugeInCard != null) ...[
+          const SizedBox(height: kSpacingS),
+          mdvGaugeInCard,
+        ],
+      ],
     );
   }
 
@@ -452,6 +457,61 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
     );
 
     return EntrySyringeGauge(syringeType: syringe, fillUnits: fillUnits);
+  }
+
+  /// Converts the current MDV entry value to the equivalent value in [newMode]
+  /// so the user doesn't see a unit mismatch (e.g. "30 units → 30 mg").
+  void _convertMdvEntryValueOnModeChange(MdvEntryChangeMode newMode) {
+    final controller = _entryOverrideController;
+    if (controller == null) return;
+
+    // Resolve medication
+    final schedule =
+        Hive.box<Schedule>('schedules').get(widget.entry.scheduleId);
+    final medId =
+        schedule?.medicationId ?? widget.entry.existingLog?.medicationId;
+    final med =
+        medId == null ? null : Hive.box<Medication>('medications').get(medId);
+    if (med == null) return;
+
+    // Compute result for current mode + current text value
+    final result = mdvEntryChangeResult(
+      med: med,
+      rawText: controller.text,
+      mode: _mdvEntryChangeMode,
+      syringe: _mdvSyringeType,
+      strengthUnit: _mdvStrengthUnit,
+    );
+    if (result == null || !result.success || result.hasError) return;
+
+    // Extract equivalent value in the new mode
+    double? newValue;
+    switch (newMode) {
+      case MdvEntryChangeMode.strength:
+        final mcg = result.entryMassMcg;
+        if (mcg != null) {
+          newValue = switch (_mdvStrengthUnit) {
+            'mcg' => mcg,
+            'mg' => mcg / 1000,
+            'g' => mcg / 1000000,
+            _ => mcg / 1000,
+          };
+        }
+        break;
+      case MdvEntryChangeMode.volume:
+        final volUl = result.entryVolumeMicroliter;
+        if (volUl != null) newValue = volUl / 1000;
+        break;
+      case MdvEntryChangeMode.units:
+        newValue = result.syringeUnits;
+        break;
+    }
+
+    if (newValue != null && newValue > 0) {
+      controller.text = newValue % 1 == 0
+          ? newValue.toInt().toString()
+          : newValue.toStringAsFixed(4).replaceAll(RegExp(r'0+$'), '');
+    }
   }
 
   @override
@@ -1027,12 +1087,15 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
                   mdvSyringe: _mdvSyringeType,
                   mdvStrengthUnit: _mdvStrengthUnit,
                   onChanged: () => setState(() => _hasChanged = true),
-                  onMdvModeChanged: (value) => setState(() {
-                    _mdvEntryChangeMode = value;
-                    _entryOverrideUnit =
-                        mdvEntryChangeUnitLabel(value, _mdvStrengthUnit);
-                    _hasChanged = true;
-                  }),
+                  onMdvModeChanged: (value) {
+                    _convertMdvEntryValueOnModeChange(value);
+                    setState(() {
+                      _mdvEntryChangeMode = value;
+                      _entryOverrideUnit =
+                          mdvEntryChangeUnitLabel(value, _mdvStrengthUnit);
+                      _hasChanged = true;
+                    });
+                  },
                   onMdvSyringeChanged: (value) => setState(() {
                     _mdvSyringeType = value;
                     _hasChanged = true;
@@ -1041,6 +1104,35 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
                     _entryOverrideUnit = value;
                     _hasChanged = true;
                   }),
+                  onMdvStrengthUnitChanged: (value) {
+                    // Convert the current controller text to the new unit
+                    final controller = _entryOverrideController;
+                    if (controller != null) {
+                      final raw = double.tryParse(controller.text.trim());
+                      if (raw != null && raw > 0) {
+                        // Convert via mcg as intermediate
+                        final mcg = mdvStrengthToMcg(raw, _mdvStrengthUnit);
+                        final converted = switch (value) {
+                          'mcg' => mcg,
+                          'mg' => mcg / 1000,
+                          'g' => mcg / 1000000,
+                          _ => mcg / 1000,
+                        };
+                        controller.text = converted % 1 == 0
+                            ? converted.toInt().toString()
+                            : converted
+                                .toStringAsFixed(4)
+                                .replaceAll(RegExp(r'0+$'), '');
+                      }
+                    }
+                    setState(() {
+                      _mdvStrengthUnit = value;
+                      if (_mdvEntryChangeMode == MdvEntryChangeMode.strength) {
+                        _entryOverrideUnit = value;
+                      }
+                      _hasChanged = true;
+                    });
+                  },
                 ),
               ],
             ),

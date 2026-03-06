@@ -43,7 +43,119 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   final _csv = const CsvExportService();
   final _pdf = const PdfExportService();
   ReportTimeRangePreset _rangePreset = ReportTimeRangePreset.last30Days;
-  Set<MedicationForm> _filterForms = {};
+  Set<MedicationForm> _filterForms = MedicationForm.values.toSet();
+
+  /// Medication ID filter for exports. Empty = include all.
+  Set<String> _exportMedFilter = {};
+
+  Future<void> _showExportFilterSheet(
+    BuildContext context,
+    List<Medication> meds,
+  ) async {
+    var draft = Set<String>.from(_exportMedFilter);
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            final allSelected = draft.isEmpty;
+            final bottomPad = MediaQuery.of(ctx).viewInsets.bottom +
+                MediaQuery.of(ctx).padding.bottom;
+            return Padding(
+              padding: EdgeInsets.only(bottom: bottomPad),
+              child: DraggableScrollableSheet(
+                expand: false,
+                initialChildSize: 0.55,
+                maxChildSize: 0.9,
+                builder: (ctx2, scrollCtrl) => Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingM,
+                        vertical: kSpacingS,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Export Medication Filter',
+                            style: sectionTitleStyle(context),
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () => setSS(() => draft = {}),
+                            child: const Text('Clear'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: ListView(
+                        controller: scrollCtrl,
+                        children: [
+                          CheckboxListTile(
+                            title: const Text('All medications'),
+                            value: allSelected,
+                            onChanged: (v) {
+                              if (v == true) setSS(() => draft = {});
+                            },
+                          ),
+                          const Divider(height: 1),
+                          for (final med in meds)
+                            CheckboxListTile(
+                              title: Text(med.name),
+                              value:
+                                  !allSelected && draft.contains(med.id),
+                              onChanged: (v) {
+                                setSS(() {
+                                  if (v == true) {
+                                    draft = {...draft, med.id};
+                                  } else {
+                                    draft = draft
+                                        .where((id) => id != med.id)
+                                        .toSet();
+                                    if (draft.isEmpty) draft = {};
+                                  }
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(kSpacingM),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  Navigator.of(sheetCtx).pop(),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                          const SizedBox(width: kSpacingS),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () {
+                                setState(() => _exportMedFilter = draft);
+                                Navigator.of(sheetCtx).pop();
+                              },
+                              child: const Text('Apply'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -355,10 +467,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
-  /// Horizontal metric bars for top-N medications.
+  /// Horizontal stacked-bar chart showing per-action-type counts per medication.
   Widget _buildTopMedsChart(
     BuildContext context,
-    List<MapEntry<String, int>> topActivity,
+    List<MapEntry<String, Map<String, int>>> topActivity,
   ) {
     final cs = Theme.of(context).colorScheme;
     if (topActivity.isEmpty) {
@@ -373,10 +485,42 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         ),
       );
     }
-    final maxVal = topActivity.first.value;
+
+    // Determine the max total across all medications for proportional scaling
+    final maxTotal = topActivity
+        .map((e) => e.value.values.fold(0, (s, v) => s + v))
+        .fold(0, (a, b) => a > b ? a : b);
+    if (maxTotal == 0) return const SizedBox.shrink();
+
+    const actionOrder = ['Logged', 'Skipped', 'Snoozed', 'Refilled'];
+
+    Color actionColor(String action) => switch (action) {
+      'Logged' => cs.primary,
+      'Skipped' => cs.error,
+      'Snoozed' => cs.tertiary,
+      'Refilled' => cs.secondary,
+      _ => cs.outline,
+    };
+
+    // Only show legend items for action types present in the data
+    final presentActions = actionOrder
+        .where((a) => topActivity.any((e) => (e.value[a] ?? 0) > 0))
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Legend
+        Wrap(
+          spacing: kSpacingM,
+          runSpacing: kSpacingXS,
+          children: [
+            for (final action in presentActions)
+              _legend(context, actionColor(action), action),
+          ],
+        ),
+        const SizedBox(height: kSpacingM),
+        // One row per medication
         for (final entry in topActivity)
           Padding(
             padding: const EdgeInsets.only(bottom: kSpacingS),
@@ -393,40 +537,46 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 ),
                 const SizedBox(width: kSpacingS),
                 Expanded(
-                  child: Stack(
-                    children: [
-                      Container(
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color:
-                              cs.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(
-                            kBorderRadiusChipTight,
-                          ),
-                        ),
+                  child: ClipRRect(
+                    borderRadius:
+                        BorderRadius.circular(kBorderRadiusChipTight),
+                    child: SizedBox(
+                      height: 20,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final totalWidth = constraints.maxWidth;
+                          final counts = entry.value;
+                          return Stack(
+                            children: [
+                              Container(
+                                color: cs.surfaceContainerHighest,
+                                width: totalWidth,
+                              ),
+                              Row(
+                                children: [
+                                  for (final action in actionOrder)
+                                    if ((counts[action] ?? 0) > 0)
+                                      Container(
+                                        width: ((counts[action]! / maxTotal) *
+                                                totalWidth)
+                                            .clamp(0.0, totalWidth),
+                                        height: 20,
+                                        color: actionColor(action),
+                                      ),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
                       ),
-                      FractionallySizedBox(
-                        widthFactor: maxVal == 0
-                            ? 0
-                            : (entry.value / maxVal).clamp(0.0, 1.0),
-                        child: Container(
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: cs.primary,
-                            borderRadius: BorderRadius.circular(
-                              kBorderRadiusChipTight,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: kSpacingS),
                 SizedBox(
                   width: 28,
                   child: Text(
-                    entry.value.toString(),
+                    entry.value.values.fold(0, (s, v) => s + v).toString(),
                     style: helperTextStyle(context),
                     textAlign: TextAlign.right,
                   ),
@@ -606,17 +756,68 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           )
                           .length;
 
-                      final activityByMedication = <String, int>{};
+                      // Per-medication per-action-type activity breakdown
+                      final activityByMedication = <String, Map<String, int>>{};
                       for (final log in logItems) {
-                        activityByMedication.update(
-                          log.medicationName,
-                          (value) => value + 1,
-                          ifAbsent: () => 1,
-                        );
+                        final label = switch (log.action) {
+                          EntryAction.logged => 'Logged',
+                          EntryAction.skipped => 'Skipped',
+                          EntryAction.snoozed => 'Snoozed',
+                        };
+                        activityByMedication.putIfAbsent(
+                          log.medicationName, () => {});
+                        activityByMedication[log.medicationName]!.update(
+                          label, (v) => v + 1, ifAbsent: () => 1);
                       }
-                      final topActivity =
-                          activityByMedication.entries.toList()
-                            ..sort((a, b) => b.value.compareTo(a.value));
+                      // Include refill events from inventory logs
+                      for (final inv in inventoryItems) {
+                        final isRefill =
+                            inv.changeType == InventoryChangeType.refillAdd ||
+                            inv.changeType == InventoryChangeType.refillToMax ||
+                            inv.changeType == InventoryChangeType.vialRestocked;
+                        if (!isRefill) continue;
+                        activityByMedication.putIfAbsent(
+                          inv.medicationName, () => {});
+                        activityByMedication[inv.medicationName]!.update(
+                          'Refilled', (v) => v + 1, ifAbsent: () => 1);
+                      }
+                      final topActivity = activityByMedication.entries.toList()
+                        ..sort((a, b) =>
+                            b.value.values.fold(0, (s, v) => s + v)
+                                .compareTo(
+                                    a.value.values.fold(0, (s, v) => s + v)));
+
+                      // Export-filtered lists (applies the medication ID filter)
+                      final exportMeds = _exportMedFilter.isEmpty
+                          ? medItems
+                          : medItems
+                              .where((m) => _exportMedFilter.contains(m.id))
+                              .toList(growable: false);
+                      final exportSchedules = _exportMedFilter.isEmpty
+                          ? scheduleItems
+                          : scheduleItems
+                              .where(
+                                (s) =>
+                                    s.medicationId != null &&
+                                    _exportMedFilter.contains(s.medicationId),
+                              )
+                              .toList(growable: false);
+                      final exportLogs = _exportMedFilter.isEmpty
+                          ? logItems
+                          : logItems
+                              .where(
+                                (l) =>
+                                    _exportMedFilter.contains(l.medicationId),
+                              )
+                              .toList(growable: false);
+                      final exportInventory = _exportMedFilter.isEmpty
+                          ? inventoryItems
+                          : inventoryItems
+                              .where(
+                                (l) =>
+                                    _exportMedFilter.contains(l.medicationId),
+                              )
+                              .toList(growable: false);
 
                       // Medication type breakdown
                       final typeBreakdown = <MedicationForm, int>{};
@@ -716,10 +917,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   _statTile(
                                     context,
                                     icon: Icons.medication_outlined,
-                                    label: _filterForms.isEmpty
+                                    label: _filterForms.length == MedicationForm.values.length
                                         ? 'Medications'
                                         : 'Filtered',
-                                    value: (_filterForms.isEmpty
+                                    value: (_filterForms.length == MedicationForm.values.length
                                             ? medItems.length
                                             : medItems
                                                 .where((m) => _filterForms
@@ -813,12 +1014,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 const SizedBox(height: kSpacingM),
                                 buildHelperText(
                                   context,
-                                  _filterForms.isEmpty
+                                  _filterForms.length == MedicationForm.values.length
                                       ? 'By type — tap to filter'
                                       : 'Filtered: ${_filterForms.map(_formLabel).join(', ')}',
                                 ),
                                 const SizedBox(height: kSpacingXS),
-                                Wrap(
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Wrap(
                                   spacing: kSpacingS,
                                   runSpacing: kSpacingXS,
                                   alignment: WrapAlignment.center,
@@ -834,13 +1037,18 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                           onTap: () => setState(() {
                                             if (_filterForms
                                                 .contains(form)) {
-                                              _filterForms.remove(form);
+                                              if (_filterForms.length > 1) {
+                                                _filterForms.remove(form);
+                                              } else {
+                                                _filterForms = MedicationForm.values.toSet();
+                                              }
                                             } else {
                                               _filterForms.add(form);
                                             }
                                           }),
                                         ),
                                   ],
+                                ),
                                 ),
                               ],
                             ],
@@ -1012,11 +1220,34 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             title: 'Export',
                             neutral: true,
                             children: [
-                              buildHelperText(
-                                context,
-                                'Export data as CSV or PDF. Activity & inventory exports use the selected time range.',
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: buildHelperText(
+                                      context,
+                                      _exportMedFilter.isEmpty
+                                          ? 'Exporting all medications. Activity & inventory use the selected time range.'
+                                          : '${_exportMedFilter.length} medication${_exportMedFilter.length == 1 ? '' : 's'} selected. Activity & inventory use the selected time range.',
+                                    ),
+                                  ),
+                                  TextButton.icon(
+                                    icon: Icon(
+                                      _exportMedFilter.isEmpty
+                                          ? Icons.filter_list
+                                          : Icons.filter_list_off,
+                                      size: kIconSizeSmall,
+                                    ),
+                                    label: Text(
+                                      _exportMedFilter.isEmpty ? 'Filter' : 'Filtered',
+                                    ),
+                                    onPressed: () => _showExportFilterSheet(
+                                      context,
+                                      medItems,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: kSpacingM),
+                              const SizedBox(height: kSpacingS),
                               _exportButton(
                                 context,
                                 label: 'Summary',
@@ -1041,9 +1272,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 context,
                                 label: 'Medications',
                                 icon: Icons.medication_outlined,
-                                enabled: medItems.isNotEmpty,
+                                enabled: exportMeds.isNotEmpty,
                                 onShareCsv: () async {
-                                  final csv = _csv.medicationsToCsv(medItems);
+                                  final csv = _csv.medicationsToCsv(exportMeds);
                                   await _shareExport(
                                     csv,
                                     'skedux_medications.csv',
@@ -1051,7 +1282,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   );
                                 },
                                 onSharePdf: () async {
-                                  final csv = _csv.medicationsToCsv(medItems);
+                                  final csv = _csv.medicationsToCsv(exportMeds);
                                   await _sharePdfExport(
                                     () => _pdf.buildTablePdf(
                                       title: 'Medications',
@@ -1068,9 +1299,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 context,
                                 label: 'Schedules',
                                 icon: Icons.schedule_outlined,
-                                enabled: scheduleItems.isNotEmpty,
+                                enabled: exportSchedules.isNotEmpty,
                                 onShareCsv: () async {
-                                  final csv = _csv.schedulesToCsv(scheduleItems);
+                                  final csv = _csv.schedulesToCsv(exportSchedules);
                                   await _shareExport(
                                     csv,
                                     'skedux_schedules.csv',
@@ -1078,7 +1309,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   );
                                 },
                                 onSharePdf: () async {
-                                  final csv = _csv.schedulesToCsv(scheduleItems);
+                                  final csv = _csv.schedulesToCsv(exportSchedules);
                                   await _sharePdfExport(
                                     () => _pdf.buildTablePdf(
                                       title: 'Schedules',
@@ -1095,10 +1326,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 context,
                                 label: 'Activity Log',
                                 icon: Icons.history_outlined,
-                                enabled: logItems.isNotEmpty,
+                                enabled: exportLogs.isNotEmpty,
                                 onShareCsv: () async {
                                   final csv = _csv.entryLogsToCsv(
-                                    logItems,
+                                    exportLogs,
                                     range: range,
                                   );
                                   await _shareExport(
@@ -1109,7 +1340,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 },
                                 onSharePdf: () async {
                                   final csv = _csv.entryLogsToCsv(
-                                    logItems,
+                                    exportLogs,
                                     range: range,
                                   );
                                   await _sharePdfExport(
@@ -1128,10 +1359,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 context,
                                 label: 'Inventory Logs',
                                 icon: Icons.inventory_2_outlined,
-                                enabled: inventoryItems.isNotEmpty,
+                                enabled: exportInventory.isNotEmpty,
                                 onShareCsv: () async {
                                   final csv = _csv.inventoryLogsToCsv(
-                                    inventoryItems,
+                                    exportInventory,
                                     range: range,
                                   );
                                   await _shareExport(
@@ -1142,7 +1373,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 },
                                 onSharePdf: () async {
                                   final csv = _csv.inventoryLogsToCsv(
-                                    inventoryItems,
+                                    exportInventory,
                                     range: range,
                                   );
                                   await _sharePdfExport(

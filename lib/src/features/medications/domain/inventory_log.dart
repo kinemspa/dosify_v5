@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 part 'inventory_log.g.dart';
 
+
 /// Records stock changes for medications (refills, adjustments, usage).
 /// Persists even if medication is deleted for historical reporting.
 @HiveType(typeId: 43)
@@ -16,6 +17,7 @@ class InventoryLog {
     required this.newStock,
     required this.changeAmount,
     this.notes,
+    this.batchNumber,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
@@ -45,6 +47,10 @@ class InventoryLog {
 
   @HiveField(8)
   final String? notes; // Optional notes (e.g., "Refilled to max", prescription number)
+
+  /// Batch number/name associated with this stock change (e.g. which batch was restocked).
+  @HiveField(9)
+  final String? batchNumber;
 
   /// Whether this log references a deleted medication
   bool isOrphanedMedication(List<String> activeMedicationIds) {

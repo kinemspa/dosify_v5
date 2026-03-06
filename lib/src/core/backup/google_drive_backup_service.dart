@@ -78,13 +78,22 @@ class GoogleDriveBackupService {
     );
     if (existing != null) return existing;
 
+    // Sign out first to clear any stale cached token that may be preventing
+    // a clean interactive sign-in (common cause of user selecting account
+    // but sign-in still returning null).
+    try {
+      await _googleSignIn.signOut().timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // Best-effort. Proceed with interactive sign-in regardless.
+    }
+
     final interactive = await _googleSignIn.signIn().timeout(
-      const Duration(seconds: 30),
+      const Duration(seconds: 60),
       onTimeout: () => null,
     );
     if (interactive == null) {
       throw const BackupFormatException(
-        'Google sign-in cancelled or timed out',
+        'Google sign-in failed. Make sure you have a Google account added to your device and that Google Play Services is up to date, then try again.',
       );
     }
 

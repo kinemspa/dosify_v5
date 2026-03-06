@@ -37,6 +37,7 @@ class EntryPartialEntrySection extends StatelessWidget {
     required this.onMdvModeChanged,
     required this.onMdvSyringeChanged,
     required this.onUnitChanged,
+    this.onMdvStrengthUnitChanged,
   });
 
   final bool isAdHoc;
@@ -79,6 +80,9 @@ class EntryPartialEntrySection extends StatelessWidget {
 
   /// Called when the user changes the entry-unit dropdown (non-MDV only).
   final ValueChanged<String> onUnitChanged;
+
+  /// Called when the user changes the strength unit in MDV strength mode.
+  final ValueChanged<String>? onMdvStrengthUnitChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +171,7 @@ class EntryPartialEntrySection extends StatelessWidget {
           onModeChanged: onMdvModeChanged,
           onSyringeChanged: onMdvSyringeChanged,
           onValueChanged: onChanged,
+          onStrengthUnitChanged: onMdvStrengthUnitChanged,
         ),
       const SizedBox(height: kSpacingM),
     ];

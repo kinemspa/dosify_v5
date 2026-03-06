@@ -17,13 +17,13 @@ class DisclaimerStrings {
   // ─── Full / Legal ────────────────────────────────────────────────────────
 
   static const String full = '''
-Skedux is a medication organization and tracking tool. It is not a medical device and does not provide medical advice, diagnosis, treatment, clinical decision support, or recommendations/decisions about the treatment of any disease, condition, ailment, or defect.
+Skedux is a research reference, organization, and tracking tool. It is not a medical device and does not provide medical advice, diagnosis, treatment, clinical decision support, or recommendations/decisions about the treatment of any disease, condition, ailment, or defect.
 
 Skedux is not a doctor, pharmacist, nurse, or healthcare provider.
 
 Skedux does not offer health recommendations, treatment plans, or clinical guidance.
 
-Skedux is purely a tracking app with medication metrics and records (for example: schedules, entries, entry logs, inventory, and vial/reconstitution tracking). It is intended for tracking approved medications only and does not endorse or facilitate use of unapproved substances.
+Skedux is a research reference and tracking tool for medication metrics and records (for example: schedules, entries, entry logs, inventory, and vial/reconstitution tracking). It is intended for informational, research, and tracking purposes and does not provide clinical guidance, therapeutic recommendations, or endorsement of any substance.
 
 You should always follow instructions from your licensed healthcare professional and the official medication labeling. Do not start, stop, or change any medicine, entry, concentration, schedule, titration, or injection/reconstitution process based solely on information displayed in this app.
 
@@ -40,18 +40,19 @@ To the maximum extent permitted by applicable law, Skedux and its developers dis
   // ─── In-App Onboarding Dialog ────────────────────────────────────────────
 
   static const String onboarding =
-      'Skedux helps you organize medicines and schedules, but it is not medical advice, '
-      'diagnosis, or treatment. Verify all entry and reconstitution details with your '
-      'healthcare professional. Keep a backup reminder method for important entries.\n\n'
-      'Skedux is not a doctor and does not offer health recommendations or decisions about '
-      'diseases/conditions. It is a tracking app for medication metrics only, intended '
-      'for approved medications.';
+      'Skedux helps you organize and track medication metrics and schedules for '
+      'informational and research purposes. It is not medical advice, diagnosis, or '
+      'treatment. Verify all entry and reconstitution details with a qualified '
+      'professional. Keep a backup reminder method for important entries.\n\n'
+      'Skedux is not a doctor and does not offer health recommendations or decisions '
+      'about diseases/conditions. It is a research reference and tracking tool for '
+      'medication metrics.';
 
   // ─── Ultra-Short Footer ───────────────────────────────────────────────────
 
   static const String footer =
-      'For organization only — not medical advice or disease treatment decisions. '
-      'For approved meds; verify all dosing with your clinician.';
+      'For research and tracking reference only — not medical advice or disease treatment decisions. '
+      'Verify all values with a qualified professional.';
 
   // ─── Emergency Banner ─────────────────────────────────────────────────────
 
@@ -70,10 +71,10 @@ To the maximum extent permitted by applicable law, Skedux and its developers dis
   // ─── Google Play Listing (Short) ─────────────────────────────────────────
 
   static const String playStoreListing =
-      'Skedux is an organizational tool only and does not provide medical advice, '
+      'Skedux is a research reference and tracking tool and does not provide medical advice, '
       'diagnosis, treatment, or decisions about any disease/condition. Always follow '
       'guidance from licensed healthcare professionals. Notification delivery may vary '
       'by device/OS settings and is not guaranteed.\n\n'
-      'Skedux is not a doctor and does not provide health recommendations. It is '
-      'purely a tracking app with medication metrics, intended for approved medications only.';
+      'Skedux is not a doctor and does not provide health recommendations. It is a '
+      'research reference and tracking tool for medication metrics and records.';
 }

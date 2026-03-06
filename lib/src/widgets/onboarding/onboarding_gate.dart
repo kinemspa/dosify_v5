@@ -15,8 +15,12 @@ const _tips = <String, _CoachStep>{
   '/medications': _CoachStep(
     title: 'Medications',
     message:
-        'Add medications here and track stock, expiry, and core details. '
-        'Tap any medication to view its full detail page.',
+        'This is where everything starts. Each medication is the core building '
+        'block — add one here first.\n\n'
+        'Once you have a medication, you create a Schedule for it. That schedule '
+        'defines when entries are due and generates your daily reminders.\n\n'
+        'Tap any medication card to view its full detail, edit stock, or log '
+        'activity outside a scheduled time.',
     targetAlignment: Alignment(-0.6, 0.92),
   ),
   '/medications/:id': _CoachStep(
@@ -169,12 +173,6 @@ class _OnboardingGateState extends State<OnboardingGate> {
     setState(() => _tipVisible = false);
   }
 
-  Future<void> _skipAll() async {
-    await OnboardingSettings.markAllSeen();
-    if (!mounted) return;
-    setState(() => _tipVisible = false);
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!_tipVisible || _activeRouteId == null) return widget.child;
@@ -188,7 +186,6 @@ class _OnboardingGateState extends State<OnboardingGate> {
         _CoachBubble(
           step: step,
           onDismiss: _dismiss,
-          onSkip: _skipAll,
         ),
       ],
     );
@@ -202,12 +199,10 @@ class _CoachBubble extends StatelessWidget {
   const _CoachBubble({
     required this.step,
     required this.onDismiss,
-    required this.onSkip,
   });
 
   final _CoachStep step;
   final VoidCallback onDismiss;
-  final VoidCallback onSkip;
 
   Alignment _bubbleAlignmentFor(Alignment target) {
     final isLowerHalf = target.y > 0.1;
@@ -221,164 +216,85 @@ class _CoachBubble extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final coachFg = kOnboardingCoachForegroundColor;
     final bubbleAlignment = _bubbleAlignmentFor(step.targetAlignment);
-    final bubbleIsBelowTarget = bubbleAlignment.y > step.targetAlignment.y;
 
     return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final targetDeltaX = step.targetAlignment.x - bubbleAlignment.x;
-          final pointerAlignmentX = (targetDeltaX *
-                  (constraints.maxWidth / kOnboardingCoachBubbleMaxWidth))
-              .clamp(
-                -kOnboardingCoachPointerClamp,
-                kOnboardingCoachPointerClamp,
-              );
-
-          return Align(
-            alignment: bubbleAlignment,
+      child: Align(
+        alignment: bubbleAlignment,
+        child: Container(
+          constraints: const BoxConstraints(
+            maxWidth: kOnboardingCoachBubbleMaxWidth,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
             child: Container(
-              constraints: const BoxConstraints(
-                maxWidth: kOnboardingCoachBubbleMaxWidth,
+              width: double.infinity,
+              padding: kOnboardingCoachBubblePadding,
+              decoration: BoxDecoration(
+                color: cs.primary,
+                borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (bubbleIsBelowTarget)
-                    Align(
-                      alignment: Alignment(pointerAlignmentX, 0),
-                      child: Transform.translate(
-                        offset: const Offset(
-                          0,
-                          kOnboardingCoachPointerOverlap,
+                  Text(
+                    step.title,
+                    style: sectionTitleStyle(context)?.copyWith(
+                          color: coachFg,
+                        ) ??
+                        TextStyle(
+                          color: coachFg,
+                          fontSize: kOnboardingCoachTitleFontSize,
+                          fontWeight: kFontWeightBold,
                         ),
-                        child: CustomPaint(
-                          size: const Size(
-                            kOnboardingCoachPointerSize * 2,
-                            kOnboardingCoachPointerSize,
-                          ),
-                          painter: _CoachBubblePointerPainter(
-                            color: cs.primary,
-                            pointUp: true,
-                          ),
-                        ),
-                      ),
-                    ),
-                  Material(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-                    child: Container(
-                      width: double.infinity,
-                      padding: kOnboardingCoachBubblePadding,
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        borderRadius:
-                            BorderRadius.circular(kBorderRadiusMedium),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            step.title,
-                            style: sectionTitleStyle(context)?.copyWith(
-                                  color: coachFg,
-                                ) ??
-                                TextStyle(
-                                  color: coachFg,
-                                  fontSize: kOnboardingCoachTitleFontSize,
-                                  fontWeight: kFontWeightBold,
-                                ),
-                          ),
-                          const SizedBox(height: kSpacingXS),
-                          Text(
-                            step.message,
-                            style: helperTextStyle(
-                              context,
-                              color: coachFg,
-                            )?.copyWith(
-                              fontSize: kOnboardingCoachMessageFontSize,
-                            ),
-                          ),
-                          const SizedBox(height: kSpacingS),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: onSkip,
-                                style: TextButton.styleFrom(
-                                  foregroundColor:
-                                      coachFg.withValues(alpha: 0.7),
-                                  textStyle: const TextStyle(
-                                    fontSize: kOnboardingCoachMetaFontSize,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: kSpacingS,
-                                    vertical: kSpacingXXS,
-                                  ),
-                                  minimumSize: Size.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: const Text('Skip all'),
-                              ),
-                              const SizedBox(width: kSpacingXS),
-                              FilledButton(
-                                onPressed: onDismiss,
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: cs.primary.withValues(
-                                    alpha: kOpacityMedium,
-                                  ),
-                                  foregroundColor: coachFg,
-                                  side: BorderSide(
-                                    color: coachFg,
-                                    width: kBorderWidthThin,
-                                  ),
-                                  textStyle: TextStyle(
-                                    color: coachFg,
-                                    fontWeight: kFontWeightSemiBold,
-                                  ),
-                                ),
-                                child: const Text('Got it'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                  ),
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    step.message,
+                    style: helperTextStyle(
+                      context,
+                      color: coachFg,
+                    )?.copyWith(
+                      fontSize: kOnboardingCoachMessageFontSize,
                     ),
                   ),
-                  if (!bubbleIsBelowTarget)
-                    Align(
-                      alignment: Alignment(pointerAlignmentX, 0),
-                      child: Transform.translate(
-                        offset: const Offset(
-                          0,
-                          -kOnboardingCoachPointerOverlap,
-                        ),
-                        child: CustomPaint(
-                          size: const Size(
-                            kOnboardingCoachPointerSize * 2,
-                            kOnboardingCoachPointerSize,
+                  const SizedBox(height: kSpacingS),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FilledButton(
+                        onPressed: onDismiss,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: cs.primary.withValues(
+                            alpha: kOpacityMedium,
                           ),
-                          painter: _CoachBubblePointerPainter(
-                            color: cs.primary,
-                            pointUp: false,
+                          foregroundColor: coachFg,
+                          side: BorderSide(
+                            color: coachFg,
+                            width: kBorderWidthThin,
+                          ),
+                          textStyle: TextStyle(
+                            color: coachFg,
+                            fontWeight: kFontWeightSemiBold,
                           ),
                         ),
+                        child: const Text('Got it'),
                       ),
-                    ),
+                    ],
+                  ),
                 ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -398,34 +314,4 @@ class _CoachStep {
   final Alignment targetAlignment;
 }
 
-// ── Pointer painter ───────────────────────────────────────────────────────────
 
-class _CoachBubblePointerPainter extends CustomPainter {
-  _CoachBubblePointerPainter({required this.color, required this.pointUp});
-
-  final Color color;
-  final bool pointUp;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path();
-    if (pointUp) {
-      path
-        ..moveTo(size.width / 2, 0)
-        ..lineTo(0, size.height)
-        ..lineTo(size.width, size.height)
-        ..close();
-    } else {
-      path
-        ..moveTo(0, 0)
-        ..lineTo(size.width, 0)
-        ..lineTo(size.width / 2, size.height)
-        ..close();
-    }
-    canvas.drawPath(path, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(covariant _CoachBubblePointerPainter old) =>
-      old.color != color || old.pointUp != pointUp;
-}

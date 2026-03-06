@@ -87,7 +87,7 @@ class _LegalContent extends StatelessWidget {
         _SubHeading('Research & Informational Purposes Only'),
         const SizedBox(height: kSpacingS),
         _Para(
-          'Skedux is a research reference and personal tracking application. '
+          'Skedux is a research reference and tracking application. '
           'It is not a medical device and does not provide medical advice, '
           'diagnosis, or treatment of any kind.',
         ),

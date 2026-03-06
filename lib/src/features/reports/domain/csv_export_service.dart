@@ -1,4 +1,5 @@
-﻿import 'package:skedux/src/features/medications/domain/inventory_log.dart';
+﻿import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/inventory_log.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
 import 'package:skedux/src/features/reports/domain/report_time_range.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log.dart';
@@ -86,6 +87,62 @@ class CsvExportService {
 </html>''';
   }
 
+  // ── plain-text helpers ──────────────────────────────────────────────────
+
+  /// Local datetime as dd/MM/yyyy HH:mm.
+  String _fmtDate(DateTime dt) {
+    final l = dt.toLocal();
+    final d = l.day.toString().padLeft(2, '0');
+    final mo = l.month.toString().padLeft(2, '0');
+    final h = l.hour.toString().padLeft(2, '0');
+    final mi = l.minute.toString().padLeft(2, '0');
+    return '$d/$mo/${l.year} $h:$mi';
+  }
+
+  /// Medication form → plain English label.
+  static String _formLabel(MedicationForm form) => switch (form) {
+    MedicationForm.tablet => 'Tablet',
+    MedicationForm.capsule => 'Capsule',
+    MedicationForm.prefilledSyringe => 'Pre-filled Syringe',
+    MedicationForm.singleDoseVial => 'Single-Dose Vial',
+    MedicationForm.multiDoseVial => 'Multi-Dose Vial',
+  };
+
+  /// Entry action enum name → plain English.
+  static String _actionLabel(String name) => switch (name) {
+    'logged' => 'Logged',
+    'snoozed' => 'Snoozed',
+    'skipped' => 'Skipped',
+    'missed' => 'Missed',
+    _ => '${name[0].toUpperCase()}${name.substring(1)}',
+  };
+
+  /// Inventory change type → plain English.
+  static String _changeTypeLabel(InventoryChangeType t) => switch (t) {
+    InventoryChangeType.refillAdd => 'Stock Added',
+    InventoryChangeType.refillToMax => 'Refilled to Max',
+    InventoryChangeType.entryDeducted => 'Entry Deducted',
+    InventoryChangeType.adHocEntry => 'Ad-hoc Entry',
+    InventoryChangeType.manualAdjustment => 'Manual Adjustment',
+    InventoryChangeType.vialOpened => 'Vial Opened',
+    InventoryChangeType.vialRestocked => 'Sealed Vials Restocked',
+    InventoryChangeType.expired => 'Expired Removed',
+  };
+
+  /// Minutes-from-midnight integer → HH:MM.
+  static String _fmtMinutes(int minutes) {
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+  }
+
+  /// Day-of-week numbers (1=Mon … 7=Sun) → abbreviated names.
+  static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static String _fmtDays(Iterable<int> days) =>
+      days.map((d) => _dayNames[(d - 1).clamp(0, 6)]).join(', ');
+
+  // ── CSV methods ────────────────────────────────────────────────────────────
+
   String escape(String value) {
     final needsQuotes =
         value.contains(',') ||
@@ -107,16 +164,16 @@ class CsvExportService {
       );
 
     final header = [
-      'id',
-      'name',
-      'form',
-      'manufacturer',
-      'strengthValue',
-      'strengthUnit',
-      'stockValue',
-      'stockUnit',
-      'createdAtUtc',
-      'updatedAtUtc',
+      'ID',
+      'Name',
+      'Medication Type',
+      'Manufacturer',
+      'Strength',
+      'Strength Unit',
+      'Stock',
+      'Stock Unit',
+      'Created',
+      'Updated',
     ].join(',');
 
     final rows = items
@@ -124,14 +181,14 @@ class CsvExportService {
           return [
             escape(m.id),
             escape(m.name),
-            escape(m.form.name),
+            escape(_formLabel(m.form)),
             escape(m.manufacturer ?? ''),
             escape(m.strengthValue.toString()),
             escape(m.strengthUnit.name),
             escape(m.stockValue.toString()),
             escape(m.stockUnit.name),
-            escape(m.createdAt.toUtc().toIso8601String()),
-            escape(m.updatedAt.toUtc().toIso8601String()),
+            escape(_fmtDate(m.createdAt)),
+            escape(_fmtDate(m.updatedAt)),
           ].join(',');
         })
         .join('\n');
@@ -148,18 +205,18 @@ class CsvExportService {
       );
 
     final header = [
-      'id',
-      'name',
-      'medicationId',
-      'medicationName',
-      'active',
-      'startAtUtc',
-      'endAtUtc',
-      'entryValue',
-      'entryUnit',
-      'daysOfWeek',
-      'timesOfDay',
-      'createdAtUtc',
+      'ID',
+      'Name',
+      'Medication ID',
+      'Medication',
+      'Active',
+      'Start Date',
+      'End Date',
+      'Amount',
+      'Unit',
+      'Days of Week',
+      'Times of Day',
+      'Created',
     ].join(',');
 
     final rows = items
@@ -169,14 +226,14 @@ class CsvExportService {
             escape(s.name),
             escape(s.medicationId ?? ''),
             escape(s.medicationName),
-            escape(s.active.toString()),
-            escape(s.startAt?.toUtc().toIso8601String() ?? ''),
-            escape(s.endAt?.toUtc().toIso8601String() ?? ''),
+            escape(s.active ? 'Yes' : 'No'),
+            escape(s.startAt != null ? _fmtDate(s.startAt!) : ''),
+            escape(s.endAt != null ? _fmtDate(s.endAt!) : ''),
             escape(s.entryValue.toString()),
             escape(s.entryUnit),
-            escape(s.daysOfWeek.join('|')),
-            escape((s.timesOfDay ?? const <int>[]).join('|')),
-            escape(s.createdAt.toUtc().toIso8601String()),
+            escape(_fmtDays(s.daysOfWeek)),
+            escape((s.timesOfDay ?? const <int>[]).map(_fmtMinutes).join(', ')),
+            escape(_fmtDate(s.createdAt)),
           ].join(',');
         })
         .join('\n');
@@ -196,17 +253,17 @@ class CsvExportService {
       );
 
     final header = [
-      'id',
-      'medicationName',
-      'scheduleName',
-      'scheduledTimeUtc',
-      'actionTimeUtc',
-      'action',
-      'entryValue',
-      'entryUnit',
-      'actualEntryValue',
-      'actualEntryUnit',
-      'notes',
+      'ID',
+      'Medication',
+      'Schedule',
+      'Scheduled Time',
+      'Action Time',
+      'Action',
+      'Amount',
+      'Unit',
+      'Actual Amount',
+      'Actual Unit',
+      'Notes',
     ].join(',');
 
     final rows = items
@@ -215,9 +272,9 @@ class CsvExportService {
             escape(l.id),
             escape(l.medicationName),
             escape(l.scheduleName),
-            escape(l.scheduledTime.toUtc().toIso8601String()),
-            escape(l.actionTime.toUtc().toIso8601String()),
-            escape(l.action.name),
+            escape(_fmtDate(l.scheduledTime)),
+            escape(_fmtDate(l.actionTime)),
+            escape(_actionLabel(l.action.name)),
             escape(l.entryValue.toString()),
             escape(l.entryUnit),
             escape(l.actualEntryValue?.toString() ?? ''),
@@ -245,15 +302,15 @@ class CsvExportService {
       );
 
     final header = [
-      'id',
-      'medicationId',
-      'medicationName',
-      'timestampUtc',
-      'changeType',
-      'previousStock',
-      'newStock',
-      'changeAmount',
-      'notes',
+      'ID',
+      'Medication ID',
+      'Medication',
+      'Date & Time',
+      'Change Type',
+      'Previous Stock',
+      'New Stock',
+      'Change Amount',
+      'Notes',
     ].join(',');
 
     final rows = items
@@ -262,8 +319,8 @@ class CsvExportService {
             escape(l.id),
             escape(l.medicationId),
             escape(l.medicationName),
-            escape(l.timestamp.toUtc().toIso8601String()),
-            escape(l.changeType.name),
+            escape(_fmtDate(l.timestamp)),
+            escape(_changeTypeLabel(l.changeType)),
             escape(l.previousStock.toString()),
             escape(l.newStock.toString()),
             escape(l.changeAmount.toString()),

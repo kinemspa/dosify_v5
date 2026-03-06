@@ -1,4 +1,4 @@
-﻿// GENERATED CODE - DO NOT MODIFY BY HAND
+// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'schedule.dart';
 
@@ -75,6 +75,12 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..write(obj.pausedUntil)
       ..writeByte(8)
       ..write(obj.createdAt)
+      ..writeByte(27)
+      ..write(obj.startAt)
+      ..writeByte(28)
+      ..write(obj.endAt)
+      ..writeByte(29)
+      ..write(obj.monthlyMissingDayBehaviorCode)
       ..writeByte(9)
       ..write(obj.minutesOfDayUtc)
       ..writeByte(10)
@@ -110,13 +116,7 @@ class ScheduleAdapter extends TypeAdapter<Schedule> {
       ..writeByte(24)
       ..write(obj.displayUnitCode)
       ..writeByte(25)
-      ..write(obj.inputModeCode)
-      ..writeByte(27)
-      ..write(obj.startAt)
-      ..writeByte(28)
-      ..write(obj.endAt)
-      ..writeByte(29)
-      ..write(obj.monthlyMissingDayBehaviorCode);
+      ..write(obj.inputModeCode);
   }
 
   @override

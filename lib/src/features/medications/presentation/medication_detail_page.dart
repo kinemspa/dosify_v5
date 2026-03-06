@@ -29,6 +29,7 @@ import 'package:skedux/src/features/medications/domain/inventory_log.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
 import 'package:skedux/src/features/medications/domain/medication_stock_adjustment.dart';
 import 'package:skedux/src/features/medications/domain/saved_reconstitution_calculation.dart';
+import 'package:skedux/src/features/medications/domain/sealed_vial_batch.dart';
 import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:skedux/src/features/medications/presentation/medication_detail_sections.dart';
 import 'package:skedux/src/features/medications/presentation/reconstitution_calculator_dialog.dart';
@@ -41,6 +42,7 @@ import 'package:skedux/src/features/schedules/domain/schedule.dart';
 import 'package:skedux/src/features/reports/domain/report_time_range.dart';
 import 'package:skedux/src/widgets/app_header.dart';
 import 'package:skedux/src/widgets/entry_action_sheet.dart';
+import 'package:skedux/src/widgets/field36.dart';
 import 'package:skedux/src/widgets/glass_card_surface.dart';
 import 'package:skedux/src/widgets/selection_cards.dart';
 import 'package:skedux/src/widgets/smart_expiry_picker.dart';
@@ -2536,6 +2538,7 @@ void _showRefillDialog(BuildContext context, Medication med) async {
 void _showSimpleRefillDialog(BuildContext context, Medication med) async {
   final unit = _stockUnitLabel(med.stockUnit);
   final controller = TextEditingController(text: '1');
+  final batchController = TextEditingController(text: med.batchNumber ?? '');
   final currentStock = med.stockValue;
   final maxStock = med.initialStockValue ?? med.stockValue;
 
@@ -2661,6 +2664,23 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
               ],
               const SizedBox(height: kSpacingL),
 
+              // Batch number (optional)
+              Text('Batch No. (optional):', style: fieldLabelStyle(stateContext)),
+              const SizedBox(height: kSpacingS),
+              Field36(
+                child: TextField(
+                  controller: batchController,
+                  textCapitalization: TextCapitalization.words,
+                  style: Theme.of(stateContext).textTheme.bodyMedium,
+                  decoration: buildCompactFieldDecoration(
+                    context: stateContext,
+                    hint: 'e.g. Lot 2025A, Red Cap',
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: kSpacingL),
+
               // Preview
               Container(
                 width: double.infinity,
@@ -2700,10 +2720,14 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
                     Navigator.pop(dialogContext, {
                       'mode': 'add',
                       'amount': val,
+                      'batchNumber': batchController.text.trim(),
                     });
                   }
                 } else {
-                  Navigator.pop(dialogContext, {'mode': 'fillToMax'});
+                  Navigator.pop(dialogContext, {
+                    'mode': 'fillToMax',
+                    'batchNumber': batchController.text.trim(),
+                  });
                 }
               },
               child: const Text('Refill'),
@@ -2714,6 +2738,9 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
     ),
   );
 
+  controller.dispose();
+  batchController.dispose();
+
   if (result != null && context.mounted) {
     final box = Hive.box<Medication>('medications');
     final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
@@ -2722,11 +2749,17 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
     String message;
     InventoryChangeType changeType;
     double changeAmount;
+    final batchNumber = (result['batchNumber'] as String?)?.trim();
+    final batchTag = (batchNumber != null && batchNumber.isNotEmpty)
+        ? batchNumber
+        : null;
 
     if (result['mode'] == 'add') {
       final amount = result['amount'] as double;
       newStock = med.stockValue + amount;
-      message = 'Added ${_formatNumber(amount)} $unit';
+      message = batchTag != null
+          ? 'Added ${_formatNumber(amount)} $unit (batch: $batchTag)'
+          : 'Added ${_formatNumber(amount)} $unit';
       changeType = InventoryChangeType.refillAdd;
       changeAmount = amount;
     } else {
@@ -2736,8 +2769,14 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
       changeAmount = newStock - med.stockValue;
     }
 
-    // Update stock
-    box.put(med.id, med.copyWith(stockValue: newStock));
+    // Update stock (also update batchNumber on the medication if a batch was provided)
+    box.put(
+      med.id,
+      med.copyWith(
+        stockValue: newStock,
+        batchNumber: batchTag ?? med.batchNumber,
+      ),
+    );
 
     // Log the refill for reporting
     final inventoryLog = InventoryLog(
@@ -2749,6 +2788,7 @@ void _showSimpleRefillDialog(BuildContext context, Medication med) async {
       newStock: newStock,
       changeAmount: changeAmount,
       notes: message,
+      batchNumber: batchTag,
       timestamp: now,
     );
     inventoryLogBox.put(inventoryLog.id, inventoryLog);
@@ -3471,8 +3511,27 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
     final previousSealedCount = med.stockValue;
     var newSealedCount = med.stockValue;
     final usedSealedVial = useStock && previousSealedCount.toInt() > 0;
+    String? usedBatchName;
+
+    // Track which batch was opened (FIFO: pick first non-empty batch)
+    List<SealedVialBatch>? updatedBatches;
     if (usedSealedVial) {
       newSealedCount = med.stockValue - 1;
+      final batches = med.sealedVialBatches;
+      if (batches != null && batches.isNotEmpty) {
+        final firstNonEmpty = batches.indexWhere((b) => b.count > 0);
+        if (firstNonEmpty >= 0) {
+          usedBatchName = batches[firstNonEmpty].name;
+          updatedBatches = List<SealedVialBatch>.from(batches);
+          final cur = updatedBatches[firstNonEmpty];
+          if (cur.count <= 1) {
+            updatedBatches.removeAt(firstNonEmpty);
+          } else {
+            updatedBatches[firstNonEmpty] =
+                cur.copyWith(count: cur.count - 1);
+          }
+        }
+      }
     }
 
     if (mode == 'topUp') {
@@ -3504,6 +3563,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
           diluentName: topUpDiluent ?? med.diluentName,
           stockValue: newSealedCount,
           reconstitutedAt: now,
+          activeVialBatchNumber: usedBatchName ?? med.activeVialBatchNumber,
+          sealedVialBatches: updatedBatches ?? med.sealedVialBatches,
         ),
       );
 
@@ -3515,6 +3576,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         previousStock: previousSealedCount,
         newStock: newSealedCount,
         changeAmount: usedSealedVial ? -1 : 0,
+        batchNumber: usedBatchName,
         notes:
             'Topped up +${_formatNumber(addVolume)} mL to ${_formatNumber(newVolume)} mL'
             '${usedSealedVial ? ' | used 1 sealed vial' : ''}'
@@ -3556,6 +3618,8 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
         activeVialVolume: reconVolume,
         reconstitutedAt: now,
         stockValue: newSealedCount,
+        activeVialBatchNumber: usedBatchName ?? med.activeVialBatchNumber,
+        sealedVialBatches: updatedBatches ?? med.sealedVialBatches,
       ),
     );
 
@@ -3567,6 +3631,7 @@ void _showMdvRefillDialog(BuildContext context, Medication med) async {
       previousStock: previousSealedCount,
       newStock: newSealedCount,
       changeAmount: usedSealedVial ? -1 : 0,
+      batchNumber: usedBatchName,
       notes:
           'Replaced to ${_formatNumber(reconVolume)} mL'
           '${usedSealedVial ? ' | used 1 sealed vial' : ''}'
@@ -3589,9 +3654,12 @@ Future<void> _showRestockSealedVialsDialog(
   Medication med,
 ) async {
   final controller = TextEditingController(text: '1');
+  final batchController = TextEditingController(
+    text: med.backupVialsBatchNumber ?? '',
+  );
   final currentStock = med.stockValue.toInt();
 
-  final result = await showDialog<double>(
+  final result = await showDialog<Map<String, dynamic>>(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (context, setState) {
@@ -3605,91 +3673,114 @@ Future<void> _showRestockSealedVialsDialog(
           )?.copyWith(color: theme.colorScheme.primary),
           contentTextStyle: bodyTextStyle(context),
           title: const Text('Restock Sealed Vials'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Helper text
-              Text(
-                'Add new sealed vials to your sealed vial stock.',
-                style: helperTextStyle(context),
-              ),
-              const SizedBox(height: 16),
-
-              // Current stock
-              Container(
-                width: double.infinity,
-                padding: kInsetSectionPadding,
-                decoration: buildInsetSectionDecoration(context: context),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Current Sealed Vials:',
-                      style: helperTextStyle(context),
-                    ),
-                    Text(
-                      '$currentStock',
-                      style: bodyTextStyle(
-                        context,
-                      )?.copyWith(fontWeight: kFontWeightBold),
-                    ),
-                  ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Helper text
+                Text(
+                  'Add new sealed vials to your sealed vial stock.',
+                  style: helperTextStyle(context),
                 ),
-              ),
-              const SizedBox(height: kSpacingM),
+                const SizedBox(height: 16),
 
-              // Amount input
-              Text(
-                'Add vials:',
-                style: bodyTextStyle(
-                  context,
-                )?.copyWith(fontWeight: kFontWeightMedium),
-              ),
-              const SizedBox(height: kSpacingS),
-              Center(
-                child: StepperRow36(
-                  controller: controller,
-                  fixedFieldWidth: kDialogStepperFieldWidth,
-                  onDec: () {
-                    final v = int.tryParse(controller.text) ?? 0;
-                    if (v > 0) {
-                      controller.text = (v - 1).toString();
-                      setState(() {});
-                    }
-                  },
-                  onInc: () {
-                    final v = int.tryParse(controller.text) ?? 0;
-                    controller.text = (v + 1).toString();
-                    setState(() {});
-                  },
-                  decoration: buildCompactFieldDecoration(context: context),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Preview
-              Container(
-                padding: kInsetSectionPadding,
-                decoration: buildInsetSectionDecoration(
-                  context: context,
-                  backgroundOpacity: 0.9,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('New Total:', style: helperTextStyle(context)),
-                    Text(
-                      '$previewTotal vials',
-                      style: bodyTextStyle(context)?.copyWith(
-                        fontWeight: kFontWeightBold,
-                        color: theme.colorScheme.primary,
+                // Current stock
+                Container(
+                  width: double.infinity,
+                  padding: kInsetSectionPadding,
+                  decoration: buildInsetSectionDecoration(context: context),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Current Sealed Vials:',
+                        style: helperTextStyle(context),
                       ),
-                    ),
-                  ],
+                      Text(
+                        '$currentStock',
+                        style: bodyTextStyle(
+                          context,
+                        )?.copyWith(fontWeight: kFontWeightBold),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: kSpacingM),
+
+                // Amount input
+                Text(
+                  'Add vials:',
+                  style: bodyTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightMedium),
+                ),
+                const SizedBox(height: kSpacingS),
+                Center(
+                  child: StepperRow36(
+                    controller: controller,
+                    fixedFieldWidth: kDialogStepperFieldWidth,
+                    onDec: () {
+                      final v = int.tryParse(controller.text) ?? 0;
+                      if (v > 0) {
+                        controller.text = (v - 1).toString();
+                        setState(() {});
+                      }
+                    },
+                    onInc: () {
+                      final v = int.tryParse(controller.text) ?? 0;
+                      controller.text = (v + 1).toString();
+                      setState(() {});
+                    },
+                    decoration: buildCompactFieldDecoration(context: context),
+                  ),
+                ),
+                const SizedBox(height: kSpacingM),
+
+                // Batch name
+                Text(
+                  'Batch name (optional):',
+                  style: bodyTextStyle(
+                    context,
+                  )?.copyWith(fontWeight: kFontWeightMedium),
+                ),
+                const SizedBox(height: kSpacingS),
+                Field36(
+                  child: TextField(
+                    controller: batchController,
+                    textCapitalization: TextCapitalization.words,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    decoration: buildCompactFieldDecoration(
+                      context: context,
+                      hint: 'e.g. Red Cap, Lot 2025A',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Preview
+                Container(
+                  padding: kInsetSectionPadding,
+                  decoration: buildInsetSectionDecoration(
+                    context: context,
+                    backgroundOpacity: 0.9,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('New Total:', style: helperTextStyle(context)),
+                      Text(
+                        '$previewTotal vials',
+                        style: bodyTextStyle(context)?.copyWith(
+                          fontWeight: kFontWeightBold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -3700,7 +3791,10 @@ Future<void> _showRestockSealedVialsDialog(
               onPressed: () {
                 final val = double.tryParse(controller.text);
                 if (val != null && val > 0) {
-                  Navigator.pop(context, val);
+                  Navigator.pop(context, {
+                    'amount': val,
+                    'batchName': batchController.text.trim(),
+                  });
                 }
               },
               child: const Text('Add Vials'),
@@ -3711,14 +3805,45 @@ Future<void> _showRestockSealedVialsDialog(
     ),
   );
 
+  controller.dispose();
+  batchController.dispose();
+
   if (result != null && context.mounted) {
     final box = Hive.box<Medication>('medications');
     final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
     final now = DateTime.now();
+    final amount = result['amount'] as double;
+    final batchName = (result['batchName'] as String?)?.trim();
+    final batchKey = (batchName != null && batchName.isNotEmpty)
+        ? batchName
+        : null;
     final previousStock = med.stockValue;
-    final newStock = previousStock + result;
+    final newStock = previousStock + amount;
 
-    box.put(med.id, med.copyWith(stockValue: newStock));
+    // Update per-batch list
+    final existingBatches =
+        List<SealedVialBatch>.from(med.sealedVialBatches ?? []);
+    final idx = batchKey != null
+        ? existingBatches.indexWhere((b) => b.name == batchKey)
+        : -1;
+    if (idx >= 0) {
+      existingBatches[idx] = existingBatches[idx].copyWith(
+        count: existingBatches[idx].count + amount.toInt(),
+      );
+    } else {
+      existingBatches.add(
+        SealedVialBatch(name: batchKey, count: amount.toInt()),
+      );
+    }
+
+    box.put(
+      med.id,
+      med.copyWith(
+        stockValue: newStock,
+        sealedVialBatches: existingBatches,
+        backupVialsBatchNumber: batchKey ?? med.backupVialsBatchNumber,
+      ),
+    );
 
     // Log the restock for reporting
     final inventoryLog = InventoryLog(
@@ -3728,15 +3853,20 @@ Future<void> _showRestockSealedVialsDialog(
       changeType: InventoryChangeType.vialRestocked,
       previousStock: previousStock,
       newStock: newStock,
-      changeAmount: result,
-      notes: 'Added ${result.toInt()} sealed vials',
+      changeAmount: amount,
+      batchNumber: batchKey,
+      notes: batchKey != null
+          ? 'Added ${amount.toInt()} sealed vials (batch: $batchKey)'
+          : 'Added ${amount.toInt()} sealed vials',
       timestamp: now,
     );
     inventoryLogBox.put(inventoryLog.id, inventoryLog);
 
     showAppSnackBar(
       context,
-      'Added ${result.toInt()} sealed vials (${newStock.toInt()} total)',
+      batchKey != null
+          ? 'Added ${amount.toInt()} sealed vials — $batchKey (${newStock.toInt()} total)'
+          : 'Added ${amount.toInt()} sealed vials (${newStock.toInt()} total)',
     );
   }
 }

@@ -12,6 +12,7 @@ import 'package:skedux/src/features/medications/domain/enums.dart';
 import 'package:skedux/src/features/medications/domain/inventory_log.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
 import 'package:skedux/src/features/medications/domain/saved_reconstitution_calculation.dart';
+import 'package:skedux/src/features/medications/domain/sealed_vial_batch.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log.dart';
 import 'package:skedux/src/features/schedules/domain/entry_status_change_log.dart';
 import 'package:skedux/src/features/schedules/domain/schedule.dart';
@@ -199,5 +200,9 @@ class HiveBootstrap {
     // Saved reconstitution calculations
     if (!Hive.isAdapterRegistered(60))
       Hive.registerAdapter(SavedReconstitutionCalculationAdapter());
+
+    // Sealed vial batch (MDV multi-batch tracking)
+    if (!Hive.isAdapterRegistered(61))
+      Hive.registerAdapter(SealedVialBatchAdapter());
   }
 }

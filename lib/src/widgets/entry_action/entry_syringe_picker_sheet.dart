@@ -170,6 +170,7 @@ class EntryMdvControls extends StatelessWidget {
     required this.onModeChanged,
     required this.onSyringeChanged,
     required this.onValueChanged,
+    this.onStrengthUnitChanged,
   });
 
   final MdvEntryChangeMode mode;
@@ -179,6 +180,10 @@ class EntryMdvControls extends StatelessWidget {
   final ValueChanged<MdvEntryChangeMode> onModeChanged;
   final ValueChanged<SyringeType> onSyringeChanged;
   final VoidCallback onValueChanged;
+
+  /// Optional callback for when the user changes the strength unit while in
+  /// [MdvEntryChangeMode.strength] mode.
+  final ValueChanged<String>? onStrengthUnitChanged;
 
   String get _unitLabel => mdvEntryChangeUnitLabel(mode, strengthUnit);
 
@@ -231,6 +236,25 @@ class EntryMdvControls extends StatelessWidget {
             },
           ),
         ),
+        if (mode == MdvEntryChangeMode.strength &&
+            onStrengthUnitChanged != null) ...[
+          const SizedBox(height: kSpacingXS),
+          LabelFieldRow(
+            label: 'Unit',
+            field: SmallDropdown36<String>(
+              value: strengthUnit,
+              items: const [
+                DropdownMenuItem(value: 'mcg', child: Text('mcg')),
+                DropdownMenuItem(value: 'mg', child: Text('mg')),
+                DropdownMenuItem(value: 'g', child: Text('g')),
+              ],
+              onChanged: (value) {
+                if (value == null || value == strengthUnit) return;
+                onStrengthUnitChanged!(value);
+              },
+            ),
+          ),
+        ],
         const SizedBox(height: kSpacingXS),
         Row(
           children: [

@@ -148,8 +148,9 @@ class _DisclaimerBody extends StatelessWidget {
         const SizedBox(height: kSpacingL),
         _Paragraph(
           'All calculations, logs, and references produced by this application '
-          'are for personal tracking and reference only. They must be verified '
-          'by a qualified healthcare professional before being acted upon.',
+          'are for research, tracking, and reference purposes only. They must '
+          'be independently verified by a qualified professional before being '
+          'acted upon.',
         ),
         const SizedBox(height: kSpacingL),
         _Paragraph(

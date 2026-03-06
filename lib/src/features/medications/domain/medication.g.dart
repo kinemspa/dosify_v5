@@ -1,4 +1,4 @@
-﻿// GENERATED CODE - DO NOT MODIFY BY HAND
+// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'medication.dart';
 
@@ -61,13 +61,14 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       backupVialsLightSensitive: fields[37] as bool,
       activeVialVolume: fields[40] as double?,
       diluentName: fields[41] as String?,
+      sealedVialBatches: (fields[44] as List?)?.cast<SealedVialBatch>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(44)
+      ..writeByte(45)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -155,7 +156,9 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(36)
       ..write(obj.backupVialsRequiresFreezer)
       ..writeByte(37)
-      ..write(obj.backupVialsLightSensitive);
+      ..write(obj.backupVialsLightSensitive)
+      ..writeByte(44)
+      ..write(obj.sealedVialBatches);
   }
 
   @override

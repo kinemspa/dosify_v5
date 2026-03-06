@@ -11,6 +11,7 @@ import 'package:skedux/src/core/utils/id.dart';
 import 'package:skedux/src/features/medications/domain/enums.dart';
 import 'package:skedux/src/features/medications/domain/inventory_log.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/domain/sealed_vial_batch.dart';
 import 'package:skedux/src/features/medications/domain/services/medication_stock_service.dart';
 import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log.dart';
@@ -103,9 +104,11 @@ class _InventoryPageState extends State<InventoryPage> {
                             label: 'Used (recorded)',
                             value: takenEntries.toString(),
                           ),
-                          buildHelperText(
-                            context,
-                            'Overview of medication stock, expiry, and projected days remaining based on linked schedules.',
+                          Center(
+                            child: buildHelperText(
+                              context,
+                              'Overview of medication stock, expiry, and projected days remaining based on linked schedules.',
+                            ),
                           ),
                           const SizedBox(height: kSpacingS),
                           if (medItems.isEmpty)
@@ -151,9 +154,11 @@ class _InventoryPageState extends State<InventoryPage> {
                           setState(() => _tableExpanded = v);
                         },
                         children: [
-                          buildHelperText(
-                            context,
-                            'A compact table view of stock, expiry, and projected days remaining for all medications.',
+                          Center(
+                            child: buildHelperText(
+                              context,
+                              'A compact table view of stock, expiry, and projected days remaining for all medications.',
+                            ),
                           ),
                           const SizedBox(height: kSpacingS),
                           if (medItems.isEmpty)
@@ -382,9 +387,10 @@ class _MedicationInventoryTableRow extends StatelessWidget {
 
   Future<void> _showAddStockDialog(BuildContext context) async {
     final controller = TextEditingController(text: '1');
+    final batchController = TextEditingController();
     final isMdv = medication.form == MedicationForm.multiDoseVial;
 
-    final result = await showDialog<double>(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
@@ -419,6 +425,20 @@ class _MedicationInventoryTableRow extends StatelessWidget {
                   ),
                 ),
               ),
+              if (isMdv) ...[
+                const SizedBox(height: kSpacingM),
+                Field36(
+                  child: TextField(
+                    controller: batchController,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: buildFieldDecoration(
+                      dialogContext,
+                      label: 'Batch name (optional)',
+                      hint: 'e.g. Red Cap, Lot 2025A',
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
           actions: [
@@ -429,7 +449,10 @@ class _MedicationInventoryTableRow extends StatelessWidget {
             FilledButton(
               onPressed: () {
                 final v = double.tryParse(controller.text.trim()) ?? 0;
-                Navigator.of(dialogContext).pop(v);
+                Navigator.of(dialogContext).pop({
+                  'amount': v,
+                  if (isMdv) 'batchName': batchController.text.trim(),
+                });
               },
               child: const Text('Save'),
             ),
@@ -439,7 +462,10 @@ class _MedicationInventoryTableRow extends StatelessWidget {
     );
 
     controller.dispose();
-    if (result == null || result <= 0) return;
+    batchController.dispose();
+    final amount = result == null ? 0.0 : (result['amount'] as double? ?? 0.0);
+    if (result == null || amount <= 0) return;
+    final batchName = result['batchName'] as String?;
 
     final medsBox = Hive.box<Medication>('medications');
     final inventoryLogBox = Hive.box<InventoryLog>('inventory_logs');
@@ -449,8 +475,35 @@ class _MedicationInventoryTableRow extends StatelessWidget {
         medication.form == MedicationForm.multiDoseVial;
     if (isMultiDoseVial) {
       final prev = medication.stockValue;
-      final next = prev + result;
-      medsBox.put(medication.id, medication.copyWith(stockValue: next));
+      final next = prev + amount;
+
+      // Update per-batch tracking
+      final existingBatches =
+          List<SealedVialBatch>.from(medication.sealedVialBatches ?? []);
+      final batchKey = (batchName != null && batchName.isNotEmpty)
+          ? batchName
+          : null;
+      final idx = batchKey != null
+          ? existingBatches.indexWhere((b) => b.name == batchKey)
+          : -1;
+      if (idx >= 0) {
+        existingBatches[idx] = existingBatches[idx].copyWith(
+          count: existingBatches[idx].count + amount.toInt(),
+        );
+      } else {
+        existingBatches.add(SealedVialBatch(
+          name: batchKey,
+          count: amount.toInt(),
+        ));
+      }
+
+      medsBox.put(
+        medication.id,
+        medication.copyWith(
+          stockValue: next,
+          sealedVialBatches: existingBatches,
+        ),
+      );
 
       final id = IdGen.newId(prefix: 'inv_restock');
       inventoryLogBox.put(
@@ -462,8 +515,11 @@ class _MedicationInventoryTableRow extends StatelessWidget {
           changeType: InventoryChangeType.vialRestocked,
           previousStock: prev,
           newStock: next,
-          changeAmount: result,
-          notes: 'Added ${result.toInt()} sealed vials',
+          changeAmount: amount,
+          batchNumber: batchKey,
+          notes: batchKey != null
+              ? 'Added ${amount.toInt()} sealed vials (batch: $batchKey)'
+              : 'Added ${amount.toInt()} sealed vials',
           timestamp: now,
         ),
       );
@@ -471,7 +527,7 @@ class _MedicationInventoryTableRow extends StatelessWidget {
     }
 
     final prev = medication.stockValue;
-    final next = (prev + result).clamp(0.0, double.infinity);
+    final next = (prev + amount).clamp(0.0, double.infinity);
     medsBox.put(medication.id, medication.copyWith(stockValue: next));
     final id = IdGen.newId(prefix: 'inv_refill');
     inventoryLogBox.put(
@@ -483,7 +539,7 @@ class _MedicationInventoryTableRow extends StatelessWidget {
         changeType: InventoryChangeType.refillAdd,
         previousStock: prev,
         newStock: next,
-        changeAmount: result,
+        changeAmount: amount,
         notes: 'Refill from Inventory page',
         timestamp: now,
       ),
@@ -676,7 +732,7 @@ class _MedicationInventoryTableRow extends StatelessWidget {
             flex: 3,
             child: Text(
               isMdv && sealedCount != null
-                  ? '${stockInfo.label}\n$sealedCount sealed'
+                  ? '${stockInfo.label}\n$sealedCount sealed vial${sealedCount == 1 ? '' : 's'}'
                   : stockInfo.label,
               textAlign: TextAlign.end,
               style: helperTextStyle(
@@ -812,9 +868,41 @@ class _MedicationInventoryRow extends StatelessWidget {
         ? cs.error
         : cs.onSurfaceVariant.withValues(alpha: kOpacityMediumHigh);
 
+    // For MDV, active vial = open vial mL; sealed = reserve vial count
+    final activeMl = isMdv
+        ? (medication.activeVialVolume ?? medication.containerVolumeMl ?? 0)
+        : null;
+    final activeMlLabel = activeMl == null
+        ? null
+        : activeMl % 1 == 0
+            ? '${activeMl.toInt()} mL'
+            : '${activeMl.toStringAsFixed(2).replaceAll(RegExp(r'0+$'), '')} mL';
+
+    // Build a concise sealed vials label that conveys batch info when available.
+    String sealedLabel;
+    if (!isMdv) {
+      sealedLabel = '${sealedCount ?? 0} vials';
+    } else {
+      final batches = medication.sealedVialBatches
+          ?.where((b) => b.count > 0)
+          .toList();
+      if (batches == null || batches.isEmpty) {
+        sealedLabel = '${sealedCount ?? 0} vials';
+      } else if (batches.length == 1) {
+        final b = batches.first;
+        sealedLabel = b.name != null
+            ? '${b.count} × ${b.name}'
+            : '${b.count} vial${b.count == 1 ? '' : 's'}';
+      } else {
+        sealedLabel =
+            '${sealedCount ?? 0} vials\n(${batches.length} batches)';
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 44,
@@ -840,14 +928,20 @@ class _MedicationInventoryRow extends StatelessWidget {
                 ),
                 const SizedBox(height: kSpacingXS),
                 Text(
-                  '${MedicationDisplayHelpers.formLabel(medication.form)} | ${stockInfo.label}'
-                  '${isMdv && sealedCount != null ? ' | $sealedCount sealed' : ''}',
+                  // For MDV, only show form label; active/sealed go in right columns
+                  isMdv
+                      ? MedicationDisplayHelpers.formLabel(medication.form)
+                      : '${MedicationDisplayHelpers.formLabel(medication.form)} | ${stockInfo.label}',
                   style: helperTextStyle(context)?.copyWith(
                     fontWeight: kFontWeightSemiBold,
-                    color: stockStatusColorFromPercentage(
-                      context,
-                      percentage: stockInfo.percentage,
-                    ),
+                    color: isMdv
+                        ? cs.onSurfaceVariant.withValues(
+                            alpha: kOpacityMediumHigh,
+                          )
+                        : stockStatusColorFromPercentage(
+                            context,
+                            percentage: stockInfo.percentage,
+                          ),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -856,25 +950,60 @@ class _MedicationInventoryRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: kSpacingS),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'Days left',
-                style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
+          // MDV right section: Active | Sealed | Days left
+          if (isMdv) ...[
+            _statColumn(
+              context,
+              label: 'Active',
+              value: activeMlLabel ?? '—',
+              valueColor: stockStatusColorFromPercentage(
+                context,
+                percentage: stockInfo.percentage,
               ),
-              const SizedBox(height: kSpacingXS),
-              Text(
-                daysLabel,
-                style: helperTextStyle(
-                  context,
-                  color: daysColor,
-                )?.copyWith(fontWeight: kFontWeightSemiBold),
-              ),
-            ],
+            ),
+            const SizedBox(width: kSpacingM),
+            _statColumn(
+              context,
+              label: 'Sealed',
+              value: sealedLabel,
+              valueColor: (sealedCount ?? 0) == 0 ? cs.error : null,
+            ),
+            const SizedBox(width: kSpacingM),
+          ],
+          _statColumn(
+            context,
+            label: 'Days left',
+            value: daysLabel,
+            valueColor: daysColor,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _statColumn(
+    BuildContext context, {
+    required String label,
+    required String value,
+    Color? valueColor,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          label,
+          style: hintLabelTextStyle(context, color: cs.onSurfaceVariant),
+        ),
+        const SizedBox(height: kSpacingXS),
+        Text(
+          value,
+          style: helperTextStyle(
+            context,
+            color: valueColor,
+          )?.copyWith(fontWeight: kFontWeightSemiBold),
+        ),
+      ],
     );
   }
 }

@@ -1,4 +1,4 @@
-﻿// GENERATED CODE - DO NOT MODIFY BY HAND
+// GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'inventory_log.dart';
 
@@ -25,6 +25,7 @@ class InventoryLogAdapter extends TypeAdapter<InventoryLog> {
       newStock: fields[6] as double,
       changeAmount: fields[7] as double,
       notes: fields[8] as String?,
+      batchNumber: fields[9] as String?,
       timestamp: fields[3] as DateTime?,
     );
   }
@@ -32,7 +33,7 @@ class InventoryLogAdapter extends TypeAdapter<InventoryLog> {
   @override
   void write(BinaryWriter writer, InventoryLog obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +51,9 @@ class InventoryLogAdapter extends TypeAdapter<InventoryLog> {
       ..writeByte(7)
       ..write(obj.changeAmount)
       ..writeByte(8)
-      ..write(obj.notes);
+      ..write(obj.notes)
+      ..writeByte(9)
+      ..write(obj.batchNumber);
   }
 
   @override

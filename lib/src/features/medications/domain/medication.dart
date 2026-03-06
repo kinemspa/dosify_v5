@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:skedux/src/features/medications/domain/enums.dart';
+import 'package:skedux/src/features/medications/domain/sealed_vial_batch.dart';
 
 part 'medication.g.dart';
 
@@ -53,6 +54,7 @@ class Medication {
     this.backupVialsLightSensitive = false,
     this.activeVialVolume,
     this.diluentName,
+    this.sealedVialBatches,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -198,6 +200,12 @@ class Medication {
   @HiveField(37)
   final bool backupVialsLightSensitive;
 
+  /// Per-batch breakdown of sealed MDV reserve vials.
+  /// When not null/empty, these batches track which sealed vials belong to which lot/batch.
+  /// The sum of [SealedVialBatch.count] should equal [stockValue] for MDV medications.
+  @HiveField(44)
+  final List<SealedVialBatch>? sealedVialBatches;
+
   Medication copyWith({
     String? id,
     MedicationForm? form,
@@ -243,6 +251,7 @@ class Medication {
     bool? backupVialsLightSensitive,
     double? activeVialVolume,
     String? diluentName,
+    List<SealedVialBatch>? sealedVialBatches,
     bool clearReconstitution = false,
   }) {
     return Medication(
@@ -309,6 +318,7 @@ class Medication {
           backupVialsLightSensitive ?? this.backupVialsLightSensitive,
       activeVialVolume: activeVialVolume ?? this.activeVialVolume,
       diluentName: diluentName ?? this.diluentName,
+      sealedVialBatches: sealedVialBatches ?? this.sealedVialBatches,
     );
   }
 }

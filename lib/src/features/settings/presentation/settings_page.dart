@@ -1,4 +1,5 @@
 ﻿import 'dart:async';
+import 'dart:io';
 
 // Flutter imports:
 import 'package:flutter/foundation.dart';
@@ -8,15 +9,16 @@ import 'package:flutter/services.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:skedux/src/app/theme_mode_controller.dart';
 import 'package:skedux/src/core/backup/backup_models.dart';
+import 'package:skedux/src/core/backup/backup_zip_codec.dart';
 import 'package:skedux/src/core/backup/google_drive_backup_service.dart';
 import 'package:skedux/src/core/design_system.dart';
-import 'package:skedux/src/core/legal/disclaimer_settings.dart';
 import 'package:skedux/src/core/monetization/entitlement_service.dart';
 import 'package:skedux/src/core/notifications/entry_timing_settings.dart';
 import 'package:skedux/src/core/notifications/expiry_notification_scheduler.dart';
@@ -42,7 +44,6 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   static const _unlockTapTarget = 10;
 
-  late final Future<PackageInfo> _packageInfo;
   late final GoogleDriveBackupService _backupService;
   bool _devEnabled = false;
   int _tapCount = 0;
@@ -51,7 +52,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _packageInfo = PackageInfo.fromPlatform();
     _backupService = GoogleDriveBackupService();
     _loadDevEnabled();
   }
@@ -85,6 +85,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     if (!mounted) return;
     setState(() => _devEnabled = nextEnabled);
+    _tapCount = 0;
     showAppSnackBar(
       context,
       nextEnabled ? 'Developer options enabled' : 'Developer options disabled',
@@ -192,27 +193,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await action();
       if (!context.mounted) return;
       showAppSnackBar(context, 'Test notification sent');
-    }
-
-    Future<void> showAbout() async {
-      final info = await _packageInfo;
-      if (!context.mounted) return;
-
-      final versionText = info.buildNumber.trim().isEmpty
-          ? info.version
-          : '${info.version} (${info.buildNumber})';
-
-      showAboutDialog(
-        context: context,
-        applicationName: info.appName,
-        applicationVersion: versionText,
-        applicationIcon: Image.asset(
-          kPrimaryLogoAssetPath,
-          height: kAboutDialogLogoSize,
-          width: kAboutDialogLogoSize,
-          filterQuality: FilterQuality.high,
-        ),
-      );
     }
 
     Future<T?> runWithBusyDialog<T>(
@@ -559,6 +539,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 onChanged: (v) => ref
                     .read(entitlementServiceProvider.notifier)
                     .setPro(v),
+              ),
+              tileColor: Colors.amber.withValues(alpha: 0.18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+                side: const BorderSide(color: Colors.amber, width: 1.5),
               ),
             ),
             ListTile(
@@ -991,49 +976,42 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               }
             },
           ),
-
-          const SizedBox(height: kSpacingL),
-          Text(
-            'Legal',
-            style: cardTitleStyle(
-              context,
-            )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
-          ),
-          const SizedBox(height: kSpacingS),
           ListTile(
-            leading: const Icon(Icons.fact_check_outlined),
-            title: const Text('Research Disclaimer'),
-            subtitle: const Text('For research and informational purposes only'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/disclaimer', extra: true),
-          ),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Privacy Policy'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/legal'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.gavel_outlined),
-            title: const Text('Terms of Use'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/legal'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.replay_outlined),
-            title: const Text('Reset disclaimer'),
-            subtitle: const Text(
-              'Reset acceptance so the disclaimer appears on next launch',
-            ),
+            leading: const Icon(Icons.download_outlined),
+            title: const Text('Save backup to device'),
+            subtitle: const Text('Export a local copy you can share or keep'),
+            trailing: const Icon(Icons.play_arrow_rounded),
             onTap: () async {
-              await DisclaimerSettings.reset();
-              if (!context.mounted) return;
-              showAppSnackBar(
-                context,
-                'Disclaimer will appear on next app launch',
-              );
+              try {
+                final created = await runWithBusyDialog(
+                  'Creating backup…',
+                  () => const BackupZipCodec().createBackupZip(),
+                );
+                if (!context.mounted || created == null) return;
+
+                final ts = created.result.createdAtUtc
+                    .toIso8601String()
+                    .replaceAll(':', '-')
+                    .replaceAll('.', '-');
+                final fileName = 'skedux_backup_$ts.zip';
+                final tmpDir = await getTemporaryDirectory();
+                final tmpFile = File('${tmpDir.path}/$fileName');
+                await tmpFile.writeAsBytes(created.zipBytes);
+
+                await Share.shareXFiles(
+                  [XFile(tmpFile.path, mimeType: 'application/zip')],
+                  subject: 'Skedux Backup',
+                );
+              } on BackupFormatException catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, e.message);
+              } catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, 'Export failed: $e');
+              }
             },
           ),
+
           const SizedBox(height: kSpacingL),
           Text(
             'About',
@@ -1042,27 +1020,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
           const SizedBox(height: kSpacingS),
-          FutureBuilder<PackageInfo>(
-            future: _packageInfo,
-            builder: (context, snapshot) {
-              final info = snapshot.data;
-              final versionText = info == null
-                  ? 'Loading…'
-                  : info.buildNumber.trim().isEmpty
-                  ? info.version
-                  : '${info.version} (${info.buildNumber})';
-
-              final subtitle = _devEnabled
-                  ? 'Developer options enabled'
-                  : 'Version information';
-
-              return ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: const Text('Build'),
-                subtitle: Text('$versionText | $subtitle'),
-              );
-            },
-          ),
           ListTile(
             leading: GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -1074,14 +1031,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 filterQuality: FilterQuality.high,
               ),
             ),
-            title: const Text('About Skedux'),
+            title: const Text('About & Legal'),
             subtitle: Text(
               _devEnabled
                   ? 'Developer options enabled — tap logo to toggle'
-                  : 'App info — tap logo 10× to unlock developer options',
+                  : 'Tap logo 10× to unlock developer options',
             ),
             trailing: const Icon(Icons.chevron_right),
-            onTap: showAbout,
+            onTap: () => context.push('/settings/about'),
           ),
           if (entitlement.isPro) ...[
             const SizedBox(height: kSpacingL),
