@@ -1070,16 +1070,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: showAbout,
           ),
-          ListTile(
-            leading: const Icon(Icons.gavel_outlined),
-            title: const Text('Licenses'),
-            subtitle: const Text('Open source package licenses'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => showLicensePage(
-              context: context,
-              applicationName: 'Skedux',
-            ),
-          ),
           if (entitlement.isPro) ...[
             const SizedBox(height: kSpacingL),
             Text(
