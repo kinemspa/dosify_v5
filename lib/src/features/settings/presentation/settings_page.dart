@@ -1038,7 +1038,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   : 'Tap logo 10× to unlock developer options',
             ),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings/about'),
+            onTap: () async {
+              await context.push('/settings/about');
+              // Reload dev flag — user may have toggled it on the About /
+              // Licenses screen while away.
+              await _loadDevEnabled();
+            },
           ),
           if (entitlement.isPro) ...[
             const SizedBox(height: kSpacingL),
