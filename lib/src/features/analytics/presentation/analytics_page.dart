@@ -50,7 +50,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   /// Display filters — affect all analytics cards, not just export.
   Set<String> _filterMedIds = {};
   Set<String> _filterScheduleIds = {};
-  bool _filtersExpanded = true;
 
   Future<void> _showExportFilterSheet(
     BuildContext context,
@@ -154,6 +153,252 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   ],
                 ),
               ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ── display filter sheet ──────────────────────────────────────────────────
+
+  Future<void> _showDisplayFilterSheet(
+    BuildContext context, {
+    required List<Medication> medItems,
+    required List<Schedule> scheduleItems,
+    required Map<MedicationForm, int> typeBreakdown,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setSS) {
+            // helpers that mutate parent state and refresh both layers
+            void setFilter(VoidCallback fn) {
+              setSS(fn);
+              setState(() {});
+            }
+
+            final visibleMeds = medItems
+                .where((m) => _filterForms.contains(m.form))
+                .toList(growable: false);
+            final effectiveMedIds = _filterMedIds.isEmpty
+                ? visibleMeds.map((m) => m.id).toSet()
+                : _filterMedIds;
+            final visibleSchedules = scheduleItems
+                .where(
+                  (s) =>
+                      s.medicationId != null &&
+                      effectiveMedIds.contains(s.medicationId),
+                )
+                .toList(growable: false);
+
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.6,
+              maxChildSize: 0.92,
+              builder: (ctx2, scrollCtrl) {
+                return Column(
+                  children: [
+                    // ── header ──────────────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingM,
+                        vertical: kSpacingS,
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Filters',
+                            style: sectionTitleStyle(ctx),
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: () => setFilter(() {
+                              _filterForms = MedicationForm.values.toSet();
+                              _filterMedIds = {};
+                              _filterScheduleIds = {};
+                            }),
+                            child: const Text('Clear all'),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.of(sheetCtx).pop(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    // ── body ────────────────────────────────────────────────
+                    Expanded(
+                      child: ListView(
+                        controller: scrollCtrl,
+                        children: [
+                          // ── Medication Type ──────────────────────────────
+                          if (typeBreakdown.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                kSpacingM,
+                                kSpacingM,
+                                kSpacingM,
+                                kSpacingS,
+                              ),
+                              child: Text(
+                                'Medication Type',
+                                style: helperTextStyle(ctx)?.copyWith(
+                                  fontWeight: kFontWeightSemiBold,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: kSpacingM,
+                              ),
+                              child: Wrap(
+                                spacing: kSpacingS,
+                                runSpacing: kSpacingXS,
+                                children: [
+                                  for (final form in MedicationForm.values)
+                                    if ((typeBreakdown[form] ?? 0) > 0)
+                                      _filterChip(
+                                        ctx,
+                                        label:
+                                            '${_formLabel(form)} (${typeBreakdown[form]})',
+                                        selected:
+                                            _filterForms.contains(form),
+                                        onTap: () => setFilter(() {
+                                          if (_filterForms.contains(form)) {
+                                            if (_filterForms.length > 1) {
+                                              _filterForms.remove(form);
+                                            } else {
+                                              _filterForms =
+                                                  MedicationForm.values
+                                                      .toSet();
+                                            }
+                                          } else {
+                                            _filterForms.add(form);
+                                          }
+                                          _filterMedIds = {};
+                                          _filterScheduleIds = {};
+                                        }),
+                                      ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          // ── Medications ──────────────────────────────────
+                          if (visibleMeds.isNotEmpty) ...[
+                            const Divider(height: kSpacingXL),
+                            CheckboxListTile(
+                              title: const Text('All medications'),
+                              subtitle: Text(
+                                'Show data for every medication',
+                                style: microHelperTextStyle(ctx),
+                              ),
+                              value: _filterMedIds.isEmpty,
+                              controlAffinity:
+                                  ListTileControlAffinity.leading,
+                              onChanged: (v) {
+                                if (v == true) {
+                                  setFilter(() {
+                                    _filterMedIds = {};
+                                    _filterScheduleIds = {};
+                                  });
+                                }
+                              },
+                            ),
+                            const Divider(height: 1, indent: kSpacingM),
+                            for (final m in visibleMeds)
+                              CheckboxListTile(
+                                dense: true,
+                                title: Text(m.name),
+                                subtitle: Text(
+                                  _formLabel(m.form),
+                                  style: microHelperTextStyle(ctx),
+                                ),
+                                value: _filterMedIds.isNotEmpty &&
+                                    _filterMedIds.contains(m.id),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                onChanged: (v) {
+                                  setFilter(() {
+                                    if (v == true) {
+                                      _filterMedIds = {
+                                        ..._filterMedIds,
+                                        m.id,
+                                      };
+                                    } else {
+                                      _filterMedIds = _filterMedIds
+                                          .where((id) => id != m.id)
+                                          .toSet();
+                                    }
+                                    _filterScheduleIds = {};
+                                  });
+                                },
+                              ),
+                          ],
+                          // ── Schedules ────────────────────────────────────
+                          if (visibleSchedules.isNotEmpty) ...[
+                            const Divider(height: kSpacingXL),
+                            CheckboxListTile(
+                              title: const Text('All schedules'),
+                              subtitle: Text(
+                                'Show data for every schedule',
+                                style: microHelperTextStyle(ctx),
+                              ),
+                              value: _filterScheduleIds.isEmpty,
+                              controlAffinity:
+                                  ListTileControlAffinity.leading,
+                              onChanged: (v) {
+                                if (v == true) {
+                                  setFilter(() => _filterScheduleIds = {});
+                                }
+                              },
+                            ),
+                            const Divider(height: 1, indent: kSpacingM),
+                            for (final s in visibleSchedules)
+                              CheckboxListTile(
+                                dense: true,
+                                title: Text(s.name),
+                                subtitle: Text(
+                                  medItems
+                                          .where(
+                                            (m) => m.id == s.medicationId,
+                                          )
+                                          .map((m) => m.name)
+                                          .firstOrNull ??
+                                      '',
+                                  style: microHelperTextStyle(ctx),
+                                ),
+                                value: _filterScheduleIds.isNotEmpty &&
+                                    _filterScheduleIds.contains(s.id),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                onChanged: (v) {
+                                  setFilter(() {
+                                    if (v == true) {
+                                      _filterScheduleIds = {
+                                        ..._filterScheduleIds,
+                                        s.id,
+                                      };
+                                    } else {
+                                      _filterScheduleIds = _filterScheduleIds
+                                          .where((id) => id != s.id)
+                                          .toSet();
+                                    }
+                                  });
+                                },
+                              ),
+                          ],
+                          const SizedBox(height: kSpacingL),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             );
           },
         );
@@ -759,6 +1004,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               MedicationForm.values.length ||
                           _filterMedIds.isNotEmpty ||
                           _filterScheduleIds.isNotEmpty;
+                      final activeFilterCount =
+                          (MedicationForm.values.length -
+                              _filterForms.length) +
+                          _filterMedIds.length +
+                          _filterScheduleIds.length;
 
                       final logged = displayLogItems
                           .where((l) => l.action == EntryAction.logged)
@@ -951,31 +1201,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       return ListView(
                         padding: kPagePadding,
                         children: [
-                          // ── 0. Filters ──────────────────────────────────────
-                          CollapsibleSectionFormCard(
-                            title: hasActiveFilters
-                                ? 'Filters (active)'
-                                : 'Filters',
+                          // ── 0. Period + Filters ──────────────────────────
+                          SectionFormCard(
+                            title: 'Period',
                             neutral: true,
-                            isExpanded: _filtersExpanded,
-                            onExpandedChanged: (v) =>
-                                setState(() => _filtersExpanded = v),
-                            trailing: hasActiveFilters
-                                ? IconButton(
-                                    tooltip: 'Clear all filters',
-                                    icon: const Icon(Icons.filter_list_off),
-                                    constraints: kTightIconButtonConstraints,
-                                    padding: kNoPadding,
-                                    onPressed: () => setState(() {
-                                      _filterForms =
-                                          MedicationForm.values.toSet();
-                                      _filterMedIds = {};
-                                      _filterScheduleIds = {};
-                                    }),
-                                  )
-                                : null,
                             children: [
-                              // ── Date range (centered) ──────────────────────
                               Center(
                                 child: ReportTimeRangeSelectorRow(
                                   value: _rangePreset,
@@ -983,124 +1213,56 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                       setState(() => _rangePreset = next),
                                 ),
                               ),
-                              // ── Medication type ────────────────────────────
-                              if (typeBreakdown.isNotEmpty) ...[
-                                const SizedBox(height: kSpacingS),
-                                _filterRow(
-                                  context,
-                                  label: 'Type',
-                                  chips: [
-                                    for (final form in MedicationForm.values)
-                                      if ((typeBreakdown[form] ?? 0) > 0)
-                                        _filterChip(
+                              const SizedBox(height: kSpacingS),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  OutlinedButton.icon(
+                                    icon: const Icon(Icons.tune, size: 16),
+                                    label: Text(
+                                      hasActiveFilters
+                                          ? 'Filters  ·  $activeFilterCount active'
+                                          : 'Filters',
+                                    ),
+                                    style: hasActiveFilters
+                                        ? OutlinedButton.styleFrom(
+                                            foregroundColor:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                            side: BorderSide(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            ),
+                                          )
+                                        : null,
+                                    onPressed: () =>
+                                        _showDisplayFilterSheet(
                                           context,
-                                          label:
-                                              '${_formLabel(form)} (${typeBreakdown[form]})',
-                                          selected:
-                                              _filterForms.contains(form),
-                                          onTap: () => setState(() {
-                                            if (_filterForms.contains(form)) {
-                                              if (_filterForms.length > 1) {
-                                                _filterForms.remove(form);
-                                              } else {
-                                                _filterForms = MedicationForm
-                                                    .values
-                                                    .toSet();
-                                              }
-                                            } else {
-                                              _filterForms.add(form);
-                                            }
-                                            _filterMedIds = {};
-                                            _filterScheduleIds = {};
-                                          }),
+                                          medItems: medItems,
+                                          scheduleItems: scheduleItems,
+                                          typeBreakdown: typeBreakdown,
                                         ),
-                                  ],
-                                ),
-                              ],
-                              // ── Specific medication ────────────────────────
-                              if (medItems.isNotEmpty) ...[
-                                const SizedBox(height: kSpacingXS),
-                                _filterRow(
-                                  context,
-                                  label: 'Med',
-                                  chips: [
-                                    _filterChip(
-                                      context,
-                                      label: 'All',
-                                      selected: _filterMedIds.isEmpty,
-                                      onTap: () => setState(() {
+                                  ),
+                                  if (hasActiveFilters) ...[
+                                    const SizedBox(width: kSpacingXS),
+                                    IconButton(
+                                      icon: const Icon(Icons.close, size: 18),
+                                      tooltip: 'Clear all filters',
+                                      constraints:
+                                          kTightIconButtonConstraints,
+                                      padding: kNoPadding,
+                                      onPressed: () => setState(() {
+                                        _filterForms =
+                                            MedicationForm.values.toSet();
                                         _filterMedIds = {};
                                         _filterScheduleIds = {};
                                       }),
                                     ),
-                                    for (final m in medItems)
-                                      if (_filterForms.contains(m.form))
-                                        _filterChip(
-                                          context,
-                                          label: m.name,
-                                          selected:
-                                              _filterMedIds.contains(m.id),
-                                          onTap: () => setState(() {
-                                            if (_filterMedIds.contains(m.id)) {
-                                              _filterMedIds = _filterMedIds
-                                                  .where((id) => id != m.id)
-                                                  .toSet();
-                                            } else {
-                                              _filterMedIds = {
-                                                ..._filterMedIds,
-                                                m.id,
-                                              };
-                                            }
-                                            _filterScheduleIds = {};
-                                          }),
-                                        ),
                                   ],
-                                ),
-                              ],
-                              // ── Specific schedule ──────────────────────────
-                              if (scheduleItems.isNotEmpty) ...[
-                                const SizedBox(height: kSpacingXS),
-                                _filterRow(
-                                  context,
-                                  label: 'Schedule',
-                                  chips: [
-                                    _filterChip(
-                                      context,
-                                      label: 'All',
-                                      selected: _filterScheduleIds.isEmpty,
-                                      onTap: () => setState(
-                                        () => _filterScheduleIds = {},
-                                      ),
-                                    ),
-                                    for (final s in scheduleItems)
-                                      if (s.medicationId != null &&
-                                          displayMedIds
-                                              .contains(s.medicationId))
-                                        _filterChip(
-                                          context,
-                                          label: s.name,
-                                          selected:
-                                              _filterScheduleIds.contains(s.id),
-                                          onTap: () => setState(() {
-                                            if (_filterScheduleIds
-                                                .contains(s.id)) {
-                                              _filterScheduleIds =
-                                                  _filterScheduleIds
-                                                      .where(
-                                                        (id) => id != s.id,
-                                                      )
-                                                      .toSet();
-                                            } else {
-                                              _filterScheduleIds = {
-                                                ..._filterScheduleIds,
-                                                s.id,
-                                              };
-                                            }
-                                          }),
-                                        ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
                             ],
                           ),
                           sectionSpacing,
@@ -1604,43 +1766,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           ],
         ),
       ),
-    );
-  }
-
-  /// Renders a labelled horizontal-scrolling chip row for the filter card.
-  ///
-  /// [label] is a fixed-width left column; [chips] scroll horizontally so the
-  /// card height stays fixed regardless of the number of items.
-  Widget _filterRow(
-    BuildContext context, {
-    required String label,
-    required List<Widget> chips,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    final labelStyle = microHelperTextStyle(context)?.copyWith(
-      color: cs.onSurfaceVariant,
-      fontWeight: kFontWeightSemiBold,
-    );
-    return Row(
-      children: [
-        SizedBox(
-          width: 60,
-          child: Text(label, style: labelStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (int i = 0; i < chips.length; i++) ...[
-                  chips[i],
-                  if (i < chips.length - 1) const SizedBox(width: 4),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
