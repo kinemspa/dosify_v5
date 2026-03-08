@@ -69,6 +69,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   mcp_toolkit: ^0.3.0
   fl_chart: ^1.1.1
+  file_picker: ^10.3.10
 
 dev_dependencies:
   flutter_test:

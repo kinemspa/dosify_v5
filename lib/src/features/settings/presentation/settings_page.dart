@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
@@ -869,15 +870,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
           const SizedBox(height: kSpacingS),
+          // ── Google Drive ────────────────────────────────────────────────
           ListTile(
             leading: const Icon(Icons.cloud_upload_outlined),
             title: const Text('Backup to Google Drive'),
-            subtitle: const Text('Saves a copy of your app data'),
+            subtitle: const Text(
+              'Requires Google account sign-in. Saves encrypted copy to Google Drive app folder.',
+            ),
             trailing: const Icon(Icons.play_arrow_rounded),
             onTap: () async {
               try {
                 final result = await runWithBusyDialog(
-                  'Backing up…',
+                  'Backing up\u2026',
                   () => _backupService.backupToDrive().timeout(
                     const Duration(seconds: 45),
                   ),
@@ -891,17 +895,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 if (!context.mounted) return;
                 showAppSnackBar(
                   context,
-                  'Backup timed out while waiting for Google Drive. Please retry.',
+                  'Backup timed out. Check your internet connection and try again.',
                 );
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, e.message);
               } on PlatformException catch (e) {
                 if (!context.mounted) return;
-                showAppSnackBar(
-                  context,
-                  'Google sign-in failed (${e.code}): ${e.message ?? 'Check your account and try again.'}',
-                );
+                final msg = switch (e.code) {
+                  'sign_in_failed' ||
+                  'network_error' =>
+                    'Google sign-in failed. Make sure a Google account is added to this device and Google Play Services is up to date.',
+                  'access_denied' =>
+                    'Google Drive access was denied. Please try again and allow Drive access.',
+                  _ =>
+                    'Google sign-in error (${e.code}): ${e.message ?? "Check your account and try again."}',
+                };
+                showAppSnackBar(context, msg);
               } catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, 'Backup failed: $e');
@@ -911,7 +921,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ListTile(
             leading: const Icon(Icons.cloud_download_outlined),
             title: const Text('Restore from Google Drive'),
-            subtitle: const Text('Overwrites local data with your backup'),
+            subtitle: const Text(
+              'Overwrites local data with your latest Google Drive backup. This device only.',
+            ),
             trailing: const Icon(Icons.warning_amber_rounded),
             onTap: () async {
               final confirmed = await showDialog<bool>(
@@ -940,7 +952,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
               try {
                 final result = await runWithBusyDialog(
-                  'Restoring…',
+                  'Restoring\u2026',
                   () => _backupService.restoreLatestFromDrive().timeout(
                     const Duration(seconds: 45),
                   ),
@@ -959,32 +971,41 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 if (!context.mounted) return;
                 showAppSnackBar(
                   context,
-                  'Restore timed out while waiting for Google Drive. Please retry.',
+                  'Restore timed out. Check your internet connection and try again.',
                 );
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, e.message);
               } on PlatformException catch (e) {
                 if (!context.mounted) return;
-                showAppSnackBar(
-                  context,
-                  'Google sign-in failed (${e.code}): ${e.message ?? 'Check your account and try again.'}',
-                );
+                final msg = switch (e.code) {
+                  'sign_in_failed' ||
+                  'network_error' =>
+                    'Google sign-in failed. Make sure a Google account is added to this device and Google Play Services is up to date.',
+                  'access_denied' =>
+                    'Google Drive access was denied. Please try again and allow Drive access.',
+                  _ =>
+                    'Google sign-in error (${e.code}): ${e.message ?? "Check your account and try again."}',
+                };
+                showAppSnackBar(context, msg);
               } catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, 'Restore failed: $e');
               }
             },
           ),
+          // ── Device backup ────────────────────────────────────────────────
           ListTile(
-            leading: const Icon(Icons.download_outlined),
+            leading: const Icon(Icons.save_alt_outlined),
             title: const Text('Save backup to device'),
-            subtitle: const Text('Export a local copy you can share or keep'),
+            subtitle: const Text(
+              'Creates a .zip file you can save or share. Restore it on this same device only (encryption is device-bound).',
+            ),
             trailing: const Icon(Icons.play_arrow_rounded),
             onTap: () async {
               try {
                 final created = await runWithBusyDialog(
-                  'Creating backup…',
+                  'Creating backup\u2026',
                   () => const BackupZipCodec().createBackupZip(),
                 );
                 if (!context.mounted || created == null) return;
@@ -1008,6 +1029,77 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               } catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, 'Export failed: $e');
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.upload_file_outlined),
+            title: const Text('Restore from backup file'),
+            subtitle: const Text(
+              'Pick a .zip backup saved from this device and restore your data.',
+            ),
+            trailing: const Icon(Icons.warning_amber_rounded),
+            onTap: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Restore from file?'),
+                  content: const Text(
+                    'This will overwrite your local app data with the selected backup. '
+                    'Only backups created on this device can be restored.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('Choose file'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed != true) return;
+
+              try {
+                final pick = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: const ['zip'],
+                  withData: true,
+                );
+                if (pick == null || pick.files.isEmpty) return;
+
+                final bytes = pick.files.first.bytes;
+                if (bytes == null) {
+                  if (context.mounted) {
+                    showAppSnackBar(
+                      context,
+                      'Could not read the selected file. Try again.',
+                    );
+                  }
+                  return;
+                }
+
+                final result = await runWithBusyDialog(
+                  'Restoring\u2026',
+                  () => const BackupZipCodec().restoreFromBackupZip(bytes),
+                );
+                if (!context.mounted || result == null) return;
+
+                final missing = result.hiveBoxesMissing.isEmpty
+                    ? ''
+                    : ' Missing: ${result.hiveBoxesMissing.join(', ')}.';
+                showAppSnackBar(
+                  context,
+                  'Restore complete (${result.hiveBoxesRestored} boxes, ${result.sharedPrefsKeysRestored} settings). Restart app for full refresh.$missing',
+                );
+              } on BackupFormatException catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, e.message);
+              } catch (e) {
+                if (!context.mounted) return;
+                showAppSnackBar(context, 'Restore failed: $e');
               }
             },
           ),
