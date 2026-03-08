@@ -47,6 +47,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   /// Medication ID filter for exports. Empty = include all.
   Set<String> _exportMedFilter = {};
+  /// Display filters — affect all analytics cards, not just export.
+  Set<String> _filterMedIds = {};
+  Set<String> _filterScheduleIds = {};
+  bool _filtersExpanded = true;
 
   Future<void> _showExportFilterSheet(
     BuildContext context,
@@ -710,13 +714,59 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           (a, b) => b.timestamp.compareTo(a.timestamp),
                         );
 
-                      final logged = logItems
+                      // ── Apply display filters (form + med + schedule) ──────
+                      final displayMedIds = <String>{
+                        for (final m in medItems)
+                          if (_filterForms.contains(m.form) &&
+                              (_filterMedIds.isEmpty ||
+                                  _filterMedIds.contains(m.id)))
+                            m.id,
+                      };
+                      final displayScheduleIds = <String>{
+                        for (final s in scheduleItems)
+                          if (s.medicationId != null &&
+                              displayMedIds.contains(s.medicationId) &&
+                              (_filterScheduleIds.isEmpty ||
+                                  _filterScheduleIds.contains(s.id)))
+                            s.id,
+                      };
+                      final displayMedItems = medItems
+                          .where((m) => displayMedIds.contains(m.id))
+                          .toList(growable: false);
+                      final displayScheduleItems = scheduleItems
+                          .where(
+                            (s) =>
+                                s.medicationId != null &&
+                                displayMedIds.contains(s.medicationId),
+                          )
+                          .toList(growable: false);
+                      final displayLogItems = logItems
+                          .where(
+                            (l) =>
+                                displayMedIds.contains(l.medicationId) &&
+                                (_filterScheduleIds.isEmpty ||
+                                    displayScheduleIds
+                                        .contains(l.scheduleId)),
+                          )
+                          .toList(growable: false);
+                      final displayInventoryItems = inventoryItems
+                          .where(
+                            (l) => displayMedIds.contains(l.medicationId),
+                          )
+                          .toList(growable: false);
+                      final hasActiveFilters =
+                          _filterForms.length <
+                              MedicationForm.values.length ||
+                          _filterMedIds.isNotEmpty ||
+                          _filterScheduleIds.isNotEmpty;
+
+                      final logged = displayLogItems
                           .where((l) => l.action == EntryAction.logged)
                           .length;
-                      final skipped = logItems
+                      final skipped = displayLogItems
                           .where((l) => l.action == EntryAction.skipped)
                           .length;
-                      final snoozed = logItems
+                      final snoozed = displayLogItems
                           .where((l) => l.action == EntryAction.snoozed)
                           .length;
                       final totalEntryActions = logged + skipped + snoozed;
@@ -724,7 +774,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           ? 0
                           : ((logged / totalEntryActions) * 100).round();
 
-                      final stockRefills = inventoryItems
+                      final stockRefills = displayInventoryItems
                           .where(
                             (l) =>
                                 l.changeType == InventoryChangeType.refillAdd ||
@@ -734,7 +784,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     InventoryChangeType.vialRestocked,
                           )
                           .length;
-                      final stockUsage = inventoryItems
+                      final stockUsage = displayInventoryItems
                           .where(
                             (l) =>
                                 l.changeType ==
@@ -742,14 +792,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 l.changeType == InventoryChangeType.adHocEntry,
                           )
                           .length;
-                      final stockAdjustments = inventoryItems
+                      final stockAdjustments = displayInventoryItems
                           .where(
                             (l) =>
                                 l.changeType ==
                                 InventoryChangeType.manualAdjustment,
                           )
                           .length;
-                      final stockExpired = inventoryItems
+                      final stockExpired = displayInventoryItems
                           .where(
                             (l) =>
                                 l.changeType == InventoryChangeType.expired,
@@ -758,7 +808,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
                       // Per-medication per-action-type activity breakdown
                       final activityByMedication = <String, Map<String, int>>{};
-                      for (final log in logItems) {
+                      for (final log in displayLogItems) {
                         final label = switch (log.action) {
                           EntryAction.logged => 'Logged',
                           EntryAction.skipped => 'Skipped',
@@ -770,7 +820,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                           label, (v) => v + 1, ifAbsent: () => 1);
                       }
                       // Include refill events from inventory logs
-                      for (final inv in inventoryItems) {
+                      for (final inv in displayInventoryItems) {
                         final isRefill =
                             inv.changeType == InventoryChangeType.refillAdd ||
                             inv.changeType == InventoryChangeType.refillToMax ||
@@ -832,14 +882,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       // Inventory health
                       final now = DateTime.now().toUtc();
                       final in30Days = now.add(const Duration(days: 30));
-                      final lowStockCount = medItems.where((m) {
+                      final lowStockCount = displayMedItems.where((m) {
                         if (!m.lowStockEnabled) return false;
                         return m.stockValue <=
                             (m.lowStockThreshold ??
                                 m.lowStockVialsThresholdCount ??
                                 0);
                       }).length;
-                      final expiringCount = medItems.where((m) {
+                      final expiringCount = displayMedItems.where((m) {
                         final dates = [
                           m.expiry,
                           m.backupVialsExpiry,
@@ -901,39 +951,186 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       return ListView(
                         padding: kPagePadding,
                         children: [
-                          // ── 1. Overview ─────────────────────────────────────
-                          SectionFormCard(
-                            title: 'Overview',
+                          // ── 0. Filters ──────────────────────────────────────
+                          CollapsibleSectionFormCard(
+                            title: hasActiveFilters
+                                ? 'Filters (active)'
+                                : 'Filters',
                             neutral: true,
+                            isExpanded: _filtersExpanded,
+                            onExpandedChanged: (v) =>
+                                setState(() => _filtersExpanded = v),
+                            trailing: hasActiveFilters
+                                ? IconButton(
+                                    tooltip: 'Clear all filters',
+                                    icon: const Icon(Icons.filter_list_off),
+                                    constraints: kTightIconButtonConstraints,
+                                    padding: kNoPadding,
+                                    onPressed: () => setState(() {
+                                      _filterForms =
+                                          MedicationForm.values.toSet();
+                                      _filterMedIds = {};
+                                      _filterScheduleIds = {};
+                                    }),
+                                  )
+                                : null,
                             children: [
+                              // Date range
                               ReportTimeRangeSelectorRow(
                                 value: _rangePreset,
                                 onChanged: (next) =>
                                     setState(() => _rangePreset = next),
                               ),
-                              const SizedBox(height: kSpacingM),
+                              // Medication type
+                              if (typeBreakdown.isNotEmpty) ...[
+                                const SizedBox(height: kSpacingM),
+                                buildHelperText(context, 'Medication Type'),
+                                const SizedBox(height: kSpacingXS),
+                                Wrap(
+                                  spacing: kSpacingS,
+                                  runSpacing: kSpacingXS,
+                                  children: [
+                                    for (final form in MedicationForm.values)
+                                      if ((typeBreakdown[form] ?? 0) > 0)
+                                        _filterChip(
+                                          context,
+                                          label:
+                                              '${_formLabel(form)} (${typeBreakdown[form]})',
+                                          selected:
+                                              _filterForms.contains(form),
+                                          onTap: () => setState(() {
+                                            if (_filterForms.contains(form)) {
+                                              if (_filterForms.length > 1) {
+                                                _filterForms.remove(form);
+                                              } else {
+                                                _filterForms = MedicationForm
+                                                    .values
+                                                    .toSet();
+                                              }
+                                            } else {
+                                              _filterForms.add(form);
+                                            }
+                                            _filterMedIds = {};
+                                            _filterScheduleIds = {};
+                                          }),
+                                        ),
+                                  ],
+                                ),
+                              ],
+                              // Specific medication
+                              if (medItems.isNotEmpty) ...[
+                                const SizedBox(height: kSpacingM),
+                                buildHelperText(context, 'Medication'),
+                                const SizedBox(height: kSpacingXS),
+                                Wrap(
+                                  spacing: kSpacingS,
+                                  runSpacing: kSpacingXS,
+                                  children: [
+                                    _filterChip(
+                                      context,
+                                      label: 'All',
+                                      selected: _filterMedIds.isEmpty,
+                                      onTap: () => setState(() {
+                                        _filterMedIds = {};
+                                        _filterScheduleIds = {};
+                                      }),
+                                    ),
+                                    for (final m in medItems)
+                                      if (_filterForms.contains(m.form))
+                                        _filterChip(
+                                          context,
+                                          label: m.name,
+                                          selected:
+                                              _filterMedIds.contains(m.id),
+                                          onTap: () => setState(() {
+                                            if (_filterMedIds.contains(m.id)) {
+                                              _filterMedIds = _filterMedIds
+                                                  .where((id) => id != m.id)
+                                                  .toSet();
+                                            } else {
+                                              _filterMedIds = {
+                                                ..._filterMedIds,
+                                                m.id,
+                                              };
+                                            }
+                                            _filterScheduleIds = {};
+                                          }),
+                                        ),
+                                  ],
+                                ),
+                              ],
+                              // Specific schedule
+                              if (scheduleItems.isNotEmpty) ...[
+                                const SizedBox(height: kSpacingM),
+                                buildHelperText(context, 'Schedule'),
+                                const SizedBox(height: kSpacingXS),
+                                Wrap(
+                                  spacing: kSpacingS,
+                                  runSpacing: kSpacingXS,
+                                  children: [
+                                    _filterChip(
+                                      context,
+                                      label: 'All',
+                                      selected: _filterScheduleIds.isEmpty,
+                                      onTap: () => setState(
+                                        () => _filterScheduleIds = {},
+                                      ),
+                                    ),
+                                    for (final s in scheduleItems)
+                                      if (s.medicationId != null &&
+                                          displayMedIds
+                                              .contains(s.medicationId))
+                                        _filterChip(
+                                          context,
+                                          label: s.name,
+                                          selected:
+                                              _filterScheduleIds.contains(s.id),
+                                          onTap: () => setState(() {
+                                            if (_filterScheduleIds
+                                                .contains(s.id)) {
+                                              _filterScheduleIds =
+                                                  _filterScheduleIds
+                                                      .where(
+                                                        (id) => id != s.id,
+                                                      )
+                                                      .toSet();
+                                            } else {
+                                              _filterScheduleIds = {
+                                                ..._filterScheduleIds,
+                                                s.id,
+                                              };
+                                            }
+                                          }),
+                                        ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                          sectionSpacing,
+
+                          // ── 1. Overview ─────────────────────────────────────
+                          SectionFormCard(
+                            title: 'Overview',
+                            neutral: true,
+                            children: [
                               Row(
                                 children: [
                                   _statTile(
                                     context,
                                     icon: Icons.medication_outlined,
-                                    label: _filterForms.length == MedicationForm.values.length
-                                        ? 'Medications'
-                                        : 'Filtered',
-                                    value: (_filterForms.length == MedicationForm.values.length
-                                            ? medItems.length
-                                            : medItems
-                                                .where((m) => _filterForms
-                                                    .contains(m.form))
-                                                .length)
-                                        .toString(),
+                                    label: hasActiveFilters
+                                        ? 'Filtered Meds'
+                                        : 'Medications',
+                                    value: displayMedItems.length.toString(),
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
                                     context,
                                     icon: Icons.schedule_outlined,
                                     label: 'Schedules',
-                                    value: scheduleItems.length.toString(),
+                                    value:
+                                        displayScheduleItems.length.toString(),
                                     valueColor:
                                         Theme.of(context).colorScheme.secondary,
                                   ),
@@ -946,7 +1143,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     context,
                                     icon: Icons.check_circle_outline,
                                     label: 'Activity log',
-                                    value: logItems.length.toString(),
+                                    value: displayLogItems.length.toString(),
                                     valueColor:
                                         Theme.of(context).colorScheme.tertiary,
                                   ),
@@ -955,7 +1152,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     context,
                                     icon: Icons.inventory_2_outlined,
                                     label: 'Stock logs',
-                                    value: inventoryItems.length.toString(),
+                                    value:
+                                        displayInventoryItems.length.toString(),
                                     valueColor:
                                         Theme.of(context).colorScheme.secondary,
                                   ),
@@ -1010,47 +1208,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   ),
                                 ),
                               ],
-                              if (typeBreakdown.isNotEmpty) ...[
-                                const SizedBox(height: kSpacingM),
-                                buildHelperText(
-                                  context,
-                                  _filterForms.length == MedicationForm.values.length
-                                      ? 'By type — tap to filter'
-                                      : 'Filtered: ${_filterForms.map(_formLabel).join(', ')}',
-                                ),
-                                const SizedBox(height: kSpacingXS),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Wrap(
-                                  spacing: kSpacingS,
-                                  runSpacing: kSpacingXS,
-                                  alignment: WrapAlignment.center,
-                                  children: [
-                                    for (final form in MedicationForm.values)
-                                      if ((typeBreakdown[form] ?? 0) > 0)
-                                        _filterChip(
-                                          context,
-                                          label:
-                                              '${_formLabel(form)}: ${typeBreakdown[form]}',
-                                          selected:
-                                              _filterForms.contains(form),
-                                          onTap: () => setState(() {
-                                            if (_filterForms
-                                                .contains(form)) {
-                                              if (_filterForms.length > 1) {
-                                                _filterForms.remove(form);
-                                              } else {
-                                                _filterForms = MedicationForm.values.toSet();
-                                              }
-                                            } else {
-                                              _filterForms.add(form);
-                                            }
-                                          }),
-                                        ),
-                                  ],
-                                ),
-                                ),
-                              ],
                             ],
                           ),
                           sectionSpacing,
@@ -1085,7 +1242,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               const SizedBox(height: kSpacingM),
                               _buildDailyTrendChart(
                                 context,
-                                allLogItems, // use all logs so trend is bounded to trendDays window
+                                displayLogItems,
                                 trendDays,
                               ),
                             ],
