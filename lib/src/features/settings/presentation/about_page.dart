@@ -76,19 +76,23 @@ class _AboutPageState extends State<AboutPage> {
   Future<void> _showLicenses(BuildContext context) async {
     final info = await _packageInfo;
     if (!context.mounted) return;
-    showAboutDialog(
-      context: context,
-      applicationName: info.appName,
-      applicationVersion: info.buildNumber.trim().isEmpty
-          ? info.version
-          : '${info.version} (${info.buildNumber})',
-      applicationIcon: Image.asset(
-        kPrimaryLogoAssetPath,
-        height: kAboutDialogLogoSize,
-        width: kAboutDialogLogoSize,
-        filterQuality: FilterQuality.high,
+    final versionStr = info.buildNumber.trim().isEmpty
+        ? info.version
+        : '${info.version} (${info.buildNumber})';
+    // Navigate directly to LicensePage so we can embed the tappable logo
+    // that lets users unlock/lock developer options with 10 taps.
+    await Navigator.push<void>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LicensePage(
+          applicationName: info.appName,
+          applicationVersion: versionStr,
+          applicationIcon: const _TappableDevLogoIcon(),
+        ),
       ),
     );
+    // Reload dev flag in case it was toggled on the license screen.
+    await _loadDevEnabled();
   }
 
   @override
@@ -193,6 +197,62 @@ class _AboutPageState extends State<AboutPage> {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Tappable logo for the LicensePage ────────────────────────────────────────
+
+/// A self-contained tappable logo that unlocks/locks developer options after
+/// 10 rapid taps — the same gesture as on the Settings + About pages.
+///
+/// Passed as [LicensePage.applicationIcon] so it appears on the licenses screen.
+class _TappableDevLogoIcon extends StatefulWidget {
+  const _TappableDevLogoIcon();
+
+  @override
+  State<_TappableDevLogoIcon> createState() => _TappableDevLogoIconState();
+}
+
+class _TappableDevLogoIconState extends State<_TappableDevLogoIcon> {
+  static const _target = 10;
+  static const _windowMs = 2000;
+
+  int _taps = 0;
+  DateTime? _lastTap;
+
+  Future<void> _onTap() async {
+    final now = DateTime.now();
+    if (_lastTap == null ||
+        now.difference(_lastTap!).inMilliseconds > _windowMs) {
+      _taps = 0;
+    }
+    _lastTap = now;
+    _taps += 1;
+
+    if (_taps < _target) return;
+    _taps = 0;
+
+    final prefs = await SharedPreferences.getInstance();
+    final current = prefs.getBool(DeveloperOptions.prefsKey) ?? false;
+    await prefs.setBool(DeveloperOptions.prefsKey, !current);
+    if (!mounted) return;
+    showAppSnackBar(
+      context,
+      !current ? 'Developer options enabled' : 'Developer options disabled',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _onTap,
+      child: Image.asset(
+        kPrimaryLogoAssetPath,
+        height: kAboutDialogLogoSize,
+        width: kAboutDialogLogoSize,
+        filterQuality: FilterQuality.high,
       ),
     );
   }
