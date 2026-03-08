@@ -459,6 +459,112 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
     return EntrySyringeGauge(syringeType: syringe, fillUnits: fillUnits);
   }
 
+  /// Handles syringe drag in the Advanced section — converts [newUnits] to the
+  /// current MDV entry mode value and writes it to [_entryOverrideController].
+  void _onAdvancedSyringeDrag(double newUnits) {
+    final controller = _entryOverrideController;
+    if (controller == null) return;
+
+    final schedule =
+        Hive.box<Schedule>('schedules').get(widget.entry.scheduleId);
+    final medId =
+        schedule?.medicationId ?? widget.entry.existingLog?.medicationId;
+    final med =
+        medId == null ? null : Hive.box<Medication>('medications').get(medId);
+    if (med == null) return;
+
+    final syringeType = _mdvSyringeType;
+    if (syringeType == null) return;
+
+    final totalStrengthMcg = mdvTotalVialStrengthMcg(med);
+    final totalVolumeMicroliter = mdvTotalVialVolumeMicroliter(med);
+    if (totalStrengthMcg == null || totalVolumeMicroliter == null) return;
+
+    final clamped = newUnits.clamp(0.0, syringeType.maxUnits.toDouble());
+    final result = EntryCalculator.calculateFromUnitsMDV(
+      syringeUnits: clamped,
+      totalVialStrengthMcg: totalStrengthMcg,
+      totalVialVolumeMicroliter: totalVolumeMicroliter,
+      syringeType: syringeType,
+    );
+
+    if (!result.success || result.hasError) return;
+
+    String fmt(double v) {
+      final s = v.toStringAsFixed(4);
+      final trimmed = s.replaceAll(RegExp(r'0+$'), '').replaceAll(
+        RegExp(r'\.$'),
+        '',
+      );
+      return trimmed.isEmpty ? '0' : trimmed;
+    }
+
+    final newText = switch (_mdvEntryChangeMode) {
+      MdvEntryChangeMode.units || null => clamped.round().toString(),
+      MdvEntryChangeMode.volume => fmt(
+        (result.entryVolumeMicroliter ?? 0) / 1000,
+      ),
+      MdvEntryChangeMode.strength => () {
+        final mcg = result.entryMassMcg ?? 0;
+        final displayValue = switch (_mdvStrengthUnit) {
+          'mcg' => mcg,
+          'mg' => mcg / 1000,
+          'g' => mcg / 1000000,
+          _ => mcg / 1000,
+        };
+        return fmt(displayValue);
+      }(),
+    };
+
+    controller.text = newText;
+    setState(() => _hasChanged = true);
+  }
+
+  /// Builds an interactive syringe gauge for the Advanced section (MDV only).
+  ///
+  /// Returns [SizedBox.shrink] for non-MDV medications or when the syringe
+  /// type hasn't been initialised yet.
+  Widget _buildAdvancedMdvSyringeGauge(BuildContext context) {
+    if (_mdvSyringeType == null) return const SizedBox.shrink();
+
+    final schedule =
+        Hive.box<Schedule>('schedules').get(widget.entry.scheduleId);
+    final medId =
+        schedule?.medicationId ?? widget.entry.existingLog?.medicationId;
+    final med =
+        medId == null ? null : Hive.box<Medication>('medications').get(medId);
+    if (med == null || med.form != MedicationForm.multiDoseVial) {
+      return const SizedBox.shrink();
+    }
+
+    final syringe = _mdvSyringeType ?? SyringeType.ml_1_0;
+    final result = _entryOverrideController == null
+        ? null
+        : mdvEntryChangeResult(
+            med: med,
+            rawText: _entryOverrideController!.text,
+            mode: _mdvEntryChangeMode,
+            syringe: _mdvSyringeType,
+            strengthUnit: _mdvStrengthUnit,
+          );
+
+    final fallbackVolumeMl = med.volumePerEntry;
+    final fallbackUnits = fallbackVolumeMl == null
+        ? 0.0
+        : (fallbackVolumeMl * SyringeType.ml_1_0.unitsPerMl);
+
+    final fillUnits = (result?.syringeUnits ?? fallbackUnits).clamp(
+      0.0,
+      syringe.maxUnits.toDouble(),
+    );
+
+    return EntrySyringeGauge(
+      syringeType: syringe,
+      fillUnits: fillUnits,
+      onChanged: _onAdvancedSyringeDrag,
+    );
+  }
+
   /// Converts the current MDV entry value to the equivalent value in [newMode]
   /// so the user doesn't see a unit mismatch (e.g. "30 units → 30 mg").
   void _convertMdvEntryValueOnModeChange(MdvEntryChangeMode newMode) {
@@ -640,9 +746,6 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
 
       _lastLoggedLog = best;
     }
-
-    // Always expand Advanced section so users can see it immediately
-    _editExpanded = true;
   }
 
   @override
@@ -1074,6 +1177,10 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
               isExpanded: _editExpanded,
               onExpandedChanged: (v) => setState(() => _editExpanded = v),
               children: [
+                if (_mdvSyringeType != null) ...[
+                  _buildAdvancedMdvSyringeGauge(context),
+                  const SizedBox(height: kSpacingM),
+                ],
                 EntryPartialEntrySection(
                   isAdHoc: _isAdHoc,
                   existingLog: widget.entry.existingLog,
