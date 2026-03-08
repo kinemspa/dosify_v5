@@ -975,21 +975,21 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   )
                                 : null,
                             children: [
-                              // Date range
-                              ReportTimeRangeSelectorRow(
-                                value: _rangePreset,
-                                onChanged: (next) =>
-                                    setState(() => _rangePreset = next),
+                              // ── Date range (centered) ──────────────────────
+                              Center(
+                                child: ReportTimeRangeSelectorRow(
+                                  value: _rangePreset,
+                                  onChanged: (next) =>
+                                      setState(() => _rangePreset = next),
+                                ),
                               ),
-                              // Medication type
+                              // ── Medication type ────────────────────────────
                               if (typeBreakdown.isNotEmpty) ...[
-                                const SizedBox(height: kSpacingM),
-                                buildHelperText(context, 'Medication Type'),
-                                const SizedBox(height: kSpacingXS),
-                                Wrap(
-                                  spacing: kSpacingS,
-                                  runSpacing: kSpacingXS,
-                                  children: [
+                                const SizedBox(height: kSpacingS),
+                                _filterRow(
+                                  context,
+                                  label: 'Type',
+                                  chips: [
                                     for (final form in MedicationForm.values)
                                       if ((typeBreakdown[form] ?? 0) > 0)
                                         _filterChip(
@@ -1017,15 +1017,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   ],
                                 ),
                               ],
-                              // Specific medication
+                              // ── Specific medication ────────────────────────
                               if (medItems.isNotEmpty) ...[
-                                const SizedBox(height: kSpacingM),
-                                buildHelperText(context, 'Medication'),
                                 const SizedBox(height: kSpacingXS),
-                                Wrap(
-                                  spacing: kSpacingS,
-                                  runSpacing: kSpacingXS,
-                                  children: [
+                                _filterRow(
+                                  context,
+                                  label: 'Med',
+                                  chips: [
                                     _filterChip(
                                       context,
                                       label: 'All',
@@ -1059,15 +1057,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   ],
                                 ),
                               ],
-                              // Specific schedule
+                              // ── Specific schedule ──────────────────────────
                               if (scheduleItems.isNotEmpty) ...[
-                                const SizedBox(height: kSpacingM),
-                                buildHelperText(context, 'Schedule'),
                                 const SizedBox(height: kSpacingXS),
-                                Wrap(
-                                  spacing: kSpacingS,
-                                  runSpacing: kSpacingXS,
-                                  children: [
+                                _filterRow(
+                                  context,
+                                  label: 'Schedule',
+                                  chips: [
                                     _filterChip(
                                       context,
                                       label: 'All',
@@ -1611,6 +1607,43 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
   }
 
+  /// Renders a labelled horizontal-scrolling chip row for the filter card.
+  ///
+  /// [label] is a fixed-width left column; [chips] scroll horizontally so the
+  /// card height stays fixed regardless of the number of items.
+  Widget _filterRow(
+    BuildContext context, {
+    required String label,
+    required List<Widget> chips,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final labelStyle = microHelperTextStyle(context)?.copyWith(
+      color: cs.onSurfaceVariant,
+      fontWeight: kFontWeightSemiBold,
+    );
+    return Row(
+      children: [
+        SizedBox(
+          width: 60,
+          child: Text(label, style: labelStyle, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (int i = 0; i < chips.length; i++) ...[
+                  chips[i],
+                  if (i < chips.length - 1) const SizedBox(width: 4),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _filterChip(
     BuildContext context, {
     required String label,
@@ -1624,8 +1657,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       child: AnimatedContainer(
         duration: kAnimationFast,
         padding: const EdgeInsets.symmetric(
-          horizontal: kSpacingS,
-          vertical: kSpacingXS,
+          horizontal: 8,
+          vertical: 3,
         ),
         decoration: BoxDecoration(
           color: selected
@@ -1641,7 +1674,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         ),
         child: Text(
           label,
-          style: helperTextStyle(context)?.copyWith(
+          style: microHelperTextStyle(context)?.copyWith(
             color: selected ? cs.onPrimaryContainer : null,
             fontWeight: selected ? kFontWeightSemiBold : null,
           ),
