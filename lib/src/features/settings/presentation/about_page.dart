@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/core/legal/disclaimer_settings.dart';
+import 'package:skedux/src/core/utils/developer_options.dart';
 import 'package:skedux/src/widgets/app_header.dart';
 import 'package:skedux/src/widgets/app_snackbar.dart';
 
@@ -24,6 +26,52 @@ class AboutPage extends StatefulWidget {
 
 class _AboutPageState extends State<AboutPage> {
   final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
+
+  static const _unlockTapTarget = 10;
+  bool _devEnabled = false;
+  int _tapCount = 0;
+  DateTime? _lastTapAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDevEnabled();
+  }
+
+  Future<void> _loadDevEnabled() async {
+    final enabled = await DeveloperOptions.isEnabled();
+    if (!mounted) return;
+    setState(() => _devEnabled = enabled);
+  }
+
+  Future<void> _handleLogoTap() async {
+    final now = DateTime.now();
+    const resetWindowMs = 2000;
+    if (_lastTapAt == null ||
+        now.difference(_lastTapAt!).inMilliseconds > resetWindowMs) {
+      _tapCount = 0;
+    }
+    _lastTapAt = now;
+    _tapCount += 1;
+
+    if (_tapCount < _unlockTapTarget) return;
+
+    final nextEnabled = !_devEnabled;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(DeveloperOptions.prefsKey, nextEnabled);
+
+    if (!mounted) return;
+    setState(() {
+      _devEnabled = nextEnabled;
+      _tapCount = 0;
+    });
+    showAppSnackBar(
+      context,
+      nextEnabled
+          ? 'Developer options enabled'
+          : 'Developer options disabled',
+    );
+  }
 
   Future<void> _showLicenses(BuildContext context) async {
     final info = await _packageInfo;
@@ -72,14 +120,21 @@ class _AboutPageState extends State<AboutPage> {
               return Column(
                 children: [
                   ListTile(
-                    leading: Image.asset(
-                      kPrimaryLogoAssetPath,
-                      height: kSettingsAboutTileLogoSize,
-                      width: kSettingsAboutTileLogoSize,
-                      filterQuality: FilterQuality.high,
+                    leading: GestureDetector(
+                      onTap: _handleLogoTap,
+                      child: Image.asset(
+                        kPrimaryLogoAssetPath,
+                        height: kSettingsAboutTileLogoSize,
+                        width: kSettingsAboutTileLogoSize,
+                        filterQuality: FilterQuality.high,
+                      ),
                     ),
                     title: const Text('Skedux'),
-                    subtitle: Text(versionText),
+                    subtitle: Text(
+                      _devEnabled
+                          ? '$versionText • Developer options enabled'
+                          : versionText,
+                    ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.description_outlined),
