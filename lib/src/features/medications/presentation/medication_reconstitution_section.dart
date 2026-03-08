@@ -5,6 +5,7 @@ import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/features/medications/data/saved_reconstitution_repository.dart';
 import 'package:skedux/src/features/medications/domain/enums.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
 import 'package:skedux/src/widgets/glass_card_surface.dart';
 import 'package:skedux/src/widgets/reconstitution_summary_card.dart';
 
@@ -80,6 +81,10 @@ class MedicationReconstitutionSection extends StatelessWidget {
             ? savedRecon.syringeSizeMl
             : 3.0;
     final diluentName = savedRecon?.diluentName ?? med.diluentName;
+    final volumePerEntry = med.volumePerEntry ??
+        (savedRecon != null && savedRecon.calculatedUnits > 0
+            ? savedRecon.calculatedUnits / SyringeType.ml_1_0.unitsPerMl
+            : null);
 
     return GlassCardSurface(
       useGradient: false,
@@ -149,7 +154,7 @@ class MedicationReconstitutionSection extends StatelessWidget {
                   medicationName: med.name,
                   containerVolumeMl: med.containerVolumeMl,
                   perMlValue: med.perMlValue,
-                  volumePerEntry: med.volumePerEntry,
+                  volumePerEntry: volumePerEntry,
                   entryStrengthValue: actualEntryStrengthValue,
                   entryStrengthUnit: actualEntryStrengthUnit,
                   reconFluidName: diluentName ?? 'Bacteriostatic Water',

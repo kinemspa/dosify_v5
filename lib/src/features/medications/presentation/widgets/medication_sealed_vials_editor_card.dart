@@ -41,6 +41,7 @@ class MedicationSealedVialsEditorCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return SectionFormCard(
+      neutral: true,
       title: 'Sealed Vials',
       trailing: Text(
         sealedVialsCountLabel,
