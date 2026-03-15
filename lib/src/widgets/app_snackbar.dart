@@ -20,15 +20,20 @@ void showAppSnackBar(
   Duration duration = kAppSnackBarDuration,
   String? actionLabel,
   VoidCallback? onAction,
+  AppSnackBarTone? tone,
 }) {
+  final resolvedTone = tone ?? _inferSnackBarTone(message);
   final overlay =
       Overlay.maybeOf(context, rootOverlay: true) ??
       Navigator.maybeOf(context, rootNavigator: true)?.overlay;
   if (overlay == null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: appSnackBarTextStyle(context)),
-        backgroundColor: snackBarBackgroundColor(context),
+        content: Text(
+          message,
+          style: appSnackBarTextStyle(context, tone: resolvedTone),
+        ),
+        backgroundColor: snackBarBackgroundColor(context, tone: resolvedTone),
         behavior: SnackBarBehavior.fixed,
       ),
     );
@@ -52,7 +57,7 @@ void showAppSnackBar(
           child: Align(
             alignment: Alignment.topCenter,
             child: Material(
-              color: snackBarBackgroundColor(context),
+              color: snackBarBackgroundColor(context, tone: resolvedTone),
               borderRadius: kAppSnackBarBorderRadius,
               child: Padding(
                 padding: kAppSnackBarInnerPadding,
@@ -61,7 +66,10 @@ void showAppSnackBar(
                     Expanded(
                       child: Text(
                         message,
-                        style: appSnackBarTextStyle(context),
+                        style: appSnackBarTextStyle(
+                          context,
+                          tone: resolvedTone,
+                        ),
                       ),
                     ),
                     if (actionLabel != null && onAction != null) ...[
@@ -69,7 +77,10 @@ void showAppSnackBar(
                       TextButton(
                         style: TextButton.styleFrom(
                           padding: kTightTextButtonPadding,
-                          foregroundColor: snackBarForegroundColor(context),
+                          foregroundColor: snackBarForegroundColor(
+                            context,
+                            tone: resolvedTone,
+                          ),
                         ),
                         onPressed: () {
                           clearAppSnackBars();
@@ -97,4 +108,55 @@ void showAppSnackBar(
       entry.remove();
     }
   });
+}
+
+AppSnackBarTone _inferSnackBarTone(String message) {
+  final normalized = message.trim().toLowerCase();
+
+  const errorKeywords = <String>[
+    'error',
+    'failed',
+    'failure',
+    'denied',
+    'invalid',
+    'unable',
+    'could not',
+  ];
+  const warningKeywords = <String>[
+    'warning',
+    'no ',
+    'not found',
+    'empty',
+    'missing',
+    'disabled',
+    'snoozed',
+    'skipped',
+  ];
+  const successKeywords = <String>[
+    'saved',
+    'added',
+    'removed',
+    'deleted',
+    'updated',
+    'recorded',
+    'restored',
+    'exported',
+    'queued',
+    'opened',
+    'sent',
+    'marked',
+    'loaded',
+    'granted',
+  ];
+
+  if (errorKeywords.any(normalized.contains)) {
+    return AppSnackBarTone.error;
+  }
+  if (warningKeywords.any(normalized.contains)) {
+    return AppSnackBarTone.warning;
+  }
+  if (successKeywords.any(normalized.contains)) {
+    return AppSnackBarTone.success;
+  }
+  return AppSnackBarTone.neutral;
 }

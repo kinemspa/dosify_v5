@@ -11,7 +11,7 @@ class BackupManifest {
     required this.sharedPrefsFile,
   });
 
-  static const currentBackupSchemaVersion = 1;
+  static const currentBackupSchemaVersion = 2;
 
   final int backupSchemaVersion;
   final String createdAtUtcIso;
@@ -22,14 +22,14 @@ class BackupManifest {
   final String sharedPrefsFile;
 
   Map<String, Object?> toJson() => {
-        'backupSchemaVersion': backupSchemaVersion,
-        'createdAtUtcIso': createdAtUtcIso,
-        'appVersion': appVersion,
-        'buildNumber': buildNumber,
-        'hiveSchemaVersion': hiveSchemaVersion,
-        'hiveBoxes': hiveBoxes.map((e) => e.toJson()).toList(growable: false),
-        'sharedPrefsFile': sharedPrefsFile,
-      };
+    'backupSchemaVersion': backupSchemaVersion,
+    'createdAtUtcIso': createdAtUtcIso,
+    'appVersion': appVersion,
+    'buildNumber': buildNumber,
+    'hiveSchemaVersion': hiveSchemaVersion,
+    'hiveBoxes': hiveBoxes.map((e) => e.toJson()).toList(growable: false),
+    'sharedPrefsFile': sharedPrefsFile,
+  };
 
   factory BackupManifest.fromJson(Map<String, Object?> json) {
     final backupSchemaVersion = json['backupSchemaVersion'];
@@ -79,10 +79,10 @@ class BackupHiveBoxEntry {
   final int byteLength;
 
   Map<String, Object?> toJson() => {
-        'name': name,
-        'file': file,
-        'byteLength': byteLength,
-      };
+    'name': name,
+    'file': file,
+    'byteLength': byteLength,
+  };
 
   factory BackupHiveBoxEntry.fromJson(Map<String, Object?> json) {
     final name = json['name'];
@@ -106,16 +106,46 @@ class BackupFormatException implements Exception {
   String toString() => 'BackupFormatException: $message';
 }
 
+class BackupPasswordRequiredException extends BackupFormatException {
+  const BackupPasswordRequiredException()
+    : super(
+        'This backup is password-protected. Enter the backup password to continue.',
+      );
+}
+
+class BackupInvalidPasswordException extends BackupFormatException {
+  const BackupInvalidPasswordException()
+    : super('The backup password is incorrect or the backup is corrupted.');
+}
+
 class BackupResult {
   const BackupResult({
     required this.createdAtUtc,
     required this.hiveBoxesIncluded,
     required this.sharedPrefsKeysIncluded,
+    required this.totalRecordsIncluded,
+    required this.recordCountsByBox,
   });
 
   final DateTime createdAtUtc;
   final int hiveBoxesIncluded;
   final int sharedPrefsKeysIncluded;
+  final int totalRecordsIncluded;
+  final Map<String, int> recordCountsByBox;
+}
+
+class BackupPreview {
+  const BackupPreview({
+    required this.createdAtUtc,
+    required this.sharedPrefsKeysIncluded,
+    required this.recordCountsByBox,
+  });
+
+  final DateTime createdAtUtc;
+  final int sharedPrefsKeysIncluded;
+  final Map<String, int> recordCountsByBox;
+
+  int get totalRecordCount => recordCountsByBox.values.fold(0, (a, b) => a + b);
 }
 
 class RestoreResult {

@@ -41,6 +41,10 @@ class _EntryHistoryItem extends _CombinedHistoryItem {
 
   final EntryLog log;
 
+  bool get _isAdHoc => log.scheduleId == 'ad_hoc';
+
+  String get _sourceLabel => _isAdHoc ? 'AH' : 'SCH';
+
   @override
   ({IconData icon, Color color}) visualSpec(BuildContext context) {
     final spec = entryActionVisualSpec(context, log.action);
@@ -52,12 +56,22 @@ class _EntryHistoryItem extends _CombinedHistoryItem {
     return value.toStringAsFixed(2);
   }
 
+  String? _notesPreview() {
+    final trimmed = log.notes?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+
+    final normalized = trimmed.replaceAll(RegExp(r'\s+'), ' ');
+    if (normalized.length <= 40) return normalized;
+    return '${normalized.substring(0, 40).trimRight()}...';
+  }
+
   @override
   Widget buildTitle(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final displayValue = log.actualEntryValue ?? log.entryValue;
     final displayUnit = log.actualEntryUnit ?? log.entryUnit;
     final spec = entryActionVisualSpec(context, log.action);
+    final notesPreview = _notesPreview();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,20 +85,49 @@ class _EntryHistoryItem extends _CombinedHistoryItem {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: kSpacingXS / 2),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: kSpacingXS,
-          children: [
-            Text(
-              '${_formatAmount(displayValue)} $displayUnit',
-              style: smallHelperTextStyle(
-                context,
-                color: spec.color.withValues(alpha: kOpacityMediumHigh),
-              )?.copyWith(fontWeight: kFontWeightSemiBold),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: '$_sourceLabel  ',
+                style: microHelperTextStyle(
+                  context,
+                  color: cs.onSurfaceVariant.withValues(
+                    alpha: kOpacityMediumHigh,
+                  ),
+                )?.copyWith(fontWeight: kFontWeightBold),
+              ),
+              TextSpan(
+                text: '${_formatAmount(displayValue)} $displayUnit',
+                style: smallHelperTextStyle(
+                  context,
+                  color: spec.color.withValues(alpha: kOpacityMediumHigh),
+                )?.copyWith(fontWeight: kFontWeightSemiBold),
+              ),
+              if (notesPreview != null) ...[
+                TextSpan(
+                  text: '  •  ',
+                  style: smallHelperTextStyle(
+                    context,
+                    color: cs.onSurfaceVariant.withValues(
+                      alpha: kOpacityMedium,
+                    ),
+                  ),
+                ),
+                TextSpan(
+                  text: notesPreview,
+                  style: smallHelperTextStyle(
+                    context,
+                    color: cs.onSurfaceVariant.withValues(
+                      alpha: kOpacityMediumHigh,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -112,7 +155,7 @@ class _InventoryHistoryItem extends _CombinedHistoryItem {
       InventoryChangeType.manualAdjustment => 'Adjustment',
       InventoryChangeType.expired => 'Expired',
       InventoryChangeType.entryDeducted => 'Entry',
-      InventoryChangeType.adHocEntry => 'Ad-hoc Entry',
+      InventoryChangeType.adHocEntry => 'Ad hoc',
     };
   }
 

@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/features/medications/domain/enums.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/medication_display_helpers.dart';
 import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log.dart';
 import 'package:skedux/src/features/schedules/domain/entry_value_formatter.dart';
@@ -11,10 +12,10 @@ import 'package:skedux/src/features/schedules/domain/schedule.dart';
 import 'package:skedux/src/widgets/entry_action/entry_syringe_picker_sheet.dart';
 import 'package:skedux/src/widgets/unified_form.dart';
 
-/// The content of the "Advanced" section inside [EntryActionSheet].
+/// The content of the entry details section inside [EntryActionSheet].
 ///
 /// Renders either:
-/// - an **ad-hoc amount** stepper when [isAdHoc] is true, or
+/// - an **ad hoc amount** stepper when [isAdHoc] is true, or
 /// - a **entry-override** stepper (with optional MDV controls) for scheduled
 ///   entries.
 ///
@@ -86,60 +87,94 @@ class EntryPartialEntrySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final adHocMedication = isAdHoc && existingLog != null
+        ? Hive.box<Medication>('medications').get(existingLog!.medicationId)
+        : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isAdHoc && existingLog != null) ..._buildAdHocSection(context),
+        if (isAdHoc && existingLog != null)
+          ..._buildAdHocSection(context, adHocMedication),
         if (!isAdHoc) ..._buildEntryOverrideSection(context),
       ],
     );
   }
 
-  // ─── Ad-hoc section ────────────────────────────────────────────────────────
+  // ─── Ad hoc section ────────────────────────────────────────────────────────
 
-  List<Widget> _buildAdHocSection(BuildContext context) {
+  List<Widget> _buildAdHocSection(
+    BuildContext context,
+    Medication? medication,
+  ) {
     final controller = amountController!;
     final unit = existingLog!.entryUnit;
     final max = maxAdHocAmount ?? double.infinity;
+    final isMdv = medication?.form == MedicationForm.multiDoseVial;
+    final overrideController = entryOverrideController;
 
     return [
-      Text('Amount', style: sectionTitleStyle(context)),
-      const SizedBox(height: kSpacingS),
-      Row(
-        children: [
-          Expanded(
-            child: StepperRow36(
-              controller: controller,
-              onDec: () {
-                final step = EntryValueFormatter.stepSizeForUnit(unit);
-                final v = double.tryParse(controller.text) ?? 0;
-                controller.text = EntryValueFormatter.format(
-                  (v - step).clamp(0.0, max),
-                  unit,
-                );
-                onChanged();
-              },
-              onInc: () {
-                final step = EntryValueFormatter.stepSizeForUnit(unit);
-                final v = double.tryParse(controller.text) ?? 0;
-                controller.text = EntryValueFormatter.format(
-                  (v + step).clamp(0.0, max),
-                  unit,
-                );
-                onChanged();
-              },
-              decoration: buildCompactFieldDecoration(context: context),
+      if (isMdv && overrideController != null && medication != null) ...[
+        Text('Required entry settings', style: sectionTitleStyle(context)),
+        const SizedBox(height: kSpacingXS),
+        buildHelperText(
+          context,
+          'Choose how this entry should be recorded. The app will calculate the linked strength, volume, and syringe units automatically.',
+          fullWidth: true,
+        ),
+        const SizedBox(height: kSpacingS),
+        EntryMdvControls(
+          medication: medication,
+          mode: mdvMode ?? MdvEntryChangeMode.volume,
+          syringe: mdvSyringe ?? SyringeType.ml_1_0,
+          strengthUnit: mdvStrengthUnit,
+          entryOverrideController: overrideController,
+          onModeChanged: onMdvModeChanged,
+          onSyringeChanged: onMdvSyringeChanged,
+          onValueChanged: onChanged,
+          onStrengthUnitChanged: onMdvStrengthUnitChanged,
+        ),
+        const SizedBox(height: kSpacingM),
+      ],
+      if (!isMdv) ...[
+        Text('Amount', style: sectionTitleStyle(context)),
+        const SizedBox(height: kSpacingS),
+        Row(
+          children: [
+            Expanded(
+              child: StepperRow36(
+                controller: controller,
+                onDec: () {
+                  final step = EntryValueFormatter.incrementStepForUnit(unit);
+                  final v = double.tryParse(controller.text) ?? 0;
+                  controller.text = EntryValueFormatter.format(
+                    (v - step).clamp(0.0, max),
+                    unit,
+                  );
+                  onChanged();
+                },
+                onInc: () {
+                  final step = EntryValueFormatter.incrementStepForUnit(unit);
+                  final v = double.tryParse(controller.text) ?? 0;
+                  controller.text = EntryValueFormatter.format(
+                    (v + step).clamp(0.0, max),
+                    unit,
+                  );
+                  onChanged();
+                },
+                decoration: buildCompactFieldDecoration(context: context),
+              ),
             ),
-          ),
-          const SizedBox(width: kSpacingS),
-          Text(
-            unit,
-            style: helperTextStyle(
-              context,
-            )?.copyWith(fontWeight: kFontWeightMedium),
-          ),
-        ],
-      ),
+            const SizedBox(width: kSpacingS),
+            Text(
+              unit,
+              style: helperTextStyle(
+                context,
+              )?.copyWith(fontWeight: kFontWeightMedium),
+            ),
+          ],
+        ),
+      ],
       const SizedBox(height: kSpacingM),
     ];
   }
@@ -160,10 +195,19 @@ class EntryPartialEntrySection extends StatelessWidget {
     return [
       Text('Entry change', style: sectionTitleStyle(context)),
       const SizedBox(height: kSpacingXS),
+      if (isMdv && med != null) ...[
+        buildHelperText(
+          context,
+          'Choose how this entry should be recorded. The app will calculate the linked strength, volume, and syringe units automatically.',
+          fullWidth: true,
+        ),
+        const SizedBox(height: kSpacingS),
+      ],
       if (!isMdv || med == null)
         _buildSimpleOverride(context, controller)
       else
         EntryMdvControls(
+          medication: med,
           mode: mdvMode ?? MdvEntryChangeMode.strength,
           syringe: mdvSyringe ?? SyringeType.ml_1_0,
           strengthUnit: mdvStrengthUnit,
@@ -193,7 +237,7 @@ class EntryPartialEntrySection extends StatelessWidget {
           child: StepperRow36(
             controller: controller,
             onDec: () {
-              final step = EntryValueFormatter.stepSizeForUnit(unit);
+              final step = EntryValueFormatter.incrementStepForUnit(unit);
               final v = double.tryParse(controller.text) ?? 0;
               controller.text = EntryValueFormatter.format(
                 (v - step).clamp(0.0, double.infinity),
@@ -202,7 +246,7 @@ class EntryPartialEntrySection extends StatelessWidget {
               onChanged();
             },
             onInc: () {
-              final step = EntryValueFormatter.stepSizeForUnit(unit);
+              final step = EntryValueFormatter.incrementStepForUnit(unit);
               final v = double.tryParse(controller.text) ?? 0;
               controller.text = EntryValueFormatter.format(
                 (v + step).clamp(0.0, double.infinity),
@@ -233,6 +277,185 @@ class EntryPartialEntrySection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class EntryMdvCalculatedValuesCard extends StatelessWidget {
+  const EntryMdvCalculatedValuesCard({
+    super.key,
+    required this.medication,
+    required this.rawText,
+    required this.mode,
+    required this.syringe,
+    required this.strengthUnit,
+  });
+
+  final Medication? medication;
+  final String rawText;
+  final MdvEntryChangeMode mode;
+  final SyringeType syringe;
+  final String strengthUnit;
+
+  @override
+  Widget build(BuildContext context) {
+    final med = medication;
+    if (med == null) return const SizedBox.shrink();
+
+    final result = mdvEntryChangeResult(
+      med: med,
+      rawText: rawText,
+      mode: mode,
+      syringe: syringe,
+      strengthUnit: strengthUnit,
+    );
+    if (result == null) {
+      return const SizedBox.shrink();
+    }
+
+    final cs = Theme.of(context).colorScheme;
+
+    if (result.hasError) {
+      return Container(
+        margin: const EdgeInsets.only(top: kSpacingS),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kSpacingS,
+          vertical: kSpacingS,
+        ),
+        decoration: BoxDecoration(
+          color: cs.secondary.withValues(alpha: kOpacityFaint),
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          border: Border.all(
+            color: cs.secondary.withValues(alpha: kOpacityMediumHigh),
+            width: kBorderWidthThin,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: cs.secondary,
+              size: kIconSizeMedium,
+            ),
+            const SizedBox(width: kSpacingS),
+            Expanded(
+              child: Text(
+                result.error ?? 'Entry is outside the selected syringe capacity.',
+                style: helperTextStyle(context, color: cs.onSurface)?.copyWith(
+                  fontWeight: kFontWeightSemiBold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    String fmt(double value) {
+      return EntryValueFormatter.format(value, 'mg');
+    }
+
+    String strengthText() {
+      final mcg = result.entryMassMcg ?? 0;
+      final value = switch (strengthUnit) {
+        'mcg' => mcg,
+        'mg' => mcg / 1000,
+        'g' => mcg / 1000000,
+        'units' => mcg,
+        _ => mcg / 1000,
+      };
+      return '${fmt(value)} $strengthUnit';
+    }
+
+    String volumeText() {
+      final volumeMl = (result.entryVolumeMicroliter ?? 0) / 1000;
+      return '${EntryValueFormatter.format(volumeMl, 'ml')} mL';
+    }
+
+    String unitsText() {
+      final units = (result.syringeUnits ?? 0).toDouble();
+      return MedicationDisplayHelpers.formatSyringeUnits(units, longLabel: true);
+    }
+
+    Widget stat(String label, String value) {
+      return Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: microHelperTextStyle(context)?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: helperTextStyle(context)?.copyWith(
+                fontWeight: kFontWeightSemiBold,
+                color: cs.primary,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: kSpacingS),
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpacingS,
+        vertical: kSpacingS,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        border: Border.all(
+          color: cs.primary.withValues(alpha: kOpacityLow),
+          width: kBorderWidthThin,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Calculated values',
+            style: helperTextStyle(context)?.copyWith(
+              color: cs.primary,
+              fontWeight: kFontWeightSemiBold,
+            ),
+          ),
+          const SizedBox(height: 2),
+          buildHelperText(
+            context,
+            'These three values stay in sync for the current vial concentration.',
+            fullWidth: true,
+          ),
+          if (result.warning != null) ...[
+            const SizedBox(height: 2),
+            buildHelperText(
+              context,
+              result.warning!,
+              color: cs.secondary,
+              fullWidth: true,
+            ),
+          ],
+          const SizedBox(height: kSpacingXS),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              stat('Strength', strengthText()),
+              const SizedBox(width: kSpacingS),
+              stat('Volume', volumeText()),
+              const SizedBox(width: kSpacingS),
+              stat('Units', unitsText()),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

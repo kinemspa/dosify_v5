@@ -312,7 +312,7 @@ class _AddTabletWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Panadol',
+                    hint: 'e.g., Example medication',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -331,7 +331,7 @@ class _AddTabletWizardPageState
                   style: Theme.of(context).textTheme.bodyMedium,
                   decoration: buildFieldDecoration(
                     context,
-                    hint: 'e.g., Example Co.',
+                    hint: 'Optional',
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -339,7 +339,7 @@ class _AddTabletWizardPageState
             ),
             buildHelperText(
               context,
-              'Brand or company name (optional)',
+              'Optional manufacturer or source label',
               fullWidth: true,
             ),
             LabelFieldRow(

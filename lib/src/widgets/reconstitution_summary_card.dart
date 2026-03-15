@@ -24,6 +24,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
     this.syringeSizeMl,
     this.compact = false,
     this.showCardSurface = true,
+    this.showSyringeGraphic = true,
   });
 
   final double strengthValue;
@@ -38,6 +39,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
   final double? syringeSizeMl;
   final bool compact;
   final bool showCardSurface;
+  final bool showSyringeGraphic;
 
   String _formatNoTrailing(double value) {
     final str = value.toStringAsFixed(2);
@@ -247,7 +249,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
               text: TextSpan(
                 style: baseStyle,
                 children: [
-                  const TextSpan(text: 'Amount Strength  '),
+                  const TextSpan(text: 'Intended Entry  '),
                   TextSpan(
                     text:
                         '${_formatNoTrailing(entryStrengthValue!)} ${entryStrengthUnit!.trim()}',
@@ -301,7 +303,7 @@ class ReconstitutionSummaryCard extends StatelessWidget {
             ),
           ],
 
-          if (hasVolumePerEntry) ...[
+          if (hasVolumePerEntry && showSyringeGraphic) ...[
             const SizedBox(height: 6),
             // Syringe gauge showing target entry
             WhiteSyringeGauge(

@@ -15,6 +15,23 @@ import 'package:skedux/src/widgets/app_snackbar.dart';
 class PurchasesPage extends ConsumerWidget {
   const PurchasesPage({super.key});
 
+  String _purchaseSubtitle(BillingState billing) {
+    if (billing.isLoading) {
+      return 'Loading product…';
+    }
+    if (billing.product != null) {
+      return billing.product!.price;
+    }
+    if (!billing.available) {
+      return 'Google Play billing unavailable on this device';
+    }
+    final lastError = billing.lastError?.trim();
+    if (lastError != null && lastError.isNotEmpty) {
+      return lastError;
+    }
+    return 'Product unavailable for this install';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
@@ -137,11 +154,9 @@ class PurchasesPage extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.shopping_bag_outlined),
               title: const Text('Buy Pro (lifetime)'),
-              subtitle: Text(
-                billing.product?.price ?? 'Loading product…',
-              ),
+              subtitle: Text(_purchaseSubtitle(billing)),
               trailing: const Icon(Icons.chevron_right),
-              onTap: billing.isLoading
+              onTap: billing.isLoading || !billing.available || billing.product == null
                   ? null
                   : () async {
                       final started = await ref

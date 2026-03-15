@@ -161,6 +161,7 @@ class MedicationReconstitutionSection extends StatelessWidget {
                   syringeSizeMl: syringeSizeMl,
                   compact: true,
                   showCardSurface: false,
+                  showSyringeGraphic: false,
                 ),
               ),
             ),

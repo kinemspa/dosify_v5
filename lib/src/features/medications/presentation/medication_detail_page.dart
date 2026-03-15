@@ -48,7 +48,6 @@ import 'package:skedux/src/widgets/selection_cards.dart';
 import 'package:skedux/src/widgets/smart_expiry_picker.dart';
 import 'package:skedux/src/widgets/compact_storage_line.dart';
 import 'package:skedux/src/widgets/stock_donut_gauge.dart';
-import 'package:skedux/src/widgets/status_pill.dart';
 import 'package:skedux/src/widgets/unified_form.dart';
 import 'package:skedux/src/widgets/medication_schedules_section.dart';
 import 'package:skedux/src/widgets/cards/today_entries_card.dart';
@@ -144,6 +143,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
 
   double _measuredExpandedHeaderHeight = _kDetailHeaderExpandedHeight;
   final GlobalKey _headerMeasureKey = GlobalKey();
+  final GlobalKey _headerIdentityKey = GlobalKey();
+  double _measuredOverlayReservedHeight =
+      kMedicationDetailHeaderOverlayReservedHeight;
 
   @override
   void initState() {
@@ -228,6 +230,9 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
       final renderObject = _headerMeasureKey.currentContext?.findRenderObject();
       if (renderObject is! RenderBox || !renderObject.hasSize) return;
 
+      final identityRenderObject = _headerIdentityKey.currentContext
+          ?.findRenderObject();
+
       final measuredHeight = renderObject.size.height;
       final topInset = MediaQuery.of(context).padding.top;
       // Leave a small safety margin so content doesn't hug the gradient edge
@@ -237,9 +242,19 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
           ? _kDetailHeaderExpandedHeight
           : (measuredHeight + topInset + kSpacingM);
 
-      if ((desired - _measuredExpandedHeaderHeight).abs() > 1.0) {
+      var desiredOverlayReservedHeight = _measuredOverlayReservedHeight;
+      if (identityRenderObject is RenderBox && identityRenderObject.hasSize) {
+        desiredOverlayReservedHeight =
+            kMedicationDetailHeaderIdentityExpandedTopOffset +
+            identityRenderObject.size.height;
+      }
+
+      if ((desired - _measuredExpandedHeaderHeight).abs() > 1.0 ||
+          (desiredOverlayReservedHeight - _measuredOverlayReservedHeight).abs() >
+              1.0) {
         setState(() {
           _measuredExpandedHeaderHeight = desired;
+          _measuredOverlayReservedHeight = desiredOverlayReservedHeight;
         });
       }
     });
@@ -379,6 +394,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                         child: MedicationHeaderWidget(
                                           medication: updatedMed,
                                           foregroundColor: headerForeground,
+                                          overlayReservedHeight:
+                                              _measuredOverlayReservedHeight,
                                           onRefill: () => _showRefillDialog(
                                             context,
                                             updatedMed,
@@ -429,6 +446,7 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                                 t,
                               ),
                               child: MedicationDetailHeaderIdentity(
+                                key: _headerIdentityKey,
                                 name: updatedMed.name,
                                 formLabel: _formLabel(updatedMed.form),
                                 manufacturer: updatedMed.manufacturer,
@@ -592,6 +610,8 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
                         foregroundColor: medicationDetailHeaderForegroundColor(
                           context,
                         ),
+                        overlayReservedHeight:
+                            _measuredOverlayReservedHeight,
                         onRefill: () {},
                         onRestock:
                             updatedMed.form == MedicationForm.multiDoseVial
@@ -1758,80 +1778,19 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final conditions = <Widget>[];
 
-    if (med.requiresRefrigeration) {
-      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
-    }
-    if (med.requiresFreezer) {
-      conditions.add(
-        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
-      );
-    }
-    if (med.lightSensitive) {
-      conditions.add(
-        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
-      );
-    }
-    if (conditions.isEmpty) {
-      conditions.add(
-        _buildMiniChip(context, 'Room', icon: Icons.thermostat_outlined),
-      );
-    }
-
-    return InkWell(
-      onTap: () => _showStorageConditionsDialog(context, med),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kSpacingL,
-          vertical: kSpacingS,
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: kMedicationDetailInlineLabelWidth,
-              child: Text(
-                'Conditions',
-                style: smallHelperTextStyle(
-                  context,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            Wrap(spacing: kFieldSpacing, children: conditions),
-            const Spacer(),
-            Icon(
-              Icons.chevron_right,
-              size: kIconSizeSmall,
-              color: colorScheme.onSurfaceVariant.withValues(
-                alpha: kOpacityLow,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMiniChip(BuildContext context, String label, {IconData? icon}) {
-    final cs = Theme.of(context).colorScheme;
-
-    return StatusPill(label: label, color: cs.primary, icon: icon, dense: true);
-  }
-
-  Widget _buildActiveVialConditionsRow(BuildContext context, Medication med) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final conditions = <Widget>[];
-
     if (med.activeVialRequiresRefrigeration) {
-      conditions.add(_buildMiniChip(context, 'Fridge', icon: Icons.ac_unit));
+      conditions.add(
+        _buildMiniChip(context, 'Fridge', icon: Icons.ac_unit_outlined),
+      );
     }
     if (med.activeVialRequiresFreezer) {
       conditions.add(
-        _buildMiniChip(context, 'Freeze', icon: Icons.severe_cold),
+        _buildMiniChip(context, 'Freezer', icon: Icons.severe_cold_outlined),
       );
     }
     if (med.activeVialLightSensitive) {
       conditions.add(
-        _buildMiniChip(context, 'Light', icon: Icons.dark_mode_outlined),
+        _buildMiniChip(context, 'Protect from light', icon: Icons.wb_twilight),
       );
     }
     if (conditions.isEmpty) {
@@ -1868,6 +1827,46 @@ class _MedicationDetailPageState extends ConsumerState<MedicationDetailPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildActiveVialConditionsRow(BuildContext context, Medication med) {
+    return _buildConditionsRow(context, med);
+  }
+
+  Widget _buildMiniChip(
+    BuildContext context,
+    String label, {
+    required IconData icon,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: kSpacingS,
+        vertical: kSpacingXXS,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(kBorderRadiusFull),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: kOpacitySubtle),
+          width: kBorderWidthThin,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: kIconSizeSmall, color: cs.primary),
+          const SizedBox(width: kSpacingXXS),
+          Text(
+            label,
+            style: smallHelperTextStyle(context)?.copyWith(
+              fontWeight: kFontWeightSemiBold,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -3881,7 +3880,7 @@ void _showAdHocEntryDialog(BuildContext context, Medication med) async {
   final draftLog = EntryLog(
     id: id,
     scheduleId: 'ad_hoc',
-    scheduleName: 'Ad-hoc Entry',
+    scheduleName: 'Ad hoc',
     medicationId: med.id,
     medicationName: med.name,
     scheduledTime: now.toUtc(),
@@ -3893,7 +3892,7 @@ void _showAdHocEntryDialog(BuildContext context, Medication med) async {
 
   final entry = CalculatedEntry(
     scheduleId: 'ad_hoc',
-    scheduleName: 'Ad-hoc Entry',
+    scheduleName: 'Ad hoc',
     medicationName: med.name,
     scheduledTime: draftLog.scheduledTime,
     entryValue: defaultAmount,

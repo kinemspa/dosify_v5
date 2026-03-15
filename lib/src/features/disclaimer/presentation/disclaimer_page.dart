@@ -1,16 +1,17 @@
-﻿// Flutter imports:
+// Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/core/legal/disclaimer_strings.dart';
 import 'package:skedux/src/features/disclaimer/data/disclaimer_preferences.dart';
 
 /// Full-screen disclaimer gate shown on first launch.
 ///
-/// When [readOnly] is `false` (default) the user must tap "Acknowledge"
-/// to unlock the app. When `true` (revisited from Settings) a "Close"
-/// button is shown instead.
+/// When [readOnly] is `false` the user must acknowledge the disclaimer to
+/// continue. When `true`, the same screen acts as a read-only legal review
+/// surface opened from Settings.
 class DisclaimerPage extends StatelessWidget {
   const DisclaimerPage({
     super.key,
@@ -29,101 +30,128 @@ class DisclaimerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final teal = theme.colorScheme.primary;
+    final colorScheme = Theme.of(context).colorScheme;
+    final disclaimerText = readOnly
+        ? DisclaimerStrings.full
+        : DisclaimerStrings.onboarding;
+    final heading = readOnly
+        ? DisclaimerStrings.reviewHeading
+        : DisclaimerStrings.onboardingHeading;
+    final subheading = readOnly
+        ? DisclaimerStrings.reviewSubheading
+        : DisclaimerStrings.onboardingSubheading;
+    final highlights = readOnly
+        ? DisclaimerStrings.reviewHighlights
+        : DisclaimerStrings.onboardingHighlights;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: kSpacingXXL,
-            vertical: kSpacingXL,
+          padding: const EdgeInsets.symmetric(
+            horizontal: kSpacingL,
+            vertical: kSpacingL,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: kSpacingXXL),
-
-              // ── Logo ──────────────────────────────────────────────────
-              Image.asset(
-                kPrimaryLogoAssetPath,
-                width: 120,
-                fit: BoxFit.contain,
-              ),
-
-              const SizedBox(height: kSpacingXXL),
-
-              // ── Heading ───────────────────────────────────────────────
-              Text(
-                'Research & Reference Tool',
-                textAlign: TextAlign.center,
-                style: sectionTitleStyle(context)?.copyWith(
-                  fontSize: kFontSizeXLarge,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: kSpacingXL),
-
-              // ── Disclaimer body ───────────────────────────────────────
-              _DisclaimerBody(context: context),
-
-              const SizedBox(height: kSpacingXXL),
-
-              // ── Legal links ───────────────────────────────────────────
-              if (onNavigateToLegal != null) ...[
-                Text.rich(
-                  TextSpan(
-                    text: 'By continuing you agree to the\u00a0',
-                    style: helperTextStyle(context),
-                    children: [
-                      TextSpan(
-                        text: 'Privacy Policy',
-                        style: helperTextStyle(context)?.copyWith(
-                          color: teal,
-                          decoration: TextDecoration.underline,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = onNavigateToLegal,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: kSpacingL),
+                  Align(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: kSpacingS,
+                        vertical: kSpacingXXS,
                       ),
-                      TextSpan(text: '\u00a0and\u00a0'),
-                      TextSpan(
-                        text: 'Terms of Use',
-                        style: helperTextStyle(context)?.copyWith(
-                          color: teal,
-                          decoration: TextDecoration.underline,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(
+                          kBorderRadiusFull,
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = onNavigateToLegal,
                       ),
-                      TextSpan(text: '.'),
-                    ],
+                      child: Text(
+                        readOnly
+                            ? 'Full disclaimer review'
+                            : 'Required before use',
+                        style: smallHelperTextStyle(context)?.copyWith(
+                          color: colorScheme.onPrimaryContainer,
+                          fontWeight: kFontWeightSemiBold,
+                        ),
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: kSpacingL),
-              ],
-
-              // ── Primary action ────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                child: readOnly
-                    ? OutlinedButton(
-                        onPressed: onClose,
-                        child: const Text('Close'),
-                      )
-                    : FilledButton(
-                        onPressed: () async {
-                          await notifier.accept();
-                          onAcknowledged?.call();
-                        },
-                        child: const Text('Acknowledge'),
-                      ),
+                  const SizedBox(height: kSpacingL),
+                  Align(
+                    child: Image.asset(
+                      kPrimaryLogoAssetPath,
+                      width: 112,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(height: kSpacingL),
+                  Text(
+                    heading,
+                    textAlign: TextAlign.center,
+                    style: sectionTitleStyle(context)?.copyWith(
+                      fontSize: kFontSizeXLarge,
+                      fontWeight: kFontWeightBold,
+                    ),
+                  ),
+                  const SizedBox(height: kSpacingXS),
+                  Text(
+                    subheading,
+                    textAlign: TextAlign.center,
+                    style: helperTextStyle(context)?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: kSpacingL),
+                  _DisclaimerHighlightsCard(items: highlights),
+                  const SizedBox(height: kSpacingM),
+                  const _EmergencyNoticeCard(),
+                  const SizedBox(height: kSpacingM),
+                  _DisclaimerBodyCard(
+                    disclaimerText: disclaimerText,
+                    includeAgeAcknowledgement: !readOnly,
+                  ),
+                  const SizedBox(height: kSpacingL),
+                  if (onNavigateToLegal != null) ...[
+                    _LegalLinksText(
+                      color: colorScheme.primary,
+                      readOnly: readOnly,
+                      onNavigateToLegal: onNavigateToLegal!,
+                    ),
+                    const SizedBox(height: kSpacingL),
+                  ],
+                  SizedBox(
+                    width: double.infinity,
+                    child: readOnly
+                        ? OutlinedButton(
+                            onPressed: onClose,
+                            child: const Text('Close'),
+                          )
+                        : FilledButton(
+                            onPressed: () async {
+                              await notifier.accept();
+                              onAcknowledged?.call();
+                            },
+                            child: const Text('Acknowledge & Continue'),
+                          ),
+                  ),
+                  const SizedBox(height: kSpacingS),
+                  Text(
+                    DisclaimerStrings.footer,
+                    textAlign: TextAlign.center,
+                    style: smallHelperTextStyle(context)?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: kSpacingL),
+                ],
               ),
-
-              const SizedBox(height: kSpacingL),
-            ],
+            ),
           ),
         ),
       ),
@@ -131,33 +159,209 @@ class DisclaimerPage extends StatelessWidget {
   }
 }
 
-/// Disclaimer text body — shared between first-run and read-only modes.
-class _DisclaimerBody extends StatelessWidget {
-  const _DisclaimerBody({required this.context});
-  final BuildContext context;
+class _DisclaimerHighlightsCard extends StatelessWidget {
+  const _DisclaimerHighlightsCard({required this.items});
+
+  final List<String> items;
 
   @override
-  Widget build(BuildContext outerContext) {
-    return Column(
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(kSpacingM),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: kOpacitySubtle),
+          width: kBorderWidthThin,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Key points',
+            style: bodyTextStyle(context)?.copyWith(
+              fontWeight: kFontWeightBold,
+            ),
+          ),
+          const SizedBox(height: kSpacingS),
+          for (final entry in items.asMap().entries) ...[
+            _BulletRow(text: entry.value),
+            if (entry.key != items.length - 1)
+              const SizedBox(height: kSpacingS),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EmergencyNoticeCard extends StatelessWidget {
+  const _EmergencyNoticeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(kSpacingM),
+      decoration: BoxDecoration(
+        color: colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: colorScheme.onErrorContainer,
+            size: kIconSizeMedium,
+          ),
+          const SizedBox(width: kSpacingS),
+          Expanded(
+            child: Text(
+              DisclaimerStrings.emergency,
+              style: bodyTextStyle(context)?.copyWith(
+                color: colorScheme.onErrorContainer,
+                fontWeight: kFontWeightSemiBold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DisclaimerBodyCard extends StatelessWidget {
+  const _DisclaimerBodyCard({
+    required this.disclaimerText,
+    required this.includeAgeAcknowledgement,
+  });
+
+  final String disclaimerText;
+  final bool includeAgeAcknowledgement;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final paragraphs = disclaimerText
+        .split('\n\n')
+        .where((paragraph) => paragraph.trim().isNotEmpty)
+        .toList(growable: false);
+
+    return Container(
+      padding: const EdgeInsets.all(kSpacingL),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: kOpacitySubtle),
+          width: kBorderWidthThin,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            includeAgeAcknowledgement ? 'Read and acknowledge' : 'Full text',
+            style: bodyTextStyle(context)?.copyWith(
+              fontWeight: kFontWeightBold,
+            ),
+          ),
+          const SizedBox(height: kSpacingM),
+          for (final entry in paragraphs.asMap().entries) ...[
+            _Paragraph(entry.value),
+            if (entry.key != paragraphs.length - 1)
+              const SizedBox(height: kSpacingL),
+          ],
+          if (includeAgeAcknowledgement) ...[
+            const SizedBox(height: kSpacingL),
+            Container(
+              padding: const EdgeInsets.all(kSpacingM),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+              ),
+              child: const _Paragraph(DisclaimerStrings.ageAcknowledgement),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _LegalLinksText extends StatelessWidget {
+  const _LegalLinksText({
+    required this.color,
+    required this.readOnly,
+    required this.onNavigateToLegal,
+  });
+
+  final Color color;
+  final bool readOnly;
+  final VoidCallback onNavigateToLegal;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        text: readOnly
+            ? 'See the '
+            : 'By continuing you acknowledge the research disclaimer and agree to the ',
+        style: helperTextStyle(context),
+        children: [
+          TextSpan(
+            text: 'Privacy Policy',
+            style: helperTextStyle(context)?.copyWith(
+              color: color,
+              decoration: TextDecoration.underline,
+            ),
+            recognizer: TapGestureRecognizer()..onTap = onNavigateToLegal,
+          ),
+          const TextSpan(text: ' and '),
+          TextSpan(
+            text: 'Terms of Use',
+            style: helperTextStyle(context)?.copyWith(
+              color: color,
+              decoration: TextDecoration.underline,
+            ),
+            recognizer: TapGestureRecognizer()..onTap = onNavigateToLegal,
+          ),
+          const TextSpan(text: '.'),
+        ],
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+}
+
+class _BulletRow extends StatelessWidget {
+  const _BulletRow({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Paragraph(
-          'Skedux is designed for research and informational purposes only. '
-          'It does not constitute medical advice, diagnosis, or treatment.',
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(
+            Icons.check_circle_outline_rounded,
+            size: kIconSizeSmall,
+            color: colorScheme.primary,
+          ),
         ),
-        const SizedBox(height: kSpacingL),
-        _Paragraph(
-          'All calculations, logs, and references produced by this application '
-          'are for research, tracking, and reference purposes only. They must '
-          'be independently verified by a qualified professional before being '
-          'acted upon.',
-        ),
-        const SizedBox(height: kSpacingL),
-        _Paragraph(
-          'By tapping \u201cAcknowledge\u201d you confirm that you are '
-          '18 years of age or older and that you understand and accept '
-          'these terms.',
-        ),
+        const SizedBox(width: kSpacingS),
+        Expanded(child: _Paragraph(text)),
       ],
     );
   }
@@ -165,6 +369,7 @@ class _DisclaimerBody extends StatelessWidget {
 
 class _Paragraph extends StatelessWidget {
   const _Paragraph(this.text);
+
   final String text;
 
   @override

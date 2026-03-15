@@ -1,22 +1,24 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:io';
 
 // Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:skedux/src/app/theme_mode_controller.dart';
+import 'package:skedux/src/core/app_restart_service.dart';
 import 'package:skedux/src/core/backup/backup_models.dart';
+import 'package:skedux/src/core/backup/pending_backup_restore_service.dart';
 import 'package:skedux/src/core/backup/backup_zip_codec.dart';
 import 'package:skedux/src/core/backup/google_drive_backup_service.dart';
 import 'package:skedux/src/core/design_system.dart';
@@ -44,8 +46,9 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   static const _unlockTapTarget = 10;
+  static const _restartSnackBarDuration = Duration(days: 1);
+  static const _minimumBackupPasswordLength = 8;
 
-  late final GoogleDriveBackupService _backupService;
   bool _devEnabled = false;
   int _tapCount = 0;
   DateTime? _lastTapAt;
@@ -53,7 +56,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _backupService = GoogleDriveBackupService();
     _loadDevEnabled();
   }
 
@@ -91,6 +93,228 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context,
       nextEnabled ? 'Developer options enabled' : 'Developer options disabled',
     );
+  }
+
+  String _formatBackupRecordSummary(Map<String, int> recordCountsByBox) {
+    const labels = <String, String>{
+      'medications': 'meds',
+      'schedules': 'schedules',
+      'entry_logs': 'dose logs',
+      'entry_status_change_logs': 'status logs',
+      'supplies': 'supplies',
+      'stock_movements': 'stock moves',
+      'inventory_logs': 'inventory logs',
+      'saved_reconstitutions': 'saved recons',
+    };
+
+    final parts = recordCountsByBox.entries
+        .where((entry) => entry.value > 0)
+        .map((entry) => '${labels[entry.key] ?? entry.key}: ${entry.value}')
+        .toList(growable: false);
+
+    return parts.isEmpty ? 'No backed-up records' : parts.join(' · ');
+  }
+
+  void _showQueuedRestoreSnackBar(BuildContext context, BackupPreview preview) {
+    showAppSnackBar(
+      context,
+      'Restore queued for ${preview.totalRecordCount} records. Tap Restart to apply it now.',
+      duration: _restartSnackBarDuration,
+      actionLabel: 'Restart',
+      onAction: AppRestartService.restart,
+    );
+  }
+
+  Future<({bool encrypt, String? password})?> _promptBackupProtectionChoice(
+    BuildContext context, {
+    required String title,
+    required String message,
+  }) async {
+    final encrypt = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  kSpacingM,
+                  kSpacingM,
+                  kSpacingM,
+                  kSpacingS,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: cardTitleStyle(
+                        context,
+                      )?.copyWith(fontWeight: kFontWeightBold),
+                    ),
+                    const SizedBox(height: kSpacingXS),
+                    Text(message, style: bodyTextStyle(context)),
+                  ],
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.lock_open_outlined),
+                title: const Text('Standard portable backup'),
+                subtitle: const Text(
+                  'No password. Easier to restore, but anyone with the file can open it.',
+                ),
+                onTap: () => Navigator.of(context).pop(false),
+              ),
+              ListTile(
+                leading: const Icon(Icons.lock_outline),
+                title: const Text('Password-protected backup'),
+                subtitle: const Text(
+                  'Encrypt the backup before export or upload. Skedux cannot recover a forgotten password.',
+                ),
+                onTap: () => Navigator.of(context).pop(true),
+              ),
+              const SizedBox(height: kSpacingS),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (encrypt == null) return null;
+    if (!encrypt) {
+      return (encrypt: false, password: null);
+    }
+
+    final password = await _promptBackupPassword(
+      context,
+      title: 'Set backup password',
+      message:
+          'Create a password for this backup. You will need the same password to restore it later.',
+      confirmPassword: true,
+      confirmLabel: 'Confirm password',
+      submitLabel: 'Encrypt backup',
+    );
+    if (password == null) return null;
+    return (encrypt: true, password: password);
+  }
+
+  Future<String?> _promptBackupPassword(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required bool confirmPassword,
+    required String submitLabel,
+    String confirmLabel = 'Confirm',
+  }) async {
+    final passwordController = TextEditingController();
+    final confirmController = TextEditingController();
+    String? result;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        var obscurePassword = true;
+        var obscureConfirm = true;
+        String? errorText;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(title),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(message, style: bodyTextStyle(context)),
+                    const SizedBox(height: kSpacingM),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: obscurePassword,
+                      autofillHints: confirmPassword
+                          ? const [AutofillHints.newPassword]
+                          : const [AutofillHints.password],
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        errorText: errorText,
+                        suffixIcon: IconButton(
+                          onPressed: () => setState(
+                            () => obscurePassword = !obscurePassword,
+                          ),
+                          icon: Icon(
+                            obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (confirmPassword) ...[
+                      const SizedBox(height: kSpacingM),
+                      TextField(
+                        controller: confirmController,
+                        obscureText: obscureConfirm,
+                        autofillHints: const [AutofillHints.newPassword],
+                        decoration: InputDecoration(
+                          labelText: confirmLabel,
+                          suffixIcon: IconButton(
+                            onPressed: () => setState(
+                              () => obscureConfirm = !obscureConfirm,
+                            ),
+                            icon: Icon(
+                              obscureConfirm
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: kSpacingS),
+                    Text(
+                      'Use at least $_minimumBackupPasswordLength characters. Skedux cannot recover a forgotten backup password.',
+                      style: helperTextStyle(context),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final password = passwordController.text.trim();
+                    final confirmation = confirmController.text.trim();
+                    if (password.length < _minimumBackupPasswordLength) {
+                      setState(
+                        () => errorText =
+                            'Use at least $_minimumBackupPasswordLength characters.',
+                      );
+                      return;
+                    }
+                    if (confirmPassword && password != confirmation) {
+                      setState(() => errorText = 'Passwords do not match.');
+                      return;
+                    }
+
+                    result = password;
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(submitLabel),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    passwordController.dispose();
+    confirmController.dispose();
+    return result;
   }
 
   @override
@@ -193,7 +417,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
       await action();
       if (!context.mounted) return;
-      showAppSnackBar(context, 'Test notification sent');
+      showAppSnackBar(context, 'Diagnostics notification sent');
     }
 
     Future<T?> runWithBusyDialog<T>(
@@ -215,7 +439,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(width: kSpacingM),
-                Expanded(child: Text('Please wait…')),
+                Expanded(child: Text('Please wait...')),
               ],
             ),
           );
@@ -239,6 +463,47 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         dismiss();
         rethrow;
       }
+    }
+
+    Future<({BackupPreview preview, Uint8List restoreBytes})?>
+    prepareRestoreFromBytes(Uint8List sourceBytes) async {
+      Uint8List restoreBytes;
+      try {
+        final prepared = await runWithBusyDialog(
+          'Reading backup…',
+          () => const BackupZipCodec().prepareRestoreZipBytes(sourceBytes),
+        );
+        if (prepared == null) return null;
+        restoreBytes = prepared;
+      } on BackupPasswordRequiredException {
+        final password = await _promptBackupPassword(
+          context,
+          title: 'Enter backup password',
+          message:
+              'This backup is password-protected. Enter the password to decrypt and validate it before restore.',
+          confirmPassword: false,
+          submitLabel: 'Unlock backup',
+        );
+        if (password == null) return null;
+
+        final prepared = await runWithBusyDialog(
+          'Decrypting backup…',
+          () => const BackupZipCodec().prepareRestoreZipBytes(
+            sourceBytes,
+            password: password,
+          ),
+        );
+        if (prepared == null) return null;
+        restoreBytes = prepared;
+      }
+
+      final preview = await runWithBusyDialog(
+        'Validating backup…',
+        () => const BackupZipCodec().validateBackupZip(restoreBytes),
+      );
+      if (preview == null) return null;
+
+      return (preview: preview, restoreBytes: restoreBytes);
     }
 
     return Scaffold(
@@ -272,13 +537,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const SizedBox(height: kSpacingS),
           ListTile(
             leading: const Icon(Icons.brightness_6_outlined),
-            title: const Text('Theme mode'),
+            title: const Text('Theme'),
             subtitle: Text(switch (themeMode) {
-              ThemeMode.system => 'System',
+              ThemeMode.system => 'System default',
               ThemeMode.light => 'Light',
               ThemeMode.dark => 'Dark',
             }),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () async {
               final mode = await showModalBottomSheet<ThemeMode>(
                 context: context,
@@ -288,7 +553,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.phone_android),
+                          leading: const Icon(Icons.brightness_auto_outlined),
                           title: const Text('System'),
                           onTap: () =>
                               Navigator.of(context).pop(ThemeMode.system),
@@ -488,7 +753,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             subtitle: const Text('Pick and order 4 tabs to show at the bottom'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => context.push('/settings/bottom-nav'),
-          ),          if (_devEnabled) ...[
+          ),
+          if (_devEnabled) ...[
             const SizedBox(height: kSpacingL),
             Text(
               'Developer options',
@@ -498,7 +764,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: kSpacingS),
             Text(
-              'Experimental features, diagnostics, and test tools.',
+              'Experimental features, diagnostics, and preview tools.',
               style: helperTextStyle(context),
             ),
             const SizedBox(height: kSpacingM),
@@ -533,13 +799,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               leading: const Icon(Icons.workspace_premium_outlined),
               title: const Text('Simulate Pro entitlement'),
               subtitle: Text(
-                entitlement.isPro ? 'Pro is ON — tap to revoke' : 'Free tier — tap to grant Pro',
+                entitlement.isPro
+                    ? 'Pro is ON - tap to revoke'
+                    : 'Free tier - tap to grant Pro',
               ),
               trailing: Switch(
                 value: entitlement.isPro,
-                onChanged: (v) => ref
-                    .read(entitlementServiceProvider.notifier)
-                    .setPro(v),
+                onChanged: (v) =>
+                    ref.read(entitlementServiceProvider.notifier).setPro(v),
               ),
               tileColor: Colors.amber.withValues(alpha: 0.18),
               shape: RoundedRectangleBorder(
@@ -549,9 +816,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             ListTile(
               leading: const Icon(Icons.science_outlined),
-              title: const Text('Test Data'),
+              title: const Text('Preview Data'),
               subtitle: const Text(
-                'Add or remove sample medications & schedules',
+                'Add or remove preview medications and schedules',
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
@@ -565,7 +832,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         children: [
                           ListTile(
                             leading: const Icon(Icons.add_circle_outline),
-                            title: const Text('Add test data'),
+                            title: const Text('Add preview data'),
                             subtitle: const Text(
                               'Creates 5 medications and 5 schedules',
                             ),
@@ -573,12 +840,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               Navigator.of(context).pop();
                               await TestDataSeedService.seed();
                               if (!context.mounted) return;
-                              showAppSnackBar(context, 'Test data added');
+                              showAppSnackBar(context, 'Preview data added');
                             },
                           ),
                           ListTile(
                             leading: const Icon(Icons.delete_outline),
-                            title: const Text('Remove test data'),
+                            title: const Text('Remove preview data'),
                             subtitle: const Text(
                               'Deletes the seeded items only',
                             ),
@@ -586,7 +853,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                               Navigator.of(context).pop();
                               await TestDataSeedService.clear();
                               if (!context.mounted) return;
-                              showAppSnackBar(context, 'Test data removed');
+                              showAppSnackBar(context, 'Preview data removed');
                             },
                           ),
                           const SizedBox(height: kSpacingS),
@@ -599,14 +866,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             ListTile(
               leading: const Icon(Icons.notifications_active_outlined),
-              title: const Text('Show test entry reminder'),
-              subtitle: const Text('Fires exactly at each scheduled entry time'),
+              title: const Text('Preview entry reminder'),
+              subtitle: const Text(
+                'Fires exactly at each scheduled entry time',
+              ),
               trailing: const Icon(Icons.play_arrow_rounded),
               onTap: () => runNotificationTest(NotificationService.showTest),
             ),
             ListTile(
               leading: const Icon(Icons.stacked_bar_chart_outlined),
-              title: const Text('Show test grouped reminders'),
+              title: const Text('Preview grouped reminders'),
               subtitle: const Text(
                 'When multiple entries are due at the same time they appear as a group',
               ),
@@ -617,7 +886,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             ListTile(
               leading: const Icon(Icons.inventory_2_outlined),
-              title: const Text('Show test low stock'),
+              title: const Text('Preview low stock reminder'),
               subtitle: const Text('Preview Refill/Restock actions'),
               trailing: const Icon(Icons.play_arrow_rounded),
               onTap: () => runNotificationTest(
@@ -626,7 +895,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             ListTile(
               leading: const Icon(Icons.event_busy_outlined),
-              title: const Text('Show test expiry reminder'),
+              title: const Text('Preview expiry reminder'),
               subtitle: const Text('Preview an Expiry notification'),
               trailing: const Icon(Icons.play_arrow_rounded),
               onTap: () => runNotificationTest(
@@ -634,15 +903,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
             if (kDebugMode)
-            ListTile(
-              leading: const Icon(Icons.bug_report),
-              title: const Text('Debug & Diagnostics'),
-              subtitle: const Text(
-                'Notification testing and system diagnostics',
+              ListTile(
+                leading: const Icon(Icons.bug_report),
+                title: const Text('Debug & Diagnostics'),
+                subtitle: const Text(
+                  'Notification previews and system diagnostics',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push('/settings/debug'),
               ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push('/settings/debug'),
-            ),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: kSpacingM,
@@ -715,7 +984,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onTap: () => editPercentSetting(
                       title: 'Missed log reminder timing',
                       description:
-                          'Sends a reminder between the scheduled time and the missed threshold to prompt logging. For logging purposes only — not a clinical alert. 0% disables this reminder. Example: 50% sends halfway through the due-to-missed window.',
+                        'Sends a reminder between the scheduled time and the missed threshold to prompt manual logging. This is an organizational reminder only and should not be used as clinical guidance. 0% disables this reminder. Example: 50% sends halfway through the due-to-missed window.',
                       currentValue: config.overdueReminderPercent,
                       onSave: (v) =>
                           EntryTimingSettings.setOverdueReminderPercent(v),
@@ -807,7 +1076,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 secondary: const Icon(Icons.bolt_outlined),
                 title: const Text('Quick-log from notification'),
                 subtitle: const Text(
-                  'Tapping “Log” on a reminder records the entry immediately without opening the app. '
+                  'Tapping "Log" on a reminder records the entry immediately without opening the app. '
                   'Turn off to open the log sheet instead.',
                 ),
                 value: quickLog,
@@ -870,143 +1139,373 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             )?.copyWith(fontWeight: kFontWeightBold, color: cs.primary),
           ),
           const SizedBox(height: kSpacingS),
-          // ── Google Drive ────────────────────────────────────────────────
-          ListTile(
-            leading: const Icon(Icons.cloud_upload_outlined),
-            title: const Text('Backup to Google Drive'),
-            subtitle: const Text(
-              'Requires Google account sign-in. Saves encrypted copy to Google Drive app folder.',
-            ),
-            trailing: const Icon(Icons.play_arrow_rounded),
-            onTap: () async {
-              try {
-                final result = await runWithBusyDialog(
-                  'Backing up\u2026',
-                  () => _backupService.backupToDrive().timeout(
-                    const Duration(seconds: 45),
-                  ),
-                );
-                if (!context.mounted || result == null) return;
-                showAppSnackBar(
-                  context,
-                  'Backup complete (${result.hiveBoxesIncluded} boxes, ${result.sharedPrefsKeysIncluded} settings)',
-                );
-              } on TimeoutException {
-                if (!context.mounted) return;
-                showAppSnackBar(
-                  context,
-                  'Backup timed out. Check your internet connection and try again.',
-                );
-              } on BackupFormatException catch (e) {
-                if (!context.mounted) return;
-                showAppSnackBar(context, e.message);
-              } on PlatformException catch (e) {
-                if (!context.mounted) return;
-                final msg = switch (e.code) {
-                  'sign_in_failed' ||
-                  'network_error' =>
-                    'Google sign-in failed. Make sure a Google account is added to this device and Google Play Services is up to date.',
-                  'access_denied' =>
-                    'Google Drive access was denied. Please try again and allow Drive access.',
-                  _ =>
-                    'Google sign-in error (${e.code}): ${e.message ?? "Check your account and try again."}',
-                };
-                showAppSnackBar(context, msg);
-              } catch (e) {
-                if (!context.mounted) return;
-                showAppSnackBar(context, 'Backup failed: $e');
-              }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.cloud_download_outlined),
-            title: const Text('Restore from Google Drive'),
-            subtitle: const Text(
-              'Overwrites local data with your latest Google Drive backup. This device only.',
-            ),
-            trailing: const Icon(Icons.warning_amber_rounded),
-            onTap: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: const Text('Restore backup?'),
-                    content: const Text(
-                      'This will overwrite your local app data with the latest Google Drive backup.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      FilledButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Restore'),
-                      ),
-                    ],
+          if (GoogleDriveBackupService.isEnabledInThisBuild)
+            ListTile(
+              leading: const Icon(Icons.cloud_upload_outlined),
+              title: const Text('Back up to Google Drive'),
+              subtitle: const Text(
+                'Saves a portable backup to Skedux app backup storage in Google Drive. You can optionally password-protect it before upload. New backups are not tied to this device encryption key and will not appear in My Drive files.',
+              ),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () async {
+                try {
+                  final protection = await _promptBackupProtectionChoice(
+                    context,
+                    title: 'Protect Google Drive backup',
+                    message:
+                        'Choose whether this Google Drive backup should be standard or password-protected.',
                   );
-                },
-              );
+                  if (protection == null) return;
 
-              if (confirmed != true) return;
+                  final result = await runWithBusyDialog(
+                    'Uploading backup…',
+                    () => GoogleDriveBackupService().backupToDrive(
+                      password: protection.password,
+                    ),
+                  );
+                  if (!context.mounted || result == null) return;
+                  showAppSnackBar(
+                    context,
+                    '${protection.encrypt ? 'Encrypted' : 'Backup'} saved to Google Drive: ${result.totalRecordsIncluded} records across ${result.hiveBoxesIncluded} boxes. ${_formatBackupRecordSummary(result.recordCountsByBox)}.',
+                  );
+                } on BackupFormatException catch (e) {
+                  if (!context.mounted) return;
+                  showAppSnackBar(context, e.message);
+                } catch (e) {
+                  if (!context.mounted) return;
+                  showAppSnackBar(context, 'Google Drive backup failed: $e');
+                }
+              },
+            ),
+          if (GoogleDriveBackupService.isEnabledInThisBuild)
+            ListTile(
+              leading: const Icon(Icons.cloud_download_outlined),
+              title: const Text('Restore from Google Drive backup'),
+              subtitle: const Text(
+                'Choose a backup from Skedux app backup storage in Google Drive and queue it for restore. Older backups from before the portable update may still be install-bound.',
+              ),
+              trailing: const Icon(Icons.warning_amber_rounded),
+              onTap: () async {
+                try {
+                  final backups = await runWithBusyDialog(
+                    'Checking Google Drive…',
+                    () => GoogleDriveBackupService().listBackups(),
+                  );
+                  if (!context.mounted || backups == null || backups.isEmpty) {
+                    if (context.mounted) {
+                      showAppSnackBar(
+                        context,
+                        'No Skedux Google Drive backups were found.',
+                      );
+                    }
+                    return;
+                  }
 
-              try {
-                final result = await runWithBusyDialog(
-                  'Restoring\u2026',
-                  () => _backupService.restoreLatestFromDrive().timeout(
-                    const Duration(seconds: 45),
-                  ),
-                );
-                if (!context.mounted || result == null) return;
+                  final selectedBackup =
+                      await showModalBottomSheet<DriveBackupEntry>(
+                        context: context,
+                        builder: (sheetContext) {
+                          final timestampFormat = intl.DateFormat(
+                            'yyyy-MM-dd HH:mm',
+                          );
+                          return SafeArea(
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    kSpacingM,
+                                    kSpacingM,
+                                    kSpacingM,
+                                    kSpacingS,
+                                  ),
+                                  child: Text(
+                                    'Choose a backup',
+                                    style: cardTitleStyle(
+                                      sheetContext,
+                                    )?.copyWith(fontWeight: kFontWeightBold),
+                                  ),
+                                ),
+                                for (final backup in backups)
+                                  ListTile(
+                                    leading: const Icon(
+                                      Icons.cloud_done_outlined,
+                                    ),
+                                    title: Text(
+                                      backup.createdAtUtc == null
+                                          ? backup.name
+                                          : timestampFormat.format(
+                                              backup.createdAtUtc!.toLocal(),
+                                            ),
+                                    ),
+                                    subtitle: Text(
+                                      backup.sizeBytes == null
+                                          ? backup.name
+                                          : '${backup.name} · ${backup.sizeBytes} bytes',
+                                    ),
+                                    onTap: () =>
+                                        Navigator.of(sheetContext).pop(backup),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                  if (!context.mounted || selectedBackup == null) return;
 
-                final missing = result.hiveBoxesMissing.isEmpty
-                    ? ''
-                    : ' Missing: ${result.hiveBoxesMissing.join(', ')}.';
+                  final bytes = await runWithBusyDialog(
+                    'Downloading backup…',
+                    () => GoogleDriveBackupService().downloadBackupZipById(
+                      selectedBackup.id,
+                    ),
+                  );
+                  if (!context.mounted || bytes == null) return;
 
-                showAppSnackBar(
-                  context,
-                  'Restore complete (${result.hiveBoxesRestored} boxes, ${result.sharedPrefsKeysRestored} settings). Restart app for full refresh.$missing',
-                );
-              } on TimeoutException {
-                if (!context.mounted) return;
-                showAppSnackBar(
-                  context,
-                  'Restore timed out. Check your internet connection and try again.',
-                );
-              } on BackupFormatException catch (e) {
-                if (!context.mounted) return;
-                showAppSnackBar(context, e.message);
-              } on PlatformException catch (e) {
-                if (!context.mounted) return;
-                final msg = switch (e.code) {
-                  'sign_in_failed' ||
-                  'network_error' =>
-                    'Google sign-in failed. Make sure a Google account is added to this device and Google Play Services is up to date.',
-                  'access_denied' =>
-                    'Google Drive access was denied. Please try again and allow Drive access.',
-                  _ =>
-                    'Google sign-in error (${e.code}): ${e.message ?? "Check your account and try again."}',
-                };
-                showAppSnackBar(context, msg);
-              } catch (e) {
-                if (!context.mounted) return;
-                showAppSnackBar(context, 'Restore failed: $e');
-              }
-            },
-          ),
-          // ── Device backup ────────────────────────────────────────────────
+                  final prepared = await prepareRestoreFromBytes(bytes);
+                  if (!context.mounted || prepared == null) return;
+                  final preview = prepared.preview;
+
+                  if (preview.totalRecordCount == 0) {
+                    showAppSnackBar(
+                      context,
+                      'The selected backup appears empty and was not restored.',
+                    );
+                    return;
+                  }
+
+                  await runWithBusyDialog(
+                    'Preparing restore…',
+                    () => PendingBackupRestoreService.stageRestore(
+                      prepared.restoreBytes,
+                    ),
+                  );
+                  if (!context.mounted) return;
+                  _showQueuedRestoreSnackBar(context, preview);
+                } on BackupFormatException catch (e) {
+                  if (!context.mounted) return;
+                  showAppSnackBar(context, e.message);
+                } catch (e) {
+                  if (!context.mounted) return;
+                  showAppSnackBar(context, 'Google Drive restore failed: $e');
+                }
+              },
+            ),
+          if (GoogleDriveBackupService.isEnabledInThisBuild)
+            ListTile(
+              leading: const Icon(Icons.delete_outline),
+              title: const Text('Delete Google Drive backups'),
+              subtitle: const Text(
+                'Review and delete uploaded backups stored in Skedux app backup storage in Google Drive.',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                try {
+                  final listedBackups = await runWithBusyDialog(
+                    'Checking Google Drive…',
+                    () => GoogleDriveBackupService().listBackups(),
+                  );
+                  if (!context.mounted || listedBackups == null) return;
+                  if (listedBackups.isEmpty) {
+                    showAppSnackBar(
+                      context,
+                      'No Skedux Google Drive backups were found.',
+                    );
+                    return;
+                  }
+
+                  await showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (sheetContext) {
+                      final timestampFormat = intl.DateFormat(
+                        'yyyy-MM-dd HH:mm',
+                      );
+                      var visibleBackups = List<DriveBackupEntry>.of(
+                        listedBackups,
+                      );
+
+                      return StatefulBuilder(
+                        builder: (sheetContext, setSheetState) {
+                          Future<void> deleteBackup(
+                            DriveBackupEntry backup,
+                          ) async {
+                            final confirmed = await showDialog<bool>(
+                              context: sheetContext,
+                              builder: (dialogContext) => AlertDialog(
+                                title: const Text('Delete backup?'),
+                                content: Text(
+                                  'Delete ${backup.name} from Skedux app backup storage in Google Drive? This does not affect your current local app data.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(true),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmed != true) return;
+
+                            try {
+                              await runWithBusyDialog(
+                                'Deleting backup…',
+                                () => GoogleDriveBackupService().deleteBackupById(
+                                  backup.id,
+                                ),
+                              );
+                              if (!context.mounted || !sheetContext.mounted) {
+                                return;
+                              }
+
+                              setSheetState(() {
+                                visibleBackups = visibleBackups
+                                    .where((entry) => entry.id != backup.id)
+                                    .toList(growable: false);
+                              });
+                              showAppSnackBar(
+                                context,
+                                'Deleted Google Drive backup: ${backup.name}',
+                              );
+                            } on BackupFormatException catch (e) {
+                              if (!context.mounted) return;
+                              showAppSnackBar(context, e.message);
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              showAppSnackBar(
+                                context,
+                                'Google Drive backup deletion failed: $e',
+                              );
+                            }
+                          }
+
+                          return SafeArea(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight:
+                                    MediaQuery.of(sheetContext).size.height *
+                                    0.75,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      kSpacingM,
+                                      kSpacingM,
+                                      kSpacingM,
+                                      kSpacingS,
+                                    ),
+                                    child: Text(
+                                      'Manage Google Drive backups',
+                                      style: cardTitleStyle(
+                                        sheetContext,
+                                      )?.copyWith(
+                                        fontWeight: kFontWeightBold,
+                                      ),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: visibleBackups.isEmpty
+                                        ? Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                              kSpacingM,
+                                              kSpacingS,
+                                              kSpacingM,
+                                              kSpacingM,
+                                            ),
+                                            child: Text(
+                                              'No Google Drive backups remain.',
+                                              style: helperTextStyle(
+                                                sheetContext,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          )
+                                        : ListView(
+                                            shrinkWrap: true,
+                                            children: [
+                                              for (final backup
+                                                  in visibleBackups)
+                                                ListTile(
+                                                  leading: const Icon(
+                                                    Icons.cloud_done_outlined,
+                                                  ),
+                                                  title: Text(
+                                                    backup.createdAtUtc == null
+                                                        ? backup.name
+                                                        : timestampFormat
+                                                              .format(
+                                                                backup
+                                                                    .createdAtUtc!
+                                                                    .toLocal(),
+                                                              ),
+                                                  ),
+                                                  subtitle: Text(
+                                                    backup.sizeBytes == null
+                                                        ? backup.name
+                                                        : '${backup.name} · ${backup.sizeBytes} bytes',
+                                                  ),
+                                                  trailing: IconButton(
+                                                    tooltip: 'Delete backup',
+                                                    icon: const Icon(
+                                                      Icons.delete_outline,
+                                                    ),
+                                                    onPressed: () =>
+                                                        deleteBackup(backup),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                  ),
+                                  const SizedBox(height: kSpacingS),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                } on BackupFormatException catch (e) {
+                  if (!context.mounted) return;
+                  showAppSnackBar(context, e.message);
+                } catch (e) {
+                  if (!context.mounted) return;
+                  showAppSnackBar(
+                    context,
+                    'Google Drive backup management failed: $e',
+                  );
+                }
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.save_alt_outlined),
-            title: const Text('Save backup to device'),
+            title: const Text('Export Backup'),
             subtitle: const Text(
-              'Creates a .zip file you can save or share. Restore it on this same device only (encryption is device-bound).',
+              'Creates a portable backup you can keep and restore after reinstalling Skedux. You can optionally password-protect it. New exports are not tied to this device encryption key.',
             ),
             trailing: const Icon(Icons.play_arrow_rounded),
             onTap: () async {
               try {
+                final protection = await _promptBackupProtectionChoice(
+                  context,
+                  title: 'Protect exported backup',
+                  message:
+                      'Choose whether this exported backup should be standard or password-protected.',
+                );
+                if (protection == null) return;
+
                 final created = await runWithBusyDialog(
-                  'Creating backup\u2026',
-                  () => const BackupZipCodec().createBackupZip(),
+                  'Creating backup…',
+                  () => const BackupZipCodec().createBackupZip(
+                    password: protection.password,
+                  ),
                 );
                 if (!context.mounted || created == null) return;
 
@@ -1014,14 +1513,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     .toIso8601String()
                     .replaceAll(':', '-')
                     .replaceAll('.', '-');
-                final fileName = 'skedux_backup_$ts.zip';
+                final extension = created.isEncrypted ? 'skbackup' : 'zip';
+                final fileName = 'skedux_backup_$ts.$extension';
                 final tmpDir = await getTemporaryDirectory();
                 final tmpFile = File('${tmpDir.path}/$fileName');
                 await tmpFile.writeAsBytes(created.zipBytes);
 
-                await Share.shareXFiles(
-                  [XFile(tmpFile.path, mimeType: 'application/zip')],
-                  subject: 'Skedux Backup',
+                await Share.shareXFiles([
+                  XFile(
+                    tmpFile.path,
+                    mimeType: created.isEncrypted
+                        ? 'application/octet-stream'
+                        : 'application/zip',
+                  ),
+                ], subject: 'Skedux Backup');
+                if (!context.mounted) return;
+                showAppSnackBar(
+                  context,
+                  '${created.isEncrypted ? 'Encrypted backup' : 'Backup'} exported: ${created.result.totalRecordsIncluded} records across ${created.result.hiveBoxesIncluded} boxes. ${_formatBackupRecordSummary(created.result.recordCountsByBox)}.',
                 );
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
@@ -1034,9 +1543,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           ListTile(
             leading: const Icon(Icons.upload_file_outlined),
-            title: const Text('Restore from backup file'),
+            title: const Text('Restore Backup'),
             subtitle: const Text(
-              'Pick a .zip backup saved from this device and restore your data.',
+              'Use this for a backup file you already saved locally or received via share/import. Password-protected backups are supported. Google Drive backups should use the dedicated restore option above.',
             ),
             trailing: const Icon(Icons.warning_amber_rounded),
             onTap: () async {
@@ -1046,7 +1555,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   title: const Text('Restore from file?'),
                   content: const Text(
                     'This will overwrite your local app data with the selected backup. '
-                    'Only backups created on this device can be restored.',
+                    'The restore will be queued and applied the next time you reopen the app. '
+                    'New portable backups are not tied to this install encryption key. Older backups created before the portable backup update may still be install-bound.',
                   ),
                   actions: [
                     TextButton(
@@ -1065,7 +1575,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               try {
                 final pick = await FilePicker.platform.pickFiles(
                   type: FileType.custom,
-                  allowedExtensions: const ['zip'],
+                  allowedExtensions: const ['zip', 'skbackup'],
                   withData: true,
                 );
                 if (pick == null || pick.files.isEmpty) return;
@@ -1081,19 +1591,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   return;
                 }
 
-                final result = await runWithBusyDialog(
-                  'Restoring\u2026',
-                  () => const BackupZipCodec().restoreFromBackupZip(bytes),
-                );
-                if (!context.mounted || result == null) return;
+                final prepared = await prepareRestoreFromBytes(bytes);
+                if (!context.mounted || prepared == null) return;
+                final preview = prepared.preview;
 
-                final missing = result.hiveBoxesMissing.isEmpty
-                    ? ''
-                    : ' Missing: ${result.hiveBoxesMissing.join(', ')}.';
-                showAppSnackBar(
-                  context,
-                  'Restore complete (${result.hiveBoxesRestored} boxes, ${result.sharedPrefsKeysRestored} settings). Restart app for full refresh.$missing',
+                if (preview.totalRecordCount == 0) {
+                  showAppSnackBar(
+                    context,
+                    'The selected backup appears empty and was not restored.',
+                  );
+                  return;
+                }
+
+                await runWithBusyDialog(
+                  'Preparing restore…',
+                  () => PendingBackupRestoreService.stageRestore(
+                    prepared.restoreBytes,
+                  ),
                 );
+                if (!context.mounted) return;
+                _showQueuedRestoreSnackBar(context, preview);
               } on BackupFormatException catch (e) {
                 if (!context.mounted) return;
                 showAppSnackBar(context, e.message);
@@ -1126,13 +1643,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             title: const Text('About & Legal'),
             subtitle: Text(
               _devEnabled
-                  ? 'Developer options enabled — tap logo to toggle'
-                  : 'Tap logo 10× to unlock developer options',
+                  ? 'Developer options enabled - tap logo to toggle'
+                  : 'Tap logo 10x to unlock developer options',
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
               await context.push('/settings/about');
-              // Reload dev flag — user may have toggled it on the About /
+              // Reload dev flag - user may have toggled it on the About /
               // Licenses screen while away.
               await _loadDevEnabled();
             },
@@ -1147,11 +1664,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: kSpacingS),
             ListTile(
-              leading: Icon(
-                Icons.workspace_premium,
-                color: cs.primary,
-              ),
-              title: const Text('Pro — Unlocked'),
+              leading: Icon(Icons.workspace_premium, color: cs.primary),
+              title: const Text('Pro - Unlocked'),
               subtitle: const Text('Unlimited medications and no ads'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/settings/purchases'),

@@ -1,16 +1,47 @@
 ﻿@Tags(['golden'])
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:skedux/src/core/design_system.dart';
+import 'package:skedux/src/features/medications/domain/enums.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
 import 'package:skedux/src/features/schedules/domain/schedule.dart';
 import 'package:skedux/src/features/schedules/domain/entry_log.dart';
 import 'package:skedux/src/widgets/cards/today_entries_card.dart';
+
+void _registerHiveAdaptersIfNeeded() {
+  if (!Hive.isAdapterRegistered(UnitAdapter().typeId)) {
+    Hive.registerAdapter(UnitAdapter());
+  }
+  if (!Hive.isAdapterRegistered(StockUnitAdapter().typeId)) {
+    Hive.registerAdapter(StockUnitAdapter());
+  }
+  if (!Hive.isAdapterRegistered(MedicationFormAdapter().typeId)) {
+    Hive.registerAdapter(MedicationFormAdapter());
+  }
+  if (!Hive.isAdapterRegistered(VolumeUnitAdapter().typeId)) {
+    Hive.registerAdapter(VolumeUnitAdapter());
+  }
+  if (!Hive.isAdapterRegistered(MedicationAdapter().typeId)) {
+    Hive.registerAdapter(MedicationAdapter());
+  }
+  if (!Hive.isAdapterRegistered(ScheduleAdapter().typeId)) {
+    Hive.registerAdapter(ScheduleAdapter());
+  }
+  if (!Hive.isAdapterRegistered(EntryActionAdapter().typeId)) {
+    Hive.registerAdapter(EntryActionAdapter());
+  }
+  if (!Hive.isAdapterRegistered(EntryLogAdapter().typeId)) {
+    Hive.registerAdapter(EntryLogAdapter());
+  }
+}
 
 ThemeData _goldenTheme() {
   const primarySeed = kDetailHeaderGradientStart;
@@ -63,22 +94,14 @@ Widget _wrapForGolden(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() async {
-    // Initialize Hive for tests
-    await Hive.initFlutter();
-    
-    // Register adapters if needed
-    if (!Hive.isAdapterRegistered(0)) {
-      Hive.registerAdapter(MedicationAdapter());
-    }
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(ScheduleAdapter());
-    }
-    if (!Hive.isAdapterRegistered(2)) {
-      Hive.registerAdapter(EntryLogAdapter());
-    }
+  Directory? hiveDir;
 
-    // Open boxes
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    hiveDir = await Directory.systemTemp.createTemp('skedux_hive_today_');
+    Hive.init(hiveDir!.path);
+    _registerHiveAdaptersIfNeeded();
+
     await Hive.openBox<Medication>('medications');
     await Hive.openBox<Schedule>('schedules');
     await Hive.openBox<EntryLog>('entry_logs');
@@ -86,6 +109,9 @@ void main() {
 
   tearDownAll(() async {
     await Hive.close();
+    if (hiveDir != null && hiveDir!.existsSync()) {
+      hiveDir!.deleteSync(recursive: true);
+    }
   });
 
   group('TodayEntriesCard goldens', () {

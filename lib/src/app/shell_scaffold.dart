@@ -8,6 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:skedux/src/app/nav_items.dart';
+import 'package:skedux/src/core/app_restart_service.dart';
+import 'package:skedux/src/core/backup/pending_backup_restore_service.dart';
+import 'package:skedux/src/widgets/app_snackbar.dart';
 import 'package:skedux/src/widgets/onboarding/onboarding_gate.dart';
 
 final bottomNavIdsProvider =
@@ -47,9 +50,17 @@ class BottomNavIdsController extends StateNotifier<List<String>> {
   }
 }
 
-class ShellScaffold extends ConsumerWidget {
+class ShellScaffold extends ConsumerStatefulWidget {
   const ShellScaffold({required this.child, super.key});
   final Widget child;
+
+  @override
+  ConsumerState<ShellScaffold> createState() => _ShellScaffoldState();
+}
+
+class _ShellScaffoldState extends ConsumerState<ShellScaffold> {
+  static const _restartSnackBarDuration = Duration(days: 1);
+  bool _restoreNoticeChecked = false;
 
   int _locationToIndex(String location, List<NavItemConfig> items) {
     // Choose the most specific match (longest location prefix).
@@ -73,8 +84,32 @@ class ShellScaffold extends ConsumerWidget {
     return bestIndex == -1 ? 0 : bestIndex;
   }
 
+  Future<void> _maybeShowRestoreNotice(BuildContext context) async {
+    if (_restoreNoticeChecked) return;
+    _restoreNoticeChecked = true;
+
+    final notice = await PendingBackupRestoreService.consumeLastRestoreNotice();
+    if (!mounted || notice == null) {
+      return;
+    }
+
+    showAppSnackBar(
+      context,
+      notice.message,
+      duration: notice.isError
+          ? const Duration(seconds: 4)
+          : _restartSnackBarDuration,
+      actionLabel: notice.isError ? null : 'Restart',
+      onAction: notice.isError ? null : AppRestartService.restart,
+    );
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowRestoreNotice(context);
+    });
+
     final ids = ref.watch(bottomNavIdsProvider);
     final items = ids.map((id) => findNavItem(id)!).toList(growable: false);
     final location = GoRouterState.of(context).uri.toString();
@@ -87,7 +122,7 @@ class ShellScaffold extends ConsumerWidget {
         onPopInvoked: (didPop) {
           if (!didPop && location != '/') context.go('/');
         },
-        child: Scaffold(body: OnboardingGate(child: child)),
+        child: Scaffold(body: OnboardingGate(child: widget.child)),
       );
     }
 
@@ -100,7 +135,7 @@ class ShellScaffold extends ConsumerWidget {
         }
       },
       child: Scaffold(
-        body: OnboardingGate(child: child),
+        body: OnboardingGate(child: widget.child),
         bottomNavigationBar: NavigationBar(
           selectedIndex: selectedIndex,
           onDestinationSelected: (index) {

@@ -219,7 +219,7 @@ class MedicationDisplayHelpers {
         case MedicationForm.singleDoseVial:
           return 'Single Entry Vials';
         case MedicationForm.multiDoseVial:
-          return 'Multi Entry Vial';
+          return 'Multi Entry Vials';
       }
     }
     // Singular

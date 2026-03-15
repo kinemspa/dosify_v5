@@ -30,7 +30,7 @@ class EntryActionLegendRow extends StatelessWidget {
 
   void _showLegendHelp(BuildContext context) {
     final inventoryLine = includeInventory
-        ? '\n\nInventory: stock changes (adds, adjustments, ad-hoc entry stock changes).'
+        ? '\n\nInventory: stock changes (adds, adjustments, ad hoc stock changes).'
         : '';
 
     showDialog<void>(

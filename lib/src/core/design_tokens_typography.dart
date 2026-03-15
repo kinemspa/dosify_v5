@@ -171,18 +171,50 @@ const double kSyringeGaugeTickFontSizeMicro = 7;
 // THEME-AWARE COLOR HELPERS (used by text styles below)
 // ============================================================================
 
+enum AppSnackBarTone { neutral, success, warning, error }
+
 /// Theme-aware snackbar background: white in light mode, elevated dark surface in dark.
-Color snackBarBackgroundColor(BuildContext context) {
+Color snackBarBackgroundColor(
+  BuildContext context, {
+  AppSnackBarTone tone = AppSnackBarTone.neutral,
+}) {
   final cs = Theme.of(context).colorScheme;
-  if (Theme.of(context).brightness == Brightness.dark) {
-    return cs.surfaceContainerHigh;
+  switch (tone) {
+    case AppSnackBarTone.success:
+      return kEntryStatusTakenGreenAdaptive(context);
+    case AppSnackBarTone.warning:
+      return kEntryStatusSnoozedOrangeAdaptive(context);
+    case AppSnackBarTone.error:
+      return kEntryStatusSkippedRedAdaptive(context);
+    case AppSnackBarTone.neutral:
+      return cs.surfaceContainerHigh;
   }
-  return Colors.white;
 }
 
 /// Theme-aware snackbar foreground: dark in light mode, light in dark.
-Color snackBarForegroundColor(BuildContext context) {
-  return Theme.of(context).colorScheme.onSurface;
+Color snackBarForegroundColor(
+  BuildContext context, {
+  AppSnackBarTone tone = AppSnackBarTone.neutral,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  switch (tone) {
+    case AppSnackBarTone.success:
+      return _foregroundForFilledSnackBar(kEntryStatusTakenGreenAdaptive(context));
+    case AppSnackBarTone.warning:
+      return _foregroundForFilledSnackBar(
+        kEntryStatusSnoozedOrangeAdaptive(context),
+      );
+    case AppSnackBarTone.error:
+      return _foregroundForFilledSnackBar(kEntryStatusSkippedRedAdaptive(context));
+    case AppSnackBarTone.neutral:
+      return cs.onSurface;
+  }
+}
+
+Color _foregroundForFilledSnackBar(Color background) {
+  return ThemeData.estimateBrightnessForColor(background) == Brightness.dark
+      ? Colors.white
+      : Colors.black;
 }
 
 /// Muted icon color (e.g. inactive toolbar icons).
@@ -1044,9 +1076,12 @@ TextStyle? splashTaglineTextStyle(BuildContext context) {
 }
 
 /// App snackbar text style (used for app snackbars).
-TextStyle? appSnackBarTextStyle(BuildContext context) {
+TextStyle? appSnackBarTextStyle(
+  BuildContext context, {
+  AppSnackBarTone tone = AppSnackBarTone.neutral,
+}) {
   return bodyTextStyle(context)?.copyWith(
-    color: snackBarForegroundColor(context),
+    color: snackBarForegroundColor(context, tone: tone),
     fontWeight: kFontWeightSemiBold,
   );
 }

@@ -67,7 +67,7 @@ class InventoryLog {
       case InventoryChangeType.entryDeducted:
         return 'Entry taken (${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} deducted)';
       case InventoryChangeType.adHocEntry:
-        return 'Ad-hoc entry (${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} deducted)';
+        return 'Ad hoc (${changeAmount.abs().toStringAsFixed(changeAmount.abs() == changeAmount.abs().roundToDouble() ? 0 : 1)} deducted)';
       case InventoryChangeType.manualAdjustment:
         return 'Manual adjustment';
       case InventoryChangeType.vialOpened:
@@ -92,7 +92,7 @@ enum InventoryChangeType {
   entryDeducted, // Scheduled entry deducted stock
 
   @HiveField(3)
-  adHocEntry, // Ad-hoc entry deducted stock
+  adHocEntry, // Ad hoc entry deducted stock
 
   @HiveField(4)
   manualAdjustment, // Manual stock correction

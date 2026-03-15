@@ -92,7 +92,7 @@ All notable changes to this project will be documented in this file. Dates in UT
   - **Improved layout**: Med strength and remaining tablets moved to right side under expiry
   - **Stock display format**: Shows "X tablets remaining" instead of "X/X"
   - **Multi-line dose format** for better readability:
-    - Line 1: "Take 1 Panadol tablet" (dose number and unit prominent)
+    - Line 1: "Take 1 example tablet" (dose number and unit prominent)
     - Line 2: "Every Day" (frequency)
     - Line 3: "at 9:00 AM" (times)
     - Line 4: "Dose equals 20mg" (total strength prominent)

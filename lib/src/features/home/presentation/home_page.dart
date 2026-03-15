@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/features/medications/domain/medication.dart';
+import 'package:skedux/src/features/medications/presentation/ad_hoc_entry_flow.dart';
 import 'package:skedux/src/features/reports/domain/report_time_range.dart';
 import 'package:skedux/src/widgets/ads/anchored_ad_banner.dart';
 import 'package:skedux/src/widgets/app_snackbar.dart';
@@ -113,6 +114,24 @@ class _HomePageState extends ConsumerState<HomePage> {
       builder: (context) {
         return TodayEntriesCard(
           scope: const TodayEntriesScope.all(),
+          trailing: TextButton.icon(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: kSpacingS,
+                vertical: kSpacingXXS,
+              ),
+              minimumSize: const Size(0, 28),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
+            onPressed: () => showAdHocMedicationPicker(context),
+            icon: Icon(
+              Icons.bolt_rounded,
+              size: kIconSizeSmall,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            label: const Text('Ad hoc'),
+          ),
           isExpanded: _isTodayExpanded,
           onExpandedChanged: (expanded) {
             if (!mounted) return;

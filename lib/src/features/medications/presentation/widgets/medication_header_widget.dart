@@ -23,6 +23,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
     this.hasSchedules = false,
     this.crossAxisAlignment = CrossAxisAlignment.stretch,
     this.foregroundColor,
+    this.overlayReservedHeight = kMedicationDetailHeaderOverlayReservedHeight,
     super.key,
   });
 
@@ -33,6 +34,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
   final bool hasSchedules;
   final CrossAxisAlignment crossAxisAlignment;
   final Color? foregroundColor;
+  final double overlayReservedHeight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -121,7 +123,7 @@ class MedicationHeaderWidget extends ConsumerWidget {
                 children: [
                   // Space for the animated Name + form chip (rendered above in the SliverAppBar).
                   // Do NOT text-scale this SizedBox — the overlay is positioned in absolute dp.
-                  const SizedBox(height: kMedicationDetailHeaderOverlayReservedHeight),
+                  SizedBox(height: overlayReservedHeight),
 
                   // Description & Notes
                   if (descriptionTruncated.isNotEmpty)

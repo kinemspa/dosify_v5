@@ -6,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:skedux/src/core/backup/pending_backup_restore_service.dart';
 import 'package:skedux/src/core/hive/hive_encryption_key_service.dart';
 import 'package:skedux/src/core/hive/hive_migration_manager.dart';
 import 'package:skedux/src/features/medications/domain/enums.dart';
@@ -46,6 +47,20 @@ class HiveBootstrap {
 
     // One-time migration: convert pre-existing unencrypted boxes → encrypted.
     await _migrateToEncryptedIfNeeded(cipher);
+
+    try {
+      final restoreResult =
+          await PendingBackupRestoreService.applyPendingRestoreIfAny();
+      if (restoreResult != null) {
+        debugPrint(
+          'HiveBootstrap: Applied pending restore '
+          '(${restoreResult.hiveBoxesRestored} boxes, '
+          '${restoreResult.sharedPrefsKeysRestored} prefs)',
+        );
+      }
+    } catch (e) {
+      debugPrint('HiveBootstrap: Pending restore failed: $e');
+    }
 
     // Open medications first so HiveMigrationManager can use the open box.
     await _openBoxWithRetry<Medication>('medications', cipher: cipher);
@@ -130,35 +145,16 @@ class HiveBootstrap {
     } catch (e) {
       debugPrint('HiveBootstrap: Failed to open box "$name" (Error: $e).');
 
-      // Only delete and recreate on actual corruption errors (HiveError).
-      // Do NOT delete on timeouts or other transient errors — that causes data loss!
-      if (e is HiveError) {
+      // Never auto-delete a box on open failure. Restore/key mismatches can look
+      // like corruption, and deleting here causes irreversible data loss.
+      debugPrint('HiveBootstrap: Retrying open without deletion...');
+      try {
+        return await Hive.openBox<T>(name, encryptionCipher: cipher);
+      } catch (e2) {
         debugPrint(
-          'HiveBootstrap: Detected HiveError (corruption). Attempting recovery by deleting box...',
+          'HiveBootstrap: CRITICAL ERROR: Could not open box "$name": $e2',
         );
-        try {
-          await Hive.deleteBoxFromDisk(name);
-          debugPrint(
-            'HiveBootstrap: Deleted corrupted box "$name". Retrying open...',
-          );
-          return await Hive.openBox<T>(name, encryptionCipher: cipher);
-        } catch (e2) {
-          debugPrint(
-            'HiveBootstrap: CRITICAL ERROR: Could not recover box "$name": $e2',
-          );
-          rethrow;
-        }
-      } else {
-        // For timeouts and other errors, retry without deleting.
-        debugPrint('HiveBootstrap: Retrying open without deletion...');
-        try {
-          return await Hive.openBox<T>(name, encryptionCipher: cipher);
-        } catch (e2) {
-          debugPrint(
-            'HiveBootstrap: CRITICAL ERROR: Could not open box "$name": $e2',
-          );
-          rethrow;
-        }
+        rethrow;
       }
     }
   }

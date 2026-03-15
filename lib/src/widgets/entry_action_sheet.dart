@@ -115,7 +115,7 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
   String? _entryOverrideUnit;
   MdvEntryChangeMode? _mdvEntryChangeMode;
   SyringeType? _mdvSyringeType;
-  String _mdvStrengthUnit = 'mg';
+  String _mdvStrengthUnit = 'mcg';
   late EntryStatus _selectedStatus;
   late DateTime _selectedActionTime;
   DateTime? _selectedSnoozeUntil;
@@ -310,6 +310,7 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
   Widget _buildLoggedTimeField(BuildContext context) {
     return EntryLoggedTimeField(
       currentTime: _selectedActionTime,
+      scheduledTime: widget.entry.scheduledTime,
       accentColor: _statusAccentColor(context),
       onTimeChanged: (dt) => setState(() {
         _selectedActionTime = dt;
@@ -400,7 +401,8 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
       lastEntryLine: lastEntryLine(),
     );
 
-    final mdvGaugeInCard = med.form == MedicationForm.multiDoseVial
+    final mdvGaugeInCard = !_isAdHoc &&
+        med.form == MedicationForm.multiDoseVial
         ? _buildMdvGaugeInCard(context, med: med)
         : null;
 
@@ -659,8 +661,41 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
             ? (med.activeVialVolume ?? med.containerVolumeMl ?? 0)
             : med.stockValue;
 
-        // For existing ad-hoc logs, stock has already been deducted, so allow
-        // increasing up to (currentStock + loggedAmount). For brand-new ad-hoc
+        if (isMdv) {
+          _originalEntryOverrideValue = log.actualEntryValue ?? log.entryValue;
+          _entryOverrideUnit = log.actualEntryUnit ?? log.entryUnit;
+          _entryOverrideController = TextEditingController(
+            text: _formatAmount(
+              _originalEntryOverrideValue ?? log.entryValue,
+            ),
+          );
+          _mdvStrengthUnit = 'mcg';
+          _mdvEntryChangeMode = inferMdvModeFromUnit(
+            _entryOverrideUnit ?? log.entryUnit,
+          );
+
+          final recon = SavedReconstitutionRepository().ownedForMedication(
+            med.id,
+          );
+          final savedSyringeSizeMl = recon?.syringeSizeMl;
+
+          _mdvSyringeType = savedSyringeSizeMl != null && savedSyringeSizeMl > 0
+              ? SyringeTypeLookup.forVolumeMl(savedSyringeSizeMl)
+              : defaultMdvSyringeType(
+                  med,
+                  overrideValue: _originalEntryOverrideValue,
+                  overrideUnit: _entryOverrideUnit ?? log.entryUnit,
+                );
+
+          _entryOverrideUnit = mdvEntryChangeUnitLabel(
+            _mdvEntryChangeMode!,
+            _mdvStrengthUnit,
+          );
+          _editExpanded = true;
+        }
+
+        // For existing ad hoc logs, stock has already been deducted, so allow
+        // increasing up to (currentStock + loggedAmount). For brand-new ad hoc
         // entries (not yet persisted), cap at currentStock.
         final alreadyLogged = Hive.box<EntryLog>(
           'entry_logs',
@@ -698,7 +733,7 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
           ? null
           : Hive.box<Medication>('medications').get(medId);
       if (med != null && med.form == MedicationForm.multiDoseVial) {
-        _mdvStrengthUnit = mdvStrengthUnitFor(med);
+        _mdvStrengthUnit = 'mcg';
         _mdvEntryChangeMode = inferMdvModeFromUnit(
           _entryOverrideUnit ?? widget.entry.entryUnit,
         );
@@ -759,6 +794,52 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
   String _formatAmount(double value) {
     final unit = _entryOverrideUnit ?? widget.entry.entryUnit;
     return EntryValueFormatter.format(value, unit);
+  }
+
+  double? _resolvedAdHocLoggedAmount() {
+    final existingLog = widget.entry.existingLog;
+    if (!_isAdHoc || existingLog == null) return null;
+
+    final med = Hive.box<Medication>('medications').get(existingLog.medicationId);
+    final isMdv = med?.form == MedicationForm.multiDoseVial;
+    if (!isMdv) {
+      final controller = _amountController;
+      if (controller == null) return null;
+      final parsedAmount = EntryValueFormatter.tryParseAndClamp(
+        controller.text,
+        existingLog.entryUnit,
+        min: 0.0,
+        max: double.infinity,
+      );
+      if (parsedAmount == null) return null;
+      final maxAmount = _maxAdHocAmount ?? double.infinity;
+      return EntryValueFormatter.clampAndQuantize(
+        parsedAmount,
+        existingLog.entryUnit,
+        min: 0.0,
+        max: maxAmount,
+      );
+    }
+
+    final controller = _entryOverrideController;
+    if (med == null || controller == null) return null;
+    final result = mdvEntryChangeResult(
+      med: med,
+      rawText: controller.text,
+      mode: _mdvEntryChangeMode,
+      syringe: _mdvSyringeType,
+      strengthUnit: _mdvStrengthUnit,
+    );
+    if (result == null || !result.success || result.hasError) return null;
+
+    final parsedAmount = (result.entryVolumeMicroliter ?? 0) / 1000;
+    final maxAmount = _maxAdHocAmount ?? double.infinity;
+    return EntryValueFormatter.clampAndQuantize(
+      parsedAmount,
+      existingLog.entryUnit,
+      min: 0.0,
+      max: maxAmount,
+    );
   }
 
   DateTime _defaultSnoozeUntil() {
@@ -829,34 +910,33 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
     if (!_isAdHoc) return;
     final existingLog = widget.entry.existingLog;
     if (existingLog == null) return;
-    final controller = _amountController;
-    if (controller == null) return;
-
-    final parsedAmount =
-        EntryValueFormatter.tryParseAndClamp(
-          controller.text,
-          existingLog.entryUnit,
-          min: 0.0,
-          max: double.infinity,
-        ) ??
-        0;
-    final maxAmount = _maxAdHocAmount ?? double.infinity;
-    final newAmount = EntryValueFormatter.clampAndQuantize(
-      parsedAmount,
-      existingLog.entryUnit,
-      min: 0.0,
-      max: maxAmount,
-    );
+    final newAmount = _resolvedAdHocLoggedAmount() ?? 0;
     final oldAmount = _originalAdHocAmount ?? existingLog.entryValue;
     final trimmedNotes = _notesController.text.trim();
     final newNotes = trimmedNotes.isEmpty ? null : trimmedNotes;
+    final (newActualEntryValue, newActualEntryUnit) =
+      _resolvedActualEntryOverride();
 
     final amountChanged = (newAmount - oldAmount).abs() > 0.000001;
     final notesChanged = (existingLog.notes ?? '') != (newNotes ?? '');
+    final actualValueChanged =
+      (existingLog.actualEntryValue ?? 0) != (newActualEntryValue ?? 0) ||
+      (existingLog.actualEntryValue == null) !=
+        (newActualEntryValue == null);
+    final actualUnitChanged =
+      (existingLog.actualEntryUnit ?? '') != (newActualEntryUnit ?? '') ||
+      (existingLog.actualEntryUnit == null) !=
+        (newActualEntryUnit == null);
 
     final entryLogBox = Hive.box<EntryLog>('entry_logs');
     final isNew = !entryLogBox.containsKey(existingLog.id);
-    if (!isNew && !amountChanged && !notesChanged) return;
+    if (!isNew &&
+      !amountChanged &&
+      !notesChanged &&
+      !actualValueChanged &&
+      !actualUnitChanged) {
+      return;
+    }
 
     final entryLogRepo = EntryLogRepository(entryLogBox);
     final inventoryBox = Hive.box<InventoryLog>('inventory_logs');
@@ -916,7 +996,7 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
             previousStock: previousStock,
             newStock: updatedStock,
             changeAmount: changeAmount,
-            notes: newNotes ?? 'Ad-hoc entry',
+            notes: newNotes ?? 'Ad hoc',
             timestamp: _selectedActionTime,
           ),
         );
@@ -949,14 +1029,14 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
       entryValue: (isNew || amountChanged) ? newAmount : existingLog.entryValue,
       entryUnit: existingLog.entryUnit,
       action: existingLog.action,
-      actualEntryValue: existingLog.actualEntryValue,
-      actualEntryUnit: existingLog.actualEntryUnit,
+      actualEntryValue: newActualEntryValue,
+      actualEntryUnit: newActualEntryUnit,
       notes: newNotes,
     );
     await entryLogRepo.upsert(updatedLog);
 
     _originalAdHocAmount = updatedLog.entryValue;
-    controller.text = _formatAmount(updatedLog.entryValue);
+    _amountController?.text = _formatAmount(updatedLog.entryValue);
   }
 
   Future<void> _saveExistingLogEdits() async {
@@ -1160,89 +1240,204 @@ class _EntryActionSheetState extends State<EntryActionSheet> {
             _buildStatusToggle(context),
             const SizedBox(height: kSpacingXS),
             _buildStatusHint(context),
-            const SizedBox(height: kSpacingM),
-            _buildNotesField(context),
             if (_selectedStatus == EntryStatus.logged) ...[
               const SizedBox(height: kSpacingM),
               _buildLoggedTimeField(context),
             ],
-            if (_selectedStatus == EntryStatus.snoozed) ...[
+            if (_isAdHoc) ...[
+              const SizedBox(height: kSpacingM),
+              SectionFormCard(
+                title: _mdvSyringeType != null
+                    ? 'Required entry settings'
+                    : 'Ad hoc',
+                neutral: true,
+                frameless: true,
+                children: [
+                  if (_mdvSyringeType != null) ...[
+                    _buildAdvancedMdvSyringeGauge(context),
+                    EntryMdvCalculatedValuesCard(
+                      medication: widget.entry.existingLog == null
+                          ? null
+                          : Hive.box<Medication>('medications').get(
+                              widget.entry.existingLog!.medicationId,
+                            ),
+                      rawText: _entryOverrideController?.text ?? '',
+                      mode: _mdvEntryChangeMode ?? MdvEntryChangeMode.volume,
+                      syringe: _mdvSyringeType ?? SyringeType.ml_1_0,
+                      strengthUnit: _mdvStrengthUnit,
+                    ),
+                    const SizedBox(height: kSpacingM),
+                  ],
+                  EntryPartialEntrySection(
+                    isAdHoc: _isAdHoc,
+                    existingLog: widget.entry.existingLog,
+                    scheduleId: widget.entry.scheduleId,
+                    amountController: _amountController,
+                    maxAdHocAmount: _maxAdHocAmount,
+                    entryBaseUnit: widget.entry.entryUnit,
+                    entryOverrideController: _entryOverrideController,
+                    entryOverrideUnit: _entryOverrideUnit,
+                    mdvMode: _mdvEntryChangeMode,
+                    mdvSyringe: _mdvSyringeType,
+                    mdvStrengthUnit: _mdvStrengthUnit,
+                    onChanged: () => setState(() => _hasChanged = true),
+                    onMdvModeChanged: (value) {
+                      if (value == MdvEntryChangeMode.strength) {
+                        _mdvStrengthUnit = 'mcg';
+                      }
+                      _convertMdvEntryValueOnModeChange(value);
+                      setState(() {
+                        _mdvEntryChangeMode = value;
+                        _entryOverrideUnit = mdvEntryChangeUnitLabel(
+                          value,
+                          _mdvStrengthUnit,
+                        );
+                        _hasChanged = true;
+                      });
+                    },
+                    onMdvSyringeChanged: (value) => setState(() {
+                      _mdvSyringeType = value;
+                      _hasChanged = true;
+                    }),
+                    onUnitChanged: (value) => setState(() {
+                      _entryOverrideUnit = value;
+                      _hasChanged = true;
+                    }),
+                    onMdvStrengthUnitChanged: (value) {
+                      final controller = _entryOverrideController;
+                      if (controller != null) {
+                        final raw = double.tryParse(controller.text.trim());
+                        if (raw != null && raw > 0) {
+                          final mcg = mdvStrengthToMcg(raw, _mdvStrengthUnit);
+                          final converted = switch (value) {
+                            'mcg' => mcg,
+                            'mg' => mcg / 1000,
+                            'g' => mcg / 1000000,
+                            _ => mcg / 1000,
+                          };
+                          controller.text = converted % 1 == 0
+                              ? converted.toInt().toString()
+                              : converted
+                                  .toStringAsFixed(4)
+                                  .replaceAll(RegExp(r'0+$'), '');
+                        }
+                      }
+                      setState(() {
+                        _mdvStrengthUnit = value;
+                        if (_mdvEntryChangeMode ==
+                            MdvEntryChangeMode.strength) {
+                          _entryOverrideUnit = value;
+                        }
+                        _hasChanged = true;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: kSpacingM),
+            _buildNotesField(context),
+            if (_isAdHoc && _selectedStatus == EntryStatus.snoozed) ...[
               const SizedBox(height: kSpacingM),
               _buildSnoozeUntilField(context),
             ],
-            const SizedBox(height: kSpacingM),
-            CollapsibleSectionFormCard(
-              title: 'Advanced',
-              frameless: true,
-              isExpanded: _editExpanded,
-              onExpandedChanged: (v) => setState(() => _editExpanded = v),
-              children: [
-                if (_mdvSyringeType != null) ...[
-                  _buildAdvancedMdvSyringeGauge(context),
-                  const SizedBox(height: kSpacingM),
+            if (!_isAdHoc) ...[
+              const SizedBox(height: kSpacingM),
+              CollapsibleSectionFormCard(
+                title: 'Advanced',
+                frameless: true,
+                isExpanded: _editExpanded,
+                onExpandedChanged: (v) => setState(() => _editExpanded = v),
+                children: [
+                  if (_mdvSyringeType != null) ...[
+                    _buildAdvancedMdvSyringeGauge(context),
+                    EntryMdvCalculatedValuesCard(
+                      medication: () {
+                        final schedule = Hive.box<Schedule>('schedules').get(
+                          widget.entry.scheduleId,
+                        );
+                        final medId = schedule?.medicationId;
+                        if (medId == null) return null;
+                        return Hive.box<Medication>('medications').get(medId);
+                      }(),
+                      rawText: _entryOverrideController?.text ?? '',
+                      mode: _mdvEntryChangeMode ?? MdvEntryChangeMode.volume,
+                      syringe: _mdvSyringeType ?? SyringeType.ml_1_0,
+                      strengthUnit: _mdvStrengthUnit,
+                    ),
+                    const SizedBox(height: kSpacingM),
+                  ],
+                  EntryPartialEntrySection(
+                    isAdHoc: _isAdHoc,
+                    existingLog: widget.entry.existingLog,
+                    scheduleId: widget.entry.scheduleId,
+                    amountController: _amountController,
+                    maxAdHocAmount: _maxAdHocAmount,
+                    entryBaseUnit: widget.entry.entryUnit,
+                    entryOverrideController: _entryOverrideController,
+                    entryOverrideUnit: _entryOverrideUnit,
+                    mdvMode: _mdvEntryChangeMode,
+                    mdvSyringe: _mdvSyringeType,
+                    mdvStrengthUnit: _mdvStrengthUnit,
+                    onChanged: () => setState(() => _hasChanged = true),
+                    onMdvModeChanged: (value) {
+                      if (value == MdvEntryChangeMode.strength) {
+                        _mdvStrengthUnit = 'mcg';
+                      }
+                      _convertMdvEntryValueOnModeChange(value);
+                      setState(() {
+                        _mdvEntryChangeMode = value;
+                        _entryOverrideUnit = mdvEntryChangeUnitLabel(
+                          value,
+                          _mdvStrengthUnit,
+                        );
+                        _hasChanged = true;
+                      });
+                    },
+                    onMdvSyringeChanged: (value) => setState(() {
+                      _mdvSyringeType = value;
+                      _hasChanged = true;
+                    }),
+                    onUnitChanged: (value) => setState(() {
+                      _entryOverrideUnit = value;
+                      _hasChanged = true;
+                    }),
+                    onMdvStrengthUnitChanged: (value) {
+                      final controller = _entryOverrideController;
+                      if (controller != null) {
+                        final raw = double.tryParse(controller.text.trim());
+                        if (raw != null && raw > 0) {
+                          final mcg = mdvStrengthToMcg(raw, _mdvStrengthUnit);
+                          final converted = switch (value) {
+                            'mcg' => mcg,
+                            'mg' => mcg / 1000,
+                            'g' => mcg / 1000000,
+                            _ => mcg / 1000,
+                          };
+                          controller.text = converted % 1 == 0
+                              ? converted.toInt().toString()
+                              : converted
+                                  .toStringAsFixed(4)
+                                  .replaceAll(RegExp(r'0+$'), '');
+                        }
+                      }
+                      setState(() {
+                        _mdvStrengthUnit = value;
+                        if (_mdvEntryChangeMode ==
+                            MdvEntryChangeMode.strength) {
+                          _entryOverrideUnit = value;
+                        }
+                        _hasChanged = true;
+                      });
+                    },
+                  ),
+                  if (_selectedStatus == EntryStatus.snoozed) ...[
+                    const SizedBox(height: kSpacingM),
+                    _buildSnoozeUntilField(context),
+                  ],
                 ],
-                EntryPartialEntrySection(
-                  isAdHoc: _isAdHoc,
-                  existingLog: widget.entry.existingLog,
-                  scheduleId: widget.entry.scheduleId,
-                  amountController: _amountController,
-                  maxAdHocAmount: _maxAdHocAmount,
-                  entryBaseUnit: widget.entry.entryUnit,
-                  entryOverrideController: _entryOverrideController,
-                  entryOverrideUnit: _entryOverrideUnit,
-                  mdvMode: _mdvEntryChangeMode,
-                  mdvSyringe: _mdvSyringeType,
-                  mdvStrengthUnit: _mdvStrengthUnit,
-                  onChanged: () => setState(() => _hasChanged = true),
-                  onMdvModeChanged: (value) {
-                    _convertMdvEntryValueOnModeChange(value);
-                    setState(() {
-                      _mdvEntryChangeMode = value;
-                      _entryOverrideUnit =
-                          mdvEntryChangeUnitLabel(value, _mdvStrengthUnit);
-                      _hasChanged = true;
-                    });
-                  },
-                  onMdvSyringeChanged: (value) => setState(() {
-                    _mdvSyringeType = value;
-                    _hasChanged = true;
-                  }),
-                  onUnitChanged: (value) => setState(() {
-                    _entryOverrideUnit = value;
-                    _hasChanged = true;
-                  }),
-                  onMdvStrengthUnitChanged: (value) {
-                    // Convert the current controller text to the new unit
-                    final controller = _entryOverrideController;
-                    if (controller != null) {
-                      final raw = double.tryParse(controller.text.trim());
-                      if (raw != null && raw > 0) {
-                        // Convert via mcg as intermediate
-                        final mcg = mdvStrengthToMcg(raw, _mdvStrengthUnit);
-                        final converted = switch (value) {
-                          'mcg' => mcg,
-                          'mg' => mcg / 1000,
-                          'g' => mcg / 1000000,
-                          _ => mcg / 1000,
-                        };
-                        controller.text = converted % 1 == 0
-                            ? converted.toInt().toString()
-                            : converted
-                                .toStringAsFixed(4)
-                                .replaceAll(RegExp(r'0+$'), '');
-                      }
-                    }
-                    setState(() {
-                      _mdvStrengthUnit = value;
-                      if (_mdvEntryChangeMode == MdvEntryChangeMode.strength) {
-                        _entryOverrideUnit = value;
-                      }
-                      _hasChanged = true;
-                    });
-                  },
-                ),
-              ],
-            ),
+              ),
+            ],
           ],
         ),
       );

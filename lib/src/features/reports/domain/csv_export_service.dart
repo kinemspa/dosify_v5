@@ -104,8 +104,8 @@ class CsvExportService {
     MedicationForm.tablet => 'Tablet',
     MedicationForm.capsule => 'Capsule',
     MedicationForm.prefilledSyringe => 'Pre-filled Syringe',
-    MedicationForm.singleDoseVial => 'Single-Dose Vial',
-    MedicationForm.multiDoseVial => 'Multi-Dose Vial',
+     MedicationForm.singleDoseVial => 'Single Entry Vial',
+     MedicationForm.multiDoseVial => 'Multi Entry Vial',
   };
 
   /// Entry action enum name → plain English.
@@ -122,7 +122,7 @@ class CsvExportService {
     InventoryChangeType.refillAdd => 'Stock Added',
     InventoryChangeType.refillToMax => 'Refilled to Max',
     InventoryChangeType.entryDeducted => 'Entry Deducted',
-    InventoryChangeType.adHocEntry => 'Ad-hoc Entry',
+    InventoryChangeType.adHocEntry => 'Ad hoc',
     InventoryChangeType.manualAdjustment => 'Manual Adjustment',
     InventoryChangeType.vialOpened => 'Vial Opened',
     InventoryChangeType.vialRestocked => 'Sealed Vials Restocked',

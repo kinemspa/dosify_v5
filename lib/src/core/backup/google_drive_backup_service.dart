@@ -1,10 +1,11 @@
 ﻿import 'dart:async';
-import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:http/http.dart' as http;
 
+import 'package:skedux/src/core/backup/google_drive_backup_config.dart';
 import 'package:skedux/src/core/backup/backup_zip_codec.dart';
 import 'package:skedux/src/core/backup/backup_models.dart';
 
@@ -13,21 +14,60 @@ class GoogleDriveBackupService {
     : _codec = codec ?? const BackupZipCodec(),
       _googleSignIn =
           googleSignIn ??
-          GoogleSignIn(scopes: const [drive.DriveApi.driveAppdataScope]);
+          GoogleSignIn(
+            scopes: _scopes,
+            clientId: GoogleDriveBackupConfig.clientIdForCurrentPlatform,
+            serverClientId:
+                GoogleDriveBackupConfig.serverClientIdForCurrentPlatform,
+          );
+
+  static const _scopes = <String>[drive.DriveApi.driveAppdataScope];
 
   static const _fileNamePrefix = 'skedux_backup_';
 
   final BackupZipCodec _codec;
   final GoogleSignIn _googleSignIn;
 
-  Future<BackupResult> backupToDrive() async {
+  static bool get isEnabledInThisBuild =>
+      GoogleDriveBackupConfig.hasExplicitConfiguration;
+
+  Future<List<DriveBackupEntry>> listBackups() async {
     final account = await _ensureSignedIn();
     final client = await _authClient(account);
     final api = drive.DriveApi(client);
 
-    final created = await _codec.createBackupZip();
+    final result = await api.files.list(
+      spaces: 'appDataFolder',
+      q: "name contains '$_fileNamePrefix'",
+      orderBy: 'createdTime desc',
+      pageSize: 20,
+      $fields: 'files(id,name,createdTime,size)',
+    );
+    client.close();
+
+    final files = result.files ?? const <drive.File>[];
+    return files
+        .where((file) => file.id != null && file.name != null)
+        .map(
+          (file) => DriveBackupEntry(
+            id: file.id!,
+            name: file.name!,
+            createdAtUtc: file.createdTime?.toUtc(),
+            sizeBytes: file.size == null ? null : int.tryParse(file.size!),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  Future<BackupResult> backupToDrive({String? password}) async {
+    final account = await _ensureSignedIn();
+    final client = await _authClient(account);
+    final api = drive.DriveApi(client);
+
+    final created = await _codec.createBackupZip(password: password);
+    final extension = created.isEncrypted ? 'skbackup' : 'zip';
     final fileName =
-        '$_fileNamePrefix${created.result.createdAtUtc.toIso8601String().replaceAll(':', '-')}.zip';
+        '$_fileNamePrefix${created.result.createdAtUtc.toIso8601String().replaceAll(':', '-')}.${extension}';
 
     final file = drive.File(name: fileName, parents: const ['appDataFolder']);
 
@@ -44,19 +84,26 @@ class GoogleDriveBackupService {
     return created.result;
   }
 
-  Future<RestoreResult> restoreLatestFromDrive() async {
+  Future<RestoreResult> restoreLatestFromDrive({String? password}) async {
+    final bytes = await downloadLatestBackupZip();
+    return _codec.restoreFromBackupZip(bytes, password: password);
+  }
+
+  Future<Uint8List> downloadLatestBackupZip() async {
+    final backups = await listBackups();
+    if (backups.isEmpty) {
+      throw const BackupFormatException('No backups found in Google Drive');
+    }
+    return downloadBackupZipById(backups.first.id);
+  }
+
+  Future<Uint8List> downloadBackupZipById(String fileId) async {
     final account = await _ensureSignedIn();
     final client = await _authClient(account);
     final api = drive.DriveApi(client);
 
-    final latest = await _findLatestBackupFile(api);
-    if (latest == null || latest.id == null) {
-      client.close();
-      throw const BackupFormatException('No backups found in Google Drive');
-    }
-
     final media = await api.files.get(
-      latest.id!,
+      fileId,
       downloadOptions: drive.DownloadOptions.fullMedia,
     );
 
@@ -67,56 +114,78 @@ class GoogleDriveBackupService {
 
     final bytes = await _readAllBytes(media.stream);
     client.close();
+    return bytes;
+  }
 
-    return _codec.restoreFromBackupZip(bytes);
+  Future<void> deleteBackupById(String fileId) async {
+    final account = await _ensureSignedIn();
+    final client = await _authClient(account);
+    final api = drive.DriveApi(client);
+
+    await api.files.delete(fileId);
+    client.close();
   }
 
   Future<GoogleSignInAccount> _ensureSignedIn() async {
-    final existing = await _googleSignIn.signInSilently().timeout(
-      const Duration(seconds: 12),
-      onTimeout: () => null,
-    );
-    if (existing != null) return existing;
-
-    // Sign out first to clear any stale cached token that may be preventing
-    // a clean interactive sign-in (common cause of user selecting account
-    // but sign-in still returning null).
-    try {
-      await _googleSignIn.signOut().timeout(const Duration(seconds: 5));
-    } catch (_) {
-      // Best-effort. Proceed with interactive sign-in regardless.
-    }
-
-    final interactive = await _googleSignIn.signIn().timeout(
-      const Duration(seconds: 60),
-      onTimeout: () => null,
-    );
-    if (interactive == null) {
-      throw const BackupFormatException(
-        'Google sign-in failed. Make sure you have a Google account added to your device and that Google Play Services is up to date, then try again.',
+    if (!GoogleDriveBackupConfig.hasExplicitConfiguration) {
+      throw BackupFormatException(
+        GoogleDriveBackupConfig.missingConfigurationMessage,
       );
     }
 
-    return interactive;
+    try {
+      final existing = await _googleSignIn.signInSilently().timeout(
+        const Duration(seconds: 12),
+        onTimeout: () => null,
+      );
+      if (existing != null) return existing;
+
+      final interactive = await _googleSignIn.signIn().timeout(
+        const Duration(seconds: 60),
+        onTimeout: () => null,
+      );
+      if (interactive != null) return interactive;
+
+      throw const BackupFormatException(
+        'Google sign-in failed. Make sure a Google account is added to this device, then try again.',
+      );
+    } on TimeoutException {
+      throw const BackupFormatException(
+        'Google sign-in timed out. Check your connection and try again.',
+      );
+    } on PlatformException catch (error) {
+      throw _mapPlatformException(error);
+    }
   }
 
   Future<http.Client> _authClient(GoogleSignInAccount account) async {
-    final headers = await account.authHeaders;
-    return _GoogleAuthClient(headers);
+    try {
+      final headers = await account.authHeaders;
+      return _GoogleAuthClient(headers);
+    } on PlatformException catch (error) {
+      throw _mapPlatformException(error);
+    }
   }
 
-  Future<drive.File?> _findLatestBackupFile(drive.DriveApi api) async {
-    final result = await api.files.list(
-      spaces: 'appDataFolder',
-      q: "name contains '$_fileNamePrefix'",
-      orderBy: 'createdTime desc',
-      pageSize: 1,
-      $fields: 'files(id,name,createdTime)',
-    );
+  BackupFormatException _mapPlatformException(PlatformException error) {
+    final message = error.message?.trim();
+    final configurationIssue =
+        message != null &&
+        (message.contains('serverClientId') ||
+            message.contains('clientId') ||
+            message.contains('configuration'));
 
-    final files = result.files;
-    if (files == null || files.isEmpty) return null;
-    return files.first;
+    if (configurationIssue) {
+      return BackupFormatException(
+        '${GoogleDriveBackupConfig.missingConfigurationMessage}${message.isEmpty ? '' : ' $message'}',
+      );
+    }
+
+    return BackupFormatException(
+      message == null || message.isEmpty
+          ? 'Google sign-in failed. Check your account and try again.'
+          : 'Google sign-in failed. $message',
+    );
   }
 
   Future<void> _deleteOldBackups(drive.DriveApi api) async {
@@ -149,6 +218,20 @@ class GoogleDriveBackupService {
     }
     return Uint8List.fromList(chunks);
   }
+}
+
+class DriveBackupEntry {
+  const DriveBackupEntry({
+    required this.id,
+    required this.name,
+    required this.createdAtUtc,
+    required this.sizeBytes,
+  });
+
+  final String id;
+  final String name;
+  final DateTime? createdAtUtc;
+  final int? sizeBytes;
 }
 
 class _GoogleAuthClient extends http.BaseClient {

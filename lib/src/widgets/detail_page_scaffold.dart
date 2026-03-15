@@ -442,14 +442,19 @@ class DetailStatItem extends StatelessWidget {
       crossAxisAlignment: alignment,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: rowAlignment,
           children: [
             Icon(icon, size: kIconSizeSmall, color: muted),
             const SizedBox(width: kSpacingXS),
-            Text(
-              label,
-              style: helperTextStyle(context)?.copyWith(color: muted),
-              textAlign: textAlign,
+            Flexible(
+              child: Text(
+                label,
+                style: helperTextStyle(context)?.copyWith(color: muted),
+                textAlign: textAlign,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

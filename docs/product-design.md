@@ -78,10 +78,10 @@ Add/Edit Medication – Tablet
 
 Floating Summary Card (dynamic examples):
 - Tablets
-- Panadol Tablets
-- Panadol at 10mg per tablet
-- Panadol at 10mg per tablet. 100 in stock.
-- "Panamax - Keep refrigerated. Expires - 1/1/2027"
+- Example Tablets
+- Example medication at 10mg per tablet
+- Example medication at 10mg per tablet. 100 in stock.
+- "Example manufacturer label - Keep refrigerated. Expires - 1/1/2027"
 - "Take with food. Etc etc"
 
 Navigation
@@ -125,10 +125,10 @@ Add/Edit Medication – Capsule
 
 Floating Summary Card (dynamic examples):
 - Capsules
-- Panadol Capsules
-- Panadol at 10mg per capsule
-- Panadol at 10mg per capsule. 100 in stock.
-- "Panamax - Keep refrigerated. Expires - 1/1/2027"
+- Example Capsules
+- Example medication at 10mg per capsule
+- Example medication at 10mg per capsule. 100 in stock.
+- "Example manufacturer label - Keep refrigerated. Expires - 1/1/2027"
 - "Take with food. Etc etc"
 
 Navigation
@@ -161,10 +161,10 @@ Add/Edit Medication – Injection — Pre-Filled Syringe
 
 Floating Summary Card (dynamic examples):
 - Pre Filled Syringe
-- Dupixent Pre Filled Syringe
-- Dupixent 150mg/mL Pre Filled Syringes
-- Dupixent 150mg/mL Pre Filled Syringes. 100 in stock.
-- "Sanofi Genzyme - Keep refrigerated. Expires - 1/1/2027"
+- Example Pre Filled Syringe
+- Example medication 150mg/mL Pre Filled Syringes
+- Example medication 150mg/mL Pre Filled Syringes. 100 in stock.
+- "Example manufacturer label - Keep refrigerated. Expires - 1/1/2027"
 - "Subcutaneous Injection, Etc etc"
 
 Navigation
@@ -196,7 +196,7 @@ Submit
 Add/Edit Medication – Injection — Single Dose Vial
 
 Floating Summary Card (dynamic examples)
-- Single Dose Vial → Heparin examples as provided
+- Single Dose Vial → generic vial examples with manufacturer, refrigeration, expiry, and administration notes
 - Manufacturer, refrigeration, expiry, administration notes
 
 Navigation

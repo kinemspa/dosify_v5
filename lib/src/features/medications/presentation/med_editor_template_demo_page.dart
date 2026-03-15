@@ -111,7 +111,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
-              hint: 'eg. SkeduxTab-500',
+              hint: 'eg. Example item',
               suppressError: true,
             ),
             onChanged: (_) => setState(() {}),
@@ -124,7 +124,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
-              hint: 'eg. Skedux Labs',
+              hint: 'eg. Optional source label',
               suppressError: true,
             ),
             onChanged: (_) => setState(() {}),
@@ -137,7 +137,7 @@ class _EditorTemplatePreviewPageState extends State<EditorTemplatePreviewPage> {
             style: Theme.of(context).textTheme.bodyMedium,
             decoration: buildFieldDecoration(
               context,
-              hint: 'eg. Pain relief',
+              hint: 'eg. Reference description',
               suppressError: true,
             ),
             onChanged: (_) => setState(() {}),

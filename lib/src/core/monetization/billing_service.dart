@@ -77,11 +77,18 @@ class BillingService extends StateNotifier<BillingState> {
       );
     }
 
+    final productError = response.error?.message;
+    final lastError =
+        productError ??
+        (product == null
+            ? 'Pro product was not returned by Google Play for this install.'
+            : null);
+
     state = state.copyWith(
       available: true,
       isLoading: false,
       product: product,
-      lastError: response.error?.message,
+      lastError: lastError,
     );
 
     unawaited(_silentRestoreOnStartup());

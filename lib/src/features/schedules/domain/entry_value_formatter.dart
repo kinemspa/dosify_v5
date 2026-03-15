@@ -4,6 +4,12 @@
 ///
 /// Goal: keep unit precision/clamping consistent across entry entry surfaces.
 class EntryValueFormatter {
+  static double incrementStepForUnit(String unit) {
+    final u = unit.trim().toLowerCase();
+    if (u.isEmpty) return 1.0;
+    return 1.0;
+  }
+
   static double stepSizeForUnit(String unit) {
     final u = unit.trim().toLowerCase();
 

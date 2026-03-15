@@ -82,8 +82,8 @@ class NotificationChannelService {
   static const AndroidNotificationChannel _testAlarm =
       AndroidNotificationChannel(
         'test_alarm',
-        'Test Alarm (Diagnostics)',
-        description: 'Diagnostics channel for short-delay notification tests',
+        'Diagnostics Alarm',
+        description: 'Diagnostics channel for short-delay reminder previews',
         importance: Importance.max,
       );
 

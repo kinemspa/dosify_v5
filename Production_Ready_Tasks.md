@@ -63,3 +63,4 @@ By systematically addressing these areas, you can enhance the application's qual
 
 ## Deferred (do later)
 - Add visual regression (golden) tests for Calendar month/week grids to catch layout overflows/regressions.
+- Revisit cloud backup and restore after the Android OAuth signing flow and release pipeline are stable. If resumed, prefer a scoped Google Drive app-data implementation with explicit QA coverage for sign-in, restore safety, and account-permission failures.

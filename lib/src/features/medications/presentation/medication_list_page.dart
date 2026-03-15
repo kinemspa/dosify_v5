@@ -65,12 +65,11 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   _FilterBy _filterBy = _FilterBy.all;
   String _query = '';
   bool _searchExpanded = false;
+  bool _stockNormalizationQueued = false;
 
   static const _kPrefsViewKey = 'medication_list_view';
   static const _kPrefsSortByKey = 'medication_list_sort_by';
   static const _kPrefsSortAscKey = 'medication_list_sort_asc';
-  static const _kPrefsTipKey = 'screen_tip_medications_seen';
-
   IconData _viewIcon(_MedView v) => switch (v) {
     _MedView.list => Icons.view_list,
     _MedView.compact => Icons.view_comfy_alt,
@@ -229,41 +228,6 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   void initState() {
     super.initState();
     _loadSavedViewAndSort();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowScreenTip());
-  }
-
-  Future<void> _maybeShowScreenTip() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool(_kPrefsTipKey) == true) return;
-    await prefs.setBool(_kPrefsTipKey, true);
-    if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) {
-        final cs = Theme.of(ctx).colorScheme;
-        final onPrimary = cs.onPrimary;
-        return AlertDialog(
-          backgroundColor: cs.primary,
-          titleTextStyle: dialogTitleTextStyle(ctx)?.copyWith(color: onPrimary),
-          contentTextStyle:
-              dialogContentTextStyle(ctx)?.copyWith(color: onPrimary),
-          title: const Text('Medications'),
-          content: const Text(
-            'This is where your medications are saved and tracked.\n\n'
-            'A medication is the core data point — entries are scheduled against a medication. '
-            'Multiple schedules can be assigned to a single medication.\n\n'
-            'Deleting a medication will remove all linked schedules and any future entries assigned to it.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              style: TextButton.styleFrom(foregroundColor: onPrimary),
-              child: const Text('Got it'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> _loadSavedViewAndSort() async {
@@ -271,6 +235,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final savedView = prefs.getString(_kPrefsViewKey) ?? 'large';
     final savedSortBy = prefs.getString(_kPrefsSortByKey) ?? _SortBy.name.name;
     final savedSortAsc = prefs.getBool(_kPrefsSortAscKey) ?? true;
+    if (!mounted) return;
     setState(() {
       _view = _MedView.values.firstWhere(
         (v) => v.name == savedView,
@@ -288,6 +253,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   Future<void> _saveView(_MedView view) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kPrefsViewKey, view.name);
+    if (!mounted) return;
     setState(() => _view = view);
   }
 
@@ -297,6 +263,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kPrefsSortByKey, nextSortBy.name);
     await prefs.setBool(_kPrefsSortAscKey, nextSortAsc);
+    if (!mounted) return;
     setState(() {
       _sortBy = nextSortBy;
       _sortAsc = nextSortAsc;
@@ -306,8 +273,10 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
   // Ensure we have an original stock value for count-based units so that we can
   // display Remaining / Original correctly. This sets it lazily to the first
   // observed value and updates it when the current stock increases (restock).
-  void _ensureInitialStockValues(List<Medication> items) {
-    final box = ref.read(medicationsBoxProvider);
+  void _queueInitialStockValueNormalization(List<Medication> items) {
+    if (_stockNormalizationQueued) return;
+
+    final updates = <Medication>[];
     for (final m in items) {
       final isCountUnit =
           m.stockUnit == StockUnit.preFilledSyringes ||
@@ -325,10 +294,22 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         nextInit = cur; // treat as restock
       }
       if (nextInit != init) {
-        final updated = m.copyWith(initialStockValue: nextInit);
-        box.put(updated.id, updated);
+        updates.add(m.copyWith(initialStockValue: nextInit));
       }
     }
+
+    if (updates.isEmpty) return;
+
+    _stockNormalizationQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _stockNormalizationQueued = false;
+      if (!mounted) return;
+
+      final box = ref.read(medicationsBoxProvider);
+      for (final updated in updates) {
+        box.put(updated.id, updated);
+      }
+    });
   }
 
   @override
@@ -407,7 +388,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
 
           // Ensure initial stock values so large cards can show current vs
           // initial amounts.
-          _ensureInitialStockValues(items);
+          _queueInitialStockValueNormalization(items);
 
           if (items.isEmpty) {
             return Column(
@@ -570,7 +551,7 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
                 ),
                 const PopupMenuItem(
                   value: _FilterBy.formMultiDoseVial,
-                  child: Text('Multi-Dose Vials'),
+                  child: Text('Multi entry vials'),
                 ),
               ],
             ),

@@ -101,7 +101,7 @@ void main() {
     expect(overflowErrors, isEmpty);
 
     expect(find.text('Active'), findsOneWidget);
-    expect(find.text('Pause'), findsOneWidget);
+    expect(find.byIcon(Icons.pause_circle_outline_rounded), findsOneWidget);
   });
 
   testWidgets('ScheduleDetailHeaderBanner shows Resume when paused', (
@@ -133,6 +133,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Paused'), findsOneWidget);
-    expect(find.text('Resume'), findsOneWidget);
+    expect(find.byIcon(Icons.play_circle_outline_rounded), findsOneWidget);
+    expect(find.textContaining('Until '), findsOneWidget);
   });
 }

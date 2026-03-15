@@ -107,7 +107,7 @@ class _InventoryPageState extends State<InventoryPage> {
                           Center(
                             child: buildHelperText(
                               context,
-                              'Overview of medication stock, expiry, and projected days remaining based on linked schedules.',
+                              'Overview of medication stock, expiry, and projected run-out timing. Days remaining are based on stock depletion from linked schedules, not expiry dates.',
                             ),
                           ),
                           const SizedBox(height: kSpacingS),
@@ -147,7 +147,7 @@ class _InventoryPageState extends State<InventoryPage> {
                       ),
                       sectionSpacing,
                       CollapsibleSectionFormCard(
-                        title: 'Inventory table',
+                        title: 'Inventory matrix',
                         neutral: true,
                         isExpanded: _tableExpanded,
                         onExpandedChanged: (v) {
@@ -157,7 +157,7 @@ class _InventoryPageState extends State<InventoryPage> {
                           Center(
                             child: buildHelperText(
                               context,
-                              'A compact table view of stock, expiry, and projected days remaining for all medications.',
+                              'Compact comparison view for remaining stock, projected run-out, and expiry details.',
                             ),
                           ),
                           const SizedBox(height: kSpacingS),
@@ -240,7 +240,7 @@ class _MedicationInventoryTable extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Text(
-                'Days',
+                'Empty',
                 textAlign: TextAlign.end,
                 style: hintLabelTextStyle(
                   context,
@@ -315,11 +315,11 @@ class _MedicationInventoryTableRow extends StatelessWidget {
       final parts = <String>[];
       if (active != null) parts.add('A: ${_formatShortDate(context, active)}');
       if (sealed != null) parts.add('S: ${_formatShortDate(context, sealed)}');
-      if (parts.isEmpty) return '—';
+        if (parts.isEmpty) return 'No expiry';
       return parts.join('\n');
     }
 
-    if (medication.expiry == null) return '—';
+    if (medication.expiry == null) return 'No expiry';
     return _formatShortDate(context, medication.expiry!);
   }
 
@@ -818,7 +818,7 @@ class _MedicationInventoryTableRow extends StatelessWidget {
   }
 }
 
-class _MedicationInventoryRow extends StatelessWidget {
+class _MedicationInventoryRow extends StatefulWidget {
   const _MedicationInventoryRow({
     required this.medication,
     required this.schedules,
@@ -827,38 +827,85 @@ class _MedicationInventoryRow extends StatelessWidget {
   final Medication medication;
   final List<Schedule> schedules;
 
+  @override
+  State<_MedicationInventoryRow> createState() => _MedicationInventoryRowState();
+}
+
+class _MedicationInventoryRowState extends State<_MedicationInventoryRow> {
+  static const _monthAbbr = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  bool _expanded = false;
+
   List<Schedule> _linkedSchedules() {
-    return schedules
+    return widget.schedules
         .where(
           (s) =>
-              (s.medicationId != null && s.medicationId == medication.id) ||
-              (s.medicationId == null && s.medicationName == medication.name),
+              (s.medicationId != null && s.medicationId == widget.medication.id) ||
+              (s.medicationId == null &&
+                  s.medicationName == widget.medication.name),
         )
         .toList(growable: false);
+  }
+
+  String _formatShortDate(DateTime date) {
+    return '${_monthAbbr[date.month - 1]} ${date.day}';
+  }
+
+  String _formatExpiryCell() {
+    final active = widget.medication.reconstitutedVialExpiry;
+    final sealed =
+        widget.medication.backupVialsExpiry ?? widget.medication.expiry;
+
+    if (widget.medication.form == MedicationForm.multiDoseVial) {
+      final parts = <String>[];
+      if (active != null) parts.add('Active: ${_formatShortDate(active)}');
+      if (sealed != null) parts.add('Sealed: ${_formatShortDate(sealed)}');
+      if (parts.isEmpty) return 'No expiry';
+      return parts.join(' | ');
+    }
+
+    if (widget.medication.expiry == null) return 'No expiry';
+    return _formatShortDate(widget.medication.expiry!);
+  }
+
+  DateTime? _runOutDateFromDaysRemaining(double? daysRemaining) {
+    if (daysRemaining == null ||
+        daysRemaining.isNaN ||
+        daysRemaining.isInfinite ||
+        daysRemaining <= 0) {
+      return null;
+    }
+    final hours = (daysRemaining * 24).round();
+    return DateTime.now().add(Duration(hours: hours));
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final ratio = MedicationStockService.calculateStockRatio(medication);
+    final ratio = MedicationStockService.calculateStockRatio(widget.medication);
     final percentage = (ratio * 100).clamp(0.0, 100.0);
 
-    final stockInfo = MedicationDisplayHelpers.calculateStock(medication);
+    final stockInfo = MedicationDisplayHelpers.calculateStock(widget.medication);
     final linked = _linkedSchedules();
     final daysRemaining = MedicationStockService.calculateDaysRemaining(
-      medication,
+      widget.medication,
       linked,
     );
+    final expiryLabel = _formatExpiryCell();
+    final projectedEmptyAt = _runOutDateFromDaysRemaining(daysRemaining);
 
-    final isMdv = medication.form == MedicationForm.multiDoseVial;
-    final sealedCount = isMdv ? medication.stockValue.floor() : null;
+    final isMdv = widget.medication.form == MedicationForm.multiDoseVial;
+    final sealedCount = isMdv ? widget.medication.stockValue.floor() : null;
 
     final daysLabel = daysRemaining == null
-        ? '—'
+        ? '-'
         : daysRemaining.isNaN
-        ? '—'
+        ? '-'
         : daysRemaining.isInfinite
-        ? '—'
+        ? '-'
         : daysRemaining < 1
         ? '<1 day'
         : '${daysRemaining.floor()} days';
@@ -870,7 +917,9 @@ class _MedicationInventoryRow extends StatelessWidget {
 
     // For MDV, active vial = open vial mL; sealed = reserve vial count
     final activeMl = isMdv
-        ? (medication.activeVialVolume ?? medication.containerVolumeMl ?? 0)
+      ? (widget.medication.activeVialVolume ??
+          widget.medication.containerVolumeMl ??
+          0)
         : null;
     final activeMlLabel = activeMl == null
         ? null
@@ -883,7 +932,7 @@ class _MedicationInventoryRow extends StatelessWidget {
     if (!isMdv) {
       sealedLabel = '${sealedCount ?? 0} vials';
     } else {
-      final batches = medication.sealedVialBatches
+      final batches = widget.medication.sealedVialBatches
           ?.where((b) => b.count > 0)
           .toList();
       if (batches == null || batches.isEmpty) {
@@ -899,84 +948,150 @@ class _MedicationInventoryRow extends StatelessWidget {
       }
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 44,
-            height: 44,
-            child: MiniStockGauge(
-              percentage: percentage,
-              color: cs.primary,
-              size: 44,
-            ),
-          ),
-          const SizedBox(width: kSpacingS),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  medication.name,
-                  style: cardTitleStyle(
-                    context,
-                  )?.copyWith(fontWeight: kFontWeightSemiBold),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: kSpacingXS),
-                Text(
-                  // For MDV, only show form label; active/sealed go in right columns
-                  isMdv
-                      ? MedicationDisplayHelpers.formLabel(medication.form)
-                      : '${MedicationDisplayHelpers.formLabel(medication.form)} | ${stockInfo.label}',
-                  style: helperTextStyle(context)?.copyWith(
-                    fontWeight: kFontWeightSemiBold,
-                    color: isMdv
-                        ? cs.onSurfaceVariant.withValues(
-                            alpha: kOpacityMediumHigh,
-                          )
-                        : stockStatusColorFromPercentage(
-                            context,
-                            percentage: stockInfo.percentage,
-                          ),
+    return Material(
+      color: kColorTransparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        onTap: () => setState(() => _expanded = !_expanded),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: kSpacingXS),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: MiniStockGauge(
+                      percentage: percentage,
+                      color: cs.primary,
+                      size: 44,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: kSpacingS),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.medication.name,
+                          style: cardTitleStyle(
+                            context,
+                          )?.copyWith(fontWeight: kFontWeightSemiBold),
+                          maxLines: _expanded ? null : 1,
+                          overflow: _expanded
+                              ? TextOverflow.visible
+                              : TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: kSpacingXS),
+                        Text(
+                          isMdv
+                              ? MedicationDisplayHelpers.formLabel(
+                                  widget.medication.form,
+                                )
+                              : '${MedicationDisplayHelpers.formLabel(widget.medication.form)} | ${stockInfo.label}',
+                          style: helperTextStyle(context)?.copyWith(
+                            fontWeight: kFontWeightSemiBold,
+                            color: isMdv
+                                ? cs.onSurfaceVariant.withValues(
+                                    alpha: kOpacityMediumHigh,
+                                  )
+                                : stockStatusColorFromPercentage(
+                                    context,
+                                    percentage: stockInfo.percentage,
+                                  ),
+                          ),
+                          maxLines: _expanded ? null : 1,
+                          overflow: _expanded
+                              ? TextOverflow.visible
+                              : TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: kSpacingS),
+                  if (isMdv) ...[
+                    _statColumn(
+                      context,
+                      label: 'Active',
+                      value: activeMlLabel ?? '-',
+                      valueColor: stockStatusColorFromPercentage(
+                        context,
+                        percentage: stockInfo.percentage,
+                      ),
+                    ),
+                    const SizedBox(width: kSpacingM),
+                    _statColumn(
+                      context,
+                      label: 'Sealed',
+                      value: sealedLabel,
+                      valueColor: (sealedCount ?? 0) == 0 ? cs.error : null,
+                    ),
+                    const SizedBox(width: kSpacingM),
+                  ],
+                  _statColumn(
+                    context,
+                    label: 'Until empty',
+                    value: daysLabel,
+                    valueColor: daysColor,
+                  ),
+                  const SizedBox(width: kSpacingS),
+                  Icon(
+                    _expanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              if (_expanded) ...[
+                const SizedBox(height: kSpacingS),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(kSpacingS),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(kBorderRadiusSmall),
+                    border: Border.all(
+                      color: cs.outlineVariant.withValues(
+                        alpha: kOpacityVeryLow,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Stock: ${stockInfo.label}',
+                        style: helperTextStyle(context),
+                      ),
+                      const SizedBox(height: kSpacingXXS),
+                      Text(
+                        'Expiry: $expiryLabel',
+                        style: helperTextStyle(context),
+                      ),
+                      if (projectedEmptyAt != null) ...[
+                        const SizedBox(height: kSpacingXXS),
+                        Text(
+                          'Projected empty: ${_formatShortDate(projectedEmptyAt)}',
+                          style: helperTextStyle(context),
+                        ),
+                      ],
+                      if (isMdv) ...[
+                        const SizedBox(height: kSpacingXXS),
+                        Text(
+                          'Sealed reserve: $sealedLabel',
+                          style: helperTextStyle(context),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
-            ),
+            ],
           ),
-          const SizedBox(width: kSpacingS),
-          // MDV right section: Active | Sealed | Days left
-          if (isMdv) ...[
-            _statColumn(
-              context,
-              label: 'Active',
-              value: activeMlLabel ?? '—',
-              valueColor: stockStatusColorFromPercentage(
-                context,
-                percentage: stockInfo.percentage,
-              ),
-            ),
-            const SizedBox(width: kSpacingM),
-            _statColumn(
-              context,
-              label: 'Sealed',
-              value: sealedLabel,
-              valueColor: (sealedCount ?? 0) == 0 ? cs.error : null,
-            ),
-            const SizedBox(width: kSpacingM),
-          ],
-          _statColumn(
-            context,
-            label: 'Days left',
-            value: daysLabel,
-            valueColor: daysColor,
-          ),
-        ],
+        ),
       ),
     );
   }

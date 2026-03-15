@@ -52,6 +52,7 @@ class TodayEntriesCard extends ConsumerStatefulWidget {
     super.key,
     required this.scope,
     this.title = 'Today',
+    this.trailing,
     this.isExpanded,
     this.onExpandedChanged,
     this.reserveReorderHandleGutterWhenCollapsed = false,
@@ -61,6 +62,7 @@ class TodayEntriesCard extends ConsumerStatefulWidget {
 
   final TodayEntriesScope scope;
   final String title;
+  final Widget? trailing;
 
   /// If provided, expansion state is controlled by the parent.
   final bool? isExpanded;
@@ -317,6 +319,7 @@ class _TodayEntriesCardState extends ConsumerState<TodayEntriesCard> {
       neutral: widget.neutral,
       frameless: widget.frameless,
       title: widget.title,
+      trailing: widget.trailing,
       isExpanded: _expanded,
       reserveReorderHandleGutterWhenCollapsed:
           widget.reserveReorderHandleGutterWhenCollapsed,

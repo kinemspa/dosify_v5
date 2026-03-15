@@ -48,61 +48,61 @@ class TestDataSeedService {
     final tablet = Medication(
       id: _medIdTablet,
       form: MedicationForm.tablet,
-      name: 'Test Tablet',
+      name: 'Example Tablet',
       strengthValue: 50,
       strengthUnit: Unit.mg,
       stockValue: 30,
       stockUnit: StockUnit.tablets,
-      description: 'Sample tablet medication for UI testing.',
+      description: 'Preview tablet entry for layout and reminder checks.',
     );
 
     final capsule = Medication(
       id: _medIdCapsule,
       form: MedicationForm.capsule,
-      name: 'Test Capsule',
+      name: 'Example Capsule',
       strengthValue: 25,
       strengthUnit: Unit.mg,
       stockValue: 20,
       stockUnit: StockUnit.capsules,
-      description: 'Sample capsule medication for UI testing.',
+      description: 'Preview capsule entry for layout and reminder checks.',
     );
 
     final pfs = Medication(
       id: _medIdPfs,
       form: MedicationForm.prefilledSyringe,
-      name: 'Test Prefilled Syringe',
+      name: 'Example Prefilled Syringe',
       strengthValue: 5,
       strengthUnit: Unit.mgPerMl,
       stockValue: 10,
       stockUnit: StockUnit.preFilledSyringes,
       volumePerEntry: 0.5,
       volumeUnit: VolumeUnit.ml,
-      description: 'Sample prefilled syringe for UI testing.',
+      description: 'Preview prefilled syringe entry for layout and reminder checks.',
     );
 
     final sdv = Medication(
       id: _medIdSdv,
       form: MedicationForm.singleDoseVial,
-      name: 'Test Single Entry Vial',
+      name: 'Example Single Entry Vial',
       strengthValue: 1,
       strengthUnit: Unit.mg,
       stockValue: 8,
       stockUnit: StockUnit.singleDoseVials,
-      description: 'Sample single-dose vial for UI testing.',
+      description: 'Preview single entry vial for layout and reminder checks.',
     );
 
     final mdv = Medication(
       id: _medIdMdv,
       form: MedicationForm.multiDoseVial,
-      name: 'Test Multi Entry Vial',
+      name: 'Example Multi Entry Vial',
       strengthValue: 10,
       strengthUnit: Unit.mgPerMl,
       stockValue: 2,
       stockUnit: StockUnit.multiDoseVials,
       containerVolumeMl: 10,
       activeVialVolume: 10,
-      diluentName: 'Test Diluent',
-      description: 'Sample multi-dose vial for UI testing.',
+      diluentName: 'Example Diluent',
+      description: 'Preview multi entry vial for layout and reminder checks.',
     );
 
     await meds.putAll({

@@ -60,14 +60,14 @@ extension VialMedTypeConfig on VialMedType {
 
   /// Placeholder hint for the name field.
   String get nameHint => switch (this) {
-    VialMedType.singleDoseVial => 'e.g., Antibiotic',
-    VialMedType.prefilledSyringe => 'e.g., Growth Hormone',
+    VialMedType.singleDoseVial => 'e.g., Example medication',
+    VialMedType.prefilledSyringe => 'e.g., Example medication',
   };
 
   /// Placeholder hint for the manufacturer field.
   String get manufacturerHint => switch (this) {
-    VialMedType.singleDoseVial => 'e.g., PharmaInc',
-    VialMedType.prefilledSyringe => 'e.g., MedCo',
+    VialMedType.singleDoseVial => 'Optional',
+    VialMedType.prefilledSyringe => 'Optional',
   };
 }
 
@@ -438,7 +438,7 @@ class _AddVialWizardPageState
             ),
             buildHelperText(
               context,
-              'Brand or company name (optional)',
+              'Optional manufacturer or source label',
               fullWidth: true,
             ),
             LabelFieldRow(

@@ -50,15 +50,15 @@ String getStrengthHelperText(String unit) {
   switch (unit) {
     case 'units':
       return '''
-Enter the total units labeled on your vial (e.g., '10 units' for HGH).
+Enter the total units shown on the container label.
 
-Can't find units on vial?
-• HGH: 1mg ≈ 3 units (so 5mg ≈ 15 units)
-• Insulin: Usually labeled in units (check for U-100, U-200, etc.)
-• Other biologics: Check manufacturer documentation
+For reference:
+• Enter the exact unit total printed on the label
+• Do not convert between mass and units without qualified guidance
+• If the label is unclear, verify it before relying on this calculation
 
-⚠️ Units are medication potency, NOT syringe markings.
-Never guess - incorrect dosing can be dangerous.''';
+⚠️ Units are medication potency, not syringe markings.
+Never guess if the labeling is unclear.''';
 
     case 'mg':
       return '''
@@ -79,7 +79,7 @@ Check vial label carefully for unit.''';
 
     case 'g':
       return '''
-Enter total grams in vial (typically antibiotics).
+Enter total grams shown on the container label.
 
 Note: 1g = 1000mg''';
 

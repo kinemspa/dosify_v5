@@ -506,8 +506,8 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
                   Expanded(
                     child: Text(
                       widget.isEditing
-                          ? 'Edit Multi-Dose Vial'
-                          : 'Add Multi-Dose Vial',
+                          ? 'Edit Multi Entry Vial'
+                          : 'Add Multi Entry Vial',
                       style: wizardHeaderTitleTextStyle(
                         context,
                         color: headerFg,
@@ -661,13 +661,13 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
               label: 'Manufacturer',
               field: WizardTextField36(
                 controller: _manufacturerCtrl,
-                hint: 'e.g., BioTech',
+                hint: 'Optional',
                 onChanged: (_) => setState(() {}),
               ),
             ),
             buildHelperText(
               context,
-              'Brand or company name (optional)',
+              'Optional manufacturer or source label',
               fullWidth: true,
             ),
             LabelFieldRow(
@@ -698,7 +698,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
         Text('Strength & Reconstitution', style: sectionTitleStyle(context)),
         const SizedBox(height: 8),
         Text(
-          'Multi-Dose Vials require reconstitution (mixing with liquid). Enter the strength and use our calculator to reference the reconstitution ratio.',
+          'Multi Entry Vials require reconstitution (mixing with liquid). Enter the strength and use our calculator to reference the reconstitution ratio.',
           style: mutedTextStyle(context),
         ),
         const SizedBox(height: 24),
@@ -1683,7 +1683,7 @@ class _AddMdvWizardPageState extends ConsumerState<AddMdvWizardPage> {
     final activeThreshold = _activeVialLowStockEnabled
         ? double.tryParse(_activeVialLowStockMlCtrl.text.trim())
         : null;
-    final headerTitle = name.isEmpty ? 'Multi-Dose Vial' : name;
+    final headerTitle = name.isEmpty ? 'Multi Entry Vial' : name;
     final theme = Theme.of(context);
     final fg = medicationDetailHeaderForegroundColor(context);
 
@@ -1964,7 +1964,7 @@ class _ReconstitutionInfoCard extends StatelessWidget {
     final Widget content;
     if (result == null) {
       content = Text(
-        'Multi-Dose Vials need to be mixed with liquid (reconstituted). Tap to open the calculator.',
+        'Multi Entry Vials need to be mixed with liquid (reconstituted). Tap to open the calculator.',
         style: mutedTextStyle(context)?.copyWith(color: bodyFg),
       );
     } else {

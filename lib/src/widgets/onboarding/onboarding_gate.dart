@@ -33,15 +33,14 @@ const _tips = <String, _CoachStep>{
   '/medications/reconstitution': _CoachStep(
     title: 'Reconstitution calculator',
     message:
-        'Record and save vial reconstitution entries here for reference. '
-        'Always verify values with your clinician.',
+        'Record and save vial reconstitution entries here for reference.',
     targetAlignment: Alignment(0.0, -0.5),
   ),
   '/schedules': _CoachStep(
     title: 'Schedules',
     message:
-        'Create schedules here. You receive a notification when each '
-        'scheduled time arrives.',
+        'Create schedules here to organize upcoming entries and reminders. '
+        'Reminder delivery depends on your device settings and permissions.',
     targetAlignment: Alignment(0.0, 0.85),
   ),
   '/schedules/detail/:id': _CoachStep(

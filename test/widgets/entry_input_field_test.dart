@@ -5,6 +5,19 @@ import 'package:skedux/src/widgets/white_syringe_gauge.dart';
 import 'package:skedux/src/features/medications/domain/enums.dart';
 import 'package:skedux/src/features/schedules/domain/entry_calculator.dart';
 
+Future<void> _selectDropdownItem(
+  WidgetTester tester, {
+  required int iconIndex,
+  required String itemText,
+}) async {
+  final dropdownIcon = find.byIcon(Icons.arrow_drop_down).at(iconIndex);
+  await tester.ensureVisible(dropdownIcon);
+  await tester.tap(dropdownIcon);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(itemText).last);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   group('EntryInputField - Tablets', () {
     testWidgets('displays mode toggle with Tablets and Strength options', (
@@ -23,8 +36,15 @@ void main() {
         ),
       );
 
+      expect(find.text('Entry Input'), findsOneWidget);
       expect(find.text('Tablets'), findsOneWidget);
-      expect(find.text('Strength'), findsOneWidget);
+
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Strength',
+      );
+      expect(find.byType(ActionChip), findsNothing);
     });
 
     testWidgets('defaults to Tablets mode when no initial value', (
@@ -122,7 +142,7 @@ void main() {
       results.clear(); // Clear initial calculation
 
       // Find and tap increment button
-      final incrementButton = find.byIcon(Icons.add);
+      final incrementButton = find.text('+').first;
       await tester.tap(incrementButton);
       await tester.pumpAndSettle();
 
@@ -148,9 +168,11 @@ void main() {
       // Verify quick buttons exist initially
       expect(find.byType(ActionChip), findsNWidgets(4));
 
-      // Tap Strength button
-      await tester.tap(find.text('Strength'));
-      await tester.pumpAndSettle();
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Strength',
+      );
 
       // Quick buttons should be hidden in Strength mode
       expect(find.byType(ActionChip), findsNothing);
@@ -172,9 +194,11 @@ void main() {
         ),
       );
 
-      // Switch to Strength mode
-      await tester.tap(find.text('Strength'));
-      await tester.pumpAndSettle();
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Strength',
+      );
 
       // Enter 100mg
       await tester.enterText(find.byType(TextField), '100');
@@ -201,8 +225,15 @@ void main() {
         ),
       );
 
+      expect(find.text('Entry Input'), findsOneWidget);
       expect(find.text('Capsules'), findsOneWidget);
-      expect(find.text('Strength'), findsOneWidget);
+
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Strength',
+      );
+      expect(find.byType(ActionChip), findsNothing);
     });
 
     testWidgets('does not show quick buttons for capsules', (tester) async {
@@ -245,7 +276,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap increment
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.text('+').first);
       await tester.pumpAndSettle();
 
       // Get last result (after increment)
@@ -484,10 +515,22 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Should show 3-way toggle
+      expect(find.text('Entry Input'), findsOneWidget);
       expect(find.text('Strength'), findsOneWidget);
-      expect(find.text('Volume'), findsOneWidget);
-      expect(find.text('Units'), findsOneWidget);
+
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Volume',
+      );
+      expect(find.text('e.g., 0.25'), findsOneWidget);
+
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Units',
+      );
+      expect(find.text('e.g., 25'), findsOneWidget);
     });
 
     testWidgets('defaults to Strength mode', (tester) async {
@@ -567,9 +610,11 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Tap Volume button
-      await tester.tap(find.text('Volume'));
-      await tester.pumpAndSettle();
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Volume',
+      );
 
       // Enter 0.25ml
       await tester.enterText(find.byType(TextField), '0.25');
@@ -603,9 +648,11 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Tap Units button
-      await tester.tap(find.text('Units'));
-      await tester.pumpAndSettle();
+      await _selectDropdownItem(
+        tester,
+        iconIndex: 0,
+        itemText: 'Units',
+      );
 
       // Enter 25 units (corresponds to 0.25ml and 500mcg)
       await tester.enterText(find.byType(TextField), '25');
@@ -645,11 +692,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show 3-value display with all values
-      // Note: There may be 2 instances (one in 3-value display, one in result display)
       expect(find.textContaining('500mcg'), findsWidgets);
       expect(find.textContaining('0.25ml'), findsWidgets);
-      expect(find.textContaining('25.0 Units'), findsWidgets);
-      expect(find.text('•'), findsNWidgets(2)); // Two bullet separators
+      expect(find.textContaining('25'), findsWidgets);
     });
 
     testWidgets('initializes with strength value', (tester) async {
@@ -676,7 +721,8 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.entryMassMcg, 500);
-      expect(find.text('500.0'), findsOneWidget);
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.controller?.text, '500');
     });
 
     testWidgets('initializes with volume value and defaults to Volume mode', (

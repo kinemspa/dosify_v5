@@ -218,7 +218,7 @@ class _UnifiedAddEditMedicationPageState
           child: TextFormField(
             controller: _nameCtrl,
             textCapitalization: TextCapitalization.sentences,
-            decoration: _dec(hint: 'eg. Panadol'),
+            decoration: _dec(hint: 'eg. Example medication'),
             validator: (v) =>
                 (v == null || v.trim().isEmpty) ? 'Required' : null,
             onChanged: (_) => setState(() => _touchedName = true),
@@ -232,11 +232,11 @@ class _UnifiedAddEditMedicationPageState
           child: TextFormField(
             controller: _manufacturerCtrl,
             textCapitalization: TextCapitalization.sentences,
-            decoration: _dec(hint: 'e.g., Example Co.'),
+            decoration: _dec(hint: 'Optional'),
           ),
         ),
       ),
-      _helperBelowLeft('Enter the brand or company name'),
+      _helperBelowLeft('Optional manufacturer or source label'),
       _rowLabelField(
         label: 'Description',
         field: Field36(

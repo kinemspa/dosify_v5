@@ -56,8 +56,8 @@ class NoMedicationsBanner extends ConsumerWidget {
               ),
               const SizedBox(height: kSpacingXS),
               Text(
-                'Skedux tracks schedules, entries, and inventory per medication. '
-                'Add one to get started.',
+                'Skedux helps you record schedules, entries, and inventory for '
+                'items you manage manually. Add one to get started.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurfaceVariant,

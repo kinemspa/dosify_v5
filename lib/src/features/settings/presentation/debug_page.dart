@@ -23,7 +23,7 @@ class DebugPage extends StatelessWidget {
         padding: const EdgeInsets.all(kSpacingM),
         children: [
           Text(
-            'Notification Testing',
+            'Notification Diagnostics',
             style: sectionTitleStyle(context),
           ),
           const SizedBox(height: kSpacingM),
@@ -36,11 +36,11 @@ class DebugPage extends StatelessWidget {
               }
               await NotificationService.showTest();
               if (context.mounted) {
-                showAppSnackBar(context, 'Test notification sent');
+                showAppSnackBar(context, 'Diagnostics notification sent');
               }
             },
             icon: const Icon(Icons.notifications_active),
-            label: const Text('Send test notification'),
+            label: const Text('Send diagnostics notification'),
           ),
           const SizedBox(height: kSpacingS),
           FilledButton.icon(

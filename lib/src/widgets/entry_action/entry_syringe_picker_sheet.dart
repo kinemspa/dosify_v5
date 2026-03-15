@@ -163,6 +163,7 @@ double? mdvTotalVialVolumeMicroliter(Medication med) {
 class EntryMdvControls extends StatelessWidget {
   const EntryMdvControls({
     super.key,
+    required this.medication,
     required this.mode,
     required this.syringe,
     required this.strengthUnit,
@@ -173,6 +174,7 @@ class EntryMdvControls extends StatelessWidget {
     this.onStrengthUnitChanged,
   });
 
+  final Medication medication;
   final MdvEntryChangeMode mode;
   final SyringeType syringe;
   final String strengthUnit;
@@ -186,6 +188,61 @@ class EntryMdvControls extends StatelessWidget {
   final ValueChanged<String>? onStrengthUnitChanged;
 
   String get _unitLabel => mdvEntryChangeUnitLabel(mode, strengthUnit);
+
+  EntryCalculationResult? _currentResult(Medication med) {
+    return mdvEntryChangeResult(
+      med: med,
+      rawText: entryOverrideController.text,
+      mode: mode,
+      syringe: syringe,
+      strengthUnit: strengthUnit,
+    );
+  }
+
+  String _formatModeValue({
+    required double syringeUnits,
+    required Medication med,
+  }) {
+    final result = EntryCalculator.calculateFromUnitsMDV(
+      syringeUnits: syringeUnits,
+      totalVialStrengthMcg: mdvTotalVialStrengthMcg(med)!,
+      totalVialVolumeMicroliter: mdvTotalVialVolumeMicroliter(med)!,
+      syringeType: syringe,
+    );
+
+    String fmt(double value, String unit) => EntryValueFormatter.format(value, unit);
+
+    switch (mode) {
+      case MdvEntryChangeMode.units:
+        return fmt(syringeUnits, 'units');
+      case MdvEntryChangeMode.volume:
+        return fmt((result.entryVolumeMicroliter ?? 0) / 1000, 'ml');
+      case MdvEntryChangeMode.strength:
+        final mcg = result.entryMassMcg ?? 0;
+        final displayValue = switch (strengthUnit) {
+          'mcg' => mcg,
+          'mg' => mcg / 1000,
+          'g' => mcg / 1000000,
+          'units' => mcg,
+          _ => mcg,
+        };
+        return fmt(displayValue, strengthUnit);
+    }
+  }
+
+  void _stepBySyringeUnits(Medication med, double delta) {
+    final currentResult = _currentResult(med);
+    final currentUnits = (currentResult?.syringeUnits ?? 0).toDouble();
+    final nextUnits = (currentUnits + delta).clamp(
+      0.0,
+      syringe.maxUnits.toDouble(),
+    );
+    entryOverrideController.text = _formatModeValue(
+      syringeUnits: nextUnits,
+      med: med,
+    );
+    onValueChanged();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -262,23 +319,11 @@ class EntryMdvControls extends StatelessWidget {
               child: StepperRow36(
                 controller: entryOverrideController,
                 onDec: () {
-                  final step = EntryValueFormatter.stepSizeForUnit(_unitLabel);
-                  final v =
-                      double.tryParse(entryOverrideController.text) ?? 0;
-                  entryOverrideController.text = EntryValueFormatter.format(
-                    (v - step).clamp(0.0, double.infinity),
-                    _unitLabel,
-                  );
+                  _stepBySyringeUnits(medication, -1);
                   onValueChanged();
                 },
                 onInc: () {
-                  final step = EntryValueFormatter.stepSizeForUnit(_unitLabel);
-                  final v =
-                      double.tryParse(entryOverrideController.text) ?? 0;
-                  entryOverrideController.text = EntryValueFormatter.format(
-                    (v + step).clamp(0.0, double.infinity),
-                    _unitLabel,
-                  );
+                  _stepBySyringeUnits(medication, 1);
                   onValueChanged();
                 },
                 decoration: buildCompactFieldDecoration(context: context),

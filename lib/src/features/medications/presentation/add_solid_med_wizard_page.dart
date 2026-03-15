@@ -61,7 +61,7 @@ extension SolidMedTypeConfig on SolidMedType {
   /// Placeholder hint for the name field.
   String get nameHint => switch (this) {
     SolidMedType.tablet => 'e.g., Example medication',
-    SolidMedType.capsule => 'e.g., Omeprazole',
+    SolidMedType.capsule => 'e.g., Example medication',
   };
 }
 
@@ -406,13 +406,13 @@ class _AddSolidMedWizardPageState
               label: 'Manufacturer',
               field: WizardTextField36(
                 controller: _manufacturerCtrl,
-                hint: 'e.g., PharmaInc',
+                hint: 'Optional',
                 onChanged: (_) => setState(() {}),
               ),
             ),
             buildHelperText(
               context,
-              'Brand or company name (optional)',
+              'Optional manufacturer or source label',
               fullWidth: true,
             ),
             LabelFieldRow(

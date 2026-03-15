@@ -448,8 +448,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     MedicationForm.tablet => 'Tablets',
     MedicationForm.capsule => 'Capsules',
     MedicationForm.prefilledSyringe => 'Pre-filled Syringes',
-    MedicationForm.singleDoseVial => 'Single-Dose Vials',
-    MedicationForm.multiDoseVial => 'Multi-Dose Vials',
+     MedicationForm.singleDoseVial => 'Single Entry Vials',
+     MedicationForm.multiDoseVial => 'Multi Entry Vials',
   };
 
   // ── chart helpers ──────────────────────────────────────────────────────────
@@ -1201,49 +1201,81 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       return ListView(
                         padding: kPagePadding,
                         children: [
-                          // ── 0. Period + Filters ──────────────────────────
+                          // ── 0. Filter controls ───────────────────────────
                           SectionFormCard(
-                            title: 'Period',
+                            title: 'Filter',
                             neutral: true,
                             children: [
-                              Center(
-                                child: ReportTimeRangeSelectorRow(
-                                  value: _rangePreset,
-                                  onChanged: (next) =>
-                                      setState(() => _rangePreset = next),
+                              Text(
+                                'Time range',
+                                style: helperTextStyle(context)?.copyWith(
+                                  fontWeight: kFontWeightSemiBold,
                                 ),
+                              ),
+                              const SizedBox(height: kSpacingXS),
+                              ReportTimeRangeSelectorRow(
+                                value: _rangePreset,
+                                onChanged: (next) =>
+                                    setState(() => _rangePreset = next),
+                              ),
+                              const SizedBox(height: kSpacingM),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Analytics filters',
+                                      style: helperTextStyle(
+                                        context,
+                                      )?.copyWith(
+                                        fontWeight: kFontWeightSemiBold,
+                                      ),
+                                    ),
+                                  ),
+                                  if (hasActiveFilters)
+                                    Text(
+                                      '$activeFilterCount active',
+                                      style: smallHelperTextStyle(context)
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            fontWeight: kFontWeightSemiBold,
+                                          ),
+                                    ),
+                                ],
                               ),
                               const SizedBox(height: kSpacingS),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  OutlinedButton.icon(
-                                    icon: const Icon(Icons.tune, size: 16),
-                                    label: Text(
-                                      hasActiveFilters
-                                          ? 'Filters  ·  $activeFilterCount active'
-                                          : 'Filters',
-                                    ),
-                                    style: hasActiveFilters
-                                        ? OutlinedButton.styleFrom(
-                                            foregroundColor:
-                                                Theme.of(
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      icon: const Icon(Icons.tune, size: 16),
+                                      label: Text(
+                                        hasActiveFilters
+                                            ? 'Manage filters'
+                                            : 'Add filters',
+                                      ),
+                                      style: hasActiveFilters
+                                          ? OutlinedButton.styleFrom(
+                                              foregroundColor:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
+                                              side: BorderSide(
+                                                color: Theme.of(
                                                   context,
                                                 ).colorScheme.primary,
-                                            side: BorderSide(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
-                                            ),
-                                          )
-                                        : null,
-                                    onPressed: () =>
-                                        _showDisplayFilterSheet(
-                                          context,
-                                          medItems: medItems,
-                                          scheduleItems: scheduleItems,
-                                          typeBreakdown: typeBreakdown,
-                                        ),
+                                              ),
+                                            )
+                                          : null,
+                                      onPressed: () =>
+                                          _showDisplayFilterSheet(
+                                            context,
+                                            medItems: medItems,
+                                            scheduleItems: scheduleItems,
+                                            typeBreakdown: typeBreakdown,
+                                          ),
+                                    ),
                                   ),
                                   if (hasActiveFilters) ...[
                                     const SizedBox(width: kSpacingXS),
@@ -1432,6 +1464,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             title: 'Inventory Health',
                             neutral: true,
                             children: [
+                              buildHelperText(
+                                context,
+                                'Tap Low stock or Expiring to filter analytics to that medication subset.',
+                              ),
+                              const SizedBox(height: kSpacingS),
                               Row(
                                 children: [
                                   _statTile(
@@ -1444,6 +1481,22 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     valueColor: lowStockCount > 0
                                         ? Theme.of(context).colorScheme.error
                                         : null,
+                                    onTap: lowStockCount == 0
+                                        ? null
+                                        : () => setState(() {
+                                            _filterMedIds = displayMedItems
+                                                .where((m) {
+                                                  if (!m.lowStockEnabled) {
+                                                    return false;
+                                                  }
+                                                  return m.stockValue <=
+                                                      (m.lowStockThreshold ??
+                                                          m.lowStockVialsThresholdCount ??
+                                                          0);
+                                                })
+                                                .map((m) => m.id)
+                                                .toSet();
+                                          }),
                                   ),
                                   const SizedBox(width: kSpacingS),
                                   _statTile(
@@ -1456,6 +1509,26 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     valueColor: expiringCount > 0
                                         ? Theme.of(context).colorScheme.tertiary
                                         : null,
+                                    onTap: expiringCount == 0
+                                        ? null
+                                        : () => setState(() {
+                                            _filterMedIds = displayMedItems
+                                                .where((m) {
+                                                  final dates = [
+                                                    m.expiry,
+                                                    m.backupVialsExpiry,
+                                                    m.reconstitutedVialExpiry,
+                                                  ];
+                                                  return dates.any(
+                                                    (d) =>
+                                                        d != null &&
+                                                        !d.isBefore(now) &&
+                                                        d.isBefore(in30Days),
+                                                  );
+                                                })
+                                                .map((m) => m.id)
+                                                .toSet();
+                                          }),
                                   ),
                                 ],
                               ),
@@ -1561,6 +1634,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     ),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: kSpacingS),
+                              buildHelperText(
+                                context,
+                                'Inventory Logs exports refills, restocks, manual adjustments, expired removals, and ad hoc inventory deductions. It is enabled when matching inventory log entries exist for the selected range and medication filter.',
                               ),
                               const SizedBox(height: kSpacingS),
                               _exportButton(
@@ -1729,41 +1807,49 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     required String label,
     required String value,
     Color? valueColor,
+    VoidCallback? onTap,
   }) {
     final cs = Theme.of(context).colorScheme;
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: kSpacingM,
-          vertical: kSpacingS,
-        ),
-        decoration: buildStandardCardDecoration(context: context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: kIconSizeLarge,
-              color: valueColor ?? cs.primary,
+      child: Material(
+        color: kColorTransparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: kSpacingM,
+              vertical: kSpacingS,
             ),
-            const SizedBox(height: kSpacingXS),
-            Text(
-              label,
-              style: helperTextStyle(context),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
+            decoration: buildStandardCardDecoration(context: context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: kIconSizeLarge,
+                  color: valueColor ?? cs.primary,
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  label,
+                  style: helperTextStyle(context),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: kSpacingXS),
+                Text(
+                  value,
+                  style: bodyTextStyle(context)?.copyWith(
+                    fontWeight: kFontWeightBold,
+                    fontSize: kFontSizeXLarge,
+                    color: valueColor ?? cs.primary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: kSpacingXS),
-            Text(
-              value,
-              style: bodyTextStyle(context)?.copyWith(
-                fontWeight: kFontWeightBold,
-                fontSize: kFontSizeXLarge,
-                color: valueColor ?? cs.primary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+          ),
         ),
       ),
     );
