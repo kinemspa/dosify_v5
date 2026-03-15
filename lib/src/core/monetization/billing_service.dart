@@ -24,6 +24,20 @@ class BillingState {
   final ProductDetails? product;
   final String? lastError;
 
+  String? get unavailableReason {
+    final error = lastError?.trim();
+    if (error != null && error.isNotEmpty) {
+      return error;
+    }
+    if (!available) {
+      return 'Google Play billing is unavailable on this device or build.';
+    }
+    if (product == null) {
+      return 'The Pro product is not currently available from Google Play.';
+    }
+    return null;
+  }
+
   BillingState copyWith({
     bool? available,
     bool? isLoading,
@@ -103,20 +117,39 @@ class BillingService extends StateNotifier<BillingState> {
   }
 
   Future<bool> buyProLifetime() async {
+    if (!state.available || state.product == null) {
+      await initialize();
+    }
+
     final product = state.product;
     if (product == null || !state.available) {
-      state = state.copyWith(lastError: 'Pro product is not available.');
+      state = state.copyWith(
+        isLoading: false,
+        lastError:
+            state.unavailableReason ??
+            'Pro purchase is not available right now. If you are testing, install the app from Google Play internal testing with the same Google account used as a tester.',
+      );
       return false;
     }
 
     state = state.copyWith(isLoading: true, lastError: null);
     await MonetizationMetricsService.trackPurchaseStarted();
-    final param = PurchaseParam(productDetails: product);
-    final started = await _iap.buyNonConsumable(purchaseParam: param);
+    bool started;
+    try {
+      final param = PurchaseParam(productDetails: product);
+      started = await _iap.buyNonConsumable(purchaseParam: param);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        lastError: 'Google Play could not open the purchase flow. $e',
+      );
+      return false;
+    }
     if (!started) {
       state = state.copyWith(
         isLoading: false,
-        lastError: 'Purchase could not be started.',
+        lastError:
+            'Google Play did not start the purchase flow. If you are testing, make sure this build was installed from Play internal testing and your tester account has access.',
       );
     }
     return started;

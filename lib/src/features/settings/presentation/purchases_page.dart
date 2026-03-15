@@ -15,6 +15,31 @@ import 'package:skedux/src/widgets/app_snackbar.dart';
 class PurchasesPage extends ConsumerWidget {
   const PurchasesPage({super.key});
 
+  Future<void> _startPurchaseFlow(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final started = await ref
+        .read(billingServiceProvider.notifier)
+        .buyProLifetime();
+    if (!context.mounted) return;
+
+    final billing = ref.read(billingServiceProvider);
+    if (started) {
+      showAppSnackBar(
+        context,
+        'Purchase flow started. Complete checkout in Google Play.',
+      );
+      return;
+    }
+
+    showAppSnackBar(
+      context,
+      billing.unavailableReason ??
+          'Pro purchase could not be started. Check Google Play setup and try again.',
+    );
+  }
+
   String _purchaseSubtitle(BillingState billing) {
     if (billing.isLoading) {
       return 'Loading product…';
@@ -134,14 +159,7 @@ class PurchasesPage extends ConsumerWidget {
                         FilledButton(
                           onPressed: () async {
                             Navigator.of(dialogContext).pop();
-                            final started = await ref
-                                .read(billingServiceProvider.notifier)
-                                .buyProLifetime();
-                            if (!context.mounted || !started) return;
-                            showAppSnackBar(
-                              context,
-                              'Purchase flow started. Complete checkout in Google Play.',
-                            );
+                            await _startPurchaseFlow(context, ref);
                           },
                           child: const Text('Buy Pro'),
                         ),
@@ -156,17 +174,10 @@ class PurchasesPage extends ConsumerWidget {
               title: const Text('Buy Pro (lifetime)'),
               subtitle: Text(_purchaseSubtitle(billing)),
               trailing: const Icon(Icons.chevron_right),
-              onTap: billing.isLoading || !billing.available || billing.product == null
+              onTap: billing.isLoading
                   ? null
                   : () async {
-                      final started = await ref
-                          .read(billingServiceProvider.notifier)
-                          .buyProLifetime();
-                      if (!context.mounted || !started) return;
-                      showAppSnackBar(
-                        context,
-                        'Purchase flow started. Complete checkout in Google Play.',
-                      );
+                      await _startPurchaseFlow(context, ref);
                     },
             ),
             const SizedBox(height: kSpacingL),
