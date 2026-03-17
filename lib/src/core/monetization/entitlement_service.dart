@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const String kEntitlementIsProPrefsKey = 'entitlement_is_pro';
-const int kFreeTierMedicationLimit = 3;
+const int kFreeTierMedicationLimit = 5;
 
 class EntitlementState {
   const EntitlementState({required this.isPro, this.isLoaded = false});

@@ -4,7 +4,7 @@ Date: 2026-03-17
 
 ## Recommendation
 
-Launch Skedux first as a free app with the existing 3-medication limit.
+Launch Skedux first as a free app with the existing 5-medication limit.
 
 Do not enable paid Pro purchases until:
 
@@ -20,7 +20,7 @@ This is the lower-risk way to validate demand without rushing into Google paymen
 Current app behavior already supports a free-first launch well:
 
 1. the free-tier medication limit is enforced centrally
-2. the limit is currently set to 3 medications
+2. the limit is currently set to 5 medications
 3. the app already distinguishes free vs Pro entitlement state
 4. ads remain aligned with the free tier
 
@@ -54,7 +54,7 @@ Until then, the app should launch in free-first mode by default.
 
 Before publishing the free version, complete these:
 
-1. Confirm the 3-medication limit is enforced in release builds.
+1. Confirm the 5-medication limit is enforced in release builds.
 2. Confirm the app does not present a broken or unavailable purchase path.
 3. Publish a public Privacy Policy page.
 4. Publish a public Terms or legal page.
@@ -63,14 +63,14 @@ Before publishing the free version, complete these:
 7. Make sure reminder and disclaimer messaging is consistent with the app’s research/reference positioning.
 8. Validate the release build on a real Android device.
 9. Confirm onboarding is understandable for first-time users.
-10. Confirm the 3-med limit feels like a clear free tier, not like the app is broken.
+10. Confirm the 5-med limit feels like a clear free tier, not like the app is broken.
 
 ## Product Positioning Guidance
 
 The free-first launch should be framed like this:
 
 1. Skedux is available now as a focused free app.
-2. The free version supports up to 3 medications.
+2. The free version supports up to 5 medications.
 3. More advanced monetization or Pro expansion can come later if reception is strong.
 
 Do not overemphasize the future paid tier in the store listing if users cannot buy it yet.
@@ -109,13 +109,13 @@ Because this is a free-first launch, use store copy that sells the core utility 
 
 `For vial-based workflows, Skedux includes reconstitution-related reference tools and dedicated vial tracking to keep records organized.`
 
-`Free version includes support for up to 3 medications.`
+`Free version includes support for up to 5 medications.`
 
 `Important: Skedux is a research reference and tracking tool only. It does not provide medical advice, diagnosis, treatment, clinical decision support, or emergency care. Notification behavior can vary by device and operating system settings.`
 
 ### Screenshot Caption Set
 
-1. `Track Up To 3 Medications Free`
+1. `Track Up To 5 Medications Free`
 2. `Build Flexible Medication Schedules`
 3. `Log Entries Clearly Every Day`
 4. `Track Inventory, Stock, and Expiry`
@@ -128,7 +128,7 @@ Use the free launch to learn:
 
 1. do people install it?
 2. do people keep using it?
-3. do users hit the 3-med limit?
+3. do users hit the 5-med limit?
 4. do users request Pro or more capacity?
 5. do users trust the app and understand the positioning?
 
@@ -137,13 +137,13 @@ Use the free launch to learn:
 Consider enabling Pro only if these start to become true:
 
 1. the app gets consistent installs and retention
-2. users naturally hit the 3-med limit
+2. users naturally hit the 5-med limit
 3. the support burden is manageable
 4. you are comfortable with merchant/address setup
 5. business/tax/insurance steps are in place
 
 ## Final Recommendation
 
-Releasing Skedux free-first with the 3-med limit is a wise way to gauge reception.
+Releasing Skedux free-first with the 5-med limit is a wise way to gauge reception.
 
 Treat the first release as a market validation release, not a revenue release.

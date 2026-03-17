@@ -15,7 +15,7 @@ Track Smarter Every Day
 ## Full Description
 Dosifi is built for people who manage vial-based medicines and peptides and need reliable daily tracking.
 
-The free version supports up to 3 medications so you can test the workflow before committing to a larger setup.
+The free version supports up to 5 medications so you can test the workflow before committing to a larger setup.
 
 Create medication profiles for tablets, capsules, pre-filled syringes, single-dose vials, and multi-dose vials. Store strength or concentration details, schedule doses, and keep treatment records organized in one place.
 
@@ -36,7 +36,7 @@ Dosifi is a practical medication and peptide tracking companion for structured r
 Important: Dosifi is an organizational tool and does not provide medical advice, diagnosis, or treatment. Always follow guidance from licensed healthcare professionals.
 
 ## Screenshot Captions
-1. Track Up To 3 Medications Free
+1. Track Up To 5 Medications Free
 2. Vial Tracking for Daily Routines
 3. Peptide Tracking in One Place
 4. Multi-Dose Vial Management

@@ -23,6 +23,10 @@ class MonetizationMetricsService {
     await _increment('limit_hit');
   }
 
+  static Future<void> trackLimitFeedbackRequested() async {
+    await _increment('limit_feedback_requested');
+  }
+
   static Future<void> _increment(String eventName) async {
     final prefs = await SharedPreferences.getInstance();
     final countKey = '$_prefix.$eventName.count';

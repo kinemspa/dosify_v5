@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:skedux/src/features/medications/presentation/medication_providers.dart';
@@ -158,6 +159,25 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Close'),
             ),
+            if (!MonetizationConfig.isProPurchaseEnabled)
+              TextButton(
+                onPressed: () async {
+                  await MonetizationMetricsService.trackLimitFeedbackRequested();
+                  if (!dialogContext.mounted) return;
+                  Navigator.of(dialogContext).pop();
+                  await Share.share(
+                    'Skedux feedback: I hit the free limit of '
+                    '$kFreeTierMedicationLimit medications and would use a higher limit.',
+                    subject: 'Skedux free tier feedback',
+                  );
+                  if (!context.mounted) return;
+                  showAppSnackBar(
+                    context,
+                    'Thanks. If you send that message to yourself or support later, it helps gauge demand for a higher limit.',
+                  );
+                },
+                child: const Text('Need more than 5?'),
+              ),
             if (MonetizationConfig.isProPurchaseEnabled)
               FilledButton(
                 onPressed: () async {

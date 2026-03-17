@@ -15,7 +15,7 @@ Track Smarter Every Day
 ## Full Description
 Dosifi helps you manage daily medication routines with clear tracking, scheduling, and dose history.
 
-The free version supports up to 3 medications, making it easy to get started without extra setup.
+The free version supports up to 5 medications, making it easy to get started without extra setup.
 
 Track medicines and peptides by dosage form, including tablets, capsules, pre-filled syringes, single-dose vials, and multi-dose vials. Keep everything organized with strength or concentration details, inventory, and schedule-based dosing.
 
@@ -37,7 +37,7 @@ Built for people who want a focused medication tracker that is easy to use every
 Important: Dosifi is an organizational tool and does not provide medical advice, diagnosis, or treatment. Notification behavior can vary by device settings and OS restrictions.
 
 ## Screenshot Captions
-1. Track Up To 3 Medications Free
+1. Track Up To 5 Medications Free
 2. Build Flexible Medicine Schedules
 3. Log Every Dose: Taken, Skipped, Snoozed
 4. Reconstitution and Vial Tracking
