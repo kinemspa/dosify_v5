@@ -2,6 +2,14 @@
 
 This folder contains 3 complete Google Play listing variants for store experiments.
 
+Current launch strategy: free-first launch.
+
+Use these variants with messaging that matches the current product state:
+
+1. the app launches free first
+2. the free tier supports up to 3 medications
+3. paid Pro should not be promised in store copy until merchant and payments setup are actually live
+
 ## Primary Brand Tagline
 Track Smarter Every Day
 
@@ -26,3 +34,4 @@ Track Smarter Every Day
 ## Notes
 - Google Play does not use a hidden keyword field. Keyword relevance comes from title, short description, full description, reviews, and engagement signals.
 - Keep language natural. Avoid stuffing repeated keywords.
+- For the first public launch, keep the listing centered on the free product value. Do not frame the store page around Pro until Pro is actually available.
