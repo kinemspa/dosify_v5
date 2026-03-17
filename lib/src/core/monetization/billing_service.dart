@@ -7,6 +7,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:skedux/src/core/monetization/entitlement_service.dart';
+import 'package:skedux/src/core/monetization/monetization_config.dart';
 import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
 
 const String kProLifetimeProductId = 'skedux_pro_lifetime';
@@ -71,6 +72,15 @@ class BillingService extends StateNotifier<BillingState> {
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
 
   Future<void> initialize() async {
+    if (!MonetizationConfig.isProPurchaseEnabled) {
+      state = state.copyWith(
+        available: false,
+        isLoading: false,
+        lastError: 'Pro upgrade is not enabled in this build.',
+      );
+      return;
+    }
+
     state = state.copyWith(isLoading: true, lastError: null);
     final available = await _iap.isAvailable();
     if (!available) {
@@ -117,6 +127,14 @@ class BillingService extends StateNotifier<BillingState> {
   }
 
   Future<bool> buyProLifetime() async {
+    if (!MonetizationConfig.isProPurchaseEnabled) {
+      state = state.copyWith(
+        isLoading: false,
+        lastError: 'Pro upgrade is not enabled in this build.',
+      );
+      return false;
+    }
+
     if (!state.available || state.product == null) {
       await initialize();
     }
@@ -156,6 +174,14 @@ class BillingService extends StateNotifier<BillingState> {
   }
 
   Future<void> restorePurchases() async {
+    if (!MonetizationConfig.isProPurchaseEnabled) {
+      state = state.copyWith(
+        isLoading: false,
+        lastError: 'Pro restore is not enabled in this build.',
+      );
+      return;
+    }
+
     state = state.copyWith(isLoading: true, lastError: null);
     try {
       await _iap.restorePurchases();

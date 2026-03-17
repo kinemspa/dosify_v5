@@ -1,5 +1,6 @@
 ﻿import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/core/monetization/billing_service.dart';
+import 'package:skedux/src/core/monetization/monetization_config.dart';
 import 'package:skedux/src/core/monetization/entitlement_service.dart';
 import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
 import 'package:skedux/src/core/utils/format.dart';
@@ -139,7 +140,9 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
         return AlertDialog(
           title: const Text('Medication limit reached'),
           content: Text(
-            'Free tier supports up to $kFreeTierMedicationLimit medications. Upgrade to Pro for unlimited medications and an ad-free experience.',
+            MonetizationConfig.isProPurchaseEnabled
+                ? 'Free tier supports up to $kFreeTierMedicationLimit medications. Upgrade to Pro for unlimited medications and an ad-free experience.'
+                : 'This free launch build supports up to $kFreeTierMedicationLimit medications. Pro is planned for a later release.',
             style: bodyTextStyle(dialogContext),
           ),
           actions: [
@@ -155,28 +158,29 @@ class _MedicationListPageState extends ConsumerState<MedicationListPage> {
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Close'),
             ),
-            FilledButton(
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-                final started = await ref
-                    .read(billingServiceProvider.notifier)
-                    .buyProLifetime();
-                if (!context.mounted) return;
-                if (started) {
-                  showAppSnackBar(
-                    context,
-                    'Purchase flow started. Complete checkout in Google Play.',
-                  );
-                } else {
-                  context.push('/settings');
-                }
-              },
-              child: Text(
-                billing.product != null
-                    ? 'Upgrade to Pro (${billing.product!.price})'
-                    : 'Upgrade to Pro',
+            if (MonetizationConfig.isProPurchaseEnabled)
+              FilledButton(
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop();
+                  final started = await ref
+                      .read(billingServiceProvider.notifier)
+                      .buyProLifetime();
+                  if (!context.mounted) return;
+                  if (started) {
+                    showAppSnackBar(
+                      context,
+                      'Purchase flow started. Complete checkout in Google Play.',
+                    );
+                  } else {
+                    context.push('/settings');
+                  }
+                },
+                child: Text(
+                  billing.product != null
+                      ? 'Upgrade to Pro (${billing.product!.price})'
+                      : 'Upgrade to Pro',
+                ),
               ),
-            ),
           ],
         );
       },

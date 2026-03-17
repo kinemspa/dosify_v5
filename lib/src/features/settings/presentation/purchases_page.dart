@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Project imports:
 import 'package:skedux/src/core/design_system.dart';
 import 'package:skedux/src/core/monetization/billing_service.dart';
+import 'package:skedux/src/core/monetization/monetization_config.dart';
 import 'package:skedux/src/core/monetization/entitlement_service.dart';
 import 'package:skedux/src/core/monetization/monetization_metrics_service.dart';
 import 'package:skedux/src/widgets/app_header.dart';
@@ -41,6 +42,9 @@ class PurchasesPage extends ConsumerWidget {
   }
 
   String _purchaseSubtitle(BillingState billing) {
+    if (!MonetizationConfig.isProPurchaseEnabled) {
+      return 'Pro upgrade is not yet enabled in this build';
+    }
     if (billing.isLoading) {
       return 'Loading product…';
     }
@@ -135,7 +139,11 @@ class PurchasesPage extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: const Text('Pro benefits'),
-              subtitle: const Text('Unlimited medications + no ads'),
+              subtitle: Text(
+                MonetizationConfig.isProPurchaseEnabled
+                    ? 'Unlimited medications + no ads'
+                    : 'Unlimited medications and ad-free mode planned for a later release',
+              ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
                 await MonetizationMetricsService.trackPaywallShown();
@@ -146,9 +154,12 @@ class PurchasesPage extends ConsumerWidget {
                     return AlertDialog(
                       title: const Text('Go Pro'),
                       content: Text(
-                        'Unlock unlimited medications and remove ads. '
-                        'Purchases are linked to your Google Play account and '
-                        'can be restored on reinstall or new device.',
+                        MonetizationConfig.isProPurchaseEnabled
+                            ? 'Unlock unlimited medications and remove ads. '
+                                'Purchases are linked to your Google Play account and '
+                                'can be restored on reinstall or new device.'
+                            : 'Skedux is currently launching as a free-first app. '
+                                'Pro purchases are planned for a later release once merchant setup is complete.',
                         style: bodyTextStyle(dialogContext),
                       ),
                       actions: [
@@ -157,7 +168,9 @@ class PurchasesPage extends ConsumerWidget {
                           child: const Text('Not now'),
                         ),
                         FilledButton(
-                          onPressed: () async {
+                          onPressed: !MonetizationConfig.isProPurchaseEnabled
+                              ? null
+                              : () async {
                             Navigator.of(dialogContext).pop();
                             await _startPurchaseFlow(context, ref);
                           },
@@ -174,7 +187,7 @@ class PurchasesPage extends ConsumerWidget {
               title: const Text('Buy Pro (lifetime)'),
               subtitle: Text(_purchaseSubtitle(billing)),
               trailing: const Icon(Icons.chevron_right),
-              onTap: billing.isLoading
+              onTap: billing.isLoading || !MonetizationConfig.isProPurchaseEnabled
                   ? null
                   : () async {
                       await _startPurchaseFlow(context, ref);
@@ -196,7 +209,9 @@ class PurchasesPage extends ConsumerWidget {
             title: const Text('Restore purchases'),
             subtitle: const Text('Refresh Pro entitlement on this device'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
+            onTap: !MonetizationConfig.isProPurchaseEnabled
+                ? null
+                : () async {
               await ref
                   .read(billingServiceProvider.notifier)
                   .restorePurchases();
